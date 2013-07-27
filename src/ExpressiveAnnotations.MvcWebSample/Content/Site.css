@@ -1,0 +1,159 @@
+﻿body {
+    font-size: .85em;
+    font-family: "Segoe UI", Verdana, Helvetica, Sans-Serif;
+    margin: 0;
+    padding: 0;
+}
+
+#body {
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
+
+.code, form {
+   padding-top: 20px; 
+}
+
+.right {
+    float: right;
+    clear: both;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #000;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+pre {
+    font-size: 1.1em;
+}
+
+a {
+    text-decoration: none;
+}
+
+.content-wrapper {
+    margin: 0 auto;
+    max-width: 980px;
+}
+
+fieldset {
+    margin: 0;
+    padding: 10px;
+}
+
+fieldset legend {
+    font-size: 1.3em;
+    font-weight: 600;
+}
+
+fieldset ol {
+    padding: 0;
+    list-style: none;
+}
+
+fieldset ol li {
+    padding-bottom: 5px;
+}
+
+label {    
+    display: block;
+    font-weight: 600;
+}
+
+label, select {
+    font-size: 1.0em;
+}
+
+.inline {
+    display: inline;
+}
+
+input, textarea {
+    border: 1px solid #e2e2e2;
+    background: #fff;
+    color: #333;
+    font-size: 1.2em;
+    margin: 5px 0 6px 0;
+    padding: 5px;
+    width: 280px;
+}
+
+textarea {
+    font-family: inherit;
+    width: 500px;
+}
+
+input:focus, textarea:focus {
+    border: 1px solid #7ac0da;
+}
+
+input[type="checkbox"] {
+    background: transparent;
+    border: inherit;
+    width: auto;
+}
+
+input[type="submit"],
+input[type="button"],
+button {
+    background-color: #d3dce0;
+    border: 1px solid #787878;
+    cursor: pointer;
+    font-size: 1.2em;
+    font-weight: 600;
+    padding: 7px;
+    margin-right: 8px;
+    width: auto;
+}
+
+.message-info {
+    border: 1px solid;
+    clear: both;
+    padding: 10px 20px;
+}
+
+.message-error {
+    clear: both;
+    color: #e80c4d;
+    font-size: 1.1em;
+    font-weight: bold;
+    margin: 20px 0 10px 0;
+}
+
+.message-success {
+    color: #7ac0da;
+    font-size: 1.3em;
+    font-weight: bold;
+    margin: 20px 0 10px 0;
+}
+
+.error {
+    color: #e80c4d;
+}
+
+.field-validation-error {
+    color: #e80c4d;
+    font-weight: bold;
+}
+
+input.input-validation-error {
+    border: 1px solid #e80c4d;
+}
+
+input[type="checkbox"].input-validation-error {
+    border: 0 none;
+}
+
+.validation-summary-errors {
+    color: #e80c4d;
+    font-weight: bold;
+    font-size: 1.1em;
+    display: none;
+}
+
+.ctor {
+    font-weight: bold;
+    font-size: 1.4em;
+}

@@ -1,0 +1,80 @@
+﻿<h2>What is the difference between declarative and imperative programming?</h2>
+
+@Html.ActionLink("<< back", "Index", null, new {@class = "right"})
+
+<h3>declarative</h3>
+<p>
+    With declarative programming, you write code that describes what you want, but not necessarily how to get it 
+    (declare your desired results, but not the step-by-step) - it's more about metadata.
+</p>
+
+In our example it looks like below:
+<pre>
+[RequiredIfExpression(
+    Expression = "{0} || (!{1} && {2})",
+    DependentProperties = new[] { "SportType", "SportType", "GoAbroad" },
+    TargetValues = new object[] {"Extreme", "None", true},
+    ErrorMessage = "Blood type is required if you do extreme sports or, 
+                    if you do any type of sport and plan to go abroad.")]
+public string BloodType { get; set; }
+</pre>  
+
+<h3>imperative</h3>
+<p>
+    With imperative programming, you tell the compiler what you want to happen, step by step. 
+</p>
+<p>    
+    In our example, if we choose this way instead of model fields decoration, it has negative impact on the complexity of the
+    code. Logic responsible for validation is now implemented somewhere else in our application e.g. inside controllers actions
+    instead of model class itself. Possible version looks like below:
+</p>
+
+<pre>
+if (!string.IsNullOrEmpty(model.BloodType))
+{
+    return View("Success");
+}
+if (model.SportType == "Extreme" || (model.SportType != "None" && model.GoAbroad))
+{
+    ModelState.AddModelError("BloodType", "Blood type is required if you do extreme sports or, 
+                                           if you do any type of sport and plan to go abroad.");
+    return View("Home", model);
+}
+</pre>
+
+<a href="http://stackoverflow.com/questions/1784664/what-is-the-difference-between-declarative-and-imperative-programming" class="right">[reference]</a>
+
+<h2>How to construct conditional validation attributes?</h2>
+
+<pre class="ctor">RequiredIfAttribute([string DependentProperty], [object TargetValue], ...)</pre>
+<pre>
+DependentProperty - Field from which runtime value is extracted.
+
+TargetValue       - Expected value for dependent field. If runtime value is the same, 
+                    requirement condition is fulfilled and error message is displayed.
+</pre>
+<pre class="ctor">RequiredIfExpressionAttribute([string Expression], [string DependentProperty], [object TargetValue], ...)</pre>
+<pre>
+Expression        - Logical expression based on which requirement condition is calculated. If condition is fulfilled,
+                    error message is displayed. Attribute logic replaces one or more format items in specific expression 
+                    string with comparison results of dependent fields and corresponding target values.
+                    
+                    Available string expression tokens are: &&, ||, !, {, }, numbers and whitespaces.
+                    
+                    Example: 
+                            step 1. sample expression, e.g. "{0} || !{1}" is parsed to:
+                                    (DependentProperties[0] == TargetValues[0]) && (DependentProperties[1] != TargetValues[1])
+
+                            step 2. next, after corresponding field values comparison, it is computated to, let's suppose:
+                                    (true) || (false)
+                            
+                            step 3. this in turn is converted to reverse polish notation (RPN) syntax:
+                                    true false ||
+                            
+                            step 4. to be finally evaluated
+                                    (result is true - condition fulfilled, so error message is displayed next to the control)
+
+DependentProperty - Dependent fields from which runtime values are extracted.
+
+TargetValue       - Expected values for corresponding dependent fields.
+</pre>

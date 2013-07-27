@@ -1,0 +1,63 @@
+﻿@model ExpressiveAnnotations.MvcWebSample.Models.Query
+
+<h2>ExpressiveAnnotations - annotation-based conditional validation</h2>
+
+<p>
+    <b>ExpressiveAnnotations</b> is a small .NET library which provides annotation-based conditional validation mechanisms. 
+    Given implementation of <i>RequiredIf</i> and <i>RequiredIfExpression</i> attributes allows to forget about imperative 
+    way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code 
+    which is also more compacted, since fields validation requirements are applied as metadata, just in the place of such 
+    fields declaration.    
+</p>
+
+@Html.ActionLink("[documentation]", "Help", null, new {@class = "right"})
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Usage sample for model validation in ASP.NET MVC</legend>
+        <ol>
+            <li>
+                @Html.EditorFor(model => model.GoAbroad)
+                @Html.LabelFor(model => model.GoAbroad, new {@class = "inline"})                
+                @Html.ValidationMessageFor(model => model.GoAbroad)
+            </li>
+            <li>
+                @Html.LabelFor(model => model.PassportNumber)
+                @Html.EditorFor(model => model.PassportNumber)
+                @Html.ValidationMessageFor(model => model.PassportNumber)
+            </li>
+            <li>
+                @Html.LabelFor(model => model.SportType, new {@class = "inline"})
+                @Html.DropDownListFor(x => x.SportType, new SelectList(Model.Sports, "Text", "Value"))
+                @Html.ValidationMessageFor(model => model.SportType)
+            </li>
+            <li>
+                @Html.LabelFor(model => model.BloodType)    
+                @Html.EditorFor(model => model.BloodType)                            
+                @Html.ValidationMessageFor(model => model.BloodType)
+            </li>
+        </ol>
+        <input type="submit" value="Validate" />
+    </fieldset>
+}
+
+<div class="code">
+    <pre>
+[RequiredIf(DependentProperty = "GoAbroad", TargetValue = true)]
+public string PassportNumber { get; set; }
+    </pre>
+    <pre>
+[RequiredIfExpression(
+    Expression = "{0} || (!{1} && {2})",
+    DependentProperties = new[] { "SportType", "SportType", "GoAbroad" },
+    TargetValues = new object[] {"Extreme", "None", true},
+    ErrorMessage = "Blood type is required if you do extreme sports, or 
+                    if you do any type of sport and plan to go abroad.")]
+public string BloodType { get; set; }
+    </pre>         
+    <pre>How such an expression should be understood? => SportType == "Extreme" || (!(SportType == "None") && GoAbroad == true)</pre>
+</div>
