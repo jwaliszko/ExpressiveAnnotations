@@ -7,6 +7,10 @@ using ExpressiveAnnotations.BooleanExpressionsAnalyser;
 
 namespace ExpressiveAnnotations.ConditionalAttributes
 {
+    /// <summary>
+    /// Provides conditional attribute to calculate validation result based on related properties values
+    /// and relations between them, which are defined in logical expression.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
     public class RequiredIfExpressionAttribute : ValidationAttribute
     {
@@ -17,7 +21,10 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         /// <summary>
         /// Logical expression based on which requirement condition is calculated. If condition is fulfilled, error message is displayed. 
         /// Attribute logic replaces one or more format items in specific expression string with comparison results of dependent fields 
-        /// and corresponding target values. Available string expression tokens are: &amp;&amp;, ||, !, {, }, numbers and whitespaces.
+        /// and corresponding target values. 
+        /// 
+        /// Available expression tokens are: &amp;&amp;, ||, !, {, }, numbers and whitespaces.
+        /// 
         /// Example: "{0} &amp;&amp; !{1}" is parsed to (DependentProperties[0] == TargetValues[0]) &amp;&amp; (DependentProperties[1] != TargetValues[1]).
         /// </summary>
         public string Expression { get; set; }

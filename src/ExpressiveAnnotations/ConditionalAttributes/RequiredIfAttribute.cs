@@ -4,6 +4,9 @@ using System.Globalization;
 
 namespace ExpressiveAnnotations.ConditionalAttributes
 {
+    /// <summary>
+    /// Provides conditional attribute to calculate validation result based on related property value.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
     public class RequiredIfAttribute : ValidationAttribute
     {

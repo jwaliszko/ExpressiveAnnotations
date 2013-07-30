@@ -1,16 +1,16 @@
 ﻿@model ExpressiveAnnotations.MvcWebSample.Models.Query
 
-<h2>ExpressiveAnnotations - annotation-based conditional validation</h2>
+<h1>ExpressiveAnnotations - annotation-based conditional validation</h1>
 
 <p>
-    <b>ExpressiveAnnotations</b> is a small .NET library which provides annotation-based conditional validation mechanisms. 
-    Given implementation of <i>RequiredIf</i> and <i>RequiredIfExpression</i> attributes allows to forget about imperative 
-    way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code 
-    which is also more compacted, since fields validation requirements are applied as metadata, just in the place of such 
-    fields declaration.    
+    ExpressiveAnnotations is a small .NET library which provides annotation-based conditional validation mechanisms. 
+    Given implementation of RequiredIf and RequiredIfExpression attributes allows to forget about imperative way
+    of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code 
+    which is also more compacted, since fields validation requirements are applied as metadata, just in the place of 
+    such fields declaration.
 </p>
 
-@Html.ActionLink("[documentation]", "Help", null, new {@class = "right"})
+<a href="https://github.com/JaroslawWaliszko/ExpressiveAnnotations" class="right">[more on github]</a>
 
 @using (Html.BeginForm())
 {
@@ -54,10 +54,10 @@ public string PassportNumber { get; set; }
 [RequiredIfExpression(
     Expression = "{0} || (!{1} && {2})",
     DependentProperties = new[] { "SportType", "SportType", "GoAbroad" },
-    TargetValues = new object[] {"Extreme", "None", true},
+    TargetValues = new object[] { "Extreme", "None", true },
     ErrorMessage = "Blood type is required if you do extreme sports, or 
                     if you do any type of sport and plan to go abroad.")]
 public string BloodType { get; set; }
     </pre>         
-    <pre>How such an expression should be understood? => SportType == "Extreme" || (!(SportType == "None") && GoAbroad == true)</pre>
+    <pre>How such an expression should be understood? => SportType == "Extreme" || (SportType != "None" && GoAbroad)</pre>
 </div>

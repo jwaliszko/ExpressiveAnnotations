@@ -20,10 +20,5 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
             }
             return View("Home", model);
         }
-
-        public ActionResult Help()
-        {
-            return View("Help");
-        }
     }
 }
