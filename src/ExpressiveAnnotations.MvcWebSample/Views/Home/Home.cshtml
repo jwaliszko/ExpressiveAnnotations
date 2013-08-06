@@ -22,42 +22,58 @@
         <ol>
             <li>
                 @Html.EditorFor(model => model.GoAbroad)
-                @Html.LabelFor(model => model.GoAbroad, new {@class = "inline"})                
+                @Html.LabelFor(model => model.GoAbroad, new {@class = "inline"})
                 @Html.ValidationMessageFor(model => model.GoAbroad)
-            </li>
+            </li>            
             <li>
+                <pre class="code">[RequiredIf(DependentProperty = "GoAbroad", TargetValue = true)]</pre>
+                <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.PassportNumber)
                 @Html.EditorFor(model => model.PassportNumber)
                 @Html.ValidationMessageFor(model => model.PassportNumber)
             </li>
             <li>
-                @Html.LabelFor(model => model.SportType, new {@class = "inline"})
+                @Html.LabelFor(model => model.Country, new {@class = "inline prefix"})
+                @Html.DropDownListFor(x => x.Country, new SelectList(Model.Countries, "Text", "Value"))
+                @Html.ValidationMessageFor(model => model.Country)
+            </li>
+            <li>
+                @Html.LabelFor(model => model.NextCountry, new {@class = "inline prefix"})
+                @Html.DropDownListFor(x => x.NextCountry, new SelectList(Model.Countries, "Text", "Value"))
+                @Html.ValidationMessageFor(model => model.NextCountry)
+            </li>
+            <li>
+                <pre class="code">
+[RequiredIfExpression(  /* interpretation => GoAbroad == true && NextCountry != "Other" && Country == [value from NextCountry] */
+    Expression = "{0} && !{1} && {2}",
+    DependentProperties = new[] { "GoAbroad", "NextCountry", "Country" },
+    TargetValues = new object[] { true, "Other", "[NextCountry]" },
+    ErrorMessage = "If you plan to go abroad, why do you want to visit the same country twice?")]
+</pre>
+                <pre class="action">[show attribute]</pre>
+                @Html.LabelFor(model => model.ReasonForTravel)
+                @Html.EditorFor(model => model.ReasonForTravel)
+                @Html.ValidationMessageFor(model => model.ReasonForTravel)
+            </li>
+            <li>
+                @Html.LabelFor(model => model.SportType, new {@class = "inline prefix"})
                 @Html.DropDownListFor(x => x.SportType, new SelectList(Model.Sports, "Text", "Value"))
                 @Html.ValidationMessageFor(model => model.SportType)
             </li>
             <li>
-                @Html.LabelFor(model => model.BloodType)    
-                @Html.EditorFor(model => model.BloodType)                            
-                @Html.ValidationMessageFor(model => model.BloodType)
-            </li>
-        </ol>
-        <input type="submit" value="Validate" />
-    </fieldset>
-}
-
-<div class="code">
-    <pre>
-[RequiredIf(DependentProperty = "GoAbroad", TargetValue = true)]
-public string PassportNumber { get; set; }
-    </pre>
-    <pre>
-[RequiredIfExpression(
+                <pre class="code">
+[RequiredIfExpression( // interpretation => SportType == "Extreme" || (SportType != "None" && GoAbroad)
     Expression = "{0} || (!{1} && {2})",
     DependentProperties = new[] { "SportType", "SportType", "GoAbroad" },
     TargetValues = new object[] { "Extreme", "None", true },
-    ErrorMessage = "Blood type is required if you do extreme sports, or 
-                    if you do any type of sport and plan to go abroad.")]
-public string BloodType { get; set; }
-    </pre>         
-    <pre>How such an expression should be understood? => SportType == "Extreme" || (SportType != "None" && GoAbroad)</pre>
-</div>
+    ErrorMessage = "Blood type is required if you do extreme sports, or if you do any type of sport and plan to go abroad.")]
+</pre>
+                <pre class="action">[show attribute]</pre>
+                @Html.LabelFor(model => model.BloodType)
+                @Html.EditorFor(model => model.BloodType)
+                @Html.ValidationMessageFor(model => model.BloodType)
+            </li>
+        </ol>
+        <input type="submit" />
+    </fieldset>
+}

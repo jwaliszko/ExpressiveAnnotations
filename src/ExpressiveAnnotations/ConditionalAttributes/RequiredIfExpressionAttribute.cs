@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using ExpressiveAnnotations.BooleanExpressionsAnalyser;
 
 namespace ExpressiveAnnotations.ConditionalAttributes
@@ -50,9 +51,22 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             {
                 var field = containerType.GetProperty(DependentProperties[i]);
                 var dependentvalue = field.GetValue(validationContext.ObjectInstance, null);
+                var targetValue = TargetValues[i];
+
+                if (targetValue is string)
+                {
+                    var match = Regex.Match((string)targetValue, @"\[(.+)\]");
+                    if (match.Success)
+                    {
+                        field = containerType.GetProperty(match.Groups[1].Value);
+                        targetValue = field.GetValue(validationContext.ObjectInstance, null);
+                    }
+                }
+
                 var result = dependentvalue != null
-                                 ? dependentvalue.Equals(TargetValues[i])
-                                 : TargetValues[i] == null;
+                                 ? dependentvalue.Equals(targetValue)
+                                 : targetValue == null;
+
                 tokens.Add(result.ToString().ToLowerInvariant());
             }
 

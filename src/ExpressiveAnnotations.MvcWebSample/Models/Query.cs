@@ -18,11 +18,35 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
                     };
             }
         }
-        
+
+        public IEnumerable<SelectListItem> Countries
+        {
+            get
+            {
+                return new[]
+                    {
+                        new SelectListItem {Text = "Poland", Value = "Poland"},
+                        new SelectListItem {Text = "Germany", Value = "Germany"},
+                        new SelectListItem {Text = "France", Value = "France"},
+                        new SelectListItem {Text = "Other", Value = "Other"}
+                    };
+            }
+        }
+
         public bool GoAbroad { get; set; }
 
         [RequiredIf(DependentProperty = "GoAbroad", TargetValue = true)]
         public string PassportNumber { get; set; }
+        
+        public string Country { get; set; }
+        public string NextCountry { get; set; }
+
+        [RequiredIfExpression(  /* interpretation => GoAbroad == true && NextCountry != "Other" && Country == [value from NextCountry] */
+            Expression = "{0} && !{1} && {2}",
+            DependentProperties = new[] { "GoAbroad", "NextCountry", "Country" },
+            TargetValues = new object[] { true, "Other", "[NextCountry]" },
+            ErrorMessage = "If you plan to go abroad, why do you want to visit the same country twice?")]
+        public string ReasonForTravel { get; set; }
 
         public string SportType { get; set; }
 

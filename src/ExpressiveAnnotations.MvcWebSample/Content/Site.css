@@ -10,8 +10,23 @@
     padding-bottom: 50px;
 }
 
-.code, form {
+form {
    padding-top: 20px; 
+}
+
+.prefix {
+    width: 170px;
+}
+
+.action {
+    cursor: pointer;
+    display: block;
+    margin: 0;
+    color: grey;
+}
+
+select {
+    width: 117px;
 }
 
 .right {
@@ -27,6 +42,10 @@ h1, h2, h3, h4, h5, h6 {
 
 pre {
     font-size: 1.1em;
+}
+
+.code {
+    background-color: whitesmoke;
 }
 
 a {
@@ -67,7 +86,7 @@ label, select {
 }
 
 .inline {
-    display: inline;
+    display: inline-block;
 }
 
 input, textarea {

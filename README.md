@@ -16,17 +16,14 @@ public string PassportNumber { get; set; }
 
  ```
 [RequiredIfExpression(
-        Expression = "{0} || (!{1} && {2})",
-        DependentProperties = new[] { "SportType", "SportType", "GoAbroad" },
-        TargetValues = new object[] { "Extreme", "None", true },
-        ErrorMessage = "Blood type is required if you do extreme sports, or 
-                        if you do any type of sport and plan to go abroad.")]
-public string BloodType { get; set; }
+		Expression = "{0} && {1} && !{2}",
+		DependentProperties = new[] { "GoAbroad", "Country", "NextCountry" },
+		TargetValues = new object[] { true, "[NextCountry]", "Other" },
+		ErrorMessage = "If you plan to go abroad, why do you want to visit the same country twice?")]
 ```
 How such an expression should be understood?
 
- ```SportType == "Extreme" || (SportType != "None" && GoAbroad)```
-
+ ```GoAbroad == true && NextCountry != "Other" && Country == [value from NextCountry]```
 
 ###How to construct conditional validation attributes?
 
@@ -53,7 +50,7 @@ Sample `{0} || !{1}` expression evaluation steps:
 
 1. Expression is interpreted as (notice that arrays indexes of related properties and its values are given in expression inside curly parentheses `{}`): 
 
- ```(DependentProperties[0] == TargetValues[0]) && (DependentProperties[1] != TargetValues[1])```
+ ```(DependentProperties[0] == TargetValues[0]) || (DependentProperties[1] != TargetValues[1])```
 2. Arrays values are extracted and compared. Boolean computation results are inserted into corresponding brackets, let's say:
 
  ```(true) || (false)```
@@ -74,27 +71,30 @@ In our example it's more about metadata, e.g.
 
 ```
 [RequiredIfExpression(
-    Expression = "{0} || (!{1} && {2})",
-    DependentProperties = new[] { "SportType", "SportType", "GoAbroad" },
-    TargetValues = new object[] {"Extreme", "None", true},
-    ErrorMessage = "Blood type is required if you do extreme sports or, 
-                    if you do any type of sport and plan to go abroad.")]
-public string BloodType { get; set; }
+		Expression = "{0} && !{1} && {2}",
+		DependentProperties = new[] { "GoAbroad", "NextCountry", "Country" },
+		TargetValues = new object[] { true, "Other", "[NextCountry]" },
+		ErrorMessage = "If you plan to go abroad, why do you want to visit the same country twice?")]
+public string ReasonForTravel { get; set; }
 ```
 
 With **imperative** programming, you define the control flow of the computation which needs to be done. You tell the compiler what you want, step by step.
 
 If we choose this way instead of model fields decoration, it has negative impact on the complexity of the code. Logic responsible for validation is now implemented somewhere else in our application e.g. inside controllers actions instead of model class itself:
 ```
-    if (!string.IsNullOrEmpty(model.BloodType))
+    if (!model.GoAbroad)
     {
         return View("Success");
     }
-    if (model.SportType == "Extreme" || (model.SportType != "None" && model.GoAbroad))
+	if (model.NextCountry == "Other")
     {
-        ModelState.AddModelError("BloodType", "Blood type is required if you do extreme sports or, 
-                                               if you do any type of sport and plan to go abroad.");    
+        return View("Success");
     }
+    if (model.Country != model.NextCountry)
+    {
+        return View("Success");
+    }
+	ModelState.AddModelError("ReasonForTravel", "If you plan to go abroad, why do you want to visit the same country twice?");
     return View("Home", model);
 }
 ```
