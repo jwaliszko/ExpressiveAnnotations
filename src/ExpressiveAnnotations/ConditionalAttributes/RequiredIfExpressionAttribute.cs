@@ -34,7 +34,8 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         /// </summary>
         public string[] DependentProperties { get; set; }
         /// <summary>
-        /// Expected values for corresponding dependent fields.
+        /// Expected values for corresponding dependent fields. Instead of hardcoding there is also possibility for dynamic extraction of 
+        /// target values from other fields, by providing their names inside square parentheses.
         /// </summary>
         public object[] TargetValues { get; set; }
 
@@ -50,21 +51,11 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             for (var i = 0; i < DependentProperties.Count(); i++)
             {
                 var field = containerType.GetProperty(DependentProperties[i]);
-                var dependentvalue = field.GetValue(validationContext.ObjectInstance, null);
-                var targetValue = TargetValues[i];
+                var dependentValue = field.GetValue(validationContext.ObjectInstance, null);
+                var targetValue = Helper.FetchTargetValue(TargetValues[i], validationContext);
 
-                if (targetValue is string)
-                {
-                    var match = Regex.Match((string)targetValue, @"\[(.+)\]");
-                    if (match.Success)
-                    {
-                        field = containerType.GetProperty(match.Groups[1].Value);
-                        targetValue = field.GetValue(validationContext.ObjectInstance, null);
-                    }
-                }
-
-                var result = dependentvalue != null
-                                 ? dependentvalue.Equals(targetValue)
+                var result = dependentValue != null
+                                 ? dependentValue.Equals(targetValue)
                                  : targetValue == null;
 
                 tokens.Add(result.ToString().ToLowerInvariant());

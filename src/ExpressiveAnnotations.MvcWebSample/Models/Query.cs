@@ -41,10 +41,10 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public string Country { get; set; }
         public string NextCountry { get; set; }
 
-        [RequiredIfExpression(  /* interpretation => GoAbroad == true && NextCountry != "Other" && Country == [value from NextCountry] */
+        [RequiredIfExpression(  /* interpretation => GoAbroad == true && NextCountry != "Other" && NextCountry == [value from Country] */
             Expression = "{0} && !{1} && {2}",
-            DependentProperties = new[] { "GoAbroad", "NextCountry", "Country" },
-            TargetValues = new object[] { true, "Other", "[NextCountry]" },
+            DependentProperties = new[] { "GoAbroad", "NextCountry", "NextCountry" },
+            TargetValues = new object[] { true, "Other", "[Country]" },
             ErrorMessage = "If you plan to go abroad, why do you want to visit the same country twice?")]
         public string ReasonForTravel { get; set; }
 

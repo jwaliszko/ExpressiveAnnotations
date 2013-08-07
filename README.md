@@ -16,34 +16,38 @@ public string PassportNumber { get; set; }
 
  ```
 [RequiredIfExpression(
-		Expression = "{0} && {1} && !{2}",
-		DependentProperties = new[] { "GoAbroad", "Country", "NextCountry" },
-		TargetValues = new object[] { true, "[NextCountry]", "Other" },
-		ErrorMessage = "If you plan to go abroad, why do you want to visit the same country twice?")]
+    Expression = "{0} && !{1} && {2}",
+    DependentProperties = new[] { "GoAbroad", "NextCountry", "NextCountry" },
+    TargetValues = new object[] { true, "Other", "[Country]" },
+    ErrorMessage = "If you plan to go abroad, why do you 
+					want to visit the same country twice?")]
 ```
 How such an expression should be understood?
 
- ```GoAbroad == true && NextCountry != "Other" && Country == [value from NextCountry]```
+ ```GoAbroad == true && NextCountry != "Other" && NextCountry == [value from Country]```
 
 ###How to construct conditional validation attributes?
 
 ```
-RequiredIfAttribute([string DependentProperty], [object TargetValue], ...)    
+RequiredIfAttribute([string DependentProperty], [object TargetValue], ...)
 
     DependentProperty - Field from which runtime value is extracted.    
-    TargetValue       - Expected value for dependent field. If runtime value is the same, requirement condition
-                        is fulfilled and error message is displayed.
+    TargetValue       - Expected value for dependent field. Instead of hardcoding there is also 
+						possibility for dynamic extraction of target value from other field, by 
+						providing its name inside square parentheses.
 ```
 ```
 RequiredIfExpressionAttribute([string Expression], [string DependentProperty], [object TargetValue], ...)
 
-    Expression        - Logical expression based on which requirement condition is calculated. If condition 
-                        is fulfilled, error message is displayed. Attribute logic replaces one or more format 
-                        items in specific expression string with comparison results of dependent fields and 
-                        corresponding target values.                         
+    Expression        - Logical expression based on which requirement condition is calculated. 
+						If condition is fulfilled, error message is displayed. Attribute logic 
+						replaces one or more format items in specific expression string with 
+						comparison results of dependent fields and corresponding target values.                         
                         Available expression tokens are: &&, ||, !, {, }, numbers and whitespaces.
     DependentProperty - Dependent fields from which runtime values are extracted.    
-    TargetValue       - Expected values for corresponding dependent fields.
+    TargetValue       - Expected values for corresponding dependent fields. Instead of hardcoding 
+						there is also possibility for dynamic extraction of target values from 
+						other fields, by providing their names inside square parentheses.
 ```
 
 Sample `{0} || !{1}` expression evaluation steps:
@@ -71,10 +75,11 @@ In our example it's more about metadata, e.g.
 
 ```
 [RequiredIfExpression(
-		Expression = "{0} && !{1} && {2}",
-		DependentProperties = new[] { "GoAbroad", "NextCountry", "Country" },
-		TargetValues = new object[] { true, "Other", "[NextCountry]" },
-		ErrorMessage = "If you plan to go abroad, why do you want to visit the same country twice?")]
+    Expression = "{0} && !{1} && {2}",
+    DependentProperties = new[] { "GoAbroad", "NextCountry", "NextCountry" },
+    TargetValues = new object[] { true, "Other", "[Country]" },
+    ErrorMessage = "If you plan to go abroad, why do you 
+					want to visit the same country twice?")]
 public string ReasonForTravel { get; set; }
 ```
 
@@ -94,7 +99,8 @@ If we choose this way instead of model fields decoration, it has negative impact
     {
         return View("Success");
     }
-	ModelState.AddModelError("ReasonForTravel", "If you plan to go abroad, why do you want to visit the same country twice?");
+	ModelState.AddModelError("ReasonForTravel", "If you plan to go abroad, why do you 
+												 want to visit the same country twice?");
     return View("Home", model);
 }
 ```

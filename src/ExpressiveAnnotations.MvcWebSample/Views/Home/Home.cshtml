@@ -44,10 +44,10 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIfExpression(  /* interpretation => GoAbroad == true && NextCountry != "Other" && Country == [value from NextCountry] */
+[RequiredIfExpression(  /* interpretation => GoAbroad == true && NextCountry != "Other" && NextCountry == [value from Country] */
     Expression = "{0} && !{1} && {2}",
-    DependentProperties = new[] { "GoAbroad", "NextCountry", "Country" },
-    TargetValues = new object[] { true, "Other", "[NextCountry]" },
+    DependentProperties = new[] { "GoAbroad", "NextCountry", "NextCountry" },
+    TargetValues = new object[] { true, "Other", "[Country]" },
     ErrorMessage = "If you plan to go abroad, why do you want to visit the same country twice?")]
 </pre>
                 <pre class="action">[show attribute]</pre>
@@ -62,7 +62,7 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIfExpression( // interpretation => SportType == "Extreme" || (SportType != "None" && GoAbroad)
+[RequiredIfExpression( /* interpretation => SportType == "Extreme" || (SportType != "None" && GoAbroad) */
     Expression = "{0} || (!{1} && {2})",
     DependentProperties = new[] { "SportType", "SportType", "GoAbroad" },
     TargetValues = new object[] { "Extreme", "None", true },

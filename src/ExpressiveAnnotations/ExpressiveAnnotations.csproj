@@ -43,6 +43,7 @@
     <Compile Include="BooleanExpressionsAnalyser\LexicalAnalysis\TokenDefinition.cs" />
     <Compile Include="BooleanExpressionsAnalyser\SyntacticAnalysis\InfixToRpnConverter.cs" />
     <Compile Include="BooleanExpressionsAnalyser\SyntacticAnalysis\RpnParser.cs" />
+    <Compile Include="ConditionalAttributes\Helper.cs" />
     <Compile Include="ConditionalAttributes\RequiredIfAttribute.cs" />
     <Compile Include="ConditionalAttributes\RequiredIfExpressionAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

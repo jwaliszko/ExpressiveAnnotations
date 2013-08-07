@@ -19,8 +19,8 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         /// </summary>
         public string DependentProperty { get; set; }
         /// <summary>
-        /// Expected value for dependent field. If runtime value is the same, 
-        /// requirement condition is fulfilled and error message is displayed.
+        /// Expected value for dependent field. Instead of hardcoding there is also possibility for dynamic extraction of 
+        /// target value from other field, by providing its name inside square parentheses.
         /// </summary>
         public object TargetValue { get; set; }
 
@@ -40,14 +40,16 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             var dependentPropertyName = attrib != null ? attrib.GetName() : DependentProperty;
 
             // get the value of the dependent property
-            var dependentvalue = field.GetValue(validationContext.ObjectInstance, null);
+            var dependentValue = field.GetValue(validationContext.ObjectInstance, null);
+            // fetch target value
+            var targetValue = Helper.FetchTargetValue(TargetValue, validationContext);
 
             // compare the value against the target value
-            if ((dependentvalue == null && TargetValue == null) ||
-                (dependentvalue != null && dependentvalue.Equals(TargetValue)) ||
-                (dependentvalue != null && dependentvalue.ToString()
+            if ((dependentValue == null && targetValue == null) ||
+                (dependentValue != null && dependentValue.Equals(targetValue)) ||
+                (dependentValue != null && dependentValue.ToString()
                                                          .Equals(
-                                                             TargetValue != null ? TargetValue.ToString() : string.Empty,
+                                                             targetValue != null ? targetValue.ToString() : string.Empty,
                                                              StringComparison.OrdinalIgnoreCase)))
             {
                 // match => means we should try validating this field
