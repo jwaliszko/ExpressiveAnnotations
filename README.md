@@ -20,7 +20,7 @@ public string PassportNumber { get; set; }
     DependentProperties = new[] { "GoAbroad", "NextCountry", "NextCountry" },
     TargetValues = new object[] { true, "Other", "[Country]" },
     ErrorMessage = "If you plan to go abroad, why do you 
-					want to visit the same country twice?")]
+                    want to visit the same country twice?")]
 ```
 How such an expression should be understood?
 
@@ -29,7 +29,8 @@ How such an expression should be understood?
 ###How to construct conditional validation attributes?
 
 ```
-RequiredIfAttribute([string DependentProperty], [object TargetValue], ...)
+RequiredIfAttribute([string DependentProperty], 
+                    [object TargetValue], ...)
 
     DependentProperty - Field from which runtime value is extracted.
     TargetValue       - Expected value for dependent field. Instead of hardcoding there is also
@@ -37,7 +38,9 @@ RequiredIfAttribute([string DependentProperty], [object TargetValue], ...)
                         providing its name inside square parentheses.
 ```
 ```
-RequiredIfExpressionAttribute([string Expression], [string DependentProperty], [object TargetValue], ...)
+RequiredIfExpressionAttribute([string Expression], 
+                              [string DependentProperty], 
+                              [object TargetValue], ...)
 
     Expression        - Logical expression based on which requirement condition is calculated.
                         If condition is fulfilled, error message is displayed. Attribute logic
@@ -91,7 +94,7 @@ If we choose this way instead of model fields decoration, it has negative impact
     {
         return View("Success");
     }
-	if (model.NextCountry == "Other")
+    if (model.NextCountry == "Other")
     {
         return View("Success");
     }
@@ -99,8 +102,8 @@ If we choose this way instead of model fields decoration, it has negative impact
     {
         return View("Success");
     }
-	ModelState.AddModelError("ReasonForTravel", "If you plan to go abroad, why do you 
-												 want to visit the same country twice?");
+    ModelState.AddModelError("ReasonForTravel", "If you plan to go abroad, why do you 
+                                                 want to visit the same country twice?");
     return View("Home", model);
 }
 ```
