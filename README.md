@@ -31,23 +31,23 @@ How such an expression should be understood?
 ```
 RequiredIfAttribute([string DependentProperty], [object TargetValue], ...)
 
-    DependentProperty - Field from which runtime value is extracted.    
-    TargetValue       - Expected value for dependent field. Instead of hardcoding there is also 
-						possibility for dynamic extraction of target value from other field, by 
-						providing its name inside square parentheses.
+    DependentProperty - Field from which runtime value is extracted.
+    TargetValue       - Expected value for dependent field. Instead of hardcoding there is also
+                        possibility for dynamic extraction of target value from other field, by
+                        providing its name inside square parentheses.
 ```
 ```
 RequiredIfExpressionAttribute([string Expression], [string DependentProperty], [object TargetValue], ...)
 
-    Expression        - Logical expression based on which requirement condition is calculated. 
-						If condition is fulfilled, error message is displayed. Attribute logic 
-						replaces one or more format items in specific expression string with 
-						comparison results of dependent fields and corresponding target values.                         
+    Expression        - Logical expression based on which requirement condition is calculated.
+                        If condition is fulfilled, error message is displayed. Attribute logic
+                        replaces one or more format items in specific expression string with
+                        comparison results of dependent fields and corresponding target values.
                         Available expression tokens are: &&, ||, !, {, }, numbers and whitespaces.
-    DependentProperty - Dependent fields from which runtime values are extracted.    
-    TargetValue       - Expected values for corresponding dependent fields. Instead of hardcoding 
-						there is also possibility for dynamic extraction of target values from 
-						other fields, by providing their names inside square parentheses.
+    DependentProperty - Dependent fields from which runtime values are extracted.
+    TargetValue       - Expected values for corresponding dependent fields. Instead of hardcoding
+                        there is also possibility for dynamic extraction of target values from
+                        other fields, by providing their names inside square parentheses.
 ```
 
 Sample `{0} || !{1}` expression evaluation steps:
