@@ -24,7 +24,7 @@ public string PassportNumber { get; set; }
 public bool AgreeToContact { get; set; }
 ```
 
- In this one we can see that nested properties are supported by the mechanism. The other thing is wired star character `*` used as target value. It just stands for any value.
+ In this one we can see that nested properties are supported by the mechanism. The other thing is wired star character `*` used as target value - it just stands for *any value*.
 
 * More complex, using **RequiredIfExpressionAttribute** which *provides conditional attribute to calculate validation result based on related properties values and relations between them, which are defined in logical expression*:
  
@@ -42,7 +42,7 @@ public string ReasonForTravel { get; set; }
 
  ```GoAbroad == true && NextCountry != "Other" && NextCountry == [value from Country]```
  
- Besides parsing interpretation of the conditional expression, this sample additionally shows that instead of hardcoding there is also possibility for dynamic extraction of target values from other fields, by providing their names inside square parentheses.
+ Besides parsing interpretation of the conditional expression, this sample shows as well that instead of hardcoding there is also possibility for dynamic extraction of target values from other fields, by providing their names inside square parentheses `[]`.
 
 ###How to construct conditional validation attributes?
 
@@ -75,9 +75,16 @@ RequiredIfExpressionAttribute([string Expression],
 
 Sample `{0} || !{1}` expression evaluation steps:
 
-1. Expression is interpreted as (notice that arrays indexes of dependent properties and its values are given in expression inside curly parentheses `{}`): 
+1. Expression is interpreted as: 
 
- ```(DependentProperties[0] == TargetValues[0]) || (DependentProperties[1] != TargetValues[1])```
+ ```
+    (DependentProperties[0] == TargetValues[0]) || (DependentProperties[1] != TargetValues[1])
+    '------------------.   .------------------'    '------------------.   .------------------'
+                        \ /                                            \ / 
+                        {0}                                            {1}
+```
+ 
+ Note: Arrays indexes of dependent properties and its values are given in expression inside curly parentheses `{}`.
 2. Arrays values are extracted and compared. Boolean computation results are inserted into corresponding brackets, let's say:
 
  ```(true) || (false)```
