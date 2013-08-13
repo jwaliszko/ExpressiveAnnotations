@@ -1,5 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace ExpressiveAnnotations.ConditionalAttributes
@@ -11,21 +13,70 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             var value = targetValue as string;
             if (value != null)
             {
-                var containerType = validationContext.ObjectInstance.GetType();
                 var match = Regex.Match(value, @"^\[(.+)\]$");
                 if (match.Success)
                 {
                     var fieldName = match.Groups[1].Value;
-                    var field = containerType.GetProperty(fieldName);
-                    if (field == null)
-                    {
-                        throw new ArgumentException("Target value cannot be dynamically extracted from \"{0}\" field.",
-                                                    fieldName);
-                    }
-                    return field.GetValue(validationContext.ObjectInstance, null);
+                    return ExtractValue(validationContext.ObjectInstance, fieldName);
                 }
             }
             return targetValue;
+        }
+
+        internal static bool Compare(object dependentValue, object targetValue)
+        {
+            dependentValue = dependentValue is string && string.IsNullOrEmpty((string) dependentValue)
+                                 ? null
+                                 : dependentValue;
+            targetValue = targetValue is string && string.IsNullOrEmpty((string) targetValue)
+                              ? null
+                              : targetValue;
+
+            return Equals(dependentValue, targetValue) ||
+                   (dependentValue != null
+                    && targetValue is string
+                    && targetValue.ToString().Equals("*", StringComparison.OrdinalIgnoreCase));
+        }
+
+        internal static PropertyInfo ExtractProperty(object source, string property)
+        {
+            var props = property.Split('.');
+            var type = source.GetType();
+            PropertyInfo pi = null;
+            foreach (var prop in props)
+            {
+                pi = type.GetProperty(prop);
+                if (pi == null)
+                {
+                    throw new ArgumentException(string.Format("Field \"{0}\" is not found.", prop));
+                }
+                type = pi.PropertyType;
+            }
+            return pi;
+        }
+
+        internal static object ExtractValue(object source, string property)
+        {
+            var props = property.Split('.');
+            var type = source.GetType();
+            var arg = Expression.Parameter(type, "x");
+            Expression expr = arg;
+            foreach (var prop in props)
+            {
+                var pi = type.GetProperty(prop);
+                if (pi == null)
+                {
+                    throw new ArgumentException(string.Format("Field \"{0}\" is not found.", prop));
+                }
+                expr = Expression.Property(expr, pi);
+                type = pi.PropertyType;
+            }
+            var delegateType = typeof(Func<,>).MakeGenericType(source.GetType(), type);
+            var lambda = Expression.Lambda(delegateType, expr, arg);
+
+            var compiledLambda = lambda.Compile();
+            var value = compiledLambda.DynamicInvoke(source);
+            return value;
         }
     }
 }

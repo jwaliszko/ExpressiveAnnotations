@@ -24,7 +24,7 @@
                 @Html.EditorFor(model => model.GoAbroad)
                 @Html.LabelFor(model => model.GoAbroad, new {@class = "inline"})
                 @Html.ValidationMessageFor(model => model.GoAbroad)
-            </li>            
+            </li>
             <li>
                 <pre class="code">[RequiredIf(DependentProperty = "GoAbroad", TargetValue = true)]</pre>
                 <pre class="action">[show attribute]</pre>
@@ -73,6 +73,21 @@
                 @Html.EditorFor(model => model.BloodType)
                 @Html.ValidationMessageFor(model => model.BloodType)
             </li>
+            <li>
+                @Html.EditorFor(model => model.ContactDetails)
+            </li>
+            <li>
+                <pre class="code">
+[RequiredIf(
+    DependentProperty = "ContactDetails.Email", /* nested properties can be used */
+    TargetValue = "*",  /* any value */
+    ErrorMessage = "You have to authorize us to send an email under provided address in case of any problem.")]
+</pre>
+                <pre class="action">[show attribute]</pre>
+                @Html.EditorFor(model => model.AgreeToContact)
+                @Html.LabelFor(model => model.AgreeToContact, new {@class = "inline"})
+                @Html.ValidationMessageFor(model => model.AgreeToContact)
+            </li>            
         </ol>
         <input type="submit" />
     </fieldset>

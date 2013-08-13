@@ -7,24 +7,42 @@
 For sample usages go to [**demo project**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations.MvcWebSample).
 
 * Simplest, using **RequiredIfAttribute** which *provides conditional attribute to calculate validation result based on related property value*:
-    
+ 
  ```
 [RequiredIf(DependentProperty = "GoAbroad", TargetValue = true)]
 public string PassportNumber { get; set; }
 ```
-* More complex, using **RequiredIfExpressionAttribute** which *provides conditional attribute to calculate validation result based on related properties values and relations between them, which are defined in logical expression*:
+
+ This construction says that passoprt number is required if go abroad option is selected. Another usage version of this attribute:
 
  ```
-[RequiredIfExpression(
-    Expression = "{0} && !{1} && {2}",
-    DependentProperties = new[] { "GoAbroad", "NextCountry", "NextCountry" },
-    TargetValues = new object[] { true, "Other", "[Country]" },
-    ErrorMessage = "If you plan to go abroad, why do you 
-                    want to visit the same country twice?")]
+[RequiredIf(
+        DependentProperty = "ContactDetails.Email",
+        TargetValue = "*",
+        ErrorMessage = "You have to authorize us to send an email 
+	                    under provided address in case of any problem.")]
+public bool AgreeToContact { get; set; }
 ```
-How such an expression should be understood?
+
+ In this one we can see that nested properties are supported by the mechanism. The other thing is wired star character `*` used as target value. It just stands for any value.
+
+* More complex, using **RequiredIfExpressionAttribute** which *provides conditional attribute to calculate validation result based on related properties values and relations between them, which are defined in logical expression*:
+ 
+ ```
+[RequiredIfExpression(
+        Expression = "{0} && !{1} && {2}",
+        DependentProperties = new[] { "GoAbroad", "NextCountry", "NextCountry" },
+        TargetValues = new object[] { true, "Other", "[Country]" },
+        ErrorMessage = "If you plan to go abroad, why do you 
+                        want to visit the same country twice?")]
+public string ReasonForTravel { get; set; }
+```
+
+ How such an expression should be understood?
 
  ```GoAbroad == true && NextCountry != "Other" && NextCountry == [value from Country]```
+ 
+ Besides parsing interpretation of the conditional expression, this sample points also that instead of hardcoding there is also possibility for dynamic extraction of target values from other fields, by providing their names inside square parentheses.
 
 ###How to construct conditional validation attributes?
 
@@ -35,7 +53,8 @@ RequiredIfAttribute([string DependentProperty],
     DependentProperty - Field from which runtime value is extracted.
     TargetValue       - Expected value for dependent field. Instead of hardcoding there is also
                         possibility for dynamic extraction of target value from other field, by
-                        providing its name inside square parentheses.
+                        providing its name inside square parentheses. Star character stands for 
+						any value.
 ```
 ```
 RequiredIfExpressionAttribute([string Expression], 
@@ -50,7 +69,8 @@ RequiredIfExpressionAttribute([string Expression],
     DependentProperty - Dependent fields from which runtime values are extracted.
     TargetValue       - Expected values for corresponding dependent fields. Instead of hardcoding
                         there is also possibility for dynamic extraction of target values from
-                        other fields, by providing their names inside square parentheses.
+                        other fields, by providing their names inside square parentheses. Star 
+						character stands for any value.
 ```
 
 Sample `{0} || !{1}` expression evaluation steps:

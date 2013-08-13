@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
-using System.Text.RegularExpressions;
 using ExpressiveAnnotations.BooleanExpressionsAnalyser;
 
 namespace ExpressiveAnnotations.ConditionalAttributes
@@ -35,7 +34,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         public string[] DependentProperties { get; set; }
         /// <summary>
         /// Expected values for corresponding dependent fields. Instead of hardcoding there is also possibility for dynamic extraction of 
-        /// target values from other fields, by providing their names inside square parentheses.
+        /// target values from other fields, by providing their names inside square parentheses. Star character stands for any value.
         /// </summary>
         public object[] TargetValues { get; set; }
 
@@ -47,17 +46,12 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             var tokens = new List<object>();
-            var containerType = validationContext.ObjectInstance.GetType();
             for (var i = 0; i < DependentProperties.Count(); i++)
             {
-                var field = containerType.GetProperty(DependentProperties[i]);
-                var dependentValue = field.GetValue(validationContext.ObjectInstance, null);
+                var dependentValue = Helper.ExtractValue(validationContext.ObjectInstance, DependentProperties[i]);
                 var targetValue = Helper.FetchTargetValue(TargetValues[i], validationContext);
 
-                var result = dependentValue != null
-                                 ? dependentValue.Equals(targetValue)
-                                 : targetValue == null;
-
+                var result = Helper.Compare(dependentValue, targetValue);
                 tokens.Add(result.ToString().ToLowerInvariant());
             }
 
@@ -67,7 +61,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             if (evaluator.Compute(expression))
             {
                 // match => means we should try validating this field
-                if (!_innerAttribute.IsValid(value))
+                if (!_innerAttribute.IsValid(value) || (value is bool && !(bool) value))
                 {
                     // validation failed - return an error
                     return new ValidationResult(String.Format(CultureInfo.CurrentCulture, ErrorMessageString,

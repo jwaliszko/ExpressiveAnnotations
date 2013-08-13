@@ -32,7 +32,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
                     };
             }
         }
-
+       
         public bool GoAbroad { get; set; }
 
         [RequiredIf(DependentProperty = "GoAbroad", TargetValue = true)]
@@ -56,5 +56,13 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             TargetValues = new object[] { "Extreme", "None", true },
             ErrorMessage = "Blood type is required if you do extreme sports, or if you do any type of sport and plan to go abroad.")]
         public string BloodType { get; set; }
+
+        [RequiredIf(
+            DependentProperty = "ContactDetails.Email", /* nested properties can be used */
+            TargetValue = "*",  /* any value */
+            ErrorMessage = "You have to authorize us to send an email under provided address in case of any problem.")]
+        public bool AgreeToContact { get; set; }
+
+        public Contact ContactDetails { get; set; }
     }
 }

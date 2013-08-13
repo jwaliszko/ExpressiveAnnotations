@@ -1,0 +1,23 @@
+﻿@model ExpressiveAnnotations.MvcWebSample.Models.Contact
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <legend>Contact details</legend>
+        <ol>
+            <li>
+                @Html.LabelFor(model => model.Phone)
+                @Html.EditorFor(model => model.Phone)
+                @Html.ValidationMessageFor(model => model.Phone)
+            </li>            
+            <li>
+                @Html.LabelFor(model => model.Email)
+                @Html.EditorFor(model => model.Email)
+                @Html.ValidationMessageFor(model => model.Email)
+            </li>
+        </ol>
+    </fieldset>
+}
