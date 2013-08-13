@@ -55,7 +55,7 @@ RequiredIfExpressionAttribute([string Expression],
 
 Sample `{0} || !{1}` expression evaluation steps:
 
-1. Expression is interpreted as (notice that arrays indexes of related properties and its values are given in expression inside curly parentheses `{}`): 
+1. Expression is interpreted as (notice that arrays indexes of dependent properties and its values are given in expression inside curly parentheses `{}`): 
 
  ```(DependentProperties[0] == TargetValues[0]) || (DependentProperties[1] != TargetValues[1])```
 2. Arrays values are extracted and compared. Boolean computation results are inserted into corresponding brackets, let's say:
@@ -82,7 +82,7 @@ In our example it's more about metadata, e.g.
     DependentProperties = new[] { "GoAbroad", "NextCountry", "NextCountry" },
     TargetValues = new object[] { true, "Other", "[Country]" },
     ErrorMessage = "If you plan to go abroad, why do you 
-					want to visit the same country twice?")]
+                    want to visit the same country twice?")]
 public string ReasonForTravel { get; set; }
 ```
 
@@ -98,7 +98,7 @@ If we choose this way instead of model fields decoration, it has negative impact
     {
         return View("Success");
     }
-    if (model.Country != model.NextCountry)
+    if (model.NextCountry != model.Country)
     {
         return View("Success");
     }
