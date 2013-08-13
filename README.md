@@ -13,14 +13,14 @@ For sample usages go to [**demo project**](https://github.com/JaroslawWaliszko/E
 public string PassportNumber { get; set; }
 ```
 
- This construction says that passoprt number is required if go abroad option is selected. Another usage version of this attribute:
+ This construction says that passport number is required, if go abroad option is selected. Because construction is simple, let's move forward with this matter at once. Another usage version of presented attribute:
 
  ```
 [RequiredIf(
         DependentProperty = "ContactDetails.Email",
         TargetValue = "*",
         ErrorMessage = "You have to authorize us to send an email 
-	                    under provided address in case of any problem.")]
+                        under provided address in case of any problem.")]
 public bool AgreeToContact { get; set; }
 ```
 
@@ -42,7 +42,7 @@ public string ReasonForTravel { get; set; }
 
  ```GoAbroad == true && NextCountry != "Other" && NextCountry == [value from Country]```
  
- Besides parsing interpretation of the conditional expression, this sample points also that instead of hardcoding there is also possibility for dynamic extraction of target values from other fields, by providing their names inside square parentheses.
+ Besides parsing interpretation of the conditional expression, this sample additionally shows that instead of hardcoding there is also possibility for dynamic extraction of target values from other fields, by providing their names inside square parentheses.
 
 ###How to construct conditional validation attributes?
 
