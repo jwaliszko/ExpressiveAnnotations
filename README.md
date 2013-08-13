@@ -24,7 +24,7 @@ public string PassportNumber { get; set; }
 public bool AgreeToContact { get; set; }
 ```
 
- In this one we can see that nested properties are supported by the mechanism. The other thing is wired star character `*` used as target value - it just stands for *any value*.
+ In this one we can see that nested properties are supported by the mechanism. The other thing is star character `*` used as target value - it is special character which just stands for *any value*.
 
 * More complex, using **RequiredIfExpressionAttribute** which *provides conditional attribute to calculate validation result based on related properties values and relations between them, which are defined in logical expression*:
  
