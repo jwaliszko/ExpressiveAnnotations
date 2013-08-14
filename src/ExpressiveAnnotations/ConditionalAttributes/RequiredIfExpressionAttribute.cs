@@ -41,23 +41,28 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         public RequiredIfExpressionAttribute()
             : base(_defaultErrorMessage)
         {
+            DependentProperties = new string[0];
+            TargetValues = new object[0];
         }
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
+            if (DependentProperties.Length != TargetValues.Length)
+            {
+                throw new ArgumentException("Number of elements in DependentProperties and TargetValues must match.");
+            }
+
             var tokens = new List<object>();
             for (var i = 0; i < DependentProperties.Count(); i++)
             {
                 var dependentValue = Helper.ExtractValue(validationContext.ObjectInstance, DependentProperties[i]);
                 var targetValue = Helper.FetchTargetValue(TargetValues[i], validationContext);
-
                 var result = Helper.Compare(dependentValue, targetValue);
                 tokens.Add(result.ToString().ToLowerInvariant());
             }
 
             var expression = string.Format(Expression, tokens.ToArray());
             var evaluator = new Evaluator();
-
             if (evaluator.Compute(expression))
             {
                 // match => means we should try validating this field

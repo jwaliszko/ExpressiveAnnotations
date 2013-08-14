@@ -48,7 +48,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                 pi = type.GetProperty(prop);
                 if (pi == null)
                 {
-                    throw new ArgumentException(string.Format("Field \"{0}\" is not found.", prop));
+                    throw new ArgumentException(string.Format("Field \"{0}\" not found.", prop));
                 }
                 type = pi.PropertyType;
             }
@@ -66,7 +66,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                 var pi = type.GetProperty(prop);
                 if (pi == null)
                 {
-                    throw new ArgumentException(string.Format("Field \"{0}\" is not found.", prop));
+                    throw new ArgumentException(string.Format("Field \"{0}\" not found.", prop));
                 }
                 expr = Expression.Property(expr, pi);
                 type = pi.PropertyType;
