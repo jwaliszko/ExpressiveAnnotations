@@ -1,6 +1,9 @@
 ﻿@model ExpressiveAnnotations.MvcWebSample.Models.Query
 
-<h1>ExpressiveAnnotations - annotation-based conditional validation</h1>
+<div class="box">
+    <div class="left-corner"><h1>ExpressiveAnnotations - annotation-based conditional validation</h1></div>
+    <div class="right-corner"><a href="https://github.com/JaroslawWaliszko/ExpressiveAnnotations">[more on github]</a></div>
+</div>
 
 <p>
     ExpressiveAnnotations is a small .NET library which provides annotation-based conditional validation mechanisms. 
@@ -10,12 +13,15 @@
     such fields declaration.
 </p>
 
-<a href="https://github.com/JaroslawWaliszko/ExpressiveAnnotations" class="right">[more on github]</a>
-
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
     @Html.ValidationSummary(true)
+
+    if (ViewBag.Success != null)
+    {
+        <div class="message-success">@ViewBag.Success</div>
+    }
 
     <fieldset>
         <legend>Usage sample for model validation in ASP.NET MVC</legend>
@@ -46,8 +52,8 @@
                 <pre class="code">
 [RequiredIfExpression(  /* interpretation => GoAbroad == true && NextCountry != "Other" && NextCountry == [value from Country] */
     Expression = "{0} && !{1} && {2}",
-    DependentProperties = new[] { "GoAbroad", "NextCountry", "NextCountry" },
-    TargetValues = new object[] { true, "Other", "[Country]" },
+    DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry"},
+    TargetValues = new object[] {true, "Other", "[Country]"},
     ErrorMessage = "If you plan to go abroad, why do you want to visit the same country twice?")]
 </pre>
                 <pre class="action">[show attribute]</pre>
@@ -64,8 +70,8 @@
                 <pre class="code">
 [RequiredIfExpression( /* interpretation => SportType == "Extreme" || (SportType != "None" && GoAbroad) */
     Expression = "{0} || (!{1} && {2})",
-    DependentProperties = new[] { "SportType", "SportType", "GoAbroad" },
-    TargetValues = new object[] { "Extreme", "None", true },
+    DependentProperties = new[] {"SportType", "SportType", "GoAbroad"},
+    TargetValues = new object[] {"Extreme", "None", true},
     ErrorMessage = "Blood type is required if you do extreme sports, or if you do any type of sport and plan to go abroad.")]
 </pre>
                 <pre class="action">[show attribute]</pre>
@@ -78,10 +84,19 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIf(
-    DependentProperty = "ContactDetails.Email", /* nested properties can be used */
-    TargetValue = "*",  /* any value */
-    ErrorMessage = "You have to authorize us to send an email under provided address in case of any problem.")]
+[RequiredIfExpression(
+    Expression = "{0} || {1}",
+    DependentProperties = new[] {"ContactDetails.Email", "ContactDetails.Phone"},   /* nested properties are supported */
+    TargetValues = new object[] {"*", "*"}, /* any values */
+    ErrorMessage = "You have to authorize us to contact with you.")]
+
+equivalent is:
+                    
+[RequiredIfExpression(
+    Expression = "!{0} || !{1}",
+    DependentProperties = new[] {"ContactDetails.Email", "ContactDetails.Phone"},
+    TargetValues = new object[] {null, null},
+    ErrorMessage = "You have to authorize us to make contact.")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.EditorFor(model => model.AgreeToContact)

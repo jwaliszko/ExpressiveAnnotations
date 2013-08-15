@@ -16,7 +16,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
         {
             if (ModelState.IsValid)
             {
-                return View("Success");
+                ViewBag.Success = "Success";
             }
             return View("Home", model);
         }

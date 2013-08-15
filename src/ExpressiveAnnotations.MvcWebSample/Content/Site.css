@@ -6,12 +6,8 @@
 }
 
 #body {
-    padding-top: 50px;
-    padding-bottom: 50px;
-}
-
-form {
-   padding-top: 20px; 
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 .prefix {
@@ -29,19 +25,28 @@ select {
     width: 117px;
 }
 
-.right {
-    float: right;
-    clear: both;
+.box {
+    position: relative;
+    height: 40px;
+    width: 100%;
+}
+
+.left-corner {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+}
+
+.right-corner {
+    position: absolute;
+    right: 0;
+    bottom: 0;
 }
 
 h1, h2, h3, h4, h5, h6 {
     color: #000;
     margin-bottom: 0;
     padding-bottom: 0;
-}
-
-pre {
-    font-size: 1.1em;
 }
 
 .code {
@@ -94,7 +99,6 @@ input, textarea {
     border: 1px solid #e2e2e2;
     background: #fff;
     color: #333;
-    font-size: 1.2em;
     margin: 5px 0 6px 0;
     padding: 5px;
     width: 280px;
@@ -121,9 +125,8 @@ button {
     background-color: #d3dce0;
     border: 1px solid #787878;
     cursor: pointer;
-    font-size: 1.2em;
     font-weight: 600;
-    padding: 7px;
+    padding: 5px;
     margin-right: 8px;
     width: auto;
 }
@@ -137,16 +140,14 @@ button {
 .message-error {
     clear: both;
     color: #e80c4d;
-    font-size: 1.1em;
     font-weight: bold;
-    margin: 20px 0 10px 0;
+    margin: 10px 0 10px 0;
 }
 
 .message-success {
-    color: #7ac0da;
-    font-size: 1.3em;
+    color: #51b421;
     font-weight: bold;
-    margin: 20px 0 10px 0;
+    margin: 10px 0 10px 0;
 }
 
 .error {
@@ -156,6 +157,7 @@ button {
 .field-validation-error {
     color: #e80c4d;
     font-weight: bold;
+    padding-left: 5px;
 }
 
 input.input-validation-error {
@@ -170,7 +172,6 @@ input[type="checkbox"].input-validation-error {
     color: #e80c4d;
     font-weight: bold;
     font-size: 1.1em;
-    display: none;
 }
 
 .ctor {

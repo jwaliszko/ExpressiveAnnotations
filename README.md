@@ -13,14 +13,13 @@ For sample usages go to [**demo project**](https://github.com/JaroslawWaliszko/E
 public string PassportNumber { get; set; }
 ```
 
- This construction says that passport number is required, if go abroad option is selected. Because construction is simple, let's move forward with this matter at once. Another usage version of presented attribute:
+ This construction says that passport number is required, if go abroad option is selected. Because construction is simple, let's move forward. Another usage version of presented attribute:
 
  ```
 [RequiredIf(
         DependentProperty = "ContactDetails.Email",
         TargetValue = "*",
-        ErrorMessage = "You have to authorize us to send an email 
-                        under provided address in case of any problem.")]
+        ErrorMessage = "You have to authorize us to make contact.")]
 public bool AgreeToContact { get; set; }
 ```
 
@@ -31,8 +30,8 @@ public bool AgreeToContact { get; set; }
  ```
 [RequiredIfExpression(
         Expression = "{0} && !{1} && {2}",
-        DependentProperties = new[] { "GoAbroad", "NextCountry", "NextCountry" },
-        TargetValues = new object[] { true, "Other", "[Country]" },
+        DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry"},
+        TargetValues = new object[] {true, "Other", "[Country]"},
         ErrorMessage = "If you plan to go abroad, why do you 
                         want to visit the same country twice?")]
 public string ReasonForTravel { get; set; }
@@ -106,8 +105,8 @@ In our example it's more about metadata, e.g.
 ```
 [RequiredIfExpression(
     Expression = "{0} && !{1} && {2}",
-    DependentProperties = new[] { "GoAbroad", "NextCountry", "NextCountry" },
-    TargetValues = new object[] { true, "Other", "[Country]" },
+    DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry"},
+    TargetValues = new object[] {true, "Other", "[Country]"},
     ErrorMessage = "If you plan to go abroad, why do you 
                     want to visit the same country twice?")]
 public string ReasonForTravel { get; set; }
