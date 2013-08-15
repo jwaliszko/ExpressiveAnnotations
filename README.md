@@ -13,7 +13,7 @@ For sample usages go to [**demo project**](https://github.com/JaroslawWaliszko/E
 public string PassportNumber { get; set; }
 ```
 
- This construction says that passport number is required, if go abroad option is selected. Because construction is simple, let's move forward. Another usage version of presented attribute:
+ This construction says that passport number is required, if go abroad option is selected. Because it is simple, let's move forward to another usage version of this attribute:
 
  ```
 [RequiredIf(
@@ -23,7 +23,7 @@ public string PassportNumber { get; set; }
 public bool AgreeToContact { get; set; }
 ```
 
- In this one we can see that nested properties are supported by the mechanism. The other thing is star character `*` used as target value - it is special character which just stands for *any value*.
+ This one mean that if email is not empty, boolean property value has to be true. We can see that nested properties are supported by the mechanism. The other thing is star character `*` used as target value - it is special character which stands for *any value*.
 
 * More complex, using **RequiredIfExpressionAttribute** which *provides conditional attribute to calculate validation result based on related properties values and relations between them, which are defined in logical expression*:
  
