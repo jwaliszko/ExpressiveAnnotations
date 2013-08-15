@@ -23,7 +23,7 @@ public string PassportNumber { get; set; }
 public bool AgreeToContact { get; set; }
 ```
 
- This one mean that if email is not empty, boolean property value has to be true. We can see that nested properties are supported by the mechanism. The other thing is star character `*` used as target value - it is special character which stands for *any value*.
+ This one means that if email is not empty, boolean property value has to be true. We can see that nested properties are supported by the mechanism. The other thing is star character `*` used as target value - it is special character which stands for *any value*.
 
 * More complex, using **RequiredIfExpressionAttribute** which *provides conditional attribute to calculate validation result based on related properties values and relations between them, which are defined in logical expression*:
  
