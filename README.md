@@ -13,7 +13,7 @@ For sample usages go to [**demo project**](https://github.com/JaroslawWaliszko/E
 public string PassportNumber { get; set; }
 ```
 
- This construction says that passport number is required, if go abroad option is selected. Because it is simple, let's move forward to another usage version of this attribute:
+ This construction says that *passport number is required, if go abroad option is selected*. Because it is simple, let's move forward to another usage sample of this attribute:
 
  ```
 [RequiredIf(
@@ -23,7 +23,7 @@ public string PassportNumber { get; set; }
 public bool AgreeToContact { get; set; }
 ```
 
- This one means that if email is not empty, boolean property value has to be true. We can see that nested properties are supported by the mechanism. The other thing is star character `*` used as target value - it is special character which stands for *any value*.
+ This one means that *if email is not empty (has any value), boolean value indicating contact permission has to be true*. What's more, we can see that nested properties are supported by the mechanism. The last thing shown here is star character `*` used as target value - it is special character which stands for any value.
 
 * More complex, using **RequiredIfExpressionAttribute** which *provides conditional attribute to calculate validation result based on related properties values and relations between them, which are defined in logical expression*:
  
@@ -57,19 +57,19 @@ RequiredIfAttribute([string DependentProperty],
 ```
 ```
 RequiredIfExpressionAttribute([string Expression], 
-                              [string DependentProperty], 
-                              [object TargetValue], ...)
+                              [string[] DependentProperties], 
+                              [object[] TargetValues], ...)
 
-    Expression        - Logical expression based on which requirement condition is calculated.
-                        If condition is fulfilled, error message is displayed. Attribute logic
-                        replaces one or more format items in specific expression string with
-                        comparison results of dependent fields and corresponding target values.
-                        Available expression tokens are: &&, ||, !, {, }, numbers and whitespaces.
-    DependentProperty - Dependent fields from which runtime values are extracted.
-    TargetValue       - Expected values for corresponding dependent fields. Instead of hardcoding
-                        there is also possibility for dynamic extraction of target values from
-                        other fields, by providing their names inside square parentheses. Star 
-						character stands for any value.
+    Expression          - Logical expression based on which requirement condition is calculated.
+                          If condition is fulfilled, error message is displayed. Attribute logic
+                          replaces one or more format items in specific expression string with
+                          comparison results of dependent fields and corresponding target values.
+                          Available expression tokens are: &&, ||, !, {, }, numbers and whitespaces.
+    DependentProperties - Dependent fields from which runtime values are extracted.
+    TargetValues        - Expected values for corresponding dependent fields. Instead of hardcoding
+                          there is also possibility for dynamic extraction of target values from
+                          other fields, by providing their names inside square parentheses. Star 
+                          character stands for any value.
 ```
 
 Sample `{0} || !{1}` expression evaluation steps:
