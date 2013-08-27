@@ -40,12 +40,12 @@
             </li>
             <li>
                 @Html.LabelFor(model => model.Country, new {@class = "inline prefix"})
-                @Html.DropDownListFor(x => x.Country, new SelectList(Model.Countries, "Text", "Value"))
+                @Html.DropDownListFor(x => x.Country, new SelectList(Model.Countries, "Value", "Text"))
                 @Html.ValidationMessageFor(model => model.Country)
             </li>
             <li>
                 @Html.LabelFor(model => model.NextCountry, new {@class = "inline prefix"})
-                @Html.DropDownListFor(x => x.NextCountry, new SelectList(Model.Countries, "Text", "Value"))
+                @Html.DropDownListFor(x => x.NextCountry, new SelectList(Model.Countries, "Value", "Text"))
                 @Html.ValidationMessageFor(model => model.NextCountry)
             </li>
             <li>
@@ -63,7 +63,7 @@
             </li>
             <li>
                 @Html.LabelFor(model => model.SportType, new {@class = "inline prefix"})
-                @Html.DropDownListFor(x => x.SportType, new SelectList(Model.Sports, "Text", "Value"))
+                @Html.DropDownListFor(x => x.SportType, new SelectList(Model.Sports, "Value", "Text"))
                 @Html.ValidationMessageFor(model => model.SportType)
             </li>
             <li>
