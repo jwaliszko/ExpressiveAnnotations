@@ -1,39 +1,33 @@
 ﻿@model ExpressiveAnnotations.MvcWebSample.Models.Contact
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
-    @Html.ValidationSummary(true)
-
-    <fieldset>
-        <legend>Contact details</legend>
-        <ol>
-            <li>
-                <pre class="code">
+<fieldset>
+    <legend>Contact details</legend>
+    <ol>
+        <li>
+            <pre class="code">
 [RequiredIfExpression(
     Expression = "{0} && {1}",
     DependentProperties = new[] {"Email", "Phone"},
     TargetValues = new object[] {null, null},
     ErrorMessage = "You do not enter any contact information. At least email or phone should be provided.")]
 </pre>
-                <pre class="action">[show attribute]</pre>                
-                @Html.LabelFor(model => model.Email)
-                @Html.EditorFor(model => model.Email)
-                @Html.ValidationMessageFor(model => model.Email)
-            </li>            
-            <li>
-                <pre class="code">
+        <pre class="action">[show attribute]</pre>                
+            @Html.LabelFor(model => model.Email)
+            @Html.EditorFor(model => model.Email)
+            @Html.ValidationMessageFor(model => model.Email)
+        </li>
+        <li>
+            <pre class="code">
 [RequiredIfExpression(
     Expression = "{0} && {1}",
     DependentProperties = new[] {"Email", "Phone"},
     TargetValues = new object[] {null, null},
     ErrorMessage = "You do not enter any contact information. At least email or phone should be provided.")]
 </pre>
-                <pre class="action">[show attribute]</pre>
-                @Html.LabelFor(model => model.Phone)
-                @Html.EditorFor(model => model.Phone)
-                @Html.ValidationMessageFor(model => model.Phone)
-            </li>
-        </ol>
-    </fieldset>
-}
+        <pre class="action">[show attribute]</pre>
+            @Html.LabelFor(model => model.Phone)
+            @Html.EditorFor(model => model.Phone)
+            @Html.ValidationMessageFor(model => model.Phone)
+        </li>
+    </ol>
+</fieldset>
