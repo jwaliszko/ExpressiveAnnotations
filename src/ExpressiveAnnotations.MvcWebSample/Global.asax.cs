@@ -1,7 +1,9 @@
 ﻿using System.Web.Http;
 using System.Web.Mvc;
+using System.Web.Optimization;
 using System.Web.Routing;
-using ExpressiveAnnotations.MvcWebSample.App_Start;
+using ExpressiveAnnotations.ConditionalAttributes;
+using ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider;
 
 namespace ExpressiveAnnotations.MvcWebSample
 {
@@ -11,11 +13,14 @@ namespace ExpressiveAnnotations.MvcWebSample
     {
         protected void Application_Start()
         {
+            DataAnnotationsModelValidatorProvider.RegisterAdapter(typeof(RequiredIfAttribute), typeof(RequiredIfValidator));
+
             AreaRegistration.RegisterAllAreas();
 
             WebApiConfig.Register(GlobalConfiguration.Configuration);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
+            BundleConfig.RegisterBundles(BundleTable.Bundles);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Web.Http;
 
-namespace ExpressiveAnnotations.MvcWebSample.App_Start
+namespace ExpressiveAnnotations.MvcWebSample
 {
     public static class WebApiConfig
     {

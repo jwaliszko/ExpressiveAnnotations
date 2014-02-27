@@ -1,7 +1,7 @@
 ﻿using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace ExpressiveAnnotations.MvcWebSample.App_Start
+namespace ExpressiveAnnotations.MvcWebSample
 {
     public class RouteConfig
     {

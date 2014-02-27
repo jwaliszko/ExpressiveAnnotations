@@ -29,6 +29,12 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         {
         }
 
+        public override string FormatErrorMessage(string name)
+        {
+            //ToDo: improve
+            return string.Format(CultureInfo.CurrentCulture, ErrorMessageString, name, DependentProperty);
+        }
+
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {            
             // get a reference to the property this validation depends upon
@@ -48,6 +54,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                 // match => means we should try validating this field                                
                 if (!_innerAttribute.IsValid(value) || (value is bool && !(bool) value))
                     // validation failed - return an error
+                    //ToDo: consider usage of FormatErrorMessage
                     return new ValidationResult(String.Format(CultureInfo.CurrentCulture, ErrorMessageString,
                                                               validationContext.DisplayName, dependentPropertyName));
             }

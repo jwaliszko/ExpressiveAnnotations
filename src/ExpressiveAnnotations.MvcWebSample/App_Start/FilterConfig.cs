@@ -1,6 +1,6 @@
 ﻿using System.Web.Mvc;
 
-namespace ExpressiveAnnotations.MvcWebSample.App_Start
+namespace ExpressiveAnnotations.MvcWebSample
 {
     public class FilterConfig
     {

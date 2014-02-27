@@ -107,3 +107,18 @@ equivalent is:
         <input type="submit" />
     </fieldset>
 }
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/jqueryea")
+    
+    <script>
+        $(document).ready(function () {
+            $('.code').hide();
+            $('.action').click(function () {
+                $(this).hide();
+                $(this).parent().find('.code').toggle('slow');
+            });
+        });
+    </script>
+}
