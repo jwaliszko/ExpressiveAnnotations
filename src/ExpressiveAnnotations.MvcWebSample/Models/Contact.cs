@@ -1,4 +1,5 @@
-﻿using ExpressiveAnnotations.ConditionalAttributes;
+﻿using System.ComponentModel.DataAnnotations;
+using ExpressiveAnnotations.ConditionalAttributes;
 
 namespace ExpressiveAnnotations.MvcWebSample.Models
 {
@@ -8,14 +9,16 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             Expression = "{0} && {1}",
             DependentProperties = new[] {"Email", "Phone"},
             TargetValues = new object[] {null, null},
-            ErrorMessage = "You do not enter any contact information. At least email or phone should be provided.")]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "EmailOrPhoneRequired")]
+        [Display(ResourceType = typeof(Resources), Name = "Email")]
         public string Email { get; set; }
 
         [RequiredIfExpression(
             Expression = "{0} && {1}",
             DependentProperties = new[] {"Email", "Phone"},
             TargetValues = new object[] {null, null},
-            ErrorMessage = "You do not enter any contact information. At least email or phone should be provided.")]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "EmailOrPhoneRequired")]
+        [Display(ResourceType = typeof(Resources), Name = "Phone")]
         public string Phone { get; set; }
     }
 }

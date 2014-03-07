@@ -31,6 +31,18 @@ select {
     width: 100%;
 }
 
+.box-small {
+    position: relative;
+    height: 35px;
+    width: 65%;
+    float: right;
+}
+
+    .box-small div {
+        text-align: right;
+        width: 100%;
+    }
+
 .left-corner {
     position: absolute;
     left: 0;
@@ -171,7 +183,6 @@ input[type="checkbox"].input-validation-error {
 .validation-summary-errors {
     color: #e80c4d;
     font-weight: bold;
-    font-size: 1.1em;
 }
 
 .ctor {

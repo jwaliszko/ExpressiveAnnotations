@@ -1,8 +1,12 @@
 ﻿@model ExpressiveAnnotations.MvcWebSample.Models.Query
 
 <div class="box">
-    <div class="left-corner"><h1>ExpressiveAnnotations - annotation-based conditional validation</h1></div>
-    <div class="right-corner"><a href="https://github.com/JaroslawWaliszko/ExpressiveAnnotations">[more on github]</a></div>
+    <div class="left-corner">
+        <h1>ExpressiveAnnotations - annotation-based conditional validation</h1>
+    </div>
+    <div class="right-corner">
+        <a href="https://github.com/JaroslawWaliszko/ExpressiveAnnotations">[more on github]</a>    
+    </div>
 </div>
 
 <p>
@@ -25,6 +29,12 @@
 
     <fieldset>
         <legend>Usage sample for model validation in ASP.NET MVC</legend>
+        <div class="box-small">
+            <div class="right-corner">
+                @Html.Partial("_Culture")
+                @Html.Partial("_Validation")
+            </div>
+        </div>
         <ol>
             <li>
                 @Html.EditorFor(model => model.GoAbroad)
@@ -102,15 +112,18 @@ equivalent is:
                 @Html.EditorFor(model => model.AgreeToContact)
                 @Html.LabelFor(model => model.AgreeToContact, new {@class = "inline"})
                 @Html.ValidationMessageFor(model => model.AgreeToContact)
-            </li>            
+            </li>
         </ol>
         <input type="submit" />
     </fieldset>
 }
 
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
-    @Scripts.Render("~/bundles/jqueryea")
+    @if ("client".Equals(ViewBag.Validation))
+    {
+        @Scripts.Render("~/bundles/jqueryval")
+        @Scripts.Render("~/bundles/jqueryea")
+    }
     
     <script>
         $(document).ready(function () {

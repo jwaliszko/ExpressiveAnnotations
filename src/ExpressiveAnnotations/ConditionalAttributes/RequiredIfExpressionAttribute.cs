@@ -11,7 +11,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
     /// Provides conditional attribute to calculate validation result based on related properties values
     /// and relations between them, which are defined in logical expression.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public class RequiredIfExpressionAttribute : ValidationAttribute
     {
         private readonly RequiredAttribute _innerAttribute = new RequiredAttribute();
@@ -48,9 +48,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             if (DependentProperties.Length != TargetValues.Length)
-            {
                 throw new ArgumentException("Number of elements in DependentProperties and TargetValues must match.");
-            }
 
             var tokens = new List<object>();
             for (var i = 0; i < DependentProperties.Count(); i++)
@@ -65,12 +63,11 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             var evaluator = new Evaluator();
             if (evaluator.Compute(expression))
             {
-                // match => means we should try validating this field
+                // match => means we should try to validate this field
                 if (!_innerAttribute.IsValid(value) || (value is bool && !(bool) value))
                 {
                     // validation failed - return an error
-                    return new ValidationResult(String.Format(CultureInfo.CurrentCulture, ErrorMessageString,
-                                                              validationContext.DisplayName));
+                    return new ValidationResult(String.Format(ErrorMessageString, validationContext.DisplayName));
                 }
             }
 

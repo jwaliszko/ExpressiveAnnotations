@@ -1,0 +1,11 @@
+﻿@using System.Threading
+
+@{
+    var plLabel = "pl".Equals(Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName) ? "[polski]" : "polski";
+    var enLabel = "en".Equals(Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName) ? "[english]" : "english";
+}
+<div>
+    change language to test localized properties and validation messages:
+    <a href="@Url.Action("SetCulture", "System", new { lang = "pl", returnUrl = Request.RawUrl }, null)">@plLabel</a>
+    <a href="@Url.Action("SetCulture", "System", new { lang = "en", returnUrl = Request.RawUrl }, null)">@enLabel</a>
+</div>

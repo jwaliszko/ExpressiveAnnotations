@@ -1,13 +1,14 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using System.Linq;
 
 namespace ExpressiveAnnotations.ConditionalAttributes
 {
     /// <summary>
     /// Provides conditional attribute to calculate validation result based on related property value.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public class RequiredIfAttribute : ValidationAttribute
     {
         private readonly RequiredAttribute _innerAttribute = new RequiredAttribute();
@@ -29,18 +30,16 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         {
         }
 
-        public override string FormatErrorMessage(string name)
+        public string FormatErrorMessage(string displayName, string dependentPropertyName)
         {
-            //ToDo: improve
-            return string.Format(CultureInfo.CurrentCulture, ErrorMessageString, name, DependentProperty);
+            return string.Format(ErrorMessageString, displayName, dependentPropertyName);
         }
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {            
             // get a reference to the property this validation depends upon
             var field = Helper.ExtractProperty(validationContext.ObjectInstance, DependentProperty);
-            var attribs = field.GetCustomAttributes(typeof (DisplayAttribute), false);
-            var attrib = attribs.Length > 0 ? (DisplayAttribute) attribs[0] : null;
+            var attrib = field.GetCustomAttributes(typeof (DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
             var dependentPropertyName = attrib != null ? attrib.GetName() : DependentProperty;
 
             // get the value of the dependent property
@@ -51,12 +50,10 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             // compare the value against the target value
             if (Helper.Compare(dependentValue, targetValue))
             {
-                // match => means we should try validating this field                                
+                // match => means we should try to validate this field                                
                 if (!_innerAttribute.IsValid(value) || (value is bool && !(bool) value))
                     // validation failed - return an error
-                    //ToDo: consider usage of FormatErrorMessage
-                    return new ValidationResult(String.Format(CultureInfo.CurrentCulture, ErrorMessageString,
-                                                              validationContext.DisplayName, dependentPropertyName));
+                    return new ValidationResult(FormatErrorMessage(validationContext.DisplayName, dependentPropertyName));
             }
 
             return ValidationResult.Success;

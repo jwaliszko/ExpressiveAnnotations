@@ -3,7 +3,7 @@ using ExpressiveAnnotations.MvcWebSample.Models;
 
 namespace ExpressiveAnnotations.MvcWebSample.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         public ActionResult Index()
         {
@@ -15,9 +15,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
         public ActionResult Index(Query model)
         {
             if (ModelState.IsValid)
-            {
-                ViewBag.Success = "Success";
-            }
+                ViewBag.Success = "Success";            
             return View("Home", model);
         }
     }

@@ -1,4 +1,6 @@
-﻿using System.Web.Mvc;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web.Mvc;
 using ExpressiveAnnotations.ConditionalAttributes;
 using System.Collections.Generic;
 
@@ -13,9 +15,13 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         public RequiredIfValidator(ModelMetadata metadata, ControllerContext context, RequiredIfAttribute attribute)
             : base(metadata, context, attribute)
         {
-            _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName());
+            var field = metadata.ContainerType.GetProperty(attribute.DependentProperty);
+            var attrib = field.GetCustomAttributes(typeof (DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
+            var dependentPropertyName = attrib != null ? attrib.GetName() : attribute.DependentProperty;
+
+            _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), dependentPropertyName);
             _dependentProperty = attribute.DependentProperty;
-            _targetValue = attribute.TargetValue.ToString().ToLowerInvariant();
+            _targetValue = (attribute.TargetValue ?? string.Empty).ToString().ToLowerInvariant();   // null returned as string.Empty to client side
         }
 
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()
