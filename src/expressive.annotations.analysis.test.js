@@ -1,14 +1,6 @@
-﻿/*!
-	jquery.expressive.annotations
-	jQuery front-end part for ExpresiveAnnotations, annotation-based conditional validation library
-	(c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
-	license: http://www.opensource.org/licenses/mit-license.php
-*/
-
-///<reference path="./expressive.annotations.analysis.js"/>
+﻿///<reference path="./expressive.annotations.analysis.js"/>
 
 test("Verify_infix_lexer_logic", function () {
-    //debugger;
     var expression = "( true && (true) ) || false";
     var lexer = new InfixLexer();
 
@@ -44,7 +36,6 @@ test("Verify_infix_lexer_logic", function () {
 });
 
 test("Verify_postfix_lexer_logic", function () {
-
     var expression = "true true && false ||";
     var lexer = new PostfixLexer();
 
@@ -70,7 +61,6 @@ test("Verify_postfix_lexer_logic", function () {
 });
 
 test("Verify_infix_to_postfix_conversion", function () {
-
     var converter = new InfixToPostfixConverter();
 
     equal(converter.convert("()"), "");
@@ -82,7 +72,6 @@ test("Verify_infix_to_postfix_conversion", function () {
 });
 
 test("Verify_postfix_parser", function () {
-
     var parser = new PostfixParser();    
     
     ok(parser.evaluate("true"));
@@ -102,7 +91,6 @@ test("Verify_postfix_parser", function () {
 });
 
 test("Verify_complex_expression_evaluation", function () {
-
     var evaluator = new Evaluator();
 
     ok(evaluator.compute("(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false"));

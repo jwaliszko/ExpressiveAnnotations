@@ -1,6 +1,6 @@
 #ExpressiveAnnotations - annotation-based conditional validation
 
-[**ExpressiveAnnotations**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations) is a small .NET library which provides annotation-based conditional validation mechanisms. Given implementation of **RequiredIf** and **RequiredIfExpression** attributes allows to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more compacted, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
+[**ExpressiveAnnotations**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations) is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given implementation of RequiredIf and RequiredIfExpression attributes allows to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more compacted, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
 
 ###What are brief examples of usage?
 
@@ -132,4 +132,29 @@ If we choose this way instead of model fields decoration, it has negative impact
                                                  want to visit the same country twice?");
     return View("Home", model);
 }
+```
+
+###What about the support of ASP.NET MVC client side validation?
+
+Client side validation is fully supported. Enable it for your web project within the next few steps:
+
+1. Add [**ExpressiveAnnotations.dll**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations) and [**ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider) reference libraries to your projest,
+2. In `Global.asax` register required validators:
+
+ ```    
+    protected void Application_Start()
+    {
+        DataAnnotationsModelValidatorProvider.RegisterAdapter(
+            typeof (RequiredIfAttribute), typeof (RequiredIfValidator));
+        DataAnnotationsModelValidatorProvider.RegisterAdapter(
+            typeof(RequiredIfExpressionAttribute), typeof(RequiredIfExpressionValidator));
+```			
+3. Include [**expressive.annotations.analysis.js**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/blob/master/src/expressive.annotations.analysis.js) and [**expressive.annotations.validate.js**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/blob/master/src/expressive.annotations.validate.js) scripts in your page (do not forget standard jQuery validation scripts):
+
+ ```
+    <script src="/Scripts/jquery.validate.js"></script>
+    <script src="/Scripts/jquery.validate.unobtrusive.js"></script>
+    ...
+    <script src="/Scripts/expressive.annotations.analysis.js"></script>
+    <script src="/Scripts/expressive.annotations.validate.js"></script>
 ```

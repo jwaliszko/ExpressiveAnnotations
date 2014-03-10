@@ -1,13 +1,9 @@
-﻿/*!
-	jquery.expressive.annotations
-	jQuery front-end part for ExpresiveAnnotations, annotation-based conditional validation library
-	(c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
-	license: http://www.opensource.org/licenses/mit-license.php
-*/
+﻿/* expressive.annotations.validate.js
+ * client side component of ExpresiveAnnotations - annotation-based conditional validation library
+ * (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
+ * license: http://www.opensource.org/licenses/mit-license.php */
 
 (function($) {
-    'use strict';
-
     var appendModelPrefix = function(val, pref) {
         return pref + val;
     };
