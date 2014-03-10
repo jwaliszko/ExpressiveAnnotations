@@ -35,14 +35,15 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BooleanExpressionsAnalyser\Evaluator.cs" />
-    <Compile Include="BooleanExpressionsAnalyser\LexicalAnalysis\InfixLexer.cs" />
-    <Compile Include="BooleanExpressionsAnalyser\LexicalAnalysis\Lexer.cs" />
-    <Compile Include="BooleanExpressionsAnalyser\LexicalAnalysis\RegexMatcher.cs" />
-    <Compile Include="BooleanExpressionsAnalyser\LexicalAnalysis\RpnLexer.cs" />
-    <Compile Include="BooleanExpressionsAnalyser\LexicalAnalysis\TokenDefinition.cs" />
-    <Compile Include="BooleanExpressionsAnalyser\SyntacticAnalysis\InfixToRpnConverter.cs" />
-    <Compile Include="BooleanExpressionsAnalyser\SyntacticAnalysis\RpnParser.cs" />
+    <Compile Include="BooleanExpressionAnalysis\Evaluator.cs" />
+    <Compile Include="BooleanExpressionAnalysis\LexicalAnalysis\InfixLexer.cs" />
+    <Compile Include="BooleanExpressionAnalysis\LexicalAnalysis\Token.cs" />
+    <Compile Include="BooleanExpressionAnalysis\LexicalAnalysis\Lexer.cs" />
+    <Compile Include="BooleanExpressionAnalysis\LexicalAnalysis\RegexMatcher.cs" />
+    <Compile Include="BooleanExpressionAnalysis\LexicalAnalysis\PostfixLexer.cs" />
+    <Compile Include="BooleanExpressionAnalysis\LexicalAnalysis\TokenDefinition.cs" />
+    <Compile Include="BooleanExpressionAnalysis\SyntacticAnalysis\InfixToPostfixConverter.cs" />
+    <Compile Include="BooleanExpressionAnalysis\SyntacticAnalysis\PostfixParser.cs" />
     <Compile Include="ConditionalAttributes\Helper.cs" />
     <Compile Include="ConditionalAttributes\RequiredIfAttribute.cs" />
     <Compile Include="ConditionalAttributes\RequiredIfExpressionAttribute.cs" />

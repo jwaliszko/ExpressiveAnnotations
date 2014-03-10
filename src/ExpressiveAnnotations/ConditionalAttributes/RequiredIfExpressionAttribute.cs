@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
-using ExpressiveAnnotations.BooleanExpressionsAnalyser;
+using ExpressiveAnnotations.BooleanExpressionAnalysis;
 
 namespace ExpressiveAnnotations.ConditionalAttributes
 {
@@ -67,7 +67,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                 if (!_innerAttribute.IsValid(value) || (value is bool && !(bool) value))
                 {
                     // validation failed - return an error
-                    return new ValidationResult(String.Format(ErrorMessageString, validationContext.DisplayName));
+                    return new ValidationResult(string.Format(ErrorMessageString, validationContext.DisplayName));
                 }
             }
 
