@@ -1,7 +1,7 @@
 ﻿using System;
-using ExpressiveAnnotations.BooleanExpressionsAnalyser;
-using ExpressiveAnnotations.BooleanExpressionsAnalyser.LexicalAnalysis;
-using ExpressiveAnnotations.BooleanExpressionsAnalyser.SyntacticAnalysis;
+using ExpressiveAnnotations.BooleanExpressionAnalysis;
+using ExpressiveAnnotations.BooleanExpressionAnalysis.LexicalAnalysis;
+using ExpressiveAnnotations.BooleanExpressionAnalysis.SyntacticAnalysis;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ExpressiveAnnotations.Tests
@@ -64,14 +64,13 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is ArgumentException);
             }
-
         }
 
         [TestMethod]
-        public void Verify_rpn_lexer_logic()
+        public void Verify_postfix_lexer_logic()
         {
             const string expression = "true true && false ||";
-            var lexer = new RpnLexer();
+            var lexer = new PostfixLexer();
 
             var tokens = lexer.Analyze(expression, false);
             Assert.AreEqual(tokens.Length, 9);
@@ -115,14 +114,13 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_infix_to_rpn_conversion()
+        public void Verify_infix_to_postfix_conversion()
         {
-            var converter = new InfixToRpnConverter();
+            var converter = new InfixToPostfixConverter();
             Assert.AreEqual(converter.Convert("()"), "");
             Assert.AreEqual(converter.Convert("( true && (true) ) || false"), "true true && false ||");
-            Assert.AreEqual(
-                converter.Convert(
-                    "(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false"),
+            Assert.AreEqual(converter.Convert(
+                "(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false"),
                 "true true false true || || || true true false false true true true false || && && || || && && false && ||");
             Assert.AreEqual(converter.Convert("!!((!(!!true))) && true"), "true ! ! ! ! ! true &&");
 
@@ -164,9 +162,9 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_rpn_parser()
+        public void Verify_postfix_parser()
         {
-            var parser = new RpnParser();
+            var parser = new PostfixParser();
 
             Assert.IsTrue(parser.Evaluate("true"));
             Assert.IsFalse(parser.Evaluate("false"));
