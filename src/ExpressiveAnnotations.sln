@@ -11,6 +11,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvcWe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider", "ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.csproj", "{1926A95D-19EE-451B-9DA4-C3EAF555B15D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExpressiveAnnotations.Scripts", "ExpressiveAnnotations.Scripts", "{56496E2F-18D3-4633-90A5-082C83132B83}"
+	ProjectSection(SolutionItems) = preProject
+		expressive.annotations.analysis.js = expressive.annotations.analysis.js
+		expressive.annotations.validate.js = expressive.annotations.validate.js
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExpressiveAnnotations.Scripts.Tests", "ExpressiveAnnotations.Scripts.Tests", "{E294CF4D-9878-42D0-A825-2F54FA52B77E}"
+	ProjectSection(SolutionItems) = preProject
+		expressive.annotations.analysis.test.js = expressive.annotations.analysis.test.js
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

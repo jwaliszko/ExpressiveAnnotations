@@ -122,12 +122,11 @@ equivalent is:
     @if ("client".Equals(ViewBag.Validation))
     {
         @Scripts.Render("~/bundles/jqueryval")
-        @Scripts.Render("~/bundles/jqueryea")
+        @Scripts.Render("~/bundles/expressive")
     }
     
     <script>
         $(document).ready(function () {
-            $('.code').hide();
             $('.action').click(function () {
                 $(this).hide();
                 $(this).parent().find('.code').toggle('slow');

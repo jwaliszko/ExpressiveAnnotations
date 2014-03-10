@@ -14,8 +14,8 @@ namespace ExpressiveAnnotations.MvcWebSample
                         "~/Scripts/jquery.unobtrusive*",
                         "~/Scripts/jquery.validate*"));
 
-            bundles.Add(new ScriptBundle("~/bundles/jqueryea").Include(
-                        "~/Scripts/jquery.expressive.annotations-{version}.js"));
+            bundles.Add(new ScriptBundle("~/bundles/expressive").Include(
+                        "~/Scripts/expressive.annotations*"));
 
             bundles.Add(new ScriptBundle("~/bundles/site").Include(
                         "~/Scripts/site.js"));

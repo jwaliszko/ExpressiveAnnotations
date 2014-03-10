@@ -14,7 +14,10 @@ namespace ExpressiveAnnotations.MvcWebSample
     {
         protected void Application_Start()
         {
-            DataAnnotationsModelValidatorProvider.RegisterAdapter(typeof(RequiredIfAttribute), typeof(RequiredIfValidator));
+            DataAnnotationsModelValidatorProvider.RegisterAdapter(
+                typeof (RequiredIfAttribute), typeof (RequiredIfValidator));
+            DataAnnotationsModelValidatorProvider.RegisterAdapter(
+                typeof(RequiredIfExpressionAttribute), typeof(RequiredIfExpressionValidator));
 
             AreaRegistration.RegisterAllAreas();
 
