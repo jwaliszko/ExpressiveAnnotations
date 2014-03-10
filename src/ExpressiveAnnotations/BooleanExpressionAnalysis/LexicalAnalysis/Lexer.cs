@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ExpressiveAnnotations.BooleanExpressionsAnalyser.LexicalAnalysis
+namespace ExpressiveAnnotations.BooleanExpressionAnalysis.LexicalAnalysis
 {
     internal sealed class Lexer
     {
@@ -18,28 +18,25 @@ namespace ExpressiveAnnotations.BooleanExpressionsAnalyser.LexicalAnalysis
         public string[] Analyze(string expression, bool removeEmptyTokens)
         {
             _expression = expression;
-            var tokens = new Stack<string>();
+            var tokens = new List<string>();
             while (Next())
             {
-                tokens.Push(_token);
+                tokens.Add(_token);
             }
-            var result = tokens.Reverse().ToArray();
-            return removeEmptyTokens ? result.Where(t => (new RegexMatcher(@"\s")).Match(t) == 0).ToArray() : result;
+            return removeEmptyTokens ? tokens.Where(token => !Token.SPACE.Equals(token)).ToArray() : tokens.ToArray();
         }
 
         private bool Next()
         {
             if (string.IsNullOrEmpty(_expression))
-            {
                 return false;
-            }
 
             foreach (var def in _tokenDefinitions)
             {
                 var matched = def.Matcher.Match(_expression);
                 if (matched > 0)
                 {
-                    _token = _expression.Substring(0, matched);
+                    _token = def.Token;
                     _expression = _expression.Substring(matched);
                     return true;
                 }
