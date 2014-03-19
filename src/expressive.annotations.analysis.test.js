@@ -2,7 +2,7 @@
 
 test("Verify_infix_lexer_logic", function () {
     var expression = "( true && (true) ) || false";
-    var lexer = new InfixLexer();
+    var lexer = new BooleanExpressionsAnalyser.InfixLexer();
 
     var tokens = lexer.analyze(expression, false);
     equal(tokens.length, 15);
@@ -37,7 +37,7 @@ test("Verify_infix_lexer_logic", function () {
 
 test("Verify_postfix_lexer_logic", function () {
     var expression = "true true && false ||";
-    var lexer = new PostfixLexer();
+    var lexer = new BooleanExpressionsAnalyser.PostfixLexer();
 
     var tokens = lexer.analyze(expression, false);
     equal(tokens.length, 9);
@@ -61,7 +61,7 @@ test("Verify_postfix_lexer_logic", function () {
 });
 
 test("Verify_infix_to_postfix_conversion", function () {
-    var converter = new InfixToPostfixConverter();
+    var converter = new BooleanExpressionsAnalyser.InfixToPostfixConverter();
 
     equal(converter.convert("()"), "");
     equal(converter.convert("( true && (true) ) || false"), "true true && false ||");
@@ -72,7 +72,7 @@ test("Verify_infix_to_postfix_conversion", function () {
 });
 
 test("Verify_postfix_parser", function () {
-    var parser = new PostfixParser();    
+    var parser = new BooleanExpressionsAnalyser.PostfixParser();
     
     ok(parser.evaluate("true"));
     ok(!parser.evaluate("false"));
@@ -91,7 +91,7 @@ test("Verify_postfix_parser", function () {
 });
 
 test("Verify_complex_expression_evaluation", function () {
-    var evaluator = new Evaluator();
+    var evaluator = new BooleanExpressionsAnalyser.Evaluator();
 
     ok(evaluator.compute("(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false"));
     ok(evaluator.compute("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))"));

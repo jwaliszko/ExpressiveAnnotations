@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.validate.js
+﻿/* expressive.annotations.validate.js - v1.0.0
  * client side component of ExpresiveAnnotations - annotation-based conditional validation library
  * (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
  * license: http://www.opensource.org/licenses/mit-license.php */
@@ -78,8 +78,9 @@
             var result = ((dependentValue == targetValue) || (dependentValue != '' && targetValue == '*'));
             tokens.push(result.toString());
         }
-        var composedExpression = String.format(params.expression, tokens);
-        var evaluator = new Evaluator();
+
+        var composedExpression = BooleanExpressionsAnalyser.Utils.String.format(params.expression, tokens);
+        var evaluator = new BooleanExpressionsAnalyser.Evaluator();
         if (evaluator.compute(composedExpression))
             // match (condition fulfilled) => means we should try to validate this field (check if required value is provided)
             return value != null && value != '';
