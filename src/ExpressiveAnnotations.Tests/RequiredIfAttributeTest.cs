@@ -25,10 +25,10 @@ namespace ExpressiveAnnotations.Tests
             public string Email { get; set; }
 
             [RequiredIf(DependentProperty = "Email", TargetValue = "*")]
-            public string SecondEmail { get; set; }            
+            public string SecondEmail { get; set; }
 
             [RequiredIf(DependentProperty = "GoAbroad", TargetValue = true)]
-            public string PassportNumber { get; set; }            
+            public string PassportNumber { get; set; }
 
             [RequiredIf(DependentProperty = "Email", TargetValue = "jaroslaw.waliszko@gmail.com")]
             public string WhatToDoAboutInsomnia { get; set; }
@@ -46,13 +46,13 @@ namespace ExpressiveAnnotations.Tests
             var model = new Model {GoAbroad = false};
             Assert.IsTrue(model.IsValid(m => m.PassportNumber));
 
-            model = new Model { Email = "someone@fromsomewhere.com" };
+            model = new Model {Email = "someone@fromsomewhere.com"};
             Assert.IsTrue(model.IsValid(m => m.WhatToDoAboutInsomnia));
 
-            model = new Model { Email = "jaroslaw.waliszko@gmail.com", WhatToDoAboutInsomnia = "write a script" };
+            model = new Model {Email = "jaroslaw.waliszko@gmail.com", WhatToDoAboutInsomnia = "write a script"};
             Assert.IsTrue(model.IsValid(m => m.WhatToDoAboutInsomnia));
 
-            model = new Model { Email = "Jaroslaw.Waliszko@gmail.com", WhatToDoAboutInsomnia = "" };
+            model = new Model {Email = "Jaroslaw.Waliszko@gmail.com", WhatToDoAboutInsomnia = ""};
             Assert.IsTrue(model.IsValid(m => m.WhatToDoAboutInsomnia));
         }
 
@@ -62,16 +62,16 @@ namespace ExpressiveAnnotations.Tests
             var model = new Model {GoAbroad = true, PassportNumber = ""};
             Assert.IsFalse(model.IsValid(m => m.PassportNumber));
 
-            model = new Model { GoAbroad = true, PassportNumber = "   " };
+            model = new Model {GoAbroad = true, PassportNumber = "   "};
             Assert.IsFalse(model.IsValid(m => m.PassportNumber));
 
-            model = new Model { GoAbroad = true, PassportNumber = null };
+            model = new Model {GoAbroad = true, PassportNumber = null};
             Assert.IsFalse(model.IsValid(m => m.PassportNumber));
 
-            model = new Model { Email = "jaroslaw.waliszko@gmail.com", WhatToDoAboutInsomnia = "" };
-            Assert.IsFalse(model.IsValid(m => m.WhatToDoAboutInsomnia));            
+            model = new Model {Email = "jaroslaw.waliszko@gmail.com", WhatToDoAboutInsomnia = ""};
+            Assert.IsFalse(model.IsValid(m => m.WhatToDoAboutInsomnia));
 
-            model = new Model { Email = "   jaroslaw.waliszko@gmail.com   ", WhatToDoAboutInsomnia = "" };
+            model = new Model {Email = "   jaroslaw.waliszko@gmail.com   ", WhatToDoAboutInsomnia = ""};
             Assert.IsFalse(model.IsValid(m => m.WhatToDoAboutInsomnia));
         }
 
@@ -80,7 +80,7 @@ namespace ExpressiveAnnotations.Tests
         {
             var model = new Model
             {
-                Secret = new Model.SecretModel { KnowSomething = true },
+                Secret = new Model.SecretModel {KnowSomething = true},
                 WhatIsTheSecret = "the secret is..."
             };
             Assert.IsTrue(model.IsValid(m => m.WhatIsTheSecret));
@@ -88,7 +88,7 @@ namespace ExpressiveAnnotations.Tests
 
         [TestMethod]
         public void Verify_if_target_value_extraction_works()
-        {            
+        {
             var model = new Model
             {
                 StartDate = new DateTime(2014, 3, 22),

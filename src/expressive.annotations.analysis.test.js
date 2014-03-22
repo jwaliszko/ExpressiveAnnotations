@@ -2,7 +2,7 @@
 
 (function(global, analyser) { //scoping function (top-level, usually anonymous, function that prevents global namespace pollution)
 
-    global.module("verification");
+    global.module("expressive.annotations.analysis.test");
 
     test("Verify_infix_lexer_logic", function() {
         var expression = "( true && (true) ) || false";

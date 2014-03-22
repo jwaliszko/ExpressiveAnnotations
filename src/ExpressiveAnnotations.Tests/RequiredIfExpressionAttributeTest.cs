@@ -8,7 +8,7 @@ namespace ExpressiveAnnotations.Tests
     /// Tests basic stuff, just for the peace of mind. More detailed tests are done by expressions 
     /// testing and indirectly by RequiredIfAttribute tests (which uses exact common logic inside).
     /// </summary>
-    [TestClass]    
+    [TestClass]
     public class RequiredIExpressionfAttributeTest
     {
         private class Model
@@ -43,7 +43,7 @@ namespace ExpressiveAnnotations.Tests
         [TestMethod]
         public void Verify_if_required()
         {
-            var model = new Model { GoAbroad = true, Country = "Poland", NextCountry = "   poland   " };
+            var model = new Model {GoAbroad = true, Country = "Poland", NextCountry = "Poland"};
             Assert.IsFalse(model.IsValid(m => m.ReasonForTravel));
         }
     }

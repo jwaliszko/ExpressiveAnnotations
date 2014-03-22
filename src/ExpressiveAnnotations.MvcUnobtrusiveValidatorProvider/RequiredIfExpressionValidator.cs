@@ -11,7 +11,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
     {
         private readonly string _errorMessage;
         private readonly string[] _dependentProperties;
-        private readonly string[] _targetValues;
+        private readonly object[] _targetValues;
         private readonly string _expression;
 
         public RequiredIfExpressionValidator(ModelMetadata metadata, ControllerContext context, RequiredIfExpressionAttribute attribute)
@@ -22,12 +22,12 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 
             var count = attribute.DependentProperties.Count();
             _dependentProperties = new string[count];
-            _targetValues = new string[count];
+            _targetValues = new object[count];
 
             for (var i = 0; i < count; i++)
             {
                 _dependentProperties[i] = attribute.DependentProperties[i];
-                _targetValues[i] = (attribute.TargetValues[i] ?? string.Empty).ToString();
+                _targetValues[i] = attribute.TargetValues[i] ?? string.Empty;   // null returned as empty string at client side
             }
 
             _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName());
