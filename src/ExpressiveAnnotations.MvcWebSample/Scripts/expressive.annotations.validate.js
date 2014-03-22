@@ -1,9 +1,10 @@
 ﻿/* expressive.annotations.validate.js - v1.0.0
- * client side component of ExpresiveAnnotations - annotation-based conditional validation library
- * (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
- * license: http://www.opensource.org/licenses/mit-license.php */
+ * this script is a part of client side component of ExpresiveAnnotations - annotation-based conditional validation library
+ * copyright (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
+ * licensed MIT: http://www.opensource.org/licenses/mit-license.php */
 
-(function($) {
+(function ($) {
+
     var appendModelPrefix = function(val, pref) {
         return pref + val;
     };

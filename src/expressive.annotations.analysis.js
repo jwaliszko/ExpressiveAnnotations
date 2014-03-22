@@ -4,8 +4,8 @@
  *     var evaluator = new Evaluator();
  *     var result = evaluator.compute("(true) && (!false)")
  * this script is a part of client side component of ExpresiveAnnotations - annotation-based conditional validation library
- * (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
- * license: http://www.opensource.org/licenses/mit-license.php */
+ * copyright (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
+ * licensed MIT: http://www.opensource.org/licenses/mit-license.php */
 
 var BooleanExpressionsAnalyser = (function() {
 
@@ -211,7 +211,7 @@ var BooleanExpressionsAnalyser = (function() {
         var popCorrespondingUnaryOperators = function(operators, output) {
             var length = operators.length;
             for (var i = 0; i < length; i++) {
-                var top = operators[operators.length - 1]; //peek
+                var top = operators[operators.length - 1];  // peek
                 if (isUnaryOperator(top) && isPostfixOperator(top)) {
                     top = operators.pop();
                     output.push(top);

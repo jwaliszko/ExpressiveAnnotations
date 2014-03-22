@@ -36,6 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -50,6 +51,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Misc\ModelHelper.cs" />
+    <Compile Include="RequiredIfAttributeTest.cs" />
+    <Compile Include="RequiredIfExpressionAttributeTest.cs" />
     <Compile Include="BooleanExpressionsAnalyserUnitTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

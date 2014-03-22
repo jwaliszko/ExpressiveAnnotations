@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.Threading;
 using System.Web;
 
 namespace ExpressiveAnnotations.MvcWebSample.Misc

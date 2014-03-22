@@ -1,98 +1,104 @@
 ﻿///<reference path="./expressive.annotations.analysis.js"/>
 
-test("Verify_infix_lexer_logic", function () {
-    var expression = "( true && (true) ) || false";
-    var lexer = new BooleanExpressionsAnalyser.InfixLexer();
+(function(global, analyser) { //scoping function (top-level, usually anonymous, function that prevents global namespace pollution)
 
-    var tokens = lexer.analyze(expression, false);
-    equal(tokens.length, 15);
-    equal(tokens[0], "(");
-    equal(tokens[1], " ");
-    equal(tokens[2], "true");
-    equal(tokens[3], " ");
-    equal(tokens[4], "&&");
-    equal(tokens[5], " ");
-    equal(tokens[6], "(");
-    equal(tokens[7], "true");
-    equal(tokens[8], ")");
-    equal(tokens[9], " ");
-    equal(tokens[10], ")");
-    equal(tokens[11], " ");
-    equal(tokens[12], "||");
-    equal(tokens[13], " ");
-    equal(tokens[14], "false");
+    global.module("verification");
 
-    tokens = lexer.analyze(expression, true);
-    equal(tokens.length, 9);
-    equal(tokens[0], "(");
-    equal(tokens[1], "true");
-    equal(tokens[2], "&&");
-    equal(tokens[3], "(");
-    equal(tokens[4], "true");
-    equal(tokens[5], ")");
-    equal(tokens[6], ")");
-    equal(tokens[7], "||");
-    equal(tokens[8], "false");
-});
+    test("Verify_infix_lexer_logic", function() {
+        var expression = "( true && (true) ) || false";
+        var lexer = new analyser.InfixLexer();
 
-test("Verify_postfix_lexer_logic", function () {
-    var expression = "true true && false ||";
-    var lexer = new BooleanExpressionsAnalyser.PostfixLexer();
+        var tokens = lexer.analyze(expression, false);
+        global.equal(tokens.length, 15);
+        global.equal(tokens[0], "(");
+        global.equal(tokens[1], " ");
+        global.equal(tokens[2], "true");
+        global.equal(tokens[3], " ");
+        global.equal(tokens[4], "&&");
+        global.equal(tokens[5], " ");
+        global.equal(tokens[6], "(");
+        global.equal(tokens[7], "true");
+        global.equal(tokens[8], ")");
+        global.equal(tokens[9], " ");
+        global.equal(tokens[10], ")");
+        global.equal(tokens[11], " ");
+        global.equal(tokens[12], "||");
+        global.equal(tokens[13], " ");
+        global.equal(tokens[14], "false");
 
-    var tokens = lexer.analyze(expression, false);
-    equal(tokens.length, 9);
-    equal(tokens[0], "true");
-    equal(tokens[1], " ");
-    equal(tokens[2], "true");
-    equal(tokens[3], " ");
-    equal(tokens[4], "&&");
-    equal(tokens[5], " ");
-    equal(tokens[6], "false");
-    equal(tokens[7], " ");
-    equal(tokens[8], "||");
+        tokens = lexer.analyze(expression, true);
+        global.equal(tokens.length, 9);
+        global.equal(tokens[0], "(");
+        global.equal(tokens[1], "true");
+        global.equal(tokens[2], "&&");
+        global.equal(tokens[3], "(");
+        global.equal(tokens[4], "true");
+        global.equal(tokens[5], ")");
+        global.equal(tokens[6], ")");
+        global.equal(tokens[7], "||");
+        global.equal(tokens[8], "false");
+    });
 
-    tokens = lexer.analyze(expression, true);
-    equal(tokens.length, 5);
-    equal(tokens[0], "true");
-    equal(tokens[1], "true");
-    equal(tokens[2], "&&");
-    equal(tokens[3], "false");
-    equal(tokens[4], "||");
-});
+    test("Verify_postfix_lexer_logic", function() {
+        var expression = "true true && false ||";
+        var lexer = new analyser.PostfixLexer();
 
-test("Verify_infix_to_postfix_conversion", function () {
-    var converter = new BooleanExpressionsAnalyser.InfixToPostfixConverter();
+        var tokens = lexer.analyze(expression, false);
+        global.equal(tokens.length, 9);
+        global.equal(tokens[0], "true");
+        global.equal(tokens[1], " ");
+        global.equal(tokens[2], "true");
+        global.equal(tokens[3], " ");
+        global.equal(tokens[4], "&&");
+        global.equal(tokens[5], " ");
+        global.equal(tokens[6], "false");
+        global.equal(tokens[7], " ");
+        global.equal(tokens[8], "||");
 
-    equal(converter.convert("()"), "");
-    equal(converter.convert("( true && (true) ) || false"), "true true && false ||");
-    equal(converter.convert(
-        "(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false"),
-        "true true false true || || || true true false false true true true false || && && || || && && false && ||");
-    equal(converter.convert("!!((!(!!true))) && true"), "true ! ! ! ! ! true &&");
-});
+        tokens = lexer.analyze(expression, true);
+        global.equal(tokens.length, 5);
+        global.equal(tokens[0], "true");
+        global.equal(tokens[1], "true");
+        global.equal(tokens[2], "&&");
+        global.equal(tokens[3], "false");
+        global.equal(tokens[4], "||");
+    });
 
-test("Verify_postfix_parser", function () {
-    var parser = new BooleanExpressionsAnalyser.PostfixParser();
-    
-    ok(parser.evaluate("true"));
-    ok(!parser.evaluate("false"));
+    test("Verify_infix_to_postfix_conversion", function() {
+        var converter = new analyser.InfixToPostfixConverter();
 
-    ok(parser.evaluate("true true &&"));
-    ok(!parser.evaluate("true false &&"));
-    ok(!parser.evaluate("false true &&"));
-    ok(!parser.evaluate("false false &&"));
+        global.equal(converter.convert("()"), "");
+        global.equal(converter.convert("( true && (true) ) || false"), "true true && false ||");
+        global.equal(converter.convert(
+                "(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false"),
+            "true true false true || || || true true false false true true true false || && && || || && && false && ||");
+        global.equal(converter.convert("!!((!(!!true))) && true"), "true ! ! ! ! ! true &&");
+    });
 
-    ok(parser.evaluate("true true ||"));
-    ok(parser.evaluate("true false ||"));
-    ok(parser.evaluate("false true ||"));
-    ok(!parser.evaluate("false false ||"));
+    test("Verify_postfix_parser", function() {
+        var parser = new analyser.PostfixParser();
 
-    ok(parser.evaluate("true true false true || || || true true false false true true true false || && && || || && && false && ||"));
-});
+        global.ok(parser.evaluate("true"));
+        global.ok(!parser.evaluate("false"));
 
-test("Verify_complex_expression_evaluation", function () {
-    var evaluator = new BooleanExpressionsAnalyser.Evaluator();
+        global.ok(parser.evaluate("true true &&"));
+        global.ok(!parser.evaluate("true false &&"));
+        global.ok(!parser.evaluate("false true &&"));
+        global.ok(!parser.evaluate("false false &&"));
 
-    ok(evaluator.compute("(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false"));
-    ok(evaluator.compute("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))"));
-});
+        global.ok(parser.evaluate("true true ||"));
+        global.ok(parser.evaluate("true false ||"));
+        global.ok(parser.evaluate("false true ||"));
+        global.ok(!parser.evaluate("false false ||"));
+
+        global.ok(parser.evaluate("true true false true || || || true true false false true true true false || && && || || && && false && ||"));
+    });
+
+    test("Verify_complex_expression_evaluation", function() {
+        var evaluator = new analyser.Evaluator();
+
+        global.ok(evaluator.compute("(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false"));
+        global.ok(evaluator.compute("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))"));
+    });
+
+}(window, BooleanExpressionsAnalyser));

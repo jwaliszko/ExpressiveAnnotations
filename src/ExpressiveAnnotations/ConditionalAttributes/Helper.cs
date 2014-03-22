@@ -26,16 +26,19 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         internal static bool Compare(object dependentValue, object targetValue)
         {
             dependentValue = dependentValue is string && string.IsNullOrEmpty((string) dependentValue)
-                                 ? null
-                                 : dependentValue;
+                ? null
+                : dependentValue;
             targetValue = targetValue is string && string.IsNullOrEmpty((string) targetValue)
-                              ? null
-                              : targetValue;
+                ? null
+                : targetValue;
 
-            return Equals(dependentValue, targetValue) ||
-                   (dependentValue != null
-                    && targetValue is string
-                    && targetValue.ToString().Equals("*", StringComparison.OrdinalIgnoreCase));
+            return Equals(dependentValue, targetValue)
+                   || (dependentValue is string
+                       && targetValue is string
+                       && string.Equals(((string) dependentValue).Trim(), ((string) targetValue).Trim()))
+                   || (dependentValue != null
+                       && targetValue is string
+                       && string.Equals((string) targetValue, "*"));
         }
 
         internal static PropertyInfo ExtractProperty(object source, string property)

@@ -43,6 +43,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 
         [Display(ResourceType = typeof(Resources), Name = "Country")]
         public string Country { get; set; }
+
         [Display(ResourceType = typeof(Resources), Name = "NextCountry")]
         public string NextCountry { get; set; }
 

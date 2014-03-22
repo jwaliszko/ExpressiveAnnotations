@@ -94,7 +94,7 @@ Sample `{0} || !{1}` expression evaluation steps:
 
 ###What is the context behind this implementation? 
 
-Simplicity. Declarative validation is more convenient. Cleaner and more compacted code goes hand in hand with it.
+Declarative validation is simply more convenient in many cases. Cleaner and more compacted code goes hand in hand with it, because all validation logic can be defined within the model metadata.
 
 ###What is the difference between declarative and imperative programming?
 
@@ -136,10 +136,10 @@ If we choose this way instead of model fields decoration, it has negative impact
 
 ###What about the support of ASP.NET MVC client side validation?
 
-Client side validation is fully supported. Enable it for your web project within the next few steps:
+Client side validation is **fully supported**. Enable it for your web project within the next few steps:
 
 1. Add [**ExpressiveAnnotations.dll**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations) and [**ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider) reference libraries to your projest,
-2. In `Global.asax` register required validators:
+2. In `Global.asax` register required validators (`IClientValidatable` interface is not directly implemented by the attribute, to avoid coupling of `ExpressionAnnotations` assembly with `System.Web.Mvc` dependency):
 
  ```    
     protected void Application_Start()
