@@ -158,3 +158,7 @@ Client side validation is **fully supported**. Enable it for your web project wi
     <script src="/Scripts/expressive.annotations.analysis.js"></script>
     <script src="/Scripts/expressive.annotations.validate.js"></script>
 ```
+
+Alternatively, using the NuGet Package Manager Console:
+
+###`PM> Install-Package ExpressiveAnnotations`
