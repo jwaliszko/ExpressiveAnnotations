@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.analysis.js - v1.1.0
+﻿/* expressive.annotations.analysis.js - v1.1.1
  * script responsible for logical expressions parsing and computation 
  * e.g. suppose there is "(true) && (!false)" expression given, and we need to know its final logical value:
  *     var evaluator = new Evaluator();
@@ -11,12 +11,6 @@ var BooleanExpressionsAnalyser = (function() {
 
     var Utils = {
         Array: {
-            sanatize: function(arr, item) {
-                for (var i = arr.length; i--;) {
-                    if (arr[i] === item)
-                        arr.splice(i, 1);
-                }
-            },
             contains: function(arr, item) {
                 var i = arr.length;
                 while (i--) {
@@ -24,17 +18,25 @@ var BooleanExpressionsAnalyser = (function() {
                         return true;
                 }
                 return false;
+            },
+            sanatize: function(arr, item) {
+                for (var i = arr.length; i--;) {
+                    if (arr[i] === item)
+                        arr.splice(i, 1);
+                }
             }
         },
         String: {
             format: function(text, params) {
-                if (typeof params === 'string') {
-                    text = text.replace('{0}', params);
+                var i;
+                if (params instanceof Array) {
+                    for (i = 0; i < params.length; i++) {
+                        text = text.replace(new RegExp('\\{' + i + '\\}', 'gm'), params[i]);
+                    }
                     return text;
                 }
-                var length = params.length;
-                for (var i = 0; i < length; i++) {
-                    text = text.replace('{' + i + '}', params[i]);
+                for (i = 0; i < arguments.length - 1; i++) {
+                    text = text.replace(new RegExp('\\{' + i + '\\}', 'gm'), arguments[i + 1]);
                 }
                 return text;
             }

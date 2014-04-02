@@ -101,4 +101,25 @@
         global.ok(evaluator.compute("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))"));
     });
 
+    test("Verify_utils", function() {        
+        global.ok(analyser.Utils.Array.contains(["a"], "a"));
+        global.ok(analyser.Utils.Array.contains(["a", "b"], "a"));
+        global.ok(analyser.Utils.Array.contains(["a", "b"], "b"));
+        global.ok(!analyser.Utils.Array.contains(["a", "b"], "c"));
+
+        global.ok(!analyser.Utils.Array.sanatize(["a"], ["a"]));
+        global.ok(!analyser.Utils.Array.sanatize(["a", "a"], ["a"]));
+        global.ok(!analyser.Utils.Array.sanatize(["a", "b"], ["a", "b"]));
+        global.ok(!analyser.Utils.Array.sanatize(["a", "b", "c", "a", "b"], ["a", "b", "c"]));
+
+        global.ok("a" == analyser.Utils.String.format("{0}", "a"));
+        global.ok("ab" == analyser.Utils.String.format("{0}{1}", "a", "b"));
+        global.ok("aa" == analyser.Utils.String.format("{0}{0}", "a", "b"));
+        global.ok("aa" == analyser.Utils.String.format("{0}{0}", "a"));
+        global.ok("a" == analyser.Utils.String.format("{0}", ["a"]));
+        global.ok("ab" == analyser.Utils.String.format("{0}{1}", ["a", "b"]));
+        global.ok("aa" == analyser.Utils.String.format("{0}{0}", ["a", "b"]));
+        global.ok("aa" == analyser.Utils.String.format("{0}{0}", ["a"]));
+    });
+
 }(window, BooleanExpressionsAnalyser));
