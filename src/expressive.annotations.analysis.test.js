@@ -3,6 +3,7 @@
 (function(global, analyser) { //scoping function (top-level, usually anonymous, function that prevents global namespace pollution)
 
     global.module("expressive.annotations.analysis.test");
+    //debugger; //enable firebug for all web pages
 
     test("Verify_infix_lexer_logic", function() {
         var expression = "( true && (true) ) || false";
@@ -101,21 +102,37 @@
         global.ok(evaluator.compute("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))"));
     });
 
-    test("Verify_utils", function() {        
+    test("Verify_utils_array_contains", function () {
         global.ok(analyser.Utils.Array.contains(["a"], "a"));
         global.ok(analyser.Utils.Array.contains(["a", "b"], "a"));
         global.ok(analyser.Utils.Array.contains(["a", "b"], "b"));
         global.ok(!analyser.Utils.Array.contains(["a", "b"], "c"));
+    });
 
-        global.ok(!analyser.Utils.Array.sanatize(["a"], ["a"]));
-        global.ok(!analyser.Utils.Array.sanatize(["a", "a"], ["a"]));
-        global.ok(!analyser.Utils.Array.sanatize(["a", "b"], ["a", "b"]));
-        global.ok(!analyser.Utils.Array.sanatize(["a", "b", "c", "a", "b"], ["a", "b", "c"]));
+    test("Verify_utils_array_sanatize", function () {
+        var array = ["a"];
+        analyser.Utils.Array.sanatize(["a"], "");
+        global.deepEqual(["a"], array);
 
+        array = ["a", "a"];
+        analyser.Utils.Array.sanatize(array, "a");
+        global.deepEqual([], array);
+
+        array = ["a", "b"];
+        analyser.Utils.Array.sanatize(array, "");
+        global.deepEqual(["a", "b"], array);
+
+        array = ["a", "b", "c", "a", "b"];
+        analyser.Utils.Array.sanatize(array, "b");
+        global.deepEqual(["a", "c", "a"], array);
+    });
+
+    test("Verify_utils_string_format", function () {
         global.ok("a" == analyser.Utils.String.format("{0}", "a"));
         global.ok("ab" == analyser.Utils.String.format("{0}{1}", "a", "b"));
         global.ok("aa" == analyser.Utils.String.format("{0}{0}", "a", "b"));
         global.ok("aa" == analyser.Utils.String.format("{0}{0}", "a"));
+
         global.ok("a" == analyser.Utils.String.format("{0}", ["a"]));
         global.ok("ab" == analyser.Utils.String.format("{0}{1}", ["a", "b"]));
         global.ok("aa" == analyser.Utils.String.format("{0}{0}", ["a", "b"]));
