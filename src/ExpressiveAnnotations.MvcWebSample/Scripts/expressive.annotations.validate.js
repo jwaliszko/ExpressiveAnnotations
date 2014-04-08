@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.validate.js - v1.1.0
+﻿/* expressive.annotations.validate.js - v1.1.1
  * this script is a part of client side component of ExpresiveAnnotations - annotation-based conditional validation library
  * copyright (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
  * licensed MIT: http://www.opensource.org/licenses/mit-license.php */
@@ -15,9 +15,20 @@
     };
 
     var Helper = {
-        extractValue: function(form, dependentProperty, prefix) {
-            var dependentField = $(form).find(':input[name="' + ModelPrefix.append(dependentProperty, prefix) + '"]')[0];
-            var dependentValue = $(dependentField).is(':checkbox') ? $(dependentField).is(':checked') : $(dependentField).val();
+        extractValue: function (form, dependentProperty, prefix) {
+            function getFieldValue(field) {
+                var type = $(field).attr('type');
+                switch (type) {
+                    case 'checkbox':
+                        return $(field).is(':checked');
+                    case 'radio':
+                        return $(field).filter(':checked').val();
+                    default:
+                        return $(field).val();
+                }
+            }
+            var dependentField = $(form).find(':input[name="' + ModelPrefix.append(dependentProperty, prefix) + '"]');
+            var dependentValue = getFieldValue(dependentField);
             return dependentValue;
         },
         fetchTargetValue: function(form, targetValue, prefix) {
@@ -25,16 +36,21 @@
                 var patt = new RegExp('\\[(.+)\\]');
                 if (patt.test(targetValue)) {
                     var targetProperty = targetValue.substring(1, targetValue.length - 1);
-                    targetValue = $($(form).find(':input[name="' + ModelPrefix.append(targetProperty, prefix) + '"]')[0]).val();
+                    targetValue = $(form).find(':input[name="' + ModelPrefix.append(targetProperty, prefix) + '"]').val();
                 }
             }
             return targetValue;
         },
-        compare: function(dependentValue, targetValue) {
-            if (typeof dependentValue == 'string' || dependentValue instanceof String)
-                dependentValue = dependentValue.trim();
-            if (typeof targetValue == 'string' || targetValue instanceof String)
-                targetValue = targetValue.trim();
+        compare: function (dependentValue, targetValue) {
+            var boolResult;
+            if (typeof dependentValue == 'string' || dependentValue instanceof String) {
+                boolResult = analyser.Utils.Bool.tryParse(dependentValue);
+                dependentValue = boolResult.error ? dependentValue.trim() : boolResult;
+            }
+            if (typeof targetValue == 'string' || targetValue instanceof String) {
+                boolResult = analyser.Utils.Bool.tryParse(targetValue);
+                targetValue = boolResult.error ? targetValue.trim() : boolResult;
+            }
             return (dependentValue == targetValue) || (dependentValue != '' && targetValue == '*');
         }
     };
@@ -67,9 +83,12 @@
     $.validator.addMethod('requiredif', function(value, element, params) {
         var dependentValue = Helper.extractValue(params.form, params.dependentproperty, params.prefix);
         var targetValue = Helper.fetchTargetValue(params.form, params.targetvalue, params.prefix);
-        if (Helper.compare(dependentValue, targetValue))
+        if (Helper.compare(dependentValue, targetValue)) {
             // match (condition fulfilled) => means we should try to validate this field (check if required value is provided)            
-            return value != null && value != '' && value != 'undefined';
+            var boolValue = analyser.Utils.Bool.tryParse(value);
+            if (!(value != null && value != '' && value != 'undefined') || (!boolValue.error && !boolValue))
+                return false;
+        }
         return true;
     }, '');
 
@@ -85,9 +104,12 @@
 
         var composedExpression = analyser.Utils.String.format(params.expression, tokens);
         var evaluator = new analyser.Evaluator();
-        if (evaluator.compute(composedExpression))
+        if (evaluator.compute(composedExpression)) {
             // match (condition fulfilled) => means we should try to validate this field (check if required value is provided)
-            return value != null && value != '' && value != 'undefined';
+            var boolValue = analyser.Utils.Bool.tryParse(value);
+            if (!(value != null && value != '' && value != 'undefined') || (!boolValue.error && !boolValue))
+                return false;
+        }
         return true;
     }, '');
 

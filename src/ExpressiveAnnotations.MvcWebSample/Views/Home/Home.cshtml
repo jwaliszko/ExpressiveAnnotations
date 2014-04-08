@@ -1,4 +1,5 @@
-﻿@model ExpressiveAnnotations.MvcWebSample.Models.Query
+﻿@using ExpressiveAnnotations.MvcWebSample
+@model ExpressiveAnnotations.MvcWebSample.Models.Query
 
 <div class="box">
     <div class="left-corner">
@@ -72,9 +73,12 @@
                 @Html.ValidationMessageFor(model => model.ReasonForTravel)
             </li>
             <li>
-                @Html.LabelFor(model => model.SportType, new {@class = "inline prefix"})
-                @Html.DropDownListFor(x => x.SportType, new SelectList(Model.Sports, "Value", "Text"))
-                @Html.ValidationMessageFor(model => model.SportType)
+                @Html.LabelFor(model => model.SportType)
+                @foreach (var item in Model.Sports)
+                {
+                    @Html.RadioButtonFor(m => m.SportType, item.Value) <label class="inline">@item.Text</label>
+                }
+                @Html.ValidationMessageFor(model => model.SportType)                
             </li>
             <li>
                 <pre class="code">
@@ -109,9 +113,9 @@ equivalent is:
     ErrorMessage = "You have to authorize us to make contact.")]
 </pre>
                 <pre class="action">[show attribute]</pre>
-                @Html.EditorFor(model => model.AgreeToContact)
-                @Html.LabelFor(model => model.AgreeToContact, new {@class = "inline"})
-                @Html.ValidationMessageFor(model => model.AgreeToContact)
+                @Html.RadioButtonFor(model => model.AgreeForContact, true) <label class="inline">@Resources.SpamAllowed</label>
+                @Html.RadioButtonFor(model => model.AgreeForContact, false) <label class="inline">@Resources.SpamForbidden</label>
+                @Html.ValidationMessageFor(model => model.AgreeForContact)
             </li>
         </ol>
         <input type="submit" />

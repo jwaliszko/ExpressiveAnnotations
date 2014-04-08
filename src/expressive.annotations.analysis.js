@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.analysis.js - v1.1.1
+﻿/* expressive.annotations.analysis.js - v1.1.2
  * script responsible for logical expressions parsing and computation 
  * e.g. suppose there is "(true) && (!false)" expression given, and we need to know its final logical value:
  *     var evaluator = new Evaluator();
@@ -39,6 +39,18 @@ var BooleanExpressionsAnalyser = (function() {
                     text = text.replace(new RegExp('\\{' + i + '\\}', 'gm'), arguments[i + 1]);
                 }
                 return text;
+            }
+        },
+        Bool: {
+            tryParse: function (value) {
+                if (typeof value == 'boolean' || value instanceof Boolean)
+                    return value;
+                if (typeof value == 'string' || value instanceof String) {
+                    value = value.trim().toLowerCase();
+                    if (value === 'true' || value === 'false')
+                        return value === 'true';
+                }
+                return { error: true, msg: 'Parsing error. Given value has no boolean meaning.' }
             }
         }
     };

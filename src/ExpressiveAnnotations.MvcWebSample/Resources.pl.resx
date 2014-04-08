@@ -117,10 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AgreeToContact" xml:space="preserve">
+  <data name="AgreeForContact" xml:space="preserve">
     <value>Zgoda na kontakt</value>
   </data>
-  <data name="AgreeToContactRequired" xml:space="preserve">
+  <data name="AgreeForContactRequired" xml:space="preserve">
     <value>Twoja zgoda jest wymagana w celu nawiązania kontaktu.</value>
   </data>
   <data name="BloodType" xml:space="preserve">
@@ -179,6 +179,12 @@
   </data>
   <data name="ReasonForTravelRequired" xml:space="preserve">
     <value>Jeśli planujesz wyjazdy za granicę, dlaczego chcesz odwiedzić ten sam kraj dwukrotnie?</value>
+  </data>
+  <data name="SpamAllowed" xml:space="preserve">
+    <value>Zgadzam się na otrzymywanie informacji</value>
+  </data>
+  <data name="SpamForbidden" xml:space="preserve">
+    <value>Nie zgadzam sie na otrzymywanie informacji</value>
   </data>
   <data name="SportType" xml:space="preserve">
     <value>Rodzaj sportu</value>

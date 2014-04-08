@@ -61,20 +61,20 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Agree to contact.
+        ///   Looks up a localized string similar to Agree for contact.
         /// </summary>
-        public static string AgreeToContact {
+        public static string AgreeForContact {
             get {
-                return ResourceManager.GetString("AgreeToContact", resourceCulture);
+                return ResourceManager.GetString("AgreeForContact", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You have to authorize us to make contact..
+        ///   Looks up a localized string similar to You have to authorize us to contact you..
         /// </summary>
-        public static string AgreeToContactRequired {
+        public static string AgreeForContactRequired {
             get {
-                return ResourceManager.GetString("AgreeToContactRequired", resourceCulture);
+                return ResourceManager.GetString("AgreeForContactRequired", resourceCulture);
             }
         }
         
@@ -246,6 +246,24 @@ namespace ExpressiveAnnotations.MvcWebSample {
         public static string ReasonForTravelRequired {
             get {
                 return ResourceManager.GetString("ReasonForTravelRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to I agree for contact.
+        /// </summary>
+        public static string SpamAllowed {
+            get {
+                return ResourceManager.GetString("SpamAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to I don&apos;t agree for contact.
+        /// </summary>
+        public static string SpamForbidden {
+            get {
+                return ResourceManager.GetString("SpamForbidden", resourceCulture);
             }
         }
         

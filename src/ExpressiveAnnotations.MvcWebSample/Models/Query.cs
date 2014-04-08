@@ -70,9 +70,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             Expression = "{0} || {1}",
             DependentProperties = new[] { "ContactDetails.Email", "ContactDetails.Phone" },   /* nested properties are supported */
             TargetValues = new object[] { "*", "*" }, /* any values */
-            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "AgreeToContactRequired")]
-        [Display(ResourceType = typeof(Resources), Name = "AgreeToContact")]        
-        public bool AgreeToContact { get; set; }
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "AgreeForContactRequired")]
+        [Display(ResourceType = typeof(Resources), Name = "AgreeForContact")]        
+        public bool AgreeForContact { get; set; }
 
         public Contact ContactDetails { get; set; }
     }
