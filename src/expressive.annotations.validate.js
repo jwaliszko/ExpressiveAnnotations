@@ -16,8 +16,14 @@
 
     var Helper = {
         extractValue: function(form, dependentProperty, prefix) {
-            var dependentField = $(form).find(':input[name="' + ModelPrefix.append(dependentProperty, prefix) + '"]')[0];
-            var dependentValue = $(dependentField).is(':checkbox') ? $(dependentField).is(':checked') : $(dependentField).val();
+            var dependentField = $(form).find(':input[name="' + ModelPrefix.append(dependentProperty, prefix) + '"]');
+            var dependentValue = $(dependentField).val();
+            if (dependentField.is(":radio")) {
+                dependentValue = dependentField.filter(":checked").val();
+            }
+            else if (dependentField.is(":checkbox")) {
+                dependentValue = dependentField.is(':checked');
+            }
             return dependentValue;
         },
         fetchTargetValue: function(form, targetValue, prefix) {
@@ -31,10 +37,16 @@
             return targetValue;
         },
         compare: function(dependentValue, targetValue) {
-            if (typeof dependentValue == 'string' || dependentValue instanceof String)
+            if (typeof dependentValue == 'string' || dependentValue instanceof String) {
                 dependentValue = dependentValue.trim();
-            if (typeof targetValue == 'string' || targetValue instanceof String)
+                if (dependentValue.toLowerCase() === "true")
+                    dependentValue = true;
+                else if (dependentValue.toLowerCase() === "false")
+                    dependentValue = false;
+            }
+            if (typeof targetValue == 'string' || targetValue instanceof String) {
                 targetValue = targetValue.trim();
+            }
             return (dependentValue == targetValue) || (dependentValue != '' && targetValue == '*');
         }
     };
