@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.analysis.js - v1.1.2
+﻿/* expressive.annotations.analysis.js - v1.1.3
  * script responsible for logical expressions parsing and computation 
  * e.g. suppose there is "(true) && (!false)" expression given, and we need to know its final logical value:
  *     var evaluator = new Evaluator();
@@ -43,9 +43,9 @@ var BooleanExpressionsAnalyser = (function() {
         },
         Bool: {
             tryParse: function (value) {
-                if (typeof value == 'boolean' || value instanceof Boolean)
+                if (typeof value === 'boolean' || value instanceof Boolean)
                     return value;
-                if (typeof value == 'string' || value instanceof String) {
+                if (typeof value === 'string' || value instanceof String) {
                     value = value.trim().toLowerCase();
                     if (value === 'true' || value === 'false')
                         return value === 'true';
@@ -101,7 +101,7 @@ var BooleanExpressionsAnalyser = (function() {
         };
 
         var next = function() {
-            if (_expression == '')
+            if (_expression === '')
                 return false;
 
             var length = _tokenDefinitions.length;
@@ -170,11 +170,11 @@ var BooleanExpressionsAnalyser = (function() {
         };
 
         var isLeftBracket = function(token) {
-            return Token.LEFT == token;
+            return Token.LEFT === token;
         };
 
         var isRightBracket = function(token) {
-            return Token.RIGHT == token;
+            return Token.RIGHT === token;
         };
 
         var containsLeftBracket = function(st) {
@@ -258,11 +258,11 @@ var BooleanExpressionsAnalyser = (function() {
         var evaluate = function(st) {
             var top = st.pop();
 
-            if ('true' == top || 'false' == top)
-                return top == 'true';
+            if ('true' === top || 'false' === top)
+                return top === 'true';
 
             var y = evaluate(st);
-            if (top == Token.NOT)
+            if (top === Token.NOT)
                 return !y;
 
             var x = evaluate(st);

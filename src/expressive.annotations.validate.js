@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.validate.js - v1.1.1
+﻿/* expressive.annotations.validate.js - v1.1.2
  * this script is a part of client side component of ExpresiveAnnotations - annotation-based conditional validation library
  * copyright (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
  * licensed MIT: http://www.opensource.org/licenses/mit-license.php */
@@ -32,7 +32,7 @@
             return dependentValue;
         },
         fetchTargetValue: function(form, targetValue, prefix) {
-            if (typeof targetValue == 'string' || targetValue instanceof String) {
+            if (typeof targetValue === 'string' || targetValue instanceof String) {
                 var patt = new RegExp('\\[(.+)\\]');
                 if (patt.test(targetValue)) {
                     var targetProperty = targetValue.substring(1, targetValue.length - 1);
@@ -43,15 +43,15 @@
         },
         compare: function (dependentValue, targetValue) {
             var boolResult;
-            if (typeof dependentValue == 'string' || dependentValue instanceof String) {
+            if (typeof dependentValue === 'string' || dependentValue instanceof String) {
                 boolResult = analyser.Utils.Bool.tryParse(dependentValue);
                 dependentValue = boolResult.error ? dependentValue.trim() : boolResult;
             }
-            if (typeof targetValue == 'string' || targetValue instanceof String) {
+            if (typeof targetValue === 'string' || targetValue instanceof String) {
                 boolResult = analyser.Utils.Bool.tryParse(targetValue);
                 targetValue = boolResult.error ? targetValue.trim() : boolResult;
             }
-            return (dependentValue == targetValue) || (dependentValue != '' && targetValue == '*');
+            return (dependentValue === targetValue) || (dependentValue !== '' && targetValue === '*');
         }
     };
 
@@ -86,7 +86,7 @@
         if (Helper.compare(dependentValue, targetValue)) {
             // match (condition fulfilled) => means we should try to validate this field (check if required value is provided)            
             var boolValue = analyser.Utils.Bool.tryParse(value);
-            if (!(value != null && value != '' && value != 'undefined') || (!boolValue.error && !boolValue))
+            if (!(value !== null && value !== '' && value !== 'undefined') || (!boolValue.error && !boolValue))
                 return false;
         }
         return true;
@@ -107,7 +107,7 @@
         if (evaluator.compute(composedExpression)) {
             // match (condition fulfilled) => means we should try to validate this field (check if required value is provided)
             var boolValue = analyser.Utils.Bool.tryParse(value);
-            if (!(value != null && value != '' && value != 'undefined') || (!boolValue.error && !boolValue))
+            if (!(value !== null && value !== '' && value !== 'undefined') || (!boolValue.error && !boolValue))
                 return false;
         }
         return true;
