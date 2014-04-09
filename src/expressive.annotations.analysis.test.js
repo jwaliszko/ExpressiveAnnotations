@@ -128,15 +128,28 @@
     });
 
     test("Verify_utils_string_format", function () {
-        global.ok("a" == analyser.Utils.String.format("{0}", "a"));
-        global.ok("ab" == analyser.Utils.String.format("{0}{1}", "a", "b"));
-        global.ok("aa" == analyser.Utils.String.format("{0}{0}", "a", "b"));
-        global.ok("aa" == analyser.Utils.String.format("{0}{0}", "a"));
+        global.equal(analyser.Utils.String.format("{0}", "a"), "a");
+        global.equal(analyser.Utils.String.format("{0}{1}", "a", "b"), "ab");
+        global.equal(analyser.Utils.String.format("{0}{0}", "a", "b"), "aa");
+        global.equal(analyser.Utils.String.format("{0}{0}", "a"), "aa");
 
-        global.ok("a" == analyser.Utils.String.format("{0}", ["a"]));
-        global.ok("ab" == analyser.Utils.String.format("{0}{1}", ["a", "b"]));
-        global.ok("aa" == analyser.Utils.String.format("{0}{0}", ["a", "b"]));
-        global.ok("aa" == analyser.Utils.String.format("{0}{0}", ["a"]));
+        global.equal(analyser.Utils.String.format("{0}", ["a"]), "a");
+        global.equal(analyser.Utils.String.format("{0}{1}", ["a", "b"]), "ab");
+        global.equal(analyser.Utils.String.format("{0}{0}", ["a", "b"]), "aa");
+        global.equal(analyser.Utils.String.format("{0}{0}", ["a"]), "aa");
+    });
+
+    test("Verify_utils_bool_tryparse", function () {
+        global.equal(analyser.Utils.Bool.tryParse(false), false);
+        global.equal(analyser.Utils.Bool.tryParse("false"), false);
+        global.equal(analyser.Utils.Bool.tryParse("False"), false);
+        global.equal(analyser.Utils.Bool.tryParse(true), true);
+        global.equal(analyser.Utils.Bool.tryParse("true"), true);
+        global.equal(analyser.Utils.Bool.tryParse("True"), true);
+        
+        var result = analyser.Utils.Bool.tryParse("asd");
+        global.equal(result.error, true);
+        global.equal(result.msg, "Parsing error. Given value has no boolean meaning.");
     });
 
 }(window, BooleanExpressionsAnalyser));
