@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace ExpressiveAnnotations.ConditionalAttributes
 {
-    internal class Helper
+    internal static class Helper
     {
         internal static object FetchTargetValue(object targetValue, ValidationContext validationContext)
         {
@@ -30,8 +30,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                        && targetValue is string
                        && string.Equals(((string) dependentValue).Trim(), ((string) targetValue).Trim()))
                    || (dependentValue != null
-                       && targetValue is string
-                       && string.Equals((string) targetValue, "*"));
+                       && string.Equals(targetValue as string, "*"));
         }
 
         internal static PropertyInfo ExtractProperty(object source, string property)

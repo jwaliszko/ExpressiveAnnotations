@@ -23,6 +23,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), dependentPropertyName);
             _dependentProperty = attribute.DependentProperty;
             _targetValue = attribute.TargetValue ?? string.Empty;    // null returned as empty string at client side
+
+            Assert.ConsistentTypes(field, attribute.TargetValue, metadata.PropertyName, GetType().BaseType.GetGenericArguments().Single().Name);
         }
 
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()

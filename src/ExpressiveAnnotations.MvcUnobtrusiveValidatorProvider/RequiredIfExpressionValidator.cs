@@ -28,6 +28,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             {
                 _dependentProperties[i] = attribute.DependentProperties[i];
                 _targetValues[i] = attribute.TargetValues[i] ?? string.Empty;   // null returned as empty string at client side
+
+                var field = metadata.ContainerType.GetProperty(attribute.DependentProperties[i]);
+                Assert.ConsistentTypes(field, attribute.TargetValues[i], metadata.PropertyName, GetType().BaseType.GetGenericArguments().Single().Name);
             }
 
             _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName());

@@ -2,6 +2,7 @@
 using ExpressiveAnnotations.ConditionalAttributes;
 using ExpressiveAnnotations.Tests.Misc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace ExpressiveAnnotations.Tests
 {
@@ -29,6 +30,9 @@ namespace ExpressiveAnnotations.Tests
 
             [RequiredIf(DependentProperty = "GoAbroad", TargetValue = true)]
             public string PassportNumber { get; set; }
+
+            [RequiredIf(DependentProperty = "GoAbroad", TargetValue = "true")]
+            public string CreditCardNumber { get; set; }
 
             [RequiredIf(DependentProperty = "Email", TargetValue = "jaroslaw.waliszko@gmail.com")]
             public string WhatToDoAboutInsomnia { get; set; }
@@ -129,6 +133,24 @@ namespace ExpressiveAnnotations.Tests
                 SecondEmail = ""
             };
             Assert.IsFalse(model.IsValid(m => m.SecondEmail));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void Verify_types_consistency_requirement()
+        {
+            try
+            {
+                var model = new Model { GoAbroad = true, CreditCardNumber = null };
+                model.IsValid(m => m.CreditCardNumber);
+            }
+            catch (InvalidOperationException e)
+            {
+                Assert.AreEqual(
+                    "Type mismatch detected in RequiredIfAttribute definition for CreditCardNumber field. Types consistency is required for GoAbroad field and its corresponding target value (unless target is null or *).",
+                    e.Message);
+                throw;
+            }            
         }
     }
 }

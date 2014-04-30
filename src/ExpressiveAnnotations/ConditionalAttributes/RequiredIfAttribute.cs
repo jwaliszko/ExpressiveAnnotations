@@ -46,6 +46,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             // fetch target value
             var targetValue = Helper.FetchTargetValue(TargetValue, validationContext);
 
+            Assert.ConsistentTypes(field, targetValue, validationContext.DisplayName, GetType().Name);
             // compare the value against the target value
             if (Helper.Compare(dependentValue, targetValue))
             {

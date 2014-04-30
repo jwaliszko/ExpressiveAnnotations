@@ -44,6 +44,7 @@
     <Compile Include="BooleanExpressionAnalysis\LexicalAnalysis\TokenDefinition.cs" />
     <Compile Include="BooleanExpressionAnalysis\SyntacticAnalysis\InfixToPostfixConverter.cs" />
     <Compile Include="BooleanExpressionAnalysis\SyntacticAnalysis\PostfixParser.cs" />
+    <Compile Include="ConditionalAttributes\Assert.cs" />
     <Compile Include="ConditionalAttributes\Helper.cs" />
     <Compile Include="ConditionalAttributes\RequiredIfAttribute.cs" />
     <Compile Include="ConditionalAttributes\RequiredIfExpressionAttribute.cs" />

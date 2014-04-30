@@ -25,7 +25,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         /// Available expression tokens are: &amp;&amp;, ||, !, {, }, numbers and whitespaces.
         /// 
         /// Example: "{0} &amp;&amp; !{1}" is parsed to (DependentProperties[0] == TargetValues[0]) &amp;&amp; (DependentProperties[1] != TargetValues[1]).
-        /// </summary>
+        /// </summary>        
         public string Expression { get; set; }
         /// <summary>
         /// Dependent fields from which runtime values are extracted.
@@ -54,6 +54,10 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             {
                 var dependentValue = Helper.ExtractValue(validationContext.ObjectInstance, DependentProperties[i]);
                 var targetValue = Helper.FetchTargetValue(TargetValues[i], validationContext);
+
+                var field = Helper.ExtractProperty(validationContext.ObjectInstance, DependentProperties[i]);
+                Assert.ConsistentTypes(field, targetValue, validationContext.DisplayName, GetType().Name);
+
                 var result = Helper.Compare(dependentValue, targetValue);
                 tokens.Add(result.ToString().ToLowerInvariant());
             }
