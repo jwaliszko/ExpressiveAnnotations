@@ -20,8 +20,8 @@ namespace ExpressiveAnnotations.Tests
 
             public bool GoAbroad { get; set; }
 
-            public DateTime StartDate { get; set; }
-            public DateTime EndDate { get; set; }
+            public DateTime? StartDate { get; set; }
+            public DateTime? EndDate { get; set; }
 
             public string Email { get; set; }
 
@@ -150,7 +150,7 @@ namespace ExpressiveAnnotations.Tests
                     "Type mismatch detected in RequiredIfAttribute definition for CreditCardNumber field. Types consistency is required for GoAbroad field and its corresponding target value (unless target is null or *).",
                     e.Message);
                 throw;
-            }            
+            }
         }
     }
 }
