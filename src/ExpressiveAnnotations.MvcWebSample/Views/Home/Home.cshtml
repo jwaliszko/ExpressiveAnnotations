@@ -43,6 +43,11 @@
                 @Html.ValidationMessageFor(model => model.GoAbroad)
             </li>
             <li>
+                @Html.LabelFor(model => model.Age, new { @class = "inline prefix" })
+                @Html.DropDownListFor(x => x.Age, new SelectList(Model.Years, null))
+                @Html.ValidationMessageFor(model => model.Age)
+            </li>
+            <li>
                 <pre class="code">[RequiredIf(DependentProperty = "GoAbroad", TargetValue = true)]</pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.PassportNumber)
@@ -61,10 +66,15 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIfExpression(  /* interpretation => GoAbroad == true && NextCountry != "Other" && NextCountry == [value from Country] */
-    Expression = "{0} && !{1} && {2}",
-    DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry"},
-    TargetValues = new object[] {true, "Other", "[Country]"},
+[RequiredIfExpression(  /* interpretation => GoAbroad == true 
+                         *                   && ( (NextCountry != "Other" && NextCountry == [value from Country]) 
+                         *                        || Age ∈ (24, 55> 
+                         *                      )
+                         */
+    Expression = "{0} && ( (!{1} && {2}) || ({3} && {4}) )",
+    DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry", "Age", "Age"},
+    RelationalOperators = new[] {"==", "==", "==", "&gt;", "&le;"},
+    TargetValues = new object[] {true, "Other", "[Country]", 24, 55},
     ErrorMessage = "If you plan to go abroad, why do you want to visit the same country twice?")]
 </pre>
                 <pre class="action">[show attribute]</pre>

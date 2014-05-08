@@ -25,7 +25,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         /// Available expression tokens are: &amp;&amp;, ||, !, {, }, numbers and whitespaces.
         /// 
         /// Example: "{0} &amp;&amp; !{1}" is parsed to (DependentProperties[0] == TargetValues[0]) &amp;&amp; (DependentProperties[1] != TargetValues[1]).
-        /// </summary>        
+        /// </summary>
         public string Expression { get; set; }
         /// <summary>
         /// Dependent fields from which runtime values are extracted.
@@ -36,18 +36,25 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         /// target values from other fields, by providing their names inside square parentheses. Star character stands for any value.
         /// </summary>
         public object[] TargetValues { get; set; }
+        /// <summary>
+        /// ToDo explanation
+        /// </summary>
+        public string[] RelationalOperators { get; set; }
 
         public RequiredIfExpressionAttribute()
             : base(_defaultErrorMessage)
         {
             DependentProperties = new string[0];
             TargetValues = new object[0];
+            RelationalOperators = new string[0];
         }
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             if (DependentProperties.Length != TargetValues.Length)
                 throw new ArgumentException("Number of elements in DependentProperties and TargetValues must match.");
+            if (RelationalOperators.Any() && RelationalOperators.Length != DependentProperties.Length)
+                throw new ArgumentException("Number of explicitly provided relational operators is incorrect.");
 
             var tokens = new List<object>();
             for (var i = 0; i < DependentProperties.Count(); i++)
@@ -58,7 +65,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                 var field = Helper.ExtractProperty(validationContext.ObjectInstance, DependentProperties[i]);
                 Assert.ConsistentTypes(field, targetValue, validationContext.DisplayName, GetType().Name);
 
-                var result = Helper.Compare(dependentValue, targetValue);
+                var result = Helper.Compute(dependentValue, targetValue, RelationalOperators.Any() ? RelationalOperators[i] ?? "==" : "==");
                 tokens.Add(result.ToString().ToLowerInvariant());
             }
 

@@ -61,6 +61,24 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Age.
+        /// </summary>
+        public static string Age {
+            get {
+                return ResourceManager.GetString("Age", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {0} field is required..
+        /// </summary>
+        public static string AgeRequired {
+            get {
+                return ResourceManager.GetString("AgeRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Agree for contact.
         /// </summary>
         public static string AgreeForContact {
@@ -241,7 +259,7 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to If you plan to go abroad, why do you want to visit the same country twice?.
+        ///   Looks up a localized string similar to If you plan to go abroad and you are between 25 and 55 or plan to visit the same foreign country twice, write down your reasons..
         /// </summary>
         public static string ReasonForTravelRequired {
             get {

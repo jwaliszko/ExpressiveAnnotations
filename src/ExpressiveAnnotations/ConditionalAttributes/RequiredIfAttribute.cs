@@ -23,6 +23,10 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         /// target value from other field, by providing its name inside square parentheses. Star character stands for any value.
         /// </summary>
         public object TargetValue { get; set; }
+        /// <summary>
+        /// ToDo explanation
+        /// </summary>
+        public string RelationalOperator { get; set; }
 
         public RequiredIfAttribute()
             : base(_defaultErrorMessage)
@@ -48,9 +52,9 @@ namespace ExpressiveAnnotations.ConditionalAttributes
 
             Assert.ConsistentTypes(field, targetValue, validationContext.DisplayName, GetType().Name);
             // compare the value against the target value
-            if (Helper.Compare(dependentValue, targetValue))
+            if (Helper.Compute(dependentValue, targetValue, RelationalOperator ?? "=="))
             {
-                // match => means we should try to validate this field                                
+                // match => means we should try to validate this field
                 if (!_innerAttribute.IsValid(value) || (value is bool && !(bool) value))
                     // validation failed - return an error
                     return new ValidationResult(FormatErrorMessage(validationContext.DisplayName, dependentPropertyName));

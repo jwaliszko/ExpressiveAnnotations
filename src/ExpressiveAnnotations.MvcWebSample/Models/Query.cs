@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Web.Mvc;
 using ExpressiveAnnotations.ConditionalAttributes;
 
@@ -34,8 +35,17 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             }
         }
 
+        public IEnumerable<int?> Years
+        {
+            get { return new int?[] {null}.Concat(Enumerable.Range(18, 73).Select(x => (int?) x)); }
+        }
+
         [Display(ResourceType = typeof(Resources), Name = "GoAbroad")]
         public bool GoAbroad { get; set; }
+
+        [Required(ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "AgeRequired")]
+        [Display(ResourceType = typeof(Resources), Name = "Age")]
+        public int? Age { get; set; }
         
         [RequiredIf(DependentProperty = "GoAbroad", TargetValue = true, ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "FieldRequired")]
         [Display(ResourceType = typeof(Resources), Name = "PassportNumber")]
@@ -47,12 +57,17 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof(Resources), Name = "NextCountry")]
         public string NextCountry { get; set; }
 
-        [RequiredIfExpression(  /* interpretation => GoAbroad == true && NextCountry != "Other" && NextCountry == [value from Country] */
-            Expression = "{0} && !{1} && {2}",
-            DependentProperties = new[] { "GoAbroad", "NextCountry", "NextCountry" },
-            TargetValues = new object[] { true, "Other", "[Country]" },
-            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "ReasonForTravelRequired")]
-        [Display(ResourceType = typeof(Resources), Name = "ReasonForTravel")]        
+        [RequiredIfExpression(  /* interpretation => GoAbroad == true 
+                                 *                   && ( (NextCountry != "Other" && NextCountry == [value from Country]) 
+                                 *                        || Age ∈ (24, 55> 
+                                 *                      )
+                                 */
+            Expression = "{0} && ( (!{1} && {2}) || ({3} && {4}) )",
+            DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry", "Age", "Age"},
+            RelationalOperators = new[] {"==", "==", "==", ">", "<="},
+            TargetValues = new object[] {true, "Other", "[Country]", 24, 55},
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ReasonForTravelRequired")]
+        [Display(ResourceType = typeof(Resources), Name = "ReasonForTravel")]
         public string ReasonForTravel { get; set; }
 
         [Display(ResourceType = typeof(Resources), Name = "SportType")]
