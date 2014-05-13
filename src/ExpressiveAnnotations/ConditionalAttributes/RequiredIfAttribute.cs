@@ -25,7 +25,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         public object TargetValue { get; set; }
         /// <summary>
         /// Operator describing relation between dependent property and target value.
-        /// Avaliable operators: EQ (==), NE (!=), GT (>), GE (>=), LT (&lt;), LE (&le;). Default is EQ (==).
+        /// Available operators: ==, !=, >, >=, &lt;, &le;. Default is ==.
         /// </summary>
         public string RelationalOperator { get; set; }
 

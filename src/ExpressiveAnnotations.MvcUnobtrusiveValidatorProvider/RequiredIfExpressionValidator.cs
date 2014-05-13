@@ -11,6 +11,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
     {
         private readonly string _errorMessage;
         private readonly string[] _dependentProperties;
+        private readonly string[] _relationalOperators;
         private readonly object[] _targetValues;
         private readonly string _expression;
 
@@ -19,14 +20,19 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         {
             if (attribute.DependentProperties.Length != attribute.TargetValues.Length)
                 throw new ArgumentException("Number of elements in DependentProperties and TargetValues must match.");
+            if (attribute.RelationalOperators.Any() && attribute.RelationalOperators.Length != attribute.DependentProperties.Length)
+                throw new ArgumentException("Number of explicitly provided relational operators is incorrect.");            
 
             var count = attribute.DependentProperties.Count();
             _dependentProperties = new string[count];
+            _relationalOperators = new string[count];
             _targetValues = new object[count];
 
             for (var i = 0; i < count; i++)
             {
                 _dependentProperties[i] = attribute.DependentProperties[i];
+                if (attribute.RelationalOperators.Any())
+                    _relationalOperators[i] = attribute.RelationalOperators[i];
                 _targetValues[i] = attribute.TargetValues[i] ?? string.Empty;   // null returned as empty string at client side
 
                 var field = metadata.ContainerType.GetProperty(attribute.DependentProperties[i]);
@@ -45,7 +51,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
                 ValidationType = "requiredifexpression",
             };
             rule.ValidationParameters.Add("dependentproperties", JsonConvert.SerializeObject(_dependentProperties));
-            rule.ValidationParameters.Add("targetvalues", JsonConvert.SerializeObject(_targetValues));
+            rule.ValidationParameters.Add("relationaloperators", JsonConvert.SerializeObject(_relationalOperators));
+            rule.ValidationParameters.Add("targetvalues", JsonConvert.SerializeObject(_targetValues));            
             rule.ValidationParameters.Add("expression", _expression);
             yield return rule;
         }

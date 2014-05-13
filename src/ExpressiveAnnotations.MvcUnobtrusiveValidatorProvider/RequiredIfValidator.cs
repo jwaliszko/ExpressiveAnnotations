@@ -11,7 +11,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
     {
         private readonly string _errorMessage;
         private readonly string _dependentProperty;
-        private readonly object _targetValue;
+        private readonly string _relationalOperator;
+        private readonly object _targetValue;        
 
         public RequiredIfValidator(ModelMetadata metadata, ControllerContext context, RequiredIfAttribute attribute)
             : base(metadata, context, attribute)
@@ -22,6 +23,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 
             _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), dependentPropertyName);
             _dependentProperty = attribute.DependentProperty;
+            _relationalOperator = attribute.RelationalOperator;
             _targetValue = attribute.TargetValue ?? string.Empty;    // null returned as empty string at client side
 
             Assert.ConsistentTypes(field, attribute.TargetValue, metadata.PropertyName, GetType().BaseType.GetGenericArguments().Single().Name);
@@ -35,7 +37,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
                 ValidationType = "requiredif",
             };
             rule.ValidationParameters.Add("dependentproperty", JsonConvert.SerializeObject(_dependentProperty));
-            rule.ValidationParameters.Add("targetvalue", JsonConvert.SerializeObject(_targetValue));
+            rule.ValidationParameters.Add("relationaloperator", JsonConvert.SerializeObject(_relationalOperator));
+            rule.ValidationParameters.Add("targetvalue", JsonConvert.SerializeObject(_targetValue));            
             yield return rule;
         }
     }

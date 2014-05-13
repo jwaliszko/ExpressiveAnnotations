@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.validate.js - v1.1.2
+﻿/* expressive.annotations.validate.js - v1.2.0
  * this script is a part of client side component of ExpresiveAnnotations - annotation-based conditional validation library
  * copyright (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
  * licensed MIT: http://www.opensource.org/licenses/mit-license.php */
@@ -41,6 +41,24 @@
             }
             return targetValue;
         },
+        compute: function (dependentValue, targetValue, relationalOperator) {
+            switch (relationalOperator) {
+                case '==':
+                    return Helper.compare(dependentValue, targetValue);
+                case "!=":
+                    return !Helper.compare(dependentValue, targetValue);
+                case ">":
+                    return Helper.greater(dependentValue, targetValue);
+                case ">=":
+                    return !Helper.less(dependentValue, targetValue);
+                case "<":
+                    return Helper.less(dependentValue, targetValue);
+                case "<=":
+                    return !Helper.greater(dependentValue, targetValue);
+            }
+
+            throw analyser.Utils.String.format('Relational operator {0} is invalid. Available operators: ==, !=, >, >=, <, <=.', relationalOperator);
+        },
         compare: function (dependentValue, targetValue) {
             var boolResult;
             if (typeof dependentValue === 'string' || dependentValue instanceof String) {
@@ -52,14 +70,37 @@
                 targetValue = boolResult.error ? targetValue.trim() : boolResult;
             }
             return (dependentValue === targetValue) || (dependentValue !== '' && targetValue === '*');
+        },
+        greater: function (dependentValue, targetValue) {
+            if (!isNaN(dependentValue) && !isNaN(targetValue))
+                return parseFloat(dependentValue) > parseFloat(targetValue);
+            if ((typeof dependentValue === 'string' || dependentValue instanceof String)
+                && (typeof targetValue === 'string' || targetValue instanceof String))
+                return dependentValue.toLowerCase().localeCompare(targetValue.toLowerCase()) > 0;
+            if (dependentValue === null || dependentValue === 'undefined' || targetValue === null || targetValue === 'undefined')
+                return false;
+
+            throw 'Greater than and less than relational operations not allowed for arguments of types other than numeric or string.';
+        },
+        less: function (dependentValue, targetValue) {
+            if (!isNaN(dependentValue) && !isNaN(targetValue))
+                return parseFloat(dependentValue) < parseFloat(targetValue);
+            if ((typeof dependentValue === 'string' || dependentValue instanceof String)
+                && (typeof targetValue === 'string' || targetValue instanceof String))
+                return dependentValue.toLowerCase().localeCompare(targetValue.toLowerCase()) < 0;
+            if (dependentValue === null || dependentValue === 'undefined' || targetValue === null || targetValue === 'undefined')
+                return false;
+
+            throw 'Greater than and less than relational operations not allowed for arguments of types other than numeric or string.';
         }
     };
 
-    $.validator.unobtrusive.adapters.add('requiredif', ['dependentproperty', 'targetvalue'], function(options) {
+    $.validator.unobtrusive.adapters.add('requiredif', ['dependentproperty', 'relationaloperator', 'targetvalue'], function (options) {
         options.rules['requiredif'] = {
             prefix: ModelPrefix.get(options.element.name),
             form: options.form,
             dependentproperty: $.parseJSON(options.params.dependentproperty),
+            relationaloperator: $.parseJSON(options.params.relationaloperator),
             targetvalue: $.parseJSON(options.params.targetvalue)
         };
         if (options.message) {
@@ -67,11 +108,12 @@
         }
     });
 
-    $.validator.unobtrusive.adapters.add('requiredifexpression', ['dependentproperties', 'targetvalues', 'expression'], function(options) {
+    $.validator.unobtrusive.adapters.add('requiredifexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'expression'], function (options) {
         options.rules['requiredifexpression'] = {
             prefix: ModelPrefix.get(options.element.name),
             form: options.form,
             dependentproperties: $.parseJSON(options.params.dependentproperties),
+            relationaloperators: $.parseJSON(options.params.relationaloperators),
             targetvalues: $.parseJSON(options.params.targetvalues),
             expression: options.params.expression
         };
@@ -83,7 +125,7 @@
     $.validator.addMethod('requiredif', function(value, element, params) {
         var dependentValue = Helper.extractValue(params.form, params.dependentproperty, params.prefix);
         var targetValue = Helper.fetchTargetValue(params.form, params.targetvalue, params.prefix);
-        if (Helper.compare(dependentValue, targetValue)) {
+        if (Helper.compute(dependentValue, targetValue, params.relationaloperator || '==')) {
             // match (condition fulfilled) => means we should try to validate this field (check if required value is provided)            
             var boolValue = analyser.Utils.Bool.tryParse(value);
             if (!(value !== null && value !== '' && value !== 'undefined') || (!boolValue.error && !boolValue))
@@ -98,7 +140,7 @@
         for (var i = 0; i < length; i++) {
             var dependentValue = Helper.extractValue(params.form, params.dependentproperties[i], params.prefix);
             var targetValue = Helper.fetchTargetValue(params.form, params.targetvalues[i], params.prefix);
-            var result = Helper.compare(dependentValue, targetValue);
+            var result = Helper.compute(dependentValue, targetValue, params.relationaloperators[i] || '==');
             tokens.push(result.toString());
         }
 

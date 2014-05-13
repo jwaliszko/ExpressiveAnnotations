@@ -78,7 +78,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                     return !Greater(dependentValue, targetValue);
             }
 
-            throw new ArgumentException(string.Format("Relational operator {0} is invalid. Select from: EQ (==), NE (!=), GT (>), GE (>=), LT (<), LE (<=).", relationalOperator));
+            throw new ArgumentException(string.Format("Relational operator {0} is invalid. Available operators: ==, !=, >, >=, <, <=.", relationalOperator));
         }
 
         internal static bool Compare(object dependentValue, object targetValue)
