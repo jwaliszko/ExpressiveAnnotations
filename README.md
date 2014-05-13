@@ -111,23 +111,23 @@ Logical expression is an expression in which relationship between operands is sp
 #####Logical expression schematic interpretation:
 
  ```
-      == (default), !=, >, >=, <, <=     ||, &&         !
-                 /-------\             /---------\ /----------\
-    (DepProps[0] RelOps[0] TarVals[0]) BinaryLogOp (UnaryLogOp)(DepProps[1] RelOps[1] TarVals[1])
-    \--------------------------------/                         \--------------------------------/
-      {operand 0} (relational expr)                              {operand 1} (relational expr)
+  == (default), !=, >, >=, <, <=        ||, &&           !
+             /---------\             /-----------\ /------------\
+(DepProps[0] RelOpers[0] TarVals[0]) BinaryLogOper (UnaryLogOper)(DepProps[1] RelOpers[1] TarVals[1])
+\----------------------------------/                             \----------------------------------/
+   {operand 0} (relational expr)                                    {operand 1} (relational expr)
 ```
-Notice: Forgive the usage of abbreviated names on the schematic overview.
+Notice: Forgive the usage of abbreviated names (due to narrow space).
 
-#####Logical expression evaluation steps for sample `{0} || !{1}` expression:
+#####Evaluation steps for sample `{0} || !{1}` logical expression:
 
 1. Expression is interpreted as:
 
- ```
-    (DependentProperties[0] == TargetValues[0]) || (DependentProperties[1] == TargetValues[1])
-```
-Notice 1: Interpretation is based on assumption that relational operators are not provided - when computing operands, equality opereator is taken by default.
-Notice 2: It's easy to guess that arrays indexes of dependent properties and its corresponding target values are given inside curly brackets `{}`.
+ ```(DependentProperties[0] == TargetValues[0]) || !(DependentProperties[1] == TargetValues[1])```
+
+ Notice 1: Interpretation is based on assumption that relational operators are not provided - when computing operands, equality opereator is taken by default.
+
+ Notice 2: It's easy to guess that arrays indexes of dependent properties and its corresponding target values are given inside curly brackets `{}`.
 2. Values are extracted from arrays and computed (compared for equality in this case). Next, computation results (boolean flags) are injected into corresponding brackets, let's say:
 
  ```(true) || (false)```
