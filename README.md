@@ -1,4 +1,4 @@
-#ExpressiveAnnotations - annotation-based conditional validation
+﻿#ExpressiveAnnotations - annotation-based conditional validation
 
 [**ExpressiveAnnotations**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations) is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given implementation of RequiredIf and RequiredIfExpression attributes allows to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more compacted, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
 
@@ -6,7 +6,7 @@
 
 For sample usages go to [**demo project**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations.MvcWebSample).
 
-* Simplest, using **RequiredIfAttribute** which *provides conditional attribute to calculate validation result based on related property value*:
+* Simplest, using *RequiredIfAttribute* which *provides conditional attribute to calculate validation result based on related property value*:
  
  ```
 [RequiredIf(DependentProperty = "GoAbroad", TargetValue = true)]
@@ -25,11 +25,11 @@ public bool AgreeToContact { get; set; }
 
  This one means that *if email is not empty (has any value), boolean value indicating contact permission has to be true*. What's more, we can see that nested properties are supported by the mechanism. The last thing shown here is star character `*` used as target value - it is special character which stands for any value.
 
-* More complex, using **RequiredIfExpressionAttribute** which *provides conditional attribute to calculate validation result based on related properties values and relations between them, which are defined in logical expression*:
+* More complex, using *RequiredIfExpressionAttribute* which *provides conditional attribute to calculate validation result based on related properties values and relations between them, which are defined in logical expression*:
  
  ```
 [RequiredIfExpression(
-        Expression = "{0} && !{1} && {2}",
+		Expression = "{0} && !{1} && {2}",
         DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry"},
         TargetValues = new object[] {true, "Other", "[Country]"},
         ErrorMessage = "If you plan to go abroad, why do you 
@@ -39,26 +39,55 @@ public string ReasonForTravel { get; set; }
 
  How such an expression should be understood?
 
- ```GoAbroad == true && NextCountry != "Other" && NextCountry == [value from Country]```
+ ```GoAbroad == true && !(NextCountry == "Other") && NextCountry == [value from Country]```
  
  Besides parsing interpretation of the conditional expression, this sample shows as well that instead of hardcoding there is also possibility for dynamic extraction of target values from other fields, by providing their names inside square parentheses `[]`.
+
+ Finally, if we are slightly familiar with this syntax above, let's move to even more enriched use case of the same attribute *(valid from version >= 1.2)*:
+ 
+ ```
+[RequiredIfExpression(
+		Expression = "{0} && ( (!{1} && {2}) || ({3} && {4}) )",
+		DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry", "Age", "Age"},
+		RelationalOperators = new[] {"==", "==", "==", ">", "<="},
+		TargetValues = new object[] {true, "Other", "[Country]", 24, 55},
+        ErrorMessage = "If you plan to go abroad and you are between 25 and 55 or plan to 
+						visit the same foreign country twice, write down your reasons.")]
+public string ReasonForTravel { get; set; }
+```
+
+ So, how such an expression should be understood this time instead?
+
+ ```
+ GoAbroad == true 
+ && ( (NextCountry != "Other" && NextCountry == [value from Country]) 
+       || Age ∈ (24, 55> 
+     )
+```
+
+ Comparing to the previous example, this one basically introduces the usage of relational operators. Such operators describe relationships between dependent properties and corresponding target values (you should be also aware, that if relational operators are not explicitly provided, these relationships are by default defined by equality operator - just like in the example before).
 
 ###How to construct conditional validation attributes?
 
 ```
-RequiredIfAttribute([string DependentProperty], 
-                    [object TargetValue], ...)
+RequiredIfAttribute([string DependentProperty],
+                    [object TargetValue],
+					[string RelationalOperator], ...)
 
-    DependentProperty - Field from which runtime value is extracted.
-    TargetValue       - Expected value for dependent field. Instead of hardcoding there is also
-                        possibility for dynamic extraction of target value from other field, by
-                        providing its name inside square parentheses. Star character stands for 
-						any value.
+    DependentProperty  - Field from which runtime value is extracted.
+    TargetValue        - Expected value for dependent field. Instead of hardcoding there is also
+                         possibility for dynamic extraction of target value from other field, by
+                         providing its name inside square parentheses. Star character stands for 
+						 any value.
+	RelationalOperator - Operator describing relation between dependent property and target value.
+						 Avaliable operators: EQ (==), NE (!=), GT (>), GE (>=), LT (<), LE (<=). 
+						 If this property is not provided, default relation is EQ (==).
 ```
 ```
-RequiredIfExpressionAttribute([string Expression], 
-                              [string[] DependentProperties], 
-                              [object[] TargetValues], ...)
+RequiredIfExpressionAttribute([string Expression],
+                              [string[] DependentProperties],
+                              [object[] TargetValues],
+							  [string[] RelationalOperators], ...)
 
     Expression          - Logical expression based on which requirement condition is calculated.
                           If condition is fulfilled, error message is displayed. Attribute logic
@@ -70,31 +99,43 @@ RequiredIfExpressionAttribute([string Expression],
                           there is also possibility for dynamic extraction of target values from
                           other fields, by providing their names inside square parentheses. Star 
                           character stands for any value.
+	RelationalOperators - Operators describing relations between dependent properties and corresponding 
+						  target values. Avaliable operators: EQ (==), NE (!=), GT (>), GE (>=), LT (<), 
+						  LE (<=). If this property is not provided, default relation for all operands 
+						  is EQ (==).
 ```
 
-Sample `{0} || !{1}` expression evaluation steps:
+Logical expression is an expression in which relationship between operands is specified by logical operators `AND (&&)` and `OR (||)`. The logical operator `NOT (!)` is used to negate logical variables or constants. It is the type of operator `(AND, OR)` that characterizes the expression as logical, not the type of operand. Basic logical expression consists of three parts: two operands and one operator, e.g. `{idx0} && {idx1}`. Operands on the other hand can be logical variables or other expressions, such as relational expressions. Relational expressions are characterized by relational operators `EQ (==), NE (!=), GT (>), GE (>=), LT (<), LE (<=)`. In our example, operands `{idx}` are actually expanded into basic relational expressions (e.g. `DependentProperties[idx] RelationalOperators[idx] TargetValues[idx]`).
 
-1. Expression is interpreted as: 
+Logical expression schematic interpretation:
 
  ```
-    (DependentProperties[0] == TargetValues[0]) || (DependentProperties[1] != TargetValues[1])
-    '------------------.   .------------------'    '------------------.   .------------------'
-                        \ /                                            \ / 
-                        {0}                                            {1}
+             ==, !=, >, >=, <, <= (if not defined, == by default)          || or &&            ! (optional)
+                            /--------------------\                  /-------------------\ /-------------------\
+    (DependentProperties[0] RelationalOperators[0] TargetValues[0]) BinaryLogicalOperator (UnaryLogicalOperator)(DependentProperties[1] RelationalOperators[1] TargetValues[1])
+    \-------------------------------------------------------------/                                             \-------------------------------------------------------------/ 
+                  {operand 0} (relational expression)                                                                         {operand 1} (relational expression)
 ```
- 
- Note: Arrays indexes of dependent properties and its values are given in expression inside curly parentheses `{}`.
-2. Arrays values are extracted and compared. Boolean computation results are inserted into corresponding brackets, let's say:
+
+Logical expression evaluation steps for sample `{0} || !{1}` expression (assumption: relational operators not provided - when computing operands, equality opereator used by default):
+
+1. Expression is interpreted as:
+
+ ```
+    (DependentProperties[0] == TargetValues[0]) || (DependentProperties[1] == TargetValues[1])
+```
+It's easy to guess that arrays indexes of dependent properties and its corresponding target values are given inside curly brackets `{}`.
+2. Values are extracted from arrays and computed (compared for equality in this case). Next, computation results (boolean flags) are injected into corresponding brackets, let's say:
 
  ```(true) || (false)```
-3. Such preprocessed expression is now converted from infix notation, to reflect Reverse Polish Notation (RPN) syntax:
+3. Such preprocessed expression is then converted from infix notation syntax into postfix one:
 
  ```true false ||```
-4. Finally postfix expression is evaluated to give validation result. Here it is true (condition fulfilled), so error message is risen.
+4. Reverse Polish Notation (RPN) expression is finally evaluated to give validation result. Here it is true - condition fulfilled, so error message is risen.
 
 ###What is the context behind this implementation? 
 
-Declarative validation is simply more convenient in many cases. Cleaner and more compacted code goes hand in hand with it, because all validation logic can be defined within the model metadata.
+Declarative validation, when compared to imperative approach, seems to be more convenient in many cases. Clean, compact code - all validation logic can be defined within the model metadata.
 
 ###What is the difference between declarative and imperative programming?
 
