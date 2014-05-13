@@ -38,7 +38,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         public object[] TargetValues { get; set; }
         /// <summary>
         /// Operators describing relations between dependent properties and corresponding target values.
-        /// Available operators: ==, !=, >, >=, &lt;, &le;. Default is ==.
+        /// Available operators: ==, !=, >, >=, &lt;, &le;. If this property is not provided, default relation for all operands is ==.
         /// </summary>
         public string[] RelationalOperators { get; set; }
 

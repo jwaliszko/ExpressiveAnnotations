@@ -68,6 +68,7 @@ public string ReasonForTravel { get; set; }
  Comparing to the previous example, this one basically introduces the usage of relational operators. Such operators describe relationships between dependent properties and corresponding target values (you should be also aware, that if relational operators are not explicitly provided, these relationships are by default defined by equality operator - just like in the example before).
 
 ###How to construct conditional validation attributes?
+#####Signatures:
 
 ```
 RequiredIfAttribute([string DependentProperty],
@@ -80,8 +81,8 @@ RequiredIfAttribute([string DependentProperty],
                          providing its name inside square parentheses. Star character stands for 
 						 any value.
 	RelationalOperator - Operator describing relation between dependent property and target value.
-						 Avaliable operators: EQ (==), NE (!=), GT (>), GE (>=), LT (<), LE (<=). 
-						 If this property is not provided, default relation is EQ (==).
+						 Available operators: ==, !=, >, >=, <, <=. If this property is not 
+						 provided, default relation is ==.
 ```
 ```
 RequiredIfExpressionAttribute([string Expression],
@@ -99,32 +100,34 @@ RequiredIfExpressionAttribute([string Expression],
                           there is also possibility for dynamic extraction of target values from
                           other fields, by providing their names inside square parentheses. Star 
                           character stands for any value.
-	RelationalOperators - Operators describing relations between dependent properties and corresponding 
-						  target values. Avaliable operators: EQ (==), NE (!=), GT (>), GE (>=), LT (<), 
-						  LE (<=). If this property is not provided, default relation for all operands 
-						  is EQ (==).
+	RelationalOperators - Operators describing relations between dependent properties and target 
+						  values. Available operators: ==, !=, >, >=, <, <=. If this property is 
+						  not provided, default relation for all operands is ==.
 ```
 
+#####Theoretical background:
 Logical expression is an expression in which relationship between operands is specified by logical operators `AND (&&)` and `OR (||)`. The logical operator `NOT (!)` is used to negate logical variables or constants. It is the type of operator `(AND, OR)` that characterizes the expression as logical, not the type of operand. Basic logical expression consists of three parts: two operands and one operator, e.g. `{idx0} && {idx1}`. Operands on the other hand can be logical variables or other expressions, such as relational expressions. Relational expressions are characterized by relational operators `EQ (==), NE (!=), GT (>), GE (>=), LT (<), LE (<=)`. In our example, operands `{idx}` are actually expanded into basic relational expressions (e.g. `DependentProperties[idx] RelationalOperators[idx] TargetValues[idx]`).
 
-Logical expression schematic interpretation:
+#####Logical expression schematic interpretation:
 
  ```
-             ==, !=, >, >=, <, <= (if not defined, == by default)          || or &&            ! (optional)
-                            /--------------------\                  /-------------------\ /-------------------\
-    (DependentProperties[0] RelationalOperators[0] TargetValues[0]) BinaryLogicalOperator (UnaryLogicalOperator)(DependentProperties[1] RelationalOperators[1] TargetValues[1])
-    \-------------------------------------------------------------/                                             \-------------------------------------------------------------/ 
-                  {operand 0} (relational expression)                                                                         {operand 1} (relational expression)
+      == (default), !=, >, >=, <, <=     ||, &&         !
+                 /-------\             /---------\ /----------\
+    (DepProps[0] RelOps[0] TarVals[0]) BinaryLogOp (UnaryLogOp)(DepProps[1] RelOps[1] TarVals[1])
+    \--------------------------------/                         \--------------------------------/
+      {operand 0} (relational expr)                              {operand 1} (relational expr)
 ```
+Notice: Forgive the usage of abbreviated names on the schematic overview.
 
-Logical expression evaluation steps for sample `{0} || !{1}` expression (assumption: relational operators not provided - when computing operands, equality opereator used by default):
+#####Logical expression evaluation steps for sample `{0} || !{1}` expression:
 
 1. Expression is interpreted as:
 
  ```
     (DependentProperties[0] == TargetValues[0]) || (DependentProperties[1] == TargetValues[1])
 ```
-It's easy to guess that arrays indexes of dependent properties and its corresponding target values are given inside curly brackets `{}`.
+Notice 1: Interpretation is based on assumption that relational operators are not provided - when computing operands, equality opereator is taken by default.
+Notice 2: It's easy to guess that arrays indexes of dependent properties and its corresponding target values are given inside curly brackets `{}`.
 2. Values are extracted from arrays and computed (compared for equality in this case). Next, computation results (boolean flags) are injected into corresponding brackets, let's say:
 
  ```(true) || (false)```
