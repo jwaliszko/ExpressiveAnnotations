@@ -69,6 +69,10 @@
                 boolResult = analyser.Utils.Bool.tryParse(targetValue);
                 targetValue = boolResult.error ? targetValue.trim() : boolResult;
             }
+            if (!isNaN(parseFloat(dependentValue)) && isFinite(dependentValue) && !isNaN(parseFloat(targetValue)) && isFinite(targetValue)) {
+                dependentValue = parseFloat(dependentValue);
+                targetValue = parseFloat(targetValue);
+            }
             return (dependentValue === targetValue) || (dependentValue !== '' && targetValue === '*');
         },
         greater: function (dependentValue, targetValue) {
