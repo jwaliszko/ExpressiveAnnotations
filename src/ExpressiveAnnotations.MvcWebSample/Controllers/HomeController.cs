@@ -7,7 +7,13 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
     {
         public ActionResult Index()
         {
-            var model = new Query {SportType = "Extreme", GoAbroad = true};
+            var model = new Query
+            {
+                GoAbroad = true, 
+                Country = "Poland", 
+                NextCountry = "Other", 
+                SportType = "Extreme"
+            };
             return View("Home", model);
         }
 

@@ -70,15 +70,6 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The {0} field is required..
-        /// </summary>
-        public static string AgeRequired {
-            get {
-                return ResourceManager.GetString("AgeRequired", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Agree for contact.
         /// </summary>
         public static string AgreeForContact {
@@ -93,6 +84,24 @@ namespace ExpressiveAnnotations.MvcWebSample {
         public static string AgreeForContactRequired {
             get {
                 return ResourceManager.GetString("AgreeForContactRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to I am aware of the possible risks.
+        /// </summary>
+        public static string AwareOfTheRisks {
+            get {
+                return ResourceManager.GetString("AwareOfTheRisks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You are required to agree that you are aware of the risks of travel..
+        /// </summary>
+        public static string AwareOfTheRisksRequired {
+            get {
+                return ResourceManager.GetString("AwareOfTheRisksRequired", resourceCulture);
             }
         }
         
@@ -153,6 +162,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         /// <summary>
         ///   Looks up a localized string similar to The {0} field is required because depends on {1} field..
         /// </summary>
+        public static string FieldConditionallyRequired {
+            get {
+                return ResourceManager.GetString("FieldConditionallyRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {0} field is required..
+        /// </summary>
         public static string FieldRequired {
             get {
                 return ResourceManager.GetString("FieldRequired", resourceCulture);
@@ -178,11 +196,29 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Go abroad.
+        ///   Looks up a localized string similar to I&apos;m going abroad.
         /// </summary>
         public static string GoAbroad {
             get {
                 return ResourceManager.GetString("GoAbroad", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to High.
+        /// </summary>
+        public static string High {
+            get {
+                return ResourceManager.GetString("High", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Low.
+        /// </summary>
+        public static string Low {
+            get {
+                return ResourceManager.GetString("Low", resourceCulture);
             }
         }
         
@@ -250,7 +286,16 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Reason for travel.
+        ///   Looks up a localized string similar to Political stability.
+        /// </summary>
+        public static string PoliticalStability {
+            get {
+                return ResourceManager.GetString("PoliticalStability", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reasons for travel.
         /// </summary>
         public static string ReasonForTravel {
             get {
@@ -286,11 +331,20 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sport type.
+        ///   Looks up a localized string similar to Kind of sports you like the most.
         /// </summary>
         public static string SportType {
             get {
                 return ResourceManager.GetString("SportType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Uncertain.
+        /// </summary>
+        public static string Uncertain {
+            get {
+                return ResourceManager.GetString("Uncertain", resourceCulture);
             }
         }
     }

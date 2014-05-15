@@ -1,4 +1,5 @@
 ﻿@using ExpressiveAnnotations.MvcWebSample
+@using ExpressiveAnnotations.MvcWebSample.Misc
 @model ExpressiveAnnotations.MvcWebSample.Models.Query
 
 <div class="box">
@@ -43,12 +44,20 @@
                 @Html.ValidationMessageFor(model => model.GoAbroad)
             </li>
             <li>
+                <pre class="code">
+[Required]
+</pre>
+                <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.Age, new { @class = "inline prefix" })
                 @Html.DropDownListFor(x => x.Age, new SelectList(Model.Years, null))
                 @Html.ValidationMessageFor(model => model.Age)
             </li>
             <li>
-                <pre class="code">[RequiredIf(DependentProperty = "GoAbroad", TargetValue = true)]</pre>
+                <pre class="code">
+[RequiredIf(
+    DependentProperty = "GoAbroad", 
+    TargetValue = true]
+</pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.PassportNumber)
                 @Html.EditorFor(model => model.PassportNumber)
@@ -66,21 +75,47 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIfExpression(  /* interpretation => GoAbroad == true 
-                         *                   && ( (NextCountry != "Other" && NextCountry == [value from Country]) 
-                         *                        || Age ∈ (24, 55> 
-                         *                      )
-                         */
+[RequiredIfExpression( /* interpretation => GoAbroad == true 
+                        *                   && ( (NextCountry != "Other" && NextCountry == [value from Country]) 
+                        *                        || Age ∈ (24, 55> 
+                        *                      )
+                        */
     Expression = "{0} && ( (!{1} && {2}) || ({3} && {4}) )",
     DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry", "Age", "Age"},
     RelationalOperators = new[] {"==", "==", "==", "&gt;", "&le;"},
     TargetValues = new object[] {true, "Other", "[Country]", 24, 55},
-    ErrorMessage = "If you plan to go abroad, why do you want to visit the same country twice?")]
+    ErrorMessage = "If you plan to go abroad and you are between 25 and 55 or plan 
+                    to visit the same foreign country twice, write down your reasons.")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.ReasonForTravel)
-                @Html.EditorFor(model => model.ReasonForTravel)
+                @Html.TextAreaFor(model => model.ReasonForTravel)
                 @Html.ValidationMessageFor(model => model.ReasonForTravel)
+            </li>
+            <li>
+                <pre class="code">
+[RequiredIf(
+    DependentProperty = "GoAbroad", 
+    RelationalOperator = "!=", 
+    TargetValue = false)]
+</pre>
+                <pre class="action">[show attribute]</pre>
+                @Html.LabelFor(model => model.PoliticalStability, new { @class = "inline prefix" })
+                @Html.EnumDropDownListFor(x => x.PoliticalStability)
+                @Html.ValidationMessageFor(model => model.PoliticalStability)
+            </li>
+            <li>
+                <pre class="code">
+[RequiredIfExpression( /* interpretation => PoliticalStability != null && PoliticalStability != Stability.High */
+    Expression = "!{0} && !{1}",
+    DependentProperties = new[] {"PoliticalStability", "PoliticalStability"},
+    TargetValues = new object[] {null, Stability.High},
+    ErrorMessage = "You are required to agree that you are aware of the risks of travel.")]
+</pre>
+                <pre class="action">[show attribute]</pre>
+                @Html.EditorFor(model => model.AwareOfTheRisks)
+                @Html.LabelFor(model => model.AwareOfTheRisks, new { @class = "inline" })
+                @Html.ValidationMessageFor(model => model.AwareOfTheRisks)
             </li>
             <li>
                 @Html.LabelFor(model => model.SportType)
@@ -96,7 +131,8 @@
     Expression = "{0} || (!{1} && {2})",
     DependentProperties = new[] {"SportType", "SportType", "GoAbroad"},
     TargetValues = new object[] {"Extreme", "None", true},
-    ErrorMessage = "Blood type is required if you do extreme sports, or if you do any type of sport and plan to go abroad.")]
+    ErrorMessage = "Blood type is required if you do extreme sports, 
+                    or if you do any type of sport and plan to go abroad.")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.BloodType)
@@ -108,19 +144,19 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIfExpression(
+[RequiredIfExpression( /* interpretation => ContactDetails.Email == "*" || ContactDetails.Phone == "*" */
     Expression = "{0} || {1}",
-    DependentProperties = new[] {"ContactDetails.Email", "ContactDetails.Phone"},   /* nested properties are supported */
+    DependentProperties = new[] {"ContactDetails.Email", "ContactDetails.Phone"}, /* nested properties are supported */
     TargetValues = new object[] {"*", "*"}, /* any values */
-    ErrorMessage = "You have to authorize us to contact with you.")]
+    ErrorMessage = "You have to authorize us to contact you.")]
 
-equivalent is:
+one of possible equivalents is:
                     
-[RequiredIfExpression(
+[RequiredIfExpression( /* interpretation => ContactDetails.Email != null || ContactDetails.Phone != null */
     Expression = "!{0} || !{1}",
     DependentProperties = new[] {"ContactDetails.Email", "ContactDetails.Phone"},
-    TargetValues = new object[] {null, null},
-    ErrorMessage = "You have to authorize us to make contact.")]
+    TargetValues = new object[] {null, null}, /* no values */
+    ErrorMessage = "You have to authorize us to contact you.")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.RadioButtonFor(model => model.AgreeForContact, true) <label class="inline">@Resources.SpamAllowed</label>

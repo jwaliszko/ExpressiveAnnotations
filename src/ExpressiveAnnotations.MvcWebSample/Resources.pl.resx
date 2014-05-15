@@ -120,14 +120,17 @@
   <data name="Age" xml:space="preserve">
     <value>Wiek</value>
   </data>
-  <data name="AgeRequired" xml:space="preserve">
-    <value>Pole {0} jest wymagane.</value>
-  </data>
   <data name="AgreeForContact" xml:space="preserve">
     <value>Zgoda na kontakt</value>
   </data>
   <data name="AgreeForContactRequired" xml:space="preserve">
     <value>Twoja zgoda jest wymagana w celu nawiązania kontaktu.</value>
+  </data>
+  <data name="AwareOfTheRisks" xml:space="preserve">
+    <value>Jestem świadomy ewentualnych zagrożeń</value>
+  </data>
+  <data name="AwareOfTheRisksRequired" xml:space="preserve">
+    <value>Musisz potwierdzić, że jesteś świadomy istniejących zagrożeń.</value>
   </data>
   <data name="BloodType" xml:space="preserve">
     <value>Typ krwi</value>
@@ -147,8 +150,11 @@
   <data name="Extreme" xml:space="preserve">
     <value>Ekstremalny</value>
   </data>
-  <data name="FieldRequired" xml:space="preserve">
+  <data name="FieldConditionallyRequired" xml:space="preserve">
     <value>Pole {0} jest wymagane ponieważ zależy od pola {1}.</value>
+  </data>
+  <data name="FieldRequired" xml:space="preserve">
+    <value>Pole {0} jest wymagane.</value>
   </data>
   <data name="France" xml:space="preserve">
     <value>Francja</value>
@@ -157,7 +163,13 @@
     <value>Niemcy</value>
   </data>
   <data name="GoAbroad" xml:space="preserve">
-    <value>Wyjazd za granicę</value>
+    <value>Wyjeżdżam za granicę</value>
+  </data>
+  <data name="High" xml:space="preserve">
+    <value>Wysoka</value>
+  </data>
+  <data name="Low" xml:space="preserve">
+    <value>Niska</value>
   </data>
   <data name="NextCountry" xml:space="preserve">
     <value>Następny kraj</value>
@@ -180,8 +192,11 @@
   <data name="Poland" xml:space="preserve">
     <value>Polska</value>
   </data>
+  <data name="PoliticalStability" xml:space="preserve">
+    <value>Stabilnośc polityczna</value>
+  </data>
   <data name="ReasonForTravel" xml:space="preserve">
-    <value>Cel podróży</value>
+    <value>Podowy podróży</value>
   </data>
   <data name="ReasonForTravelRequired" xml:space="preserve">
     <value>Jeśli planujesz wyjechać za granicę i jesteś w wieku 25-55 lat lub planujesz odwiedzić dwukrotnie ten sam obcy kraj, podaj powody podróży.</value>
@@ -193,6 +208,9 @@
     <value>Nie zgadzam sie na otrzymywanie informacji</value>
   </data>
   <data name="SportType" xml:space="preserve">
-    <value>Rodzaj sportu</value>
+    <value>Ulubione rodzaje uprawianych sportów</value>
+  </data>
+  <data name="Uncertain" xml:space="preserve">
+    <value>Niepewna</value>
   </data>
 </root>

@@ -12,20 +12,33 @@ namespace ExpressiveAnnotations.Tests
     [TestClass]
     public class RequiredIExpressionfAttributeTest
     {
-        private class Model
+        private enum Stability
         {
+            High,
+            Low,
+            Uncertain,
+        }
+
+        private class Model
+        {            
             public bool GoAbroad { get; set; }
 
             public string Country { get; set; }
-
             public string NextCountry { get; set; }
 
-            [RequiredIfExpression(
-                /* interpretation => GoAbroad == true && NextCountry != "Other" && NextCountry == [value from Country] */
+            [RequiredIfExpression( /* interpretation => GoAbroad == true && NextCountry != "Other" && NextCountry == [value from Country] */
                 Expression = "{0} && !{1} && {2}",
                 DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry"},
                 TargetValues = new object[] {true, "Other", "[Country]"})]
             public string ReasonForTravel { get; set; }
+
+            public Stability? PoliticalStability { get; set; }
+
+            [RequiredIfExpression( /* interpretation => PoliticalStability != Stability.High */
+                Expression = "!{0}",
+                DependentProperties = new[] {"PoliticalStability"},
+                TargetValues = new object[] {Stability.High})]
+            public bool AwareOfTheRisks { get; set; }
         }
 
         [TestMethod]
@@ -39,6 +52,12 @@ namespace ExpressiveAnnotations.Tests
 
             model = new Model {GoAbroad = false, Country = "Poland", NextCountry = "Poland"};
             Assert.IsTrue(model.IsValid(m => m.ReasonForTravel));
+
+            model = new Model { AwareOfTheRisks = true, PoliticalStability = Stability.Uncertain };
+            Assert.IsTrue(model.IsValid(m => m.AwareOfTheRisks));
+
+            model = new Model { AwareOfTheRisks = false, PoliticalStability = Stability.High };
+            Assert.IsTrue(model.IsValid(m => m.AwareOfTheRisks));
         }
 
         [TestMethod]
@@ -46,6 +65,9 @@ namespace ExpressiveAnnotations.Tests
         {
             var model = new Model {GoAbroad = true, Country = "Poland", NextCountry = "Poland"};
             Assert.IsFalse(model.IsValid(m => m.ReasonForTravel));
+
+            model = new Model { AwareOfTheRisks = false, PoliticalStability = Stability.Uncertain };
+            Assert.IsFalse(model.IsValid(m => m.AwareOfTheRisks));
         }
     }
 }

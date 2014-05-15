@@ -69,33 +69,39 @@
                 boolResult = analyser.Utils.Bool.tryParse(targetValue);
                 targetValue = boolResult.error ? targetValue.trim() : boolResult;
             }
-            if (!isNaN(parseFloat(dependentValue)) && isFinite(dependentValue) && !isNaN(parseFloat(targetValue)) && isFinite(targetValue)) {
+            if (Helper.isNumber(dependentValue) && Helper.isNumber(targetValue)) {
                 dependentValue = parseFloat(dependentValue);
                 targetValue = parseFloat(targetValue);
             }
-            return (dependentValue === targetValue) || (dependentValue !== '' && targetValue === '*');
+            return (dependentValue === targetValue) || (!Helper.isNull(dependentValue) && targetValue === '*');
         },
         greater: function (dependentValue, targetValue) {
-            if (!isNaN(dependentValue) && !isNaN(targetValue))
+            if (Helper.isNumber(dependentValue) && Helper.isNumber(targetValue))
                 return parseFloat(dependentValue) > parseFloat(targetValue);
             if ((typeof dependentValue === 'string' || dependentValue instanceof String)
                 && (typeof targetValue === 'string' || targetValue instanceof String))
                 return dependentValue.toLowerCase().localeCompare(targetValue.toLowerCase()) > 0;
-            if (dependentValue === null || dependentValue === 'undefined' || targetValue === null || targetValue === 'undefined')
+            if (Helper.isNull(dependentValue) || Helper.isNull(targetValue))
                 return false;
 
-            throw 'Greater than and less than relational operations not allowed for arguments of types other than numeric or string.';
+            return false;
         },
         less: function (dependentValue, targetValue) {
-            if (!isNaN(dependentValue) && !isNaN(targetValue))
+            if (Helper.isNumber(dependentValue) && Helper.isNumber(targetValue))
                 return parseFloat(dependentValue) < parseFloat(targetValue);
             if ((typeof dependentValue === 'string' || dependentValue instanceof String)
                 && (typeof targetValue === 'string' || targetValue instanceof String))
                 return dependentValue.toLowerCase().localeCompare(targetValue.toLowerCase()) < 0;
-            if (dependentValue === null || dependentValue === 'undefined' || targetValue === null || targetValue === 'undefined')
+            if (Helper.isNull(dependentValue) || Helper.isNull(targetValue))
                 return false;
 
-            throw 'Greater than and less than relational operations not allowed for arguments of types other than numeric or string.';
+            return false;
+        },
+        isNumber: function(value) {
+            return !isNaN(parseFloat(value)) && isFinite(value);
+        },
+        isNull: function (value) {
+            return !(value !== null && value !== '' && typeof (value) !== 'undefined');
         }
     };
 
@@ -132,7 +138,7 @@
         if (Helper.compute(dependentValue, targetValue, params.relationaloperator || '==')) {
             // match (condition fulfilled) => means we should try to validate this field (check if required value is provided)            
             var boolValue = analyser.Utils.Bool.tryParse(value);
-            if (!(value !== null && value !== '' && value !== 'undefined') || (!boolValue.error && !boolValue))
+            if (Helper.isNull(value) || (!boolValue.error && !boolValue))
                 return false;
         }
         return true;
@@ -153,7 +159,7 @@
         if (evaluator.compute(composedExpression)) {
             // match (condition fulfilled) => means we should try to validate this field (check if required value is provided)
             var boolValue = analyser.Utils.Bool.tryParse(value);
-            if (!(value !== null && value !== '' && value !== 'undefined') || (!boolValue.error && !boolValue))
+            if (Helper.isNull(value) || (!boolValue.error && !boolValue))
                 return false;
         }
         return true;

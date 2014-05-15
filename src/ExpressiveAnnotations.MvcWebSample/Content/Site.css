@@ -117,11 +117,6 @@ input, textarea {
     width: 280px;
 }
 
-textarea {
-    font-family: inherit;
-    width: 500px;
-}
-
 input:focus, textarea:focus {
     border: 1px solid #7ac0da;
 }

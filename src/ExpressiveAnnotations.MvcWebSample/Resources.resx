@@ -120,14 +120,17 @@
   <data name="Age" xml:space="preserve">
     <value>Age</value>
   </data>
-  <data name="AgeRequired" xml:space="preserve">
-    <value>The {0} field is required.</value>
-  </data>
   <data name="AgreeForContact" xml:space="preserve">
     <value>Agree for contact</value>
   </data>
   <data name="AgreeForContactRequired" xml:space="preserve">
     <value>You have to authorize us to contact you.</value>
+  </data>
+  <data name="AwareOfTheRisks" xml:space="preserve">
+    <value>I am aware of the possible risks</value>
+  </data>
+  <data name="AwareOfTheRisksRequired" xml:space="preserve">
+    <value>You are required to agree that you are aware of the risks of travel.</value>
   </data>
   <data name="BloodType" xml:space="preserve">
     <value>Blood type</value>
@@ -147,8 +150,11 @@
   <data name="Extreme" xml:space="preserve">
     <value>Extreme</value>
   </data>
-  <data name="FieldRequired" xml:space="preserve">
+  <data name="FieldConditionallyRequired" xml:space="preserve">
     <value>The {0} field is required because depends on {1} field.</value>
+  </data>
+  <data name="FieldRequired" xml:space="preserve">
+    <value>The {0} field is required.</value>
   </data>
   <data name="France" xml:space="preserve">
     <value>France</value>
@@ -157,7 +163,13 @@
     <value>Germany</value>
   </data>
   <data name="GoAbroad" xml:space="preserve">
-    <value>Go abroad</value>
+    <value>I'm going abroad</value>
+  </data>
+  <data name="High" xml:space="preserve">
+    <value>High</value>
+  </data>
+  <data name="Low" xml:space="preserve">
+    <value>Low</value>
   </data>
   <data name="NextCountry" xml:space="preserve">
     <value>Next country</value>
@@ -180,8 +192,11 @@
   <data name="Poland" xml:space="preserve">
     <value>Poland</value>
   </data>
+  <data name="PoliticalStability" xml:space="preserve">
+    <value>Political stability</value>
+  </data>
   <data name="ReasonForTravel" xml:space="preserve">
-    <value>Reason for travel</value>
+    <value>Reasons for travel</value>
   </data>
   <data name="ReasonForTravelRequired" xml:space="preserve">
     <value>If you plan to go abroad and you are between 25 and 55 or plan to visit the same foreign country twice, write down your reasons.</value>
@@ -193,6 +208,9 @@
     <value>I don't agree for contact</value>
   </data>
   <data name="SportType" xml:space="preserve">
-    <value>Sport type</value>
+    <value>Kind of sports you like the most</value>
+  </data>
+  <data name="Uncertain" xml:space="preserve">
+    <value>Uncertain</value>
   </data>
 </root>
