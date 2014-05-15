@@ -26,7 +26,7 @@ namespace ExpressiveAnnotations.Tests
             public string Country { get; set; }
             public string NextCountry { get; set; }
 
-            [RequiredIfExpression( /* interpretation => GoAbroad == true && NextCountry != "Other" && NextCountry == [value from Country] */
+            [RequiredIfExpression(
                 Expression = "{0} && !{1} && {2}",
                 DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry"},
                 TargetValues = new object[] {true, "Other", "[Country]"})]
@@ -34,7 +34,7 @@ namespace ExpressiveAnnotations.Tests
 
             public Stability? PoliticalStability { get; set; }
 
-            [RequiredIfExpression( /* interpretation => PoliticalStability != Stability.High */
+            [RequiredIfExpression(
                 Expression = "!{0}",
                 DependentProperties = new[] {"PoliticalStability"},
                 TargetValues = new object[] {Stability.High})]

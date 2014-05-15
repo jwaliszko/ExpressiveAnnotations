@@ -39,11 +39,11 @@ public string ReasonForTravel { get; set; }
 
  How such an expression should be understood?
 
- ```GoAbroad == true && !(NextCountry == "Other") && NextCountry == [value from Country]```
+ ```GoAbroad == true && !(NextCountry == "Other") && NextCountry == value_from_country```
  
- Besides parsing interpretation of the conditional expression, this sample shows as well that instead of hardcoding there is also possibility for dynamic extraction of target values from other fields, by providing their names inside square parentheses `[]`.
+ Besides parsing interpretation of the conditional expression, this sample shows as well that instead of hardcoding there is also possibility for dynamic extraction of target values from other fields, by providing their names inside square brackets `[]`.
 
- Finally, if we are slightly familiar with this syntax above, let's move to even more enriched use case of the same attribute *(valid from version >= 1.2)*:
+ Finally, if we are slightly familiar with this syntax above, let's move to even more enriched use case of the same attribute *(available in version >= 1.2)*:
  
  ```
 [RequiredIfExpression(
@@ -60,7 +60,7 @@ public string ReasonForTravel { get; set; }
 
  ```
  GoAbroad == true 
- && ( (NextCountry != "Other" && NextCountry == [value from Country]) 
+ && ( (NextCountry != "Other" && NextCountry == value_from_country) 
        || Age ∈ (24, 55> 
      )
 ```
@@ -111,11 +111,13 @@ Logical expression is an expression in which relationship between operands is sp
 #####Logical expression schematic interpretation:
 
  ```
-  == (default), !=, >, >=, <, <=        ||, &&           !
-             /---------\             /-----------\ /------------\
-(DepProps[0] RelOpers[0] TarVals[0]) BinaryLogOper (UnaryLogOper)(DepProps[1] RelOpers[1] TarVals[1])
-\----------------------------------/                             \----------------------------------/
-   {operand 0} (relational expr)                                    {operand 1} (relational expr)
+       == (by default), !=, >, >=, <, <=         binary logical operators
+                   /---------\                 /----\
+(!)(DependProps[0] RelOpers[0] TargetVals[0])  ||, &&  (!)(DependProps[1] RelOpers[1] TargetVals[1])
+ | \----------------------------------------/           | \----------------------------------------/
+ |       {operand 0} (relational expr)                  |       {operand 1} (relational expr)
+ |                                                      |
+  ------------------------------------------------------ > unary logical operators (optional)
 ```
 Notice: Forgive the usage of abbreviated names (due to narrow space).
 
