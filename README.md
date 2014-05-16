@@ -121,22 +121,26 @@ Logical expression is an expression in which relationship between operands is sp
 ```
 Notice: Forgive the usage of abbreviated names (due to narrow space).
 
-#####Evaluation steps for sample `{0} || !{1}` logical expression:
+#####Evaluation steps for sample `{0} && !{1}` logical expression:
 
 1. Expression is interpreted as:
 
- ```(DependentProperties[0] == TargetValues[0]) || !(DependentProperties[1] == TargetValues[1])```
+ ```(DependentProperties[0] == TargetValues[0]) && !(DependentProperties[1] == TargetValues[1])```
 
  Notice 1: Interpretation is based on assumption that relational operators are not provided - when computing operands, equality opereator is taken by default.
 
  Notice 2: It's easy to guess that arrays indexes of dependent properties and its corresponding target values are given inside curly brackets `{}`.
 2. Values are extracted from arrays and computed (compared for equality in this case). Next, computation results (boolean flags) are injected into corresponding brackets, let's say:
 
- ```(true) || (false)```
-3. Such preprocessed expression is then converted from infix notation syntax into postfix one:
+ ```true && !false```
+3. Such preprocessed expression is then converted from infix notation syntax into postfix one using [shunting-yard algorithm](http://en.wikipedia.org/wiki/Shunting-yard_algorithm):
 
- ```true false ||```
-4. Reverse Polish Notation (RPN) expression is finally evaluated to give validation result. Here it is true - condition fulfilled, so error message is risen.
+ ```true false ! &&```
+4. Reverse Polish Notation (RPN) expression is finally evaluated using [postfix algorithm](http://en.wikipedia.org/wiki/Reverse_Polish_notation) to give validation result: 
+
+```true false ! &&``` => ```true true &&``` => ```true```
+
+Here the result is `true`, which means that requirement condition is fulfilled, so error message is shown if annotated field is not filled (i.e. is empty or false).
 
 ###What is the context behind this implementation? 
 
