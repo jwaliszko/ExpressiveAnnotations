@@ -61,7 +61,8 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public string NextCountry { get; set; }
 
         [RequiredIfExpression( /* interpretation => GoAbroad == true 
-                                *                   && ( (NextCountry != "Other" && NextCountry == value_from_country) 
+                                *                   && ( 
+                                *                        (NextCountry != "Other" && NextCountry == value_from_country) 
                                 *                        || Age ∈ (24, 55> 
                                 *                      )
                                 */

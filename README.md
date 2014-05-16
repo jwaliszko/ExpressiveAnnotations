@@ -60,7 +60,8 @@ public string ReasonForTravel { get; set; }
 
  ```
  GoAbroad == true 
- && ( (NextCountry != "Other" && NextCountry == value_from_country) 
+ && ( 
+       (NextCountry != "Other" && NextCountry == value_from_country) 
        || Age ∈ (24, 55> 
      )
 ```
@@ -138,7 +139,7 @@ Notice: Forgive the usage of abbreviated names (due to narrow space).
  ```true false ! &&```
 4. Reverse Polish Notation (RPN) expression is finally evaluated using [postfix algorithm](http://en.wikipedia.org/wiki/Reverse_Polish_notation) to give validation result: 
 
-```true false ! &&``` => ```true true &&``` => ```true```
+ ```true false ! &&``` => ```true true &&``` => ```true```
 
 Here the result is `true`, which means that requirement condition is fulfilled, so error message is shown if annotated field is not filled (i.e. is empty or false).
 
