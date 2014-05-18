@@ -1,29 +1,27 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace ExpressiveAnnotations.ConditionalAttributes
 {
-    internal static class Helper
+    public static class Helper
     {
-        internal static object FetchTargetValue(object targetValue, ValidationContext validationContext)
+        public static bool IsEncapsulated(this object targetValue, out string property)
         {
+            property = null;
             var value = targetValue as string;
             if (value != null)
             {
                 var match = Regex.Match(value, @"^\[(.+)\]$");
                 if (match.Success)
-                {
-                    var fieldName = match.Groups[1].Value;
-                    return ExtractValue(validationContext.ObjectInstance, fieldName);
-                }
+                    property = match.Groups[1].Value;
+                return match.Success;
             }
-            return targetValue;
-        }        
+            return false;
+        }
 
-        internal static PropertyInfo ExtractProperty(object source, string property)
+        public static PropertyInfo ExtractProperty(object source, string property)
         {
             var props = property.Split('.');
             var type = source.GetType();
@@ -38,7 +36,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             return pi;
         }
 
-        internal static object ExtractValue(object source, string property)
+        public static object ExtractValue(object source, string property)
         {
             var props = property.Split('.');
             var type = source.GetType();
@@ -60,7 +58,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             return value;
         }
 
-        internal static bool Compute(object dependentValue, object targetValue, string relationalOperator)
+        public static bool Compute(object dependentValue, object targetValue, string relationalOperator)
         {
             switch (relationalOperator)
             {
@@ -81,7 +79,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             throw new ArgumentException(string.Format("Relational operator {0} is invalid. Available operators: ==, !=, >, >=, <, <=.", relationalOperator));
         }
 
-        internal static bool Compare(object dependentValue, object targetValue)
+        public static bool Compare(object dependentValue, object targetValue)
         {
             return Equals(dependentValue, targetValue)
                    || (dependentValue is string
@@ -91,7 +89,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                        && string.Equals(targetValue as string, "*"));
         }
 
-        internal static bool Greater(object dependentValue, object targetValue)
+        public static bool Greater(object dependentValue, object targetValue)
         {
             if (dependentValue.IsNumeric() && targetValue.IsNumeric())
                 return Convert.ToDouble(dependentValue) > Convert.ToDouble(targetValue);
@@ -105,7 +103,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             throw new InvalidOperationException("Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or date time.");
         }
 
-        internal static bool Less(object dependentValue, object targetValue)
+        public static bool Less(object dependentValue, object targetValue)
         {
             if (dependentValue.IsNumeric() && targetValue.IsNumeric())
                 return Convert.ToDouble(dependentValue) < Convert.ToDouble(targetValue);
@@ -119,12 +117,12 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             throw new InvalidOperationException("Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or date time.");
         }
 
-        internal static bool IsNumeric(this object value)
+        public static bool IsNumeric(this object value)
         {
             return value != null && value.GetType().IsNumeric();
         }
 
-        internal static bool IsNumeric(this Type type)
+        public static bool IsNumeric(this Type type)
         {
             if (type == null) return false;
             switch (Type.GetTypeCode(type))
@@ -150,12 +148,12 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             }
         }
 
-        internal static bool IsDateTime(this object value)
+        public static bool IsDateTime(this object value)
         {
             return value != null && value.GetType().IsDateTime();
         }
 
-        internal static bool IsDateTime(this Type type)
+        public static bool IsDateTime(this Type type)
         {
             if (type == null) return false;
             switch (Type.GetTypeCode(type))

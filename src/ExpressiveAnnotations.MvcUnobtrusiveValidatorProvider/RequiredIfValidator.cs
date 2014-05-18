@@ -17,16 +17,22 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         public RequiredIfValidator(ModelMetadata metadata, ControllerContext context, RequiredIfAttribute attribute)
             : base(metadata, context, attribute)
         {
-            var field = metadata.ContainerType.GetProperty(attribute.DependentProperty);
-            var attrib = field.GetCustomAttributes(typeof (DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
-            var dependentPropertyName = attrib != null ? attrib.GetName() : attribute.DependentProperty;
+            var dependentProperty = metadata.ContainerType.GetProperty(attribute.DependentProperty);
+
+            string targetPropertyName;
+            var attributeName = GetType().BaseType.GetGenericArguments().Single().Name;
+            if (attribute.TargetValue.IsEncapsulated(out targetPropertyName))
+                Assert.ConsistentTypes(dependentProperty, metadata.ContainerType.GetProperty(targetPropertyName), metadata.PropertyName, attributeName);
+            else
+                Assert.ConsistentTypes(dependentProperty, attribute.TargetValue, metadata.PropertyName, attributeName);
+
+            var displayAttribute = dependentProperty.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
+            var dependentPropertyName = displayAttribute != null ? displayAttribute.GetName() : attribute.DependentProperty;
 
             _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), dependentPropertyName);
             _dependentProperty = attribute.DependentProperty;
             _relationalOperator = attribute.RelationalOperator;
             _targetValue = attribute.TargetValue ?? string.Empty;    // null returned as empty string at client side
-
-            Assert.ConsistentTypes(field, attribute.TargetValue, metadata.PropertyName, GetType().BaseType.GetGenericArguments().Single().Name);
         }
 
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()

@@ -57,16 +57,27 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             if (RelationalOperators.Any() && RelationalOperators.Length != DependentProperties.Length)
                 throw new ArgumentException("Number of explicitly provided relational operators is incorrect.");
 
+            var attributeName = GetType().Name;
             var tokens = new List<object>();
+
             for (var i = 0; i < DependentProperties.Count(); i++)
             {
+                var dependentProperty = Helper.ExtractProperty(validationContext.ObjectInstance, DependentProperties[i]);
+
                 var dependentValue = Helper.ExtractValue(validationContext.ObjectInstance, DependentProperties[i]);
-                var targetValue = Helper.FetchTargetValue(TargetValues[i], validationContext);
+                var targetValue = TargetValues[i];                                
 
-                var field = Helper.ExtractProperty(validationContext.ObjectInstance, DependentProperties[i]);
-                Assert.ConsistentTypes(field, targetValue, validationContext.DisplayName, GetType().Name);
+                string targetPropertyName;
+                if (targetValue.IsEncapsulated(out targetPropertyName))
+                {
+                    var targetProperty = Helper.ExtractProperty(validationContext.ObjectInstance, targetPropertyName);
+                    Assert.ConsistentTypes(dependentProperty, targetProperty, validationContext.DisplayName, attributeName);
+                    targetValue = Helper.ExtractValue(validationContext.ObjectInstance, targetPropertyName);
+                }
+                else
+                    Assert.ConsistentTypes(dependentProperty, targetValue, validationContext.DisplayName, attributeName);
 
-                var result = Helper.Compute(dependentValue, targetValue, RelationalOperators.Any() ? RelationalOperators[i] ?? "==" : "==");
+                var result = Helper.Compute(dependentValue, targetValue, RelationalOperators.Any() ? RelationalOperators[i] : "==");
                 tokens.Add(result.ToString().ToLowerInvariant());
             }
 

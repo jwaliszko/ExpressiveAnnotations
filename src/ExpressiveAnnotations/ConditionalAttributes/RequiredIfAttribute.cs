@@ -42,16 +42,25 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {            
             // get a reference to the property this validation depends upon
-            var field = Helper.ExtractProperty(validationContext.ObjectInstance, DependentProperty);
-            var attrib = field.GetCustomAttributes(typeof (DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
-            var dependentPropertyName = attrib != null ? attrib.GetName() : DependentProperty;
-
-            // get the value of the dependent property
+            var dependentProperty = Helper.ExtractProperty(validationContext.ObjectInstance, DependentProperty);            
+            
             var dependentValue = Helper.ExtractValue(validationContext.ObjectInstance, DependentProperty);
-            // fetch target value
-            var targetValue = Helper.FetchTargetValue(TargetValue, validationContext);
+            var targetValue = TargetValue;
 
-            Assert.ConsistentTypes(field, targetValue, validationContext.DisplayName, GetType().Name);
+            string targetPropertyName;
+            var attributeName = GetType().Name;
+            if (targetValue.IsEncapsulated(out targetPropertyName))
+            {
+                var targetProperty = Helper.ExtractProperty(validationContext.ObjectInstance, targetPropertyName);
+                Assert.ConsistentTypes(dependentProperty, targetProperty, validationContext.DisplayName, attributeName);
+                targetValue = Helper.ExtractValue(validationContext.ObjectInstance, targetPropertyName);
+            }
+            else
+                Assert.ConsistentTypes(dependentProperty, targetValue, validationContext.DisplayName, attributeName);
+
+            var displayAttribute = dependentProperty.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
+            var dependentPropertyName = displayAttribute != null ? displayAttribute.GetName() : DependentProperty;
+
             // compare the value against the target value
             if (Helper.Compute(dependentValue, targetValue, RelationalOperator ?? "=="))
             {

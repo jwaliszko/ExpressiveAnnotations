@@ -14,6 +14,7 @@ namespace ExpressiveAnnotations.Tests
             public class SecretModel
             {
                 public bool KnowSomething { get; set; }
+                public string ShowSecretData { get; set; }
             }
 
             public SecretModel Secret { get; set; }
@@ -33,6 +34,9 @@ namespace ExpressiveAnnotations.Tests
 
             [RequiredIf(DependentProperty = "GoAbroad", TargetValue = "true")]
             public string CreditCardNumber { get; set; }
+
+            [RequiredIf(DependentProperty = "GoAbroad", TargetValue = "[Secret.ShowSecretData]")]
+            public string DebetCardNumber { get; set; }
 
             [RequiredIf(DependentProperty = "Email", TargetValue = "jaroslaw.waliszko@gmail.com")]
             public string WhatToDoAboutInsomnia { get; set; }
@@ -147,7 +151,27 @@ namespace ExpressiveAnnotations.Tests
             catch (InvalidOperationException e)
             {
                 Assert.AreEqual(
-                    "Type mismatch detected in RequiredIfAttribute definition for CreditCardNumber field. Types consistency is required for GoAbroad field and its corresponding target value (unless target is null or *).",
+                    "Type mismatch detected in RequiredIfAttribute definition for CreditCardNumber field. Types consistency is required for GoAbroad field and its corresponding, " +
+                    "explicitly provided, target value (explicit target values, if null or *, does not interfere with types consistency assertions).",
+                    e.Message);
+                throw;
+            }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void Verify_types_consistency_requirement_for_backend_property()
+        {
+            try
+            {
+                var model = new Model { GoAbroad = true, DebetCardNumber = null, Secret = new Model.SecretModel { ShowSecretData = null } };
+                model.IsValid(m => m.DebetCardNumber);
+            }
+            catch (InvalidOperationException e)
+            {
+                Assert.AreEqual(
+                    "Type mismatch detected in RequiredIfAttribute definition for DebetCardNumber field. Types consistency is required for GoAbroad field and its corresponding, " +
+                    "provided indirectly through backend field, target value.",
                     e.Message);
                 throw;
             }
