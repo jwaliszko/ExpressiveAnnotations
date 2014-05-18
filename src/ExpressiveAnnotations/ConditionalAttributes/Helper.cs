@@ -104,7 +104,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             if (dependentValue == null || targetValue == null)
                 return false;
             
-            throw new InvalidOperationException("Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or date time.");
+            throw new InvalidOperationException("Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.");
         }
 
         public static bool Less(object dependentValue, object targetValue)
@@ -118,7 +118,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             if (dependentValue == null || targetValue == null)
                 return false;
 
-            throw new InvalidOperationException("Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or date time.");
+            throw new InvalidOperationException("Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.");
         }
 
         public static bool IsNumeric(this object value)
@@ -171,6 +171,32 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                 default:
                     return false;
             }
-        }        
+        }
+
+        public static bool IsString(this Type type)
+        {
+            if (type == null) return false;
+            return Type.GetTypeCode(type) == TypeCode.String;
+        }
+
+        public static bool IsBool(this Type type)
+        {
+            if (type == null) return false;
+            return Type.GetTypeCode(type) == TypeCode.Boolean;
+        }
+
+        public static string GetCoarseType(Type type)
+        {
+            if (type.IsDateTime())
+                return "datetime";            
+            if (type.IsNumeric())
+                return "numeric";
+            if (type.IsString())
+                return "string";           
+            if (type.IsBool())
+                return "bool";            ;
+
+            return "complex";
+        }
     }
 }

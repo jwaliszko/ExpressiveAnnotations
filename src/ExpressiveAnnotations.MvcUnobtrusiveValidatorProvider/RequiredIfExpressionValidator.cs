@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Reflection;
 using System.Web.Mvc;
 using ExpressiveAnnotations.ConditionalAttributes;
 using System.Collections.Generic;
@@ -14,6 +13,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         private readonly string[] _dependentProperties;
         private readonly string[] _relationalOperators;
         private readonly object[] _targetValues;
+        private readonly string[] _types;
         private readonly string _expression;
 
         public RequiredIfExpressionValidator(ModelMetadata metadata, ControllerContext context, RequiredIfExpressionAttribute attribute)
@@ -28,6 +28,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             _dependentProperties = new string[count];
             _relationalOperators = new string[count];
             _targetValues = new object[count];
+            _types = new string[count];
 
             var attributeName = GetType().BaseType.GetGenericArguments().Single().Name;
 
@@ -48,6 +49,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
                 if (attribute.RelationalOperators.Any())
                     _relationalOperators[i] = attribute.RelationalOperators[i];
                 _targetValues[i] = attribute.TargetValues[i] ?? string.Empty;   // null returned as empty string at client side
+
+                _types[i] = Helper.GetCoarseType(dependentProperty.PropertyType);
             }
 
             _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName());
@@ -64,6 +67,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             rule.ValidationParameters.Add("dependentproperties", JsonConvert.SerializeObject(_dependentProperties));
             rule.ValidationParameters.Add("relationaloperators", JsonConvert.SerializeObject(_relationalOperators));
             rule.ValidationParameters.Add("targetvalues", JsonConvert.SerializeObject(_targetValues));
+            rule.ValidationParameters.Add("types", JsonConvert.SerializeObject(_types)); 
             rule.ValidationParameters.Add("expression", _expression);
             yield return rule;
         }

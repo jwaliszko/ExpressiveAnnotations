@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web.Mvc;
 using ExpressiveAnnotations.ConditionalAttributes;
@@ -14,6 +13,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         private readonly string _dependentProperty;
         private readonly string _relationalOperator;
         private readonly object _targetValue;
+        private readonly string _type; 
 
         public RequiredIfValidator(ModelMetadata metadata, ControllerContext context, RequiredIfAttribute attribute)
             : base(metadata, context, attribute)
@@ -37,6 +37,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             _dependentProperty = attribute.DependentProperty;
             _relationalOperator = attribute.RelationalOperator;
             _targetValue = attribute.TargetValue ?? string.Empty;    // null returned as empty string at client side
+
+            _type = Helper.GetCoarseType(dependentProperty.PropertyType);
         }
 
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()
@@ -49,6 +51,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             rule.ValidationParameters.Add("dependentproperty", JsonConvert.SerializeObject(_dependentProperty));
             rule.ValidationParameters.Add("relationaloperator", JsonConvert.SerializeObject(_relationalOperator));
             rule.ValidationParameters.Add("targetvalue", JsonConvert.SerializeObject(_targetValue));
+            rule.ValidationParameters.Add("type", JsonConvert.SerializeObject(_type));
             yield return rule;
         }
     }

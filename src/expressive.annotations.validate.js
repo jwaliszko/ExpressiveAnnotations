@@ -105,26 +105,28 @@
         }
     };
 
-    $.validator.unobtrusive.adapters.add('requiredif', ['dependentproperty', 'relationaloperator', 'targetvalue'], function (options) {
+    $.validator.unobtrusive.adapters.add('requiredif', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type'], function (options) {
         options.rules['requiredif'] = {
             prefix: ModelPrefix.get(options.element.name),
             form: options.form,
             dependentproperty: $.parseJSON(options.params.dependentproperty),
             relationaloperator: $.parseJSON(options.params.relationaloperator),
-            targetvalue: $.parseJSON(options.params.targetvalue)
+            targetvalue: $.parseJSON(options.params.targetvalue),
+            type: $.parseJSON(options.params.typename)
         };
         if (options.message) {
             options.messages['requiredif'] = options.message;
         }
     });
 
-    $.validator.unobtrusive.adapters.add('requiredifexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'expression'], function (options) {
+    $.validator.unobtrusive.adapters.add('requiredifexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression'], function (options) {
         options.rules['requiredifexpression'] = {
             prefix: ModelPrefix.get(options.element.name),
             form: options.form,
             dependentproperties: $.parseJSON(options.params.dependentproperties),
             relationaloperators: $.parseJSON(options.params.relationaloperators),
             targetvalues: $.parseJSON(options.params.targetvalues),
+            types: $.parseJSON(options.params.typesNames),
             expression: options.params.expression
         };
         if (options.message) {
