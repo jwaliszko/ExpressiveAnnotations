@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web.Mvc;
 using ExpressiveAnnotations.ConditionalAttributes;
@@ -12,17 +13,20 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         private readonly string _errorMessage;
         private readonly string _dependentProperty;
         private readonly string _relationalOperator;
-        private readonly object _targetValue;        
+        private readonly object _targetValue;
 
         public RequiredIfValidator(ModelMetadata metadata, ControllerContext context, RequiredIfAttribute attribute)
             : base(metadata, context, attribute)
         {
-            var dependentProperty = metadata.ContainerType.GetProperty(attribute.DependentProperty);
+            var dependentProperty = Helper.ExtractProperty(metadata.ContainerType, attribute.DependentProperty);
 
             string targetPropertyName;
             var attributeName = GetType().BaseType.GetGenericArguments().Single().Name;
             if (attribute.TargetValue.IsEncapsulated(out targetPropertyName))
-                Assert.ConsistentTypes(dependentProperty, metadata.ContainerType.GetProperty(targetPropertyName), metadata.PropertyName, attributeName);
+            {
+                var targetProperty = Helper.ExtractProperty(metadata.ContainerType, targetPropertyName);
+                Assert.ConsistentTypes(dependentProperty, targetProperty, metadata.PropertyName, attributeName);
+            }
             else
                 Assert.ConsistentTypes(dependentProperty, attribute.TargetValue, metadata.PropertyName, attributeName);
 
@@ -44,7 +48,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             };
             rule.ValidationParameters.Add("dependentproperty", JsonConvert.SerializeObject(_dependentProperty));
             rule.ValidationParameters.Add("relationaloperator", JsonConvert.SerializeObject(_relationalOperator));
-            rule.ValidationParameters.Add("targetvalue", JsonConvert.SerializeObject(_targetValue));            
+            rule.ValidationParameters.Add("targetvalue", JsonConvert.SerializeObject(_targetValue));
             yield return rule;
         }
     }

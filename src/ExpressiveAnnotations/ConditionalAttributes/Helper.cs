@@ -23,8 +23,12 @@ namespace ExpressiveAnnotations.ConditionalAttributes
 
         public static PropertyInfo ExtractProperty(object source, string property)
         {
+            return ExtractProperty(source.GetType(), property);
+        }
+
+        public static PropertyInfo ExtractProperty(Type type, string property)
+        {
             var props = property.Split('.');
-            var type = source.GetType();
             PropertyInfo pi = null;
             foreach (var prop in props)
             {

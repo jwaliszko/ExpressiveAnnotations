@@ -33,11 +33,14 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 
             for (var i = 0; i < count; i++)
             {
-                var dependentProperty = metadata.ContainerType.GetProperty(attribute.DependentProperties[i]);
+                var dependentProperty = Helper.ExtractProperty(metadata.ContainerType, attribute.DependentProperties[i]);
 
                 string targetPropertyName;
                 if (attribute.TargetValues[i].IsEncapsulated(out targetPropertyName))
-                    Assert.ConsistentTypes(dependentProperty, metadata.ContainerType.GetProperty(targetPropertyName), metadata.PropertyName, attributeName);
+                {
+                    var targetProperty = Helper.ExtractProperty(metadata.ContainerType, targetPropertyName);
+                    Assert.ConsistentTypes(dependentProperty, targetProperty, metadata.PropertyName, attributeName);
+                }
                 else
                     Assert.ConsistentTypes(dependentProperty, attribute.TargetValues[i], metadata.PropertyName, attributeName);
 
@@ -60,7 +63,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             };
             rule.ValidationParameters.Add("dependentproperties", JsonConvert.SerializeObject(_dependentProperties));
             rule.ValidationParameters.Add("relationaloperators", JsonConvert.SerializeObject(_relationalOperators));
-            rule.ValidationParameters.Add("targetvalues", JsonConvert.SerializeObject(_targetValues));            
+            rule.ValidationParameters.Add("targetvalues", JsonConvert.SerializeObject(_targetValues));
             rule.ValidationParameters.Add("expression", _expression);
             yield return rule;
         }
