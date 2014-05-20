@@ -1,8 +1,8 @@
 ﻿/* expressive.annotations.analysis.js - v1.1.3
  * script responsible for logical expressions parsing and computation 
- * e.g. suppose there is "(true) && (!false)" expression given, and we need to know its final logical value:
+ * e.g. suppose there is "true && !false" expression given, and we need to know its final logical value:
  *     var evaluator = new Evaluator();
- *     var result = evaluator.compute("(true) && (!false)")
+ *     var result = evaluator.compute("true && !false")
  * this script is a part of client side component of ExpresiveAnnotations - annotation-based conditional validation library
  * copyright (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
  * licensed MIT: http://www.opensource.org/licenses/mit-license.php */
@@ -42,7 +42,7 @@ var BooleanExpressionsAnalyser = (function() {
             }
         },
         Bool: {
-            tryParse: function (value) {
+            tryParse: function(value) {
                 if (typeof value === 'boolean' || value instanceof Boolean)
                     return value;
                 if (typeof value === 'string' || value instanceof String) {
@@ -54,13 +54,30 @@ var BooleanExpressionsAnalyser = (function() {
             }
         },
         Float: {
-            tryParse: function (value) {
+            tryParse: function(value) {
                 function isNumber(n) {
                     return !isNaN(parseFloat(n)) && isFinite(n);
                 }
+
                 if (isNumber(value))
                     return parseFloat(value);
                 return { error: true, msg: 'Parsing error. Given value has no numeric meaning.' }
+            }
+        },
+        Date: {
+            tryParse: function(value) { // tries to parse a string representing an RFC2822 or ISO 8601 date.
+                function isNumber(n) {
+                    return !isNaN(parseFloat(n)) && isFinite(n);
+                    }
+
+                if (value instanceof Date)
+                    return value;
+                if (typeof value === 'string' || value instanceof String) {
+                    var milisec = Date.parse(value);
+                    if (isNumber(milisec))
+                        return new Date(milisec);
+                }
+                return { error: true, msg: 'Parsing error. Given value has no date meaning.' }
             }
         }
     };

@@ -32,7 +32,7 @@
             if (Helper.isEmpty(fieldValue))
                 return null;
 
-            var dependentValue = Helper.tryParse(fieldValue, type);
+            var dependentValue = Helper.tryParse(fieldValue, type); // convert to required type
             if (dependentValue.error)
                 throw 'Data extraction fatal error. DOM value conversion to reflect required type failed.';
             return dependentValue;
@@ -72,8 +72,10 @@
                     || (!Helper.isEmpty(dependentValue) && targetValue === '*')
                     || (Helper.isEmpty(dependentValue) && Helper.isEmpty(targetValue));
         },
-        greater: function (dependentValue, targetValue) {
+        greater: function (dependentValue, targetValue) {            
             if (Helper.isNumber(dependentValue) && Helper.isNumber(targetValue))
+                return dependentValue > targetValue;
+            if (Helper.isDate(dependentValue) && Helper.isDate(targetValue))
                 return dependentValue > targetValue;
             if (Helper.isString(dependentValue) && Helper.isString(targetValue))
                 return dependentValue.toLowerCase().localeCompare(targetValue.toLowerCase()) > 0;
@@ -82,8 +84,10 @@
 
             throw 'Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.';
         },
-        less: function (dependentValue, targetValue) {
+        less: function (dependentValue, targetValue) {            
             if (Helper.isNumber(dependentValue) && Helper.isNumber(targetValue))
+                return dependentValue < targetValue;
+            if (Helper.isDate(dependentValue) && Helper.isDate(targetValue))
                 return dependentValue < targetValue;
             if (Helper.isString(dependentValue) && Helper.isString(targetValue))
                 return dependentValue.toLowerCase().localeCompare(targetValue.toLowerCase()) < 0;
@@ -91,6 +95,9 @@
                 return false;
 
             throw 'Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.';
+        },
+        isDate: function (value) {
+            return value instanceof Date;
         },
         isNumber: function(value) {
             return !isNaN(parseFloat(value)) && isFinite(value);
@@ -104,6 +111,9 @@
         tryParse: function (value, type) {
             var result;
             switch (type) {
+                case "datetime":
+                    result = analyser.Utils.Date.tryParse(value);
+                    break;
                 case "numeric":
                     result = analyser.Utils.Float.tryParse(value);
                     break;
