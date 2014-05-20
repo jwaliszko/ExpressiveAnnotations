@@ -1,5 +1,6 @@
 ﻿using System.Web.Mvc;
 using ExpressiveAnnotations.MvcWebSample.Models;
+using System;
 
 namespace ExpressiveAnnotations.MvcWebSample.Controllers
 {
@@ -12,7 +13,8 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
                 GoAbroad = true, 
                 Country = "Poland", 
                 NextCountry = "Other", 
-                SportType = "Extreme"
+                SportType = "Extreme",
+                LatestSuggestedReturnDate = DateTime.UtcNow.AddMonths(1)
             };
             return View("Home", model);
         }

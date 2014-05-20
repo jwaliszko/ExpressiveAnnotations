@@ -85,8 +85,6 @@ namespace ExpressiveAnnotations.ConditionalAttributes
 
         public static bool Compare(object dependentValue, object targetValue)
         {
-
-
             return Equals(dependentValue, targetValue)
                    || (dependentValue is string && targetValue is string
                        && string.Equals(((string) dependentValue).Trim(), ((string) targetValue).Trim()))

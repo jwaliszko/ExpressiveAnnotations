@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web.Mvc;
@@ -73,6 +74,24 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ReasonForTravelRequired")]
         [Display(ResourceType = typeof (Resources), Name = "ReasonForTravel")]
         public string ReasonForTravel { get; set; }
+
+        public DateTime LatestSuggestedReturnDate { get; set; }
+
+        [RequiredIf(
+            DependentProperty = "GoAbroad",
+            TargetValue = true,
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]
+        [Display(ResourceType = typeof(Resources), Name = "ReturnDate")]
+        public DateTime? ReturnDate { get; set; }
+
+        [RequiredIfExpression( /* interpretation => GoAbroad == true && ReturnDate > value_from_latest_suggested_return_date */
+            Expression = "{0} && {1}",
+            DependentProperties = new[] { "GoAbroad", "ReturnDate" },
+            RelationalOperators = new[] { "==", ">" },
+            TargetValues = new object[] { true, "[LatestSuggestedReturnDate]" },
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "ReasonForLongTravelRequired")]
+        [Display(ResourceType = typeof(Resources), Name = "ReasonForLongTravel")]
+        public string ReasonForLongTravel { get; set; }
 
         [Display(ResourceType = typeof (Resources), Name = "PoliticalStability")]
         [RequiredIf(

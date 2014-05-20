@@ -4,6 +4,7 @@
         <meta charset="utf-8" />
         <title>ExpressiveAnnotations</title>
         @Styles.Render("~/Content/css")
+        @Styles.Render("~/Content/themes/base/css")
     </head>
     <body>
         <div id="body">
@@ -13,6 +14,7 @@
         </div>
         
         @Scripts.Render("~/bundles/jquery")
+        @Scripts.Render("~/bundles/jqueryui")
         @RenderSection("scripts", required: false)
     </body>
 </html>

@@ -214,6 +214,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Latest suggested return date.
+        /// </summary>
+        public static string LatestSuggestedReturnDate {
+            get {
+                return ResourceManager.GetString("LatestSuggestedReturnDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Low.
         /// </summary>
         public static string Low {
@@ -295,6 +304,24 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Reason for such a long travel.
+        /// </summary>
+        public static string ReasonForLongTravel {
+            get {
+                return ResourceManager.GetString("ReasonForLongTravel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If you plan to stay abroad longer than one month from now, write down your reasons..
+        /// </summary>
+        public static string ReasonForLongTravelRequired {
+            get {
+                return ResourceManager.GetString("ReasonForLongTravelRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Reasons for travel.
         /// </summary>
         public static string ReasonForTravel {
@@ -309,6 +336,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         public static string ReasonForTravelRequired {
             get {
                 return ResourceManager.GetString("ReasonForTravelRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Return date.
+        /// </summary>
+        public static string ReturnDate {
+            get {
+                return ResourceManager.GetString("ReturnDate", resourceCulture);
             }
         }
         

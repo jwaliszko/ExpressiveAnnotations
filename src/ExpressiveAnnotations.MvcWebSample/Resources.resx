@@ -168,6 +168,9 @@
   <data name="High" xml:space="preserve">
     <value>High</value>
   </data>
+  <data name="LatestSuggestedReturnDate" xml:space="preserve">
+    <value>Latest suggested return date</value>
+  </data>
   <data name="Low" xml:space="preserve">
     <value>Low</value>
   </data>
@@ -195,11 +198,20 @@
   <data name="PoliticalStability" xml:space="preserve">
     <value>Political stability</value>
   </data>
+  <data name="ReasonForLongTravel" xml:space="preserve">
+    <value>Reason for such a long travel</value>
+  </data>
+  <data name="ReasonForLongTravelRequired" xml:space="preserve">
+    <value>If you plan to stay abroad longer than one month from now, write down your reasons.</value>
+  </data>
   <data name="ReasonForTravel" xml:space="preserve">
     <value>Reasons for travel</value>
   </data>
   <data name="ReasonForTravelRequired" xml:space="preserve">
     <value>If you plan to go abroad and you are between 25 and 55 or plan to visit the same foreign country twice, write down your reasons.</value>
+  </data>
+  <data name="ReturnDate" xml:space="preserve">
+    <value>Return date</value>
   </data>
   <data name="SpamAllowed" xml:space="preserve">
     <value>I agree for contact</value>

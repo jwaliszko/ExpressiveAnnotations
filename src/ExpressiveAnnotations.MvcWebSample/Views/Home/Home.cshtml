@@ -94,6 +94,32 @@
                 @Html.ValidationMessageFor(model => model.ReasonForTravel)
             </li>
             <li>
+                @Html.HiddenFor(x => x.LatestSuggestedReturnDate)   @*store required information for client side backing hidden backing field*@
+                <pre class="code">
+[RequiredIf(
+    DependentProperty = "GoAbroad", 
+    TargetValue = true]
+</pre>
+                <pre class="action">[show attribute]</pre>
+                @Html.LabelFor(model => model.ReturnDate)
+                @Html.EditorFor(x => x.ReturnDate) @Resources.LatestSuggestedReturnDate: @Model.LatestSuggestedReturnDate.ToShortDateString()
+                @Html.ValidationMessageFor(model => model.ReturnDate)
+            </li>
+            <li>
+                <pre class="code">
+[RequiredIfExpression( /* interpretation => GoAbroad == true && ReturnDate > value_from_latest_suggested_return_date */
+            Expression = "{0} && {1}",
+            DependentProperties = new[] {"GoAbroad", "ReturnDate"},
+            RelationalOperators = new[] {"==", ">"},
+            TargetValues = new object[] {true, "[LatestSuggestedReturnDate]"},
+            ErrorMessage = "If you plan to stay abroad longer than one month from now, write down your reasons."]
+</pre>
+                <pre class="action">[show attribute]</pre>
+                @Html.LabelFor(model => model.ReasonForLongTravel)
+                @Html.TextAreaFor(x => x.ReasonForLongTravel)
+                @Html.ValidationMessageFor(model => model.ReasonForLongTravel)
+            </li>
+            <li>
                 <pre class="code">
 [RequiredIf(
     DependentProperty = "GoAbroad", 
@@ -182,6 +208,7 @@ one of possible equivalents is:
                 $(this).hide();
                 $(this).parent().find('.code').toggle('slow');
             });
+            $("#ReturnDate").datepicker();
         });
     </script>
 }
