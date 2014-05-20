@@ -68,7 +68,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                 var targetValue = TargetValues[i];                                
 
                 string targetPropertyName;
-                if (targetValue.IsEncapsulated(out targetPropertyName))
+                if (targetValue.TryExtractPropertyName(out targetPropertyName)) // check if target value is not an encapsulated property
                 {
                     var targetProperty = Helper.ExtractProperty(validationContext.ObjectInstance, targetPropertyName);
                     Assert.ConsistentTypes(dependentProperty, targetProperty, validationContext.DisplayName, attributeName);

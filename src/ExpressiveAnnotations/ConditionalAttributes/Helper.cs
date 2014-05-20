@@ -7,7 +7,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
 {
     public static class Helper
     {
-        public static bool IsEncapsulated(this object targetValue, out string property)
+        public static bool TryExtractPropertyName(this object targetValue, out string property)
         {
             property = null;
             var value = targetValue as string;
@@ -85,12 +85,13 @@ namespace ExpressiveAnnotations.ConditionalAttributes
 
         public static bool Compare(object dependentValue, object targetValue)
         {
+
+
             return Equals(dependentValue, targetValue)
-                   || (dependentValue is string
-                       && targetValue is string
-                       && string.Equals(((string)dependentValue).Trim(), ((string)targetValue).Trim()))
-                   || (dependentValue != null
-                       && string.Equals(targetValue as string, "*"));
+                   || (dependentValue is string && targetValue is string
+                       && string.Equals(((string) dependentValue).Trim(), ((string) targetValue).Trim()))
+                   || (!dependentValue.IsEmpty() && string.Equals(targetValue as string, "*"))
+                   || (dependentValue.IsEmpty() && targetValue.IsEmpty());
         }
 
         public static bool Greater(object dependentValue, object targetValue)
@@ -119,6 +120,11 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                 return false;
 
             throw new InvalidOperationException("Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.");
+        }
+
+        public static bool IsEmpty(this object value)
+        {
+            return value == null || (value is string && string.IsNullOrEmpty((string)value));
         }
 
         public static bool IsNumeric(this object value)
@@ -194,7 +200,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             if (type.IsString())
                 return "string";           
             if (type.IsBool())
-                return "bool";            ;
+                return "bool";
 
             return "complex";
         }

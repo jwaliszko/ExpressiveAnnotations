@@ -60,26 +60,29 @@ namespace ExpressiveAnnotations.Tests
             model = new Model {Email = "jaroslaw.waliszko@gmail.com", WhatToDoAboutInsomnia = "write a script"};
             Assert.IsTrue(model.IsValid(m => m.WhatToDoAboutInsomnia));
 
-            model = new Model {Email = "Jaroslaw.Waliszko@gmail.com", WhatToDoAboutInsomnia = ""};
+            model = new Model { Email = "  jaroslaw.waliszko@gmail.com  ", WhatToDoAboutInsomnia = "write a script" };
             Assert.IsTrue(model.IsValid(m => m.WhatToDoAboutInsomnia));
+
+            model = new Model {Email = "Jaroslaw.Waliszko@gmail.com", WhatToDoAboutInsomnia = ""};
+            Assert.IsTrue(model.IsValid(m => m.WhatToDoAboutInsomnia));            
         }
 
         [TestMethod]
         public void Verify_if_required()
         {
-            var model = new Model {GoAbroad = true, PassportNumber = ""};
+            var model = new Model { GoAbroad = true, PassportNumber = null };
+            Assert.IsFalse(model.IsValid(m => m.PassportNumber));
+
+            model = new Model {GoAbroad = true, PassportNumber = ""};
             Assert.IsFalse(model.IsValid(m => m.PassportNumber));
 
             model = new Model {GoAbroad = true, PassportNumber = "   "};
-            Assert.IsFalse(model.IsValid(m => m.PassportNumber));
-
-            model = new Model {GoAbroad = true, PassportNumber = null};
-            Assert.IsFalse(model.IsValid(m => m.PassportNumber));
+            Assert.IsFalse(model.IsValid(m => m.PassportNumber));            
 
             model = new Model {Email = "jaroslaw.waliszko@gmail.com", WhatToDoAboutInsomnia = ""};
             Assert.IsFalse(model.IsValid(m => m.WhatToDoAboutInsomnia));
 
-            model = new Model {Email = "   jaroslaw.waliszko@gmail.com   ", WhatToDoAboutInsomnia = ""};
+            model = new Model { Email = "  jaroslaw.waliszko@gmail.com  ", WhatToDoAboutInsomnia = "" };
             Assert.IsFalse(model.IsValid(m => m.WhatToDoAboutInsomnia));
         }
 

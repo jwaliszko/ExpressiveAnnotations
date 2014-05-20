@@ -37,7 +37,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
                 var dependentProperty = Helper.ExtractProperty(metadata.ContainerType, attribute.DependentProperties[i]);
 
                 string targetPropertyName;
-                if (attribute.TargetValues[i].IsEncapsulated(out targetPropertyName))
+                if (attribute.TargetValues[i].TryExtractPropertyName(out targetPropertyName))
                 {
                     var targetProperty = Helper.ExtractProperty(metadata.ContainerType, targetPropertyName);
                     Assert.ConsistentTypes(dependentProperty, targetProperty, metadata.PropertyName, attributeName);
@@ -46,9 +46,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
                     Assert.ConsistentTypes(dependentProperty, attribute.TargetValues[i], metadata.PropertyName, attributeName);
 
                 _dependentProperties[i] = attribute.DependentProperties[i];
-                if (attribute.RelationalOperators.Any())
-                    _relationalOperators[i] = attribute.RelationalOperators[i];
-                _targetValues[i] = attribute.TargetValues[i] ?? string.Empty;   // null returned as empty string at client side
+                _relationalOperators[i] = attribute.RelationalOperators.Any() ? attribute.RelationalOperators[i] : "==";
+                _targetValues[i] = attribute.TargetValues[i];
 
                 _types[i] = Helper.GetCoarseType(dependentProperty.PropertyType);
             }

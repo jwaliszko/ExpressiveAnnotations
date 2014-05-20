@@ -22,7 +22,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 
             string targetPropertyName;
             var attributeName = GetType().BaseType.GetGenericArguments().Single().Name;
-            if (attribute.TargetValue.IsEncapsulated(out targetPropertyName))
+            if (attribute.TargetValue.TryExtractPropertyName(out targetPropertyName))
             {
                 var targetProperty = Helper.ExtractProperty(metadata.ContainerType, targetPropertyName);
                 Assert.ConsistentTypes(dependentProperty, targetProperty, metadata.PropertyName, attributeName);
@@ -35,8 +35,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 
             _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), dependentPropertyName);
             _dependentProperty = attribute.DependentProperty;
-            _relationalOperator = attribute.RelationalOperator;
-            _targetValue = attribute.TargetValue ?? string.Empty;    // null returned as empty string at client side
+            _relationalOperator = attribute.RelationalOperator ?? "==";
+            _targetValue = attribute.TargetValue;
 
             _type = Helper.GetCoarseType(dependentProperty.PropertyType);
         }

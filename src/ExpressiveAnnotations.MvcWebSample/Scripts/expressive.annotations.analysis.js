@@ -52,6 +52,16 @@ var BooleanExpressionsAnalyser = (function() {
                 }
                 return { error: true, msg: 'Parsing error. Given value has no boolean meaning.' }
             }
+        },
+        Float: {
+            tryParse: function (value) {
+                function isNumber(n) {
+                    return !isNaN(parseFloat(n)) && isFinite(n);
+                }
+                if (isNumber(value))
+                    return parseFloat(value);
+                return { error: true, msg: 'Parsing error. Given value has no numeric meaning.' }
+            }
         }
     };
 

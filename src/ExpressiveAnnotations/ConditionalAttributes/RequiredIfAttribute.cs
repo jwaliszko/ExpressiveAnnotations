@@ -49,21 +49,21 @@ namespace ExpressiveAnnotations.ConditionalAttributes
 
             string targetPropertyName;
             var attributeName = GetType().Name;
-            if (targetValue.IsEncapsulated(out targetPropertyName))
+            if (targetValue.TryExtractPropertyName(out targetPropertyName)) // check if target value is not an encapsulated property
             {
                 var targetProperty = Helper.ExtractProperty(validationContext.ObjectInstance, targetPropertyName);
                 Assert.ConsistentTypes(dependentProperty, targetProperty, validationContext.DisplayName, attributeName);
                 targetValue = Helper.ExtractValue(validationContext.ObjectInstance, targetPropertyName);
             }
             else
-                Assert.ConsistentTypes(dependentProperty, targetValue, validationContext.DisplayName, attributeName);
-
-            var displayAttribute = dependentProperty.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
-            var dependentPropertyName = displayAttribute != null ? displayAttribute.GetName() : DependentProperty;
+                Assert.ConsistentTypes(dependentProperty, targetValue, validationContext.DisplayName, attributeName);            
 
             // compare the value against the target value
             if (Helper.Compute(dependentValue, targetValue, RelationalOperator ?? "=="))
             {
+                var displayAttribute = dependentProperty.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
+                var dependentPropertyName = displayAttribute != null ? displayAttribute.GetName() : DependentProperty;
+
                 // match => means we should try to validate this field
                 if (!_innerAttribute.IsValid(value) || (value is bool && !(bool) value))
                     // validation failed - return an error

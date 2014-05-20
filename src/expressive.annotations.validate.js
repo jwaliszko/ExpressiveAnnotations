@@ -15,10 +15,10 @@
     };
 
     var Helper = {
-        extractValue: function (form, dependentProperty, prefix) {
+        extractValue: function (form, dependentProperty, prefix, type) {
             function getFieldValue(field) {
-                var type = $(field).attr('type');
-                switch (type) {
+                var fieldType = $(field).attr('type');
+                switch (fieldType) {
                     case 'checkbox':
                         return $(field).is(':checked');
                     case 'radio':
@@ -28,18 +28,24 @@
                 }
             }
             var dependentField = $(form).find(':input[name="' + ModelPrefix.append(dependentProperty, prefix) + '"]');
-            var dependentValue = getFieldValue(dependentField);
+            var fieldValue = getFieldValue(dependentField);
+            if (Helper.isEmpty(fieldValue))
+                return null;
+
+            var dependentValue = Helper.tryParse(fieldValue, type);
+            if (dependentValue.error)
+                throw 'Data extraction fatal error. DOM value conversion to reflect required type failed.';
             return dependentValue;
         },
-        fetchTargetValue: function(form, targetValue, prefix) {
-            if (typeof targetValue === 'string' || targetValue instanceof String) {
+        tryExtractPropertyName: function (targetValue) {
+            if (Helper.isString(targetValue)) {
                 var patt = new RegExp('\\[(.+)\\]');
                 if (patt.test(targetValue)) {
                     var targetProperty = targetValue.substring(1, targetValue.length - 1);
-                    targetValue = $(form).find(':input[name="' + ModelPrefix.append(targetProperty, prefix) + '"]').val();
+                    return targetProperty;
                 }
             }
-            return targetValue;
+            return { error: true }
         },
         compute: function (dependentValue, targetValue, relationalOperator) {
             switch (relationalOperator) {
@@ -60,48 +66,57 @@
             throw analyser.Utils.String.format('Relational operator {0} is invalid. Available operators: ==, !=, >, >=, <, <=.', relationalOperator);
         },
         compare: function (dependentValue, targetValue) {
-            var boolResult;
-            if (typeof dependentValue === 'string' || dependentValue instanceof String) {
-                boolResult = analyser.Utils.Bool.tryParse(dependentValue);
-                dependentValue = boolResult.error ? dependentValue.trim() : boolResult;
-            }
-            if (typeof targetValue === 'string' || targetValue instanceof String) {
-                boolResult = analyser.Utils.Bool.tryParse(targetValue);
-                targetValue = boolResult.error ? targetValue.trim() : boolResult;
-            }
-            if (Helper.isNumber(dependentValue) && Helper.isNumber(targetValue)) {
-                dependentValue = parseFloat(dependentValue);
-                targetValue = parseFloat(targetValue);
-            }
-            return (dependentValue === targetValue) || (!Helper.isNull(dependentValue) && targetValue === '*');
+            return (dependentValue === targetValue)
+                    || (Helper.isString(dependentValue) && Helper.isString(targetValue)
+                        && dependentValue.trim().toLowerCase() === targetValue.trim().toLowerCase())
+                    || (!Helper.isEmpty(dependentValue) && targetValue === '*')
+                    || (Helper.isEmpty(dependentValue) && Helper.isEmpty(targetValue));
         },
         greater: function (dependentValue, targetValue) {
             if (Helper.isNumber(dependentValue) && Helper.isNumber(targetValue))
-                return parseFloat(dependentValue) > parseFloat(targetValue);
-            if ((typeof dependentValue === 'string' || dependentValue instanceof String)
-                && (typeof targetValue === 'string' || targetValue instanceof String))
+                return dependentValue > targetValue;
+            if (Helper.isString(dependentValue) && Helper.isString(targetValue))
                 return dependentValue.toLowerCase().localeCompare(targetValue.toLowerCase()) > 0;
-            if (Helper.isNull(dependentValue) || Helper.isNull(targetValue))
+            if (Helper.isEmpty(dependentValue) || Helper.isEmpty(targetValue))
                 return false;
 
-            return false;
+            throw 'Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.';
         },
         less: function (dependentValue, targetValue) {
             if (Helper.isNumber(dependentValue) && Helper.isNumber(targetValue))
-                return parseFloat(dependentValue) < parseFloat(targetValue);
-            if ((typeof dependentValue === 'string' || dependentValue instanceof String)
-                && (typeof targetValue === 'string' || targetValue instanceof String))
+                return dependentValue < targetValue;
+            if (Helper.isString(dependentValue) && Helper.isString(targetValue))
                 return dependentValue.toLowerCase().localeCompare(targetValue.toLowerCase()) < 0;
-            if (Helper.isNull(dependentValue) || Helper.isNull(targetValue))
+            if (Helper.isEmpty(dependentValue) || Helper.isEmpty(targetValue))
                 return false;
 
-            return false;
+            throw 'Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.';
         },
         isNumber: function(value) {
             return !isNaN(parseFloat(value)) && isFinite(value);
         },
-        isNull: function (value) {
-            return !(value !== null && value !== '' && typeof (value) !== 'undefined');
+        isString: function (value) {
+            return typeof value === 'string' || value instanceof String;
+        },
+        isEmpty: function (value) {
+            return value === null || value === '' || typeof (value) === 'undefined' || (Helper.isString(value) && value.trim() === '');
+        },
+        tryParse: function (value, type) {
+            var result;
+            switch (type) {
+                case "numeric":
+                    result = analyser.Utils.Float.tryParse(value);
+                    break;
+                case "string":
+                    result = value.toString();
+                    break;
+                case "bool":
+                    result = analyser.Utils.Bool.tryParse(value);
+                    break;
+                default:
+                    result = { error: true }
+            }
+            return result.error ? { error: true } : result;
         }
     };
 
@@ -112,11 +127,10 @@
             dependentproperty: $.parseJSON(options.params.dependentproperty),
             relationaloperator: $.parseJSON(options.params.relationaloperator),
             targetvalue: $.parseJSON(options.params.targetvalue),
-            type: $.parseJSON(options.params.typename)
+            type: $.parseJSON(options.params.type)
         };
-        if (options.message) {
+        if (options.message)
             options.messages['requiredif'] = options.message;
-        }
     });
 
     $.validator.unobtrusive.adapters.add('requiredifexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression'], function (options) {
@@ -126,21 +140,25 @@
             dependentproperties: $.parseJSON(options.params.dependentproperties),
             relationaloperators: $.parseJSON(options.params.relationaloperators),
             targetvalues: $.parseJSON(options.params.targetvalues),
-            types: $.parseJSON(options.params.typesNames),
+            types: $.parseJSON(options.params.types),
             expression: options.params.expression
         };
-        if (options.message) {
+        if (options.message)
             options.messages['requiredifexpression'] = options.message;
-        }
     });
 
     $.validator.addMethod('requiredif', function(value, element, params) {
-        var dependentValue = Helper.extractValue(params.form, params.dependentproperty, params.prefix);
-        var targetValue = Helper.fetchTargetValue(params.form, params.targetvalue, params.prefix);
-        if (Helper.compute(dependentValue, targetValue, params.relationaloperator || '==')) {
-            // match (condition fulfilled) => means we should try to validate this field (check if required value is provided)            
+        var dependentValue = Helper.extractValue(params.form, params.dependentproperty, params.prefix, params.type);
+        var targetValue = params.targetvalue;
+
+        var targetPropertyName = Helper.tryExtractPropertyName(targetValue);
+        if (!targetPropertyName.error)
+            targetValue = Helper.extractValue(params.form, targetPropertyName, params.prefix, params.type);
+
+        if (Helper.compute(dependentValue, targetValue, params.relationaloperator)) {
+            // match (condition fulfilled) => means we should try to validate this field (check if required value is provided)
             var boolValue = analyser.Utils.Bool.tryParse(value);
-            if (Helper.isNull(value) || (!boolValue.error && !boolValue))
+            if (Helper.isEmpty(value) || (!boolValue.error && !boolValue))
                 return false;
         }
         return true;
@@ -150,9 +168,14 @@
         var tokens = new Array();
         var length = params.dependentproperties.length;
         for (var i = 0; i < length; i++) {
-            var dependentValue = Helper.extractValue(params.form, params.dependentproperties[i], params.prefix);
-            var targetValue = Helper.fetchTargetValue(params.form, params.targetvalues[i], params.prefix);
-            var result = Helper.compute(dependentValue, targetValue, params.relationaloperators[i] || '==');
+            var dependentValue = Helper.extractValue(params.form, params.dependentproperties[i], params.prefix, params.types[i]);
+            var targetValue = params.targetvalues[i];
+
+            var targetPropertyName = Helper.tryExtractPropertyName(targetValue);
+            if (!targetPropertyName.error)
+                targetValue = Helper.extractValue(params.form, targetPropertyName, params.prefix, params.types[i]);
+
+            var result = Helper.compute(dependentValue, targetValue, params.relationaloperators[i]);
             tokens.push(result.toString());
         }
 
@@ -161,7 +184,7 @@
         if (evaluator.compute(composedExpression)) {
             // match (condition fulfilled) => means we should try to validate this field (check if required value is provided)
             var boolValue = analyser.Utils.Bool.tryParse(value);
-            if (Helper.isNull(value) || (!boolValue.error && !boolValue))
+            if (Helper.isEmpty(value) || (!boolValue.error && !boolValue))
                 return false;
         }
         return true;
