@@ -94,7 +94,7 @@
                 @Html.ValidationMessageFor(model => model.ReasonForTravel)
             </li>
             <li>
-                @Html.HiddenFor(x => x.LatestSuggestedReturnDate)   @*store required information for client side backing hidden backing field*@
+                @Html.EditorFor(x => x.LatestSuggestedReturnDate)   @*hidden backing field storing date in RFC2822 or ISO 8601 format*@
                 <pre class="code">
 [RequiredIf(
     DependentProperty = "GoAbroad", 
@@ -107,7 +107,9 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIfExpression( /* interpretation => GoAbroad == true && ReturnDate > value_from_latest_suggested_return_date */
+[RequiredIfExpression( /* interpretation => GoAbroad == true 
+                        *                   && ReturnDate > value_from_latest_suggested_return_date (stored in RFC2822 or ISO 8601 format)
+                        */
             Expression = "{0} && {1}",
             DependentProperties = new[] {"GoAbroad", "ReturnDate"},
             RelationalOperators = new[] {"==", ">"},

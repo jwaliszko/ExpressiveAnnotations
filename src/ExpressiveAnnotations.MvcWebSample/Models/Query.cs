@@ -75,6 +75,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "ReasonForTravel")]
         public string ReasonForTravel { get; set; }
 
+        [UIHint("ISO8601Date")]
         public DateTime LatestSuggestedReturnDate { get; set; }
 
         [RequiredIf(
@@ -84,7 +85,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof(Resources), Name = "ReturnDate")]
         public DateTime? ReturnDate { get; set; }
 
-        [RequiredIfExpression( /* interpretation => GoAbroad == true && ReturnDate > value_from_latest_suggested_return_date */
+        [RequiredIfExpression( /* interpretation => GoAbroad == true 
+                                *                   && ReturnDate > value_from_latest_suggested_return_date (stored in RFC2822 or ISO 8601 format)
+                                */
             Expression = "{0} && {1}",
             DependentProperties = new[] { "GoAbroad", "ReturnDate" },
             RelationalOperators = new[] { "==", ">" },

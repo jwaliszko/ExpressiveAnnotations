@@ -65,7 +65,7 @@ var BooleanExpressionsAnalyser = (function() {
             }
         },
         Date: {
-            tryParse: function(value) { // tries to parse a string representing an RFC2822 or ISO 8601 date.
+            tryParse: function(value) {
                 function isNumber(n) {
                     return !isNaN(parseFloat(n)) && isFinite(n);
                     }
@@ -77,7 +77,8 @@ var BooleanExpressionsAnalyser = (function() {
                     if (isNumber(milisec))
                         return new Date(milisec);
                 }
-                return { error: true, msg: 'Parsing error. Given value has no date meaning.' }
+                return { error: true, msg: 'Parsing error. Given value is not a string representing an RFC2822 or ISO 8601 date.'
+    }
             }
         }
     };
