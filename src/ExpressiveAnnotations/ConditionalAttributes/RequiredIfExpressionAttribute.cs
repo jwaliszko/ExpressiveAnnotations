@@ -61,36 +61,35 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             var tokens = new List<object>();
 
             for (var i = 0; i < DependentProperties.Count(); i++)
-            {
+            {                
                 var dependentProperty = Helper.ExtractProperty(validationContext.ObjectInstance, DependentProperties[i]);
 
                 var dependentValue = Helper.ExtractValue(validationContext.ObjectInstance, DependentProperties[i]);
+                var relationalOperator = RelationalOperators.Any() ? RelationalOperators[i] : "==";
                 var targetValue = TargetValues[i];                                
 
                 string targetPropertyName;
-                if (targetValue.TryExtractPropertyName(out targetPropertyName)) // check if target value is not an encapsulated property
+                if (targetValue.TryExtractPropertyName(out targetPropertyName)) // check if target value does not containan encapsulated property name
                 {
                     var targetProperty = Helper.ExtractProperty(validationContext.ObjectInstance, targetPropertyName);
-                    Assert.ConsistentTypes(dependentProperty, targetProperty, validationContext.DisplayName, attributeName);
+                    Assert.ConsistentTypes(dependentProperty, targetProperty, validationContext.DisplayName, attributeName, relationalOperator);
                     targetValue = Helper.ExtractValue(validationContext.ObjectInstance, targetPropertyName);
                 }
                 else
-                    Assert.ConsistentTypes(dependentProperty, targetValue, validationContext.DisplayName, attributeName);
+                    Assert.ConsistentTypes(dependentProperty, targetValue, validationContext.DisplayName, attributeName, relationalOperator);
 
-                var result = Helper.Compute(dependentValue, targetValue, RelationalOperators.Any() ? RelationalOperators[i] : "==");
+                var result = Helper.Compute(dependentValue, targetValue, relationalOperator); // compare dependent value against target value
                 tokens.Add(result.ToString().ToLowerInvariant());
             }
 
             var expression = string.Format(Expression, tokens.ToArray());
             var evaluator = new Evaluator();
-            if (evaluator.Compute(expression))
+            if (evaluator.Compute(expression)) // evaluate logical expression
             {
-                // match => means we should try to validate this field
+                // expression result is true => means we should try to validate this field
                 if (!_innerAttribute.IsValid(value) || (value is bool && !(bool) value))
-                {
                     // validation failed - return an error
                     return new ValidationResult(string.Format(ErrorMessageString, validationContext.DisplayName));
-                }
             }
 
             return ValidationResult.Success;

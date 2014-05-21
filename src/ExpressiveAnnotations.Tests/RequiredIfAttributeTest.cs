@@ -174,7 +174,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.AreEqual(
                     "Type mismatch detected in RequiredIfAttribute definition for DebetCardNumber field. Types consistency is required for GoAbroad field and its corresponding, " +
-                    "provided indirectly through backend field, target value.",
+                    "provided indirectly through backing field, target value.",
                     e.Message);
                 throw;
             }

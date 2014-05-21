@@ -40,26 +40,25 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         }
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
-        {            
-            // get a reference to the property this validation depends upon
-            var dependentProperty = Helper.ExtractProperty(validationContext.ObjectInstance, DependentProperty);            
+        {
+            var dependentProperty = Helper.ExtractProperty(validationContext.ObjectInstance, DependentProperty);
             
             var dependentValue = Helper.ExtractValue(validationContext.ObjectInstance, DependentProperty);
-            var targetValue = TargetValue;
+            var relationalOperator = RelationalOperator ?? "==";
+            var targetValue = TargetValue;            
 
             string targetPropertyName;
             var attributeName = GetType().Name;
-            if (targetValue.TryExtractPropertyName(out targetPropertyName)) // check if target value is not an encapsulated property
+            if (targetValue.TryExtractPropertyName(out targetPropertyName)) // check if target value does not containan encapsulated property name
             {
                 var targetProperty = Helper.ExtractProperty(validationContext.ObjectInstance, targetPropertyName);
-                Assert.ConsistentTypes(dependentProperty, targetProperty, validationContext.DisplayName, attributeName);
+                Assert.ConsistentTypes(dependentProperty, targetProperty, validationContext.DisplayName, attributeName, relationalOperator);
                 targetValue = Helper.ExtractValue(validationContext.ObjectInstance, targetPropertyName);
             }
             else
-                Assert.ConsistentTypes(dependentProperty, targetValue, validationContext.DisplayName, attributeName);            
+                Assert.ConsistentTypes(dependentProperty, targetValue, validationContext.DisplayName, attributeName, relationalOperator);
 
-            // compare the value against the target value
-            if (Helper.Compute(dependentValue, targetValue, RelationalOperator ?? "=="))
+            if (Helper.Compute(dependentValue, targetValue, relationalOperator)) // compare dependent value against target value
             {
                 var displayAttribute = dependentProperty.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
                 var dependentPropertyName = displayAttribute != null ? displayAttribute.GetName() : DependentProperty;

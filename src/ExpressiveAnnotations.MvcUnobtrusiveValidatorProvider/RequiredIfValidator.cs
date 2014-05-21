@@ -19,23 +19,24 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             : base(metadata, context, attribute)
         {
             var dependentProperty = Helper.ExtractProperty(metadata.ContainerType, attribute.DependentProperty);
+            var relationalOperator = attribute.RelationalOperator ?? "==";
 
             string targetPropertyName;
             var attributeName = GetType().BaseType.GetGenericArguments().Single().Name;
             if (attribute.TargetValue.TryExtractPropertyName(out targetPropertyName))
             {
                 var targetProperty = Helper.ExtractProperty(metadata.ContainerType, targetPropertyName);
-                Assert.ConsistentTypes(dependentProperty, targetProperty, metadata.PropertyName, attributeName);
+                Assert.ConsistentTypes(dependentProperty, targetProperty, metadata.PropertyName, attributeName, attribute.RelationalOperator);
             }
             else
-                Assert.ConsistentTypes(dependentProperty, attribute.TargetValue, metadata.PropertyName, attributeName);
+                Assert.ConsistentTypes(dependentProperty, attribute.TargetValue, metadata.PropertyName, attributeName, attribute.RelationalOperator);
 
             var displayAttribute = dependentProperty.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
             var dependentPropertyName = displayAttribute != null ? displayAttribute.GetName() : attribute.DependentProperty;
 
             _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), dependentPropertyName);
             _dependentProperty = attribute.DependentProperty;
-            _relationalOperator = attribute.RelationalOperator ?? "==";
+            _relationalOperator = relationalOperator;
             _targetValue = attribute.TargetValue;
 
             _type = Helper.GetCoarseType(dependentProperty.PropertyType);
