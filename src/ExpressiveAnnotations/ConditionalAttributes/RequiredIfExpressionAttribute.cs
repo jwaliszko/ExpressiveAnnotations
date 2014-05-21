@@ -61,7 +61,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             var tokens = new List<object>();
 
             for (var i = 0; i < DependentProperties.Count(); i++)
-            {                
+            {
                 var dependentProperty = Helper.ExtractProperty(validationContext.ObjectInstance, DependentProperties[i]);
 
                 var dependentValue = Helper.ExtractValue(validationContext.ObjectInstance, DependentProperties[i]);

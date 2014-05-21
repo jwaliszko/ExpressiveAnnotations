@@ -33,7 +33,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             var attributeName = GetType().BaseType.GetGenericArguments().Single().Name;
 
             for (var i = 0; i < count; i++)
-            {                
+            {
                 var dependentProperty = Helper.ExtractProperty(metadata.ContainerType, attribute.DependentProperties[i]);
                 var relationalOperator = attribute.RelationalOperators.Any() ? attribute.RelationalOperators[i] : "==";
 

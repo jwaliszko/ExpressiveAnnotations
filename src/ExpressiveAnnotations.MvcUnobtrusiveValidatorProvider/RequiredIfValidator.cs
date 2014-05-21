@@ -26,10 +26,10 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             if (attribute.TargetValue.TryExtractPropertyName(out targetPropertyName))
             {
                 var targetProperty = Helper.ExtractProperty(metadata.ContainerType, targetPropertyName);
-                Assert.ConsistentTypes(dependentProperty, targetProperty, metadata.PropertyName, attributeName, attribute.RelationalOperator);
+                Assert.ConsistentTypes(dependentProperty, targetProperty, metadata.PropertyName, attributeName, relationalOperator);
             }
             else
-                Assert.ConsistentTypes(dependentProperty, attribute.TargetValue, metadata.PropertyName, attributeName, attribute.RelationalOperator);
+                Assert.ConsistentTypes(dependentProperty, attribute.TargetValue, metadata.PropertyName, attributeName, relationalOperator);
 
             var displayAttribute = dependentProperty.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
             var dependentPropertyName = displayAttribute != null ? displayAttribute.GetName() : attribute.DependentProperty;
