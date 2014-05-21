@@ -95,13 +95,12 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "ReasonForLongTravelRequired")]
         [Display(ResourceType = typeof(Resources), Name = "ReasonForLongTravel")]
         public string ReasonForLongTravel { get; set; }
-
-        [Display(ResourceType = typeof (Resources), Name = "PoliticalStability")]
+        
         [RequiredIf(
             DependentProperty = "GoAbroad",
-            RelationalOperator = "!=",
-            TargetValue = false,
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]
+            TargetValue = true,
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]
+        [Display(ResourceType = typeof(Resources), Name = "PoliticalStability")]
         public Stability? PoliticalStability { get; set; }
 
         [RequiredIfExpression( /* interpretation => PoliticalStability != null && PoliticalStability != Stability.High */

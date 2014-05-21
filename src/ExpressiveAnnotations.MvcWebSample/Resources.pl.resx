@@ -163,13 +163,13 @@
     <value>Niemcy</value>
   </data>
   <data name="GoAbroad" xml:space="preserve">
-    <value>Wyjeżdżam za granicę</value>
+    <value>Jadę za granicę</value>
   </data>
   <data name="High" xml:space="preserve">
     <value>Wysoka</value>
   </data>
   <data name="LatestSuggestedReturnDate" xml:space="preserve">
-    <value>Najpóźniejsza sugerowana data powrotu</value>
+    <value>Najpóźniejsza sugerowana data</value>
   </data>
   <data name="Low" xml:space="preserve">
     <value>Niska</value>
@@ -208,7 +208,7 @@
     <value>Podowy podróży</value>
   </data>
   <data name="ReasonForTravelRequired" xml:space="preserve">
-    <value>Jeśli planujesz wyjechać za granicę i jesteś w wieku 25-55 lat lub planujesz odwiedzić dwukrotnie ten sam obcy kraj, podaj powody podróży.</value>
+    <value>Jeśli planujesz wyjechać za granicę i jesteś w wieku 25-55 lat lub planujesz odwiedzić dwukrotnie ten sam obcy kraj, podaj powody.</value>
   </data>
   <data name="ReturnDate" xml:space="preserve">
     <value>Data powrotu</value>
@@ -220,7 +220,7 @@
     <value>Nie zgadzam sie na otrzymywanie informacji</value>
   </data>
   <data name="SportType" xml:space="preserve">
-    <value>Ulubione rodzaje uprawianych sportów</value>
+    <value>Ulubione sporty</value>
   </data>
   <data name="Uncertain" xml:space="preserve">
     <value>Niepewna</value>

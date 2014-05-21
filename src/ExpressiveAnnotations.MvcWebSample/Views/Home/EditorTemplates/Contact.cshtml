@@ -12,7 +12,7 @@
     ErrorMessage = "You do not enter any contact information. At least email or phone should be provided.")]
 </pre>
         <pre class="action">[show attribute]</pre>                
-            @Html.LabelFor(model => model.Email)
+            @Html.LabelFor(model => model.Email, new { @class = "inline prefix" })
             @Html.EditorFor(model => model.Email)
             @Html.ValidationMessageFor(model => model.Email)
         </li>
@@ -25,7 +25,7 @@
     ErrorMessage = "You do not enter any contact information. At least email or phone should be provided.")]
 </pre>
         <pre class="action">[show attribute]</pre>
-            @Html.LabelFor(model => model.Phone)
+            @Html.LabelFor(model => model.Phone, new { @class = "inline prefix" })
             @Html.EditorFor(model => model.Phone)
             @Html.ValidationMessageFor(model => model.Phone)
         </li>

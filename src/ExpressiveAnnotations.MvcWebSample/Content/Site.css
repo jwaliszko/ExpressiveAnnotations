@@ -19,6 +19,7 @@
     display: block;
     margin: 0;
     color: grey;
+    margin: 0 0 0 -2px;
 }
 
 select {
@@ -29,6 +30,7 @@ select {
     position: relative;
     height: 40px;
     width: 100%;
+    margin-bottom: 15px;
 }
 
 .box-small {
@@ -61,6 +63,10 @@ h1, h2, h3, h4, h5, h6 {
     padding-bottom: 0;
 }
 
+h1 {
+    font-size: 1.2em;
+}
+
 .code {
     background-color: whitesmoke;
     display: none;
@@ -72,40 +78,39 @@ a {
 
 .content-wrapper {
     margin: 0 auto;
-    max-width: 980px;
+    max-width: 1100px;
 }
 
 fieldset {
     margin: 0;
-    padding: 10px;
 }
 
 fieldset legend {
-    font-size: 1.3em;
-    font-weight: 600;
+    font-size: 1.1em;
 }
 
 fieldset ol {
-    margin-top: 13px;
     padding: 0;    
     list-style: none;
 }
 
 fieldset ol li {
-    padding-bottom: 5px;
+    padding-bottom: 3px;
+}
+
+li fieldset legend {
+    display: none;
 }
 
 label {    
     display: block;
     font-weight: 600;
-}
-
-label, select {
-    font-size: 1.0em;
+    vertical-align: baseline;
 }
 
 .inline {
     display: inline-block;
+    vertical-align: top;
 }
 
 input, textarea {
@@ -114,7 +119,7 @@ input, textarea {
     color: #333;
     margin: 5px 0 6px 0;
     padding: 5px;
-    width: 280px;
+    width: 200px;
 }
 
 input:focus, textarea:focus {
@@ -150,13 +155,11 @@ button {
     clear: both;
     color: #e80c4d;
     font-weight: bold;
-    margin: 10px 0 10px 0;
 }
 
 .message-success {
     color: #51b421;
     font-weight: bold;
-    margin: 10px 0 10px 0;
 }
 
 .error {
@@ -167,6 +170,7 @@ button {
     color: #e80c4d;
     font-weight: bold;
     padding-left: 5px;
+    font-size: 0.8em;
 }
 
 input.input-validation-error {

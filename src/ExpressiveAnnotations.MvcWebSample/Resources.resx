@@ -169,7 +169,7 @@
     <value>High</value>
   </data>
   <data name="LatestSuggestedReturnDate" xml:space="preserve">
-    <value>Latest suggested return date</value>
+    <value>Latest suggested return</value>
   </data>
   <data name="Low" xml:space="preserve">
     <value>Low</value>
@@ -220,7 +220,7 @@
     <value>I don't agree for contact</value>
   </data>
   <data name="SportType" xml:space="preserve">
-    <value>Kind of sports you like the most</value>
+    <value>Sports you like the most</value>
   </data>
   <data name="Uncertain" xml:space="preserve">
     <value>Uncertain</value>

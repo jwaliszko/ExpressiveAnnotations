@@ -26,9 +26,8 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
         {
             var culture = GetCultureFromCookie(httpContext);
             if (culture == null)
-            {
-                culture = GetCultureFromAcceptLangHttpHeader(httpContext);
-                culture = culture ?? CultureInfo.CreateSpecificCulture("en");
+            {                
+                culture = CultureInfo.CreateSpecificCulture("en"); // force default culture to be "en"
                 SetCultureToCookie(culture, httpContext);
             }
             return culture;
@@ -38,14 +37,6 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
         {
             var cookie = httpContext.Request.Cookies.Get("expressiv.mvcwebsample.culture");
             return cookie != null ? CultureInfo.CreateSpecificCulture(cookie.Value) : null;
-        }
-
-        private CultureInfo GetCultureFromAcceptLangHttpHeader(HttpContextBase httpContext)
-        {
-            return httpContext.Request.UserLanguages != null &&
-                   httpContext.Request.UserLanguages.Length != 0
-                       ? CultureInfo.CreateSpecificCulture(httpContext.Request.UserLanguages[0].Substring(0, 2))
-                       : null;
         }
 
         private void SetCultureToCookie(CultureInfo culture, HttpContextBase httpContext)

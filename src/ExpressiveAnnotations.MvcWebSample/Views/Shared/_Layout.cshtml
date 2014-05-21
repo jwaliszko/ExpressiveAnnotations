@@ -1,5 +1,8 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+
+@{ var lang = System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName; }
+
+<html lang="@lang">
     <head>
         <meta charset="utf-8" />
         <title>ExpressiveAnnotations</title>

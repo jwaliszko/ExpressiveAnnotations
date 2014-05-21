@@ -214,7 +214,7 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Latest suggested return date.
+        ///   Looks up a localized string similar to Latest suggested return.
         /// </summary>
         public static string LatestSuggestedReturnDate {
             get {
@@ -367,7 +367,7 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Kind of sports you like the most.
+        ///   Looks up a localized string similar to Sports you like the most.
         /// </summary>
         public static string SportType {
             get {
