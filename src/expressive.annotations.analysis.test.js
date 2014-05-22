@@ -103,53 +103,53 @@
     });
 
     test("Verify_utils_array_contains", function () {
-        global.ok(analyser.Utils.Array.contains(["a"], "a"));
-        global.ok(analyser.Utils.Array.contains(["a", "b"], "a"));
-        global.ok(analyser.Utils.Array.contains(["a", "b"], "b"));
-        global.ok(!analyser.Utils.Array.contains(["a", "b"], "c"));
+        global.ok(analyser.TypeHelper.Array.contains(["a"], "a"));
+        global.ok(analyser.TypeHelper.Array.contains(["a", "b"], "a"));
+        global.ok(analyser.TypeHelper.Array.contains(["a", "b"], "b"));
+        global.ok(!analyser.TypeHelper.Array.contains(["a", "b"], "c"));
     });
 
     test("Verify_utils_array_sanatize", function () {
         var array = ["a"];
-        analyser.Utils.Array.sanatize(["a"], "");
+        analyser.TypeHelper.Array.sanatize(["a"], "");
         global.deepEqual(["a"], array);
 
         array = ["a", "a"];
-        analyser.Utils.Array.sanatize(array, "a");
+        analyser.TypeHelper.Array.sanatize(array, "a");
         global.deepEqual([], array);
 
         array = ["a", "b"];
-        analyser.Utils.Array.sanatize(array, "");
+        analyser.TypeHelper.Array.sanatize(array, "");
         global.deepEqual(["a", "b"], array);
 
         array = ["a", "b", "c", "a", "b"];
-        analyser.Utils.Array.sanatize(array, "b");
+        analyser.TypeHelper.Array.sanatize(array, "b");
         global.deepEqual(["a", "c", "a"], array);
     });
 
     test("Verify_utils_string_format", function () {
-        global.equal(analyser.Utils.String.format("{0}", "a"), "a");
-        global.equal(analyser.Utils.String.format("{0}{1}", "a", "b"), "ab");
-        global.equal(analyser.Utils.String.format("{0}{0}", "a", "b"), "aa");
-        global.equal(analyser.Utils.String.format("{0}{0}", "a"), "aa");
+        global.equal(analyser.TypeHelper.String.format("{0}", "a"), "a");
+        global.equal(analyser.TypeHelper.String.format("{0}{1}", "a", "b"), "ab");
+        global.equal(analyser.TypeHelper.String.format("{0}{0}", "a", "b"), "aa");
+        global.equal(analyser.TypeHelper.String.format("{0}{0}", "a"), "aa");
 
-        global.equal(analyser.Utils.String.format("{0}", ["a"]), "a");
-        global.equal(analyser.Utils.String.format("{0}{1}", ["a", "b"]), "ab");
-        global.equal(analyser.Utils.String.format("{0}{0}", ["a", "b"]), "aa");
-        global.equal(analyser.Utils.String.format("{0}{0}", ["a"]), "aa");
+        global.equal(analyser.TypeHelper.String.format("{0}", ["a"]), "a");
+        global.equal(analyser.TypeHelper.String.format("{0}{1}", ["a", "b"]), "ab");
+        global.equal(analyser.TypeHelper.String.format("{0}{0}", ["a", "b"]), "aa");
+        global.equal(analyser.TypeHelper.String.format("{0}{0}", ["a"]), "aa");
     });
 
     test("Verify_utils_bool_tryparse", function () {
-        global.equal(analyser.Utils.Bool.tryParse(false), false);
-        global.equal(analyser.Utils.Bool.tryParse("false"), false);
-        global.equal(analyser.Utils.Bool.tryParse("False"), false);
-        global.equal(analyser.Utils.Bool.tryParse(true), true);
-        global.equal(analyser.Utils.Bool.tryParse("true"), true);
-        global.equal(analyser.Utils.Bool.tryParse("True"), true);
+        global.equal(analyser.TypeHelper.Bool.tryParse(false), false);
+        global.equal(analyser.TypeHelper.Bool.tryParse("false"), false);
+        global.equal(analyser.TypeHelper.Bool.tryParse("False"), false);
+        global.equal(analyser.TypeHelper.Bool.tryParse(true), true);
+        global.equal(analyser.TypeHelper.Bool.tryParse("true"), true);
+        global.equal(analyser.TypeHelper.Bool.tryParse("True"), true);
         
-        var result = analyser.Utils.Bool.tryParse("asd");
+        var result = analyser.TypeHelper.Bool.tryParse("asd");
         global.equal(result.error, true);
         global.equal(result.msg, "Parsing error. Given value has no boolean meaning.");
     });
 
-}(window, BooleanExpressionsAnalyser));
+}(window, LogicalExpressionAnalyser));

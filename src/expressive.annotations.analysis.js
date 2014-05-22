@@ -7,11 +7,11 @@
  * copyright (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
  * licensed MIT: http://www.opensource.org/licenses/mit-license.php */
 
-var BooleanExpressionsAnalyser = (function() {
+var LogicalExpressionAnalyser = (function() {
 
-    var Utils = {
+    var TypeHelper = {
         Array: {
-            contains: function(arr, item) {
+            contains: function (arr, item) {
                 var i = arr.length;
                 while (i--) {
                     if (arr[i] === item)
@@ -19,7 +19,7 @@ var BooleanExpressionsAnalyser = (function() {
                 }
                 return false;
             },
-            sanatize: function(arr, item) {
+            sanatize: function (arr, item) {
                 for (var i = arr.length; i--;) {
                     if (arr[i] === item)
                         arr.splice(i, 1);
@@ -27,7 +27,7 @@ var BooleanExpressionsAnalyser = (function() {
             }
         },
         String: {
-            format: function(text, params) {
+            format: function (text, params) {
                 var i;
                 if (params instanceof Array) {
                     for (i = 0; i < params.length; i++) {
@@ -42,10 +42,10 @@ var BooleanExpressionsAnalyser = (function() {
             }
         },
         Bool: {
-            tryParse: function(value) {
-                if (typeof value === 'boolean' || value instanceof Boolean)
+            tryParse: function (value) {
+                if (TypeHelper.isBool(value))
                     return value;
-                if (typeof value === 'string' || value instanceof String) {
+                if (TypeHelper.isString(value)) {
                     value = value.trim().toLowerCase();
                     if (value === 'true' || value === 'false')
                         return value === 'true';
@@ -54,10 +54,10 @@ var BooleanExpressionsAnalyser = (function() {
             }
         },
         Float: {
-            tryParse: function(value) {
-                function isNumber(n) {
+            tryParse: function (value) {
+                function isNumber (n) {
                     return !isNaN(parseFloat(n)) && isFinite(n);
-                }
+                };
 
                 if (isNumber(value))
                     return parseFloat(value);
@@ -65,21 +65,103 @@ var BooleanExpressionsAnalyser = (function() {
             }
         },
         Date: {
-            tryParse: function(value) {
-                function isNumber(n) {
-                    return !isNaN(parseFloat(n)) && isFinite(n);
-                    }
-
-                if (value instanceof Date)
+            tryParse: function (value) {
+                if (TypeHelper.isDate(value))
                     return value;
-                if (typeof value === 'string' || value instanceof String) {
+                if (TypeHelper.isString(value)) {
                     var milisec = Date.parse(value);
-                    if (isNumber(milisec))
+                    if (TypeHelper.isNumeric(milisec))
                         return new Date(milisec);
                 }
-                return { error: true, msg: 'Parsing error. Given value is not a string representing an RFC2822 or ISO 8601 date.'
-    }
+                return { error: true, msg: 'Parsing error. Given value is not a string representing an RFC2822 or ISO 8601 date.' }
             }
+        },        
+        tryParse: function (value, type) {
+            var result;
+            switch (type) {
+                case 'datetime':
+                    result = TypeHelper.Date.tryParse(value);
+                    break;
+                case 'numeric':
+                    result = TypeHelper.Float.tryParse(value);
+                    break;
+                case 'string':
+                    result = (value || '').toString();
+                    break;
+                case 'bool':
+                    result = TypeHelper.Bool.tryParse(value);
+                    break;
+                default:
+                    result = { error: true }
+            }
+            return result.error ? { error: true } : result;
+        },
+        isEmpty: function (value) {
+            return value === null || value === '' || typeof value === 'undefined' || !/\S/.test(value);
+        },
+        isNumeric: function (value) {
+            return typeof value === 'number';
+        },
+        isDate: function (value) {
+            return value instanceof Date;
+        },
+        isString: function (value) {
+            return typeof value === 'string' || value instanceof String;
+        },
+        isBool: function (value) {
+            return typeof value === 'boolean' || value instanceof Boolean;
+        }                        
+    };
+
+    function Comparer() {
+        this.compute = function (dependentValue, targetValue, relationalOperator) {
+            switch (relationalOperator) {
+                case '==':
+                    return compare(dependentValue, targetValue);
+                case '!=':
+                    return !compare(dependentValue, targetValue);
+                case '>':
+                    return greater(dependentValue, targetValue);
+                case '>=':
+                    return !less(dependentValue, targetValue);
+                case '<':
+                    return less(dependentValue, targetValue);
+                case '<=':
+                    return !greater(dependentValue, targetValue);
+            }
+
+            throw TypeHelper.String.format('Relational operator {0} is invalid. Available operators: ==, !=, >, >=, <, <=.', relationalOperator);
+        };
+        var compare = function (dependentValue, targetValue) {
+            return (dependentValue === targetValue)
+                || (TypeHelper.isString(dependentValue) && TypeHelper.isString(targetValue)
+                    && dependentValue.trim().toLowerCase() === targetValue.trim().toLowerCase())
+                || (!TypeHelper.isEmpty(dependentValue) && targetValue === '*')
+                || (TypeHelper.isEmpty(dependentValue) && TypeHelper.isEmpty(targetValue));
+        };
+        var greater = function (dependentValue, targetValue) {
+            if (TypeHelper.isNumeric(dependentValue) && TypeHelper.isNumeric(targetValue))
+                return dependentValue > targetValue;
+            if (TypeHelper.isDate(dependentValue) && TypeHelper.isDate(targetValue))
+                return dependentValue > targetValue;
+            if (TypeHelper.isString(dependentValue) && TypeHelper.isString(targetValue))
+                return dependentValue.toLowerCase().localeCompare(targetValue.toLowerCase()) > 0;
+            if (TypeHelper.isEmpty(dependentValue) || TypeHelper.isEmpty(targetValue))
+                return false;
+
+            throw 'Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.';
+        };
+        var less = function (dependentValue, targetValue) {
+            if (TypeHelper.isNumber(dependentValue) && TypeHelper.isNumber(targetValue))
+                return dependentValue < targetValue;
+            if (TypeHelper.isDate(dependentValue) && TypeHelper.isDate(targetValue))
+                return dependentValue < targetValue;
+            if (TypeHelper.isString(dependentValue) && TypeHelper.isString(targetValue))
+                return dependentValue.toLowerCase().localeCompare(targetValue.toLowerCase()) < 0;
+            if (TypeHelper.isEmpty(dependentValue) || TypeHelper.isEmpty(targetValue))
+                return false;
+
+            throw 'Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.';
         }
     };
 
@@ -95,7 +177,7 @@ var BooleanExpressionsAnalyser = (function() {
     };
 
     function RegexMatcher(regex) {
-        var _regex = new RegExp(Utils.String.format('^{0}', regex));
+        var _regex = new RegExp(TypeHelper.String.format('^{0}', regex));
 
         this.match = function(text) {
             var success = _regex.test(text);
@@ -124,7 +206,7 @@ var BooleanExpressionsAnalyser = (function() {
                 tokens.push(_token);
             }
             if (removeEmptyTokens)
-                Utils.Array.sanatize(tokens, Token.SPACE);
+                TypeHelper.Array.sanatize(tokens, Token.SPACE);
             return tokens;
         };
 
@@ -143,7 +225,7 @@ var BooleanExpressionsAnalyser = (function() {
                 }
             }
 
-            throw Utils.String.format('Lexer error. Unexpected token started at "{0}".', _expression);
+            throw TypeHelper.String.format('Lexer error. Unexpected token started at "{0}".', _expression);
         };
     }
 
@@ -184,17 +266,17 @@ var BooleanExpressionsAnalyser = (function() {
 
         var isInfixOperator = function(token) {
             var op = [Token.AND, Token.OR, Token.NOT, Token.LEFT, Token.RIGHT];
-            return Utils.Array.contains(op, token);
+            return TypeHelper.Array.contains(op, token);
         };
 
         var isPostfixOperator = function(token) {
             var op = [Token.AND, Token.OR, Token.NOT];
-            return Utils.Array.contains(op, token);
+            return TypeHelper.Array.contains(op, token);
         };
 
         var isUnaryOperator = function(token) {
             var op = [Token.NOT];
-            return Utils.Array.contains(op, token);
+            return TypeHelper.Array.contains(op, token);
         };
 
         var isLeftBracket = function(token) {
@@ -206,7 +288,7 @@ var BooleanExpressionsAnalyser = (function() {
         };
 
         var containsLeftBracket = function(st) {
-            return Utils.Array.contains(st, Token.LEFT);
+            return TypeHelper.Array.contains(st, Token.LEFT);
         };
 
         this.convert = function(expression) {
@@ -303,7 +385,7 @@ var BooleanExpressionsAnalyser = (function() {
                 x |= y;
                 break;
             default:
-                throw Utils.String.format('RPN expression parsing error. Token "{0}" not expected.', top);
+                throw TypeHelper.String.format('RPN expression parsing error. Token "{0}" not expected.', top);
             }
             return x;
         };
@@ -324,7 +406,8 @@ var BooleanExpressionsAnalyser = (function() {
         InfixToPostfixConverter: InfixToPostfixConverter,
         PostfixParser: PostfixParser,
         Evaluator: Evaluator,
-        Utils: Utils
+        TypeHelper: TypeHelper,
+        Comparer: Comparer
     };
 
 })();
