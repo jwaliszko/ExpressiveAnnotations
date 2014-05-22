@@ -1,4 +1,5 @@
-﻿using ExpressiveAnnotations.LogicalExpressionAnalysis.SyntacticAnalysis;
+﻿using System;
+using ExpressiveAnnotations.LogicalExpressionAnalysis.SyntacticAnalysis;
 
 namespace ExpressiveAnnotations.LogicalExpressionAnalysis
 {
@@ -15,7 +16,14 @@ namespace ExpressiveAnnotations.LogicalExpressionAnalysis
 
         public bool Compute(string expression)
         {
-            return _parser.Evaluate(_converter.Convert(expression));
+            try
+            {
+                return _parser.Evaluate(_converter.Convert(expression));
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException("Logical expression computation failed. Expression is broken.", e);
+            }
         }
     }
 }

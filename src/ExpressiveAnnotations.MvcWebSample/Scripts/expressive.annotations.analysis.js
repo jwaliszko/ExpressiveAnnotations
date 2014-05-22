@@ -394,7 +394,11 @@ var LogicalExpressionAnalyser = (function() {
         var _parser = new PostfixParser();
 
         this.compute = function(expression) {
-            return _parser.evaluate(_converter.convert(expression));
+            try {
+                return _parser.evaluate(_converter.convert(expression));
+            } catch (e) {
+                throw 'Logical expression computation failed. Expression is broken.';
+            }
         };
     }
 
