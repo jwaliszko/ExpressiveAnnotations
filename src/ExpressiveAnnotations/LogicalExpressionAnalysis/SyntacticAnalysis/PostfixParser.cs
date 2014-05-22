@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using ExpressiveAnnotations.BooleanExpressionAnalysis.LexicalAnalysis;
+using ExpressiveAnnotations.LogicalExpressionAnalysis.LexicalAnalysis;
 
-namespace ExpressiveAnnotations.BooleanExpressionAnalysis.SyntacticAnalysis
+namespace ExpressiveAnnotations.LogicalExpressionAnalysis.SyntacticAnalysis
 {
     public class PostfixParser
     {

@@ -1,6 +1,6 @@
-﻿using ExpressiveAnnotations.BooleanExpressionAnalysis.SyntacticAnalysis;
+﻿using ExpressiveAnnotations.LogicalExpressionAnalysis.SyntacticAnalysis;
 
-namespace ExpressiveAnnotations.BooleanExpressionAnalysis
+namespace ExpressiveAnnotations.LogicalExpressionAnalysis
 {
     public class Evaluator
     {

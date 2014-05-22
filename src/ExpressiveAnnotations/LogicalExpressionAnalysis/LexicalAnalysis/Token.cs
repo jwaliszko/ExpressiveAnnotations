@@ -1,4 +1,4 @@
-﻿namespace ExpressiveAnnotations.BooleanExpressionAnalysis.LexicalAnalysis
+﻿namespace ExpressiveAnnotations.LogicalExpressionAnalysis.LexicalAnalysis
 {
     public sealed class Token
     {

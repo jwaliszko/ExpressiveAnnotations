@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using ExpressiveAnnotations.BooleanExpressionAnalysis;
+using ExpressiveAnnotations.LogicalExpressionAnalysis;
+using ExpressiveAnnotations.Misc;
 
 namespace ExpressiveAnnotations.ConditionalAttributes
 {
@@ -62,23 +63,23 @@ namespace ExpressiveAnnotations.ConditionalAttributes
 
             for (var i = 0; i < DependentProperties.Count(); i++)
             {
-                var dependentProperty = Helper.ExtractProperty(validationContext.ObjectInstance, DependentProperties[i]);
+                var dependentProperty = PropHelper.ExtractProperty(validationContext.ObjectInstance, DependentProperties[i]);
 
-                var dependentValue = Helper.ExtractValue(validationContext.ObjectInstance, DependentProperties[i]);
+                var dependentValue = PropHelper.ExtractValue(validationContext.ObjectInstance, DependentProperties[i]);
                 var relationalOperator = RelationalOperators.Any() ? RelationalOperators[i] : "==";
                 var targetValue = TargetValues[i];                                
 
                 string targetPropertyName;
-                if (targetValue.TryExtractPropertyName(out targetPropertyName)) // check if target value does not containan encapsulated property name
+                if (PropHelper.TryExtractName(targetValue, out targetPropertyName)) // check if target value does not containan encapsulated property name
                 {
-                    var targetProperty = Helper.ExtractProperty(validationContext.ObjectInstance, targetPropertyName);
+                    var targetProperty = PropHelper.ExtractProperty(validationContext.ObjectInstance, targetPropertyName);
                     Assert.ConsistentTypes(dependentProperty, targetProperty, validationContext.DisplayName, attributeName, relationalOperator);
-                    targetValue = Helper.ExtractValue(validationContext.ObjectInstance, targetPropertyName);
+                    targetValue = PropHelper.ExtractValue(validationContext.ObjectInstance, targetPropertyName);
                 }
                 else
                     Assert.ConsistentTypes(dependentProperty, targetValue, validationContext.DisplayName, attributeName, relationalOperator);
 
-                var result = Helper.Compute(dependentValue, targetValue, relationalOperator); // compare dependent value against target value
+                var result = Comparer.Compute(dependentValue, targetValue, relationalOperator); // compare dependent value against target value
                 tokens.Add(result.ToString().ToLowerInvariant());
             }
 
@@ -86,7 +87,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             var evaluator = new Evaluator();
             if (evaluator.Compute(expression)) // evaluate logical expression
             {
-                // expression result is true => means we should try to validate this field
+                // expression result is true => means we should try to validate this field (verify if required value is provided)  
                 if (!_innerAttribute.IsValid(value) || (value is bool && !(bool) value))
                     // validation failed - return an error
                     return new ValidationResult(string.Format(ErrorMessageString, validationContext.DisplayName));

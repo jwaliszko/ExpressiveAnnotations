@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace ExpressiveAnnotations.BooleanExpressionAnalysis.LexicalAnalysis
+namespace ExpressiveAnnotations.LogicalExpressionAnalysis.LexicalAnalysis
 {
     internal sealed class RegexMatcher
     {

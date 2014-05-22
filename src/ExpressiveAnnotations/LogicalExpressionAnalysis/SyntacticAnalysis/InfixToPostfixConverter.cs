@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ExpressiveAnnotations.BooleanExpressionAnalysis.LexicalAnalysis;
+using ExpressiveAnnotations.LogicalExpressionAnalysis.LexicalAnalysis;
 
-namespace ExpressiveAnnotations.BooleanExpressionAnalysis.SyntacticAnalysis
+namespace ExpressiveAnnotations.LogicalExpressionAnalysis.SyntacticAnalysis
 {
     public class InfixToPostfixConverter
     {

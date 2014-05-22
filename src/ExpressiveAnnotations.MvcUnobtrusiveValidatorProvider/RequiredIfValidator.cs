@@ -3,6 +3,7 @@ using System.Linq;
 using System.Web.Mvc;
 using ExpressiveAnnotations.ConditionalAttributes;
 using System.Collections.Generic;
+using ExpressiveAnnotations.Misc;
 using Newtonsoft.Json;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
@@ -18,14 +19,14 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         public RequiredIfValidator(ModelMetadata metadata, ControllerContext context, RequiredIfAttribute attribute)
             : base(metadata, context, attribute)
         {
-            var dependentProperty = Helper.ExtractProperty(metadata.ContainerType, attribute.DependentProperty);
+            var dependentProperty = PropHelper.ExtractProperty(metadata.ContainerType, attribute.DependentProperty);
             var relationalOperator = attribute.RelationalOperator ?? "==";
 
             string targetPropertyName;
             var attributeName = GetType().BaseType.GetGenericArguments().Single().Name;
-            if (attribute.TargetValue.TryExtractPropertyName(out targetPropertyName))
+            if (PropHelper.TryExtractName(attribute.TargetValue, out targetPropertyName))
             {
-                var targetProperty = Helper.ExtractProperty(metadata.ContainerType, targetPropertyName);
+                var targetProperty = PropHelper.ExtractProperty(metadata.ContainerType, targetPropertyName);
                 Assert.ConsistentTypes(dependentProperty, targetProperty, metadata.PropertyName, attributeName, relationalOperator);
             }
             else
@@ -39,7 +40,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             _relationalOperator = relationalOperator;
             _targetValue = attribute.TargetValue;
 
-            _type = Helper.GetCoarseType(dependentProperty.PropertyType);
+            _type = TypeHelper.GetCoarseType(dependentProperty.PropertyType);
         }
 
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()

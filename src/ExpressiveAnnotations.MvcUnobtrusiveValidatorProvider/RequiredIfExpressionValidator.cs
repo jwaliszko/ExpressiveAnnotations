@@ -3,6 +3,7 @@ using System.Web.Mvc;
 using ExpressiveAnnotations.ConditionalAttributes;
 using System.Collections.Generic;
 using System;
+using ExpressiveAnnotations.Misc;
 using Newtonsoft.Json;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
@@ -34,13 +35,13 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 
             for (var i = 0; i < count; i++)
             {
-                var dependentProperty = Helper.ExtractProperty(metadata.ContainerType, attribute.DependentProperties[i]);
+                var dependentProperty = PropHelper.ExtractProperty(metadata.ContainerType, attribute.DependentProperties[i]);
                 var relationalOperator = attribute.RelationalOperators.Any() ? attribute.RelationalOperators[i] : "==";
 
                 string targetPropertyName;
-                if (attribute.TargetValues[i].TryExtractPropertyName(out targetPropertyName))
+                if (PropHelper.TryExtractName(attribute.TargetValues[i], out targetPropertyName))
                 {
-                    var targetProperty = Helper.ExtractProperty(metadata.ContainerType, targetPropertyName);
+                    var targetProperty = PropHelper.ExtractProperty(metadata.ContainerType, targetPropertyName);
                     Assert.ConsistentTypes(dependentProperty, targetProperty, metadata.PropertyName, attributeName, relationalOperator);
                 }
                 else
@@ -50,7 +51,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
                 _relationalOperators[i] = relationalOperator;
                 _targetValues[i] = attribute.TargetValues[i];
 
-                _types[i] = Helper.GetCoarseType(dependentProperty.PropertyType);
+                _types[i] = TypeHelper.GetCoarseType(dependentProperty.PropertyType);
             }
 
             _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName());

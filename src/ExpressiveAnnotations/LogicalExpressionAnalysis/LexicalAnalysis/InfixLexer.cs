@@ -1,10 +1,10 @@
-﻿namespace ExpressiveAnnotations.BooleanExpressionAnalysis.LexicalAnalysis
+﻿namespace ExpressiveAnnotations.LogicalExpressionAnalysis.LexicalAnalysis
 {
-    public sealed class PostfixLexer
+    public sealed class InfixLexer
     {
         private readonly Lexer _lexer;
 
-        public PostfixLexer()
+        public InfixLexer()
         {
             var defs = new[]
                 {
@@ -13,6 +13,8 @@
                     new TokenDefinition(@"&&", Token.AND),
                     new TokenDefinition(@"\|\|", Token.OR),
                     new TokenDefinition(@"\!", Token.NOT),
+                    new TokenDefinition(@"\(", Token.LEFT),
+                    new TokenDefinition(@"\)", Token.RIGHT),
                     new TokenDefinition(@"\s", Token.SPACE)
                 };
             _lexer = new Lexer(defs);

@@ -1,13 +1,13 @@
 ﻿using System;
-using ExpressiveAnnotations.BooleanExpressionAnalysis;
-using ExpressiveAnnotations.BooleanExpressionAnalysis.LexicalAnalysis;
-using ExpressiveAnnotations.BooleanExpressionAnalysis.SyntacticAnalysis;
+using ExpressiveAnnotations.LogicalExpressionAnalysis;
+using ExpressiveAnnotations.LogicalExpressionAnalysis.LexicalAnalysis;
+using ExpressiveAnnotations.LogicalExpressionAnalysis.SyntacticAnalysis;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ExpressiveAnnotations.Tests
 {
     [TestClass]
-    public class BooleanExpressionsAnalyserUnitTest
+    public class LogicalExpressionsAnalyserUnitTest
     {
         [TestMethod]
         public void Verify_infix_lexer_logic()
