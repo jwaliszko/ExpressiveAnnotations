@@ -39,6 +39,9 @@ var LogicalExpressionAnalyser = (function() {
                     text = text.replace(new RegExp('\\{' + i + '\\}', 'gm'), arguments[i + 1]);
                 }
                 return text;
+            },
+            compareOrdinal: function(strA, strB) {
+                return strA === strB ? 0 : strA > strB ? 1 : -1;
             }
         },
         Bool: {
@@ -75,8 +78,24 @@ var LogicalExpressionAnalyser = (function() {
                 }
                 return { error: true, msg: 'Parsing error. Given value is not a string representing an RFC2822 or ISO 8601 date.' }
             }
-        },        
-        tryParse: function (value, type) {
+        },
+        
+        isEmpty: function (value) {
+            return value === null || value === '' || typeof value === 'undefined' || !/\S/.test(value);
+        },
+        isNumeric: function (value) {
+            return typeof value === 'number';
+        },
+        isDate: function (value) {
+            return value instanceof Date;
+        },
+        isString: function (value) {
+            return typeof value === 'string' || value instanceof String;
+        },
+        isBool: function (value) {
+            return typeof value === 'boolean' || value instanceof Boolean;
+        },
+        tryParse: function(value, type) {
             var result;
             switch (type) {
                 case 'datetime':
@@ -95,22 +114,7 @@ var LogicalExpressionAnalyser = (function() {
                     result = { error: true }
             }
             return result.error ? { error: true } : result;
-        },
-        isEmpty: function (value) {
-            return value === null || value === '' || typeof value === 'undefined' || !/\S/.test(value);
-        },
-        isNumeric: function (value) {
-            return typeof value === 'number';
-        },
-        isDate: function (value) {
-            return value instanceof Date;
-        },
-        isString: function (value) {
-            return typeof value === 'string' || value instanceof String;
-        },
-        isBool: function (value) {
-            return typeof value === 'boolean' || value instanceof Boolean;
-        }                        
+        }
     };
 
     function Comparer() {
@@ -132,10 +136,11 @@ var LogicalExpressionAnalyser = (function() {
 
             throw TypeHelper.String.format('Relational operator {0} is invalid. Available operators: ==, !=, >, >=, <, <=.', relationalOperator);
         };
+
         var compare = function (dependentValue, targetValue) {
             return (dependentValue === targetValue)
                 || (TypeHelper.isString(dependentValue) && TypeHelper.isString(targetValue)
-                    && dependentValue.trim().toLowerCase() === targetValue.trim().toLowerCase())
+                    && TypeHelper.String.compareOrdinal(dependentValue, targetValue) === 0)
                 || (!TypeHelper.isEmpty(dependentValue) && targetValue === '*')
                 || (TypeHelper.isEmpty(dependentValue) && TypeHelper.isEmpty(targetValue));
         };
@@ -145,7 +150,7 @@ var LogicalExpressionAnalyser = (function() {
             if (TypeHelper.isDate(dependentValue) && TypeHelper.isDate(targetValue))
                 return dependentValue > targetValue;
             if (TypeHelper.isString(dependentValue) && TypeHelper.isString(targetValue))
-                return dependentValue.toLowerCase().localeCompare(targetValue.toLowerCase()) > 0;
+                return TypeHelper.String.compareOrdinal(dependentValue, targetValue) > 0;
             if (TypeHelper.isEmpty(dependentValue) || TypeHelper.isEmpty(targetValue))
                 return false;
 
@@ -157,7 +162,7 @@ var LogicalExpressionAnalyser = (function() {
             if (TypeHelper.isDate(dependentValue) && TypeHelper.isDate(targetValue))
                 return dependentValue < targetValue;
             if (TypeHelper.isString(dependentValue) && TypeHelper.isString(targetValue))
-                return dependentValue.toLowerCase().localeCompare(targetValue.toLowerCase()) < 0;
+                return TypeHelper.String.compareOrdinal(dependentValue, targetValue) < 0;
             if (TypeHelper.isEmpty(dependentValue) || TypeHelper.isEmpty(targetValue))
                 return false;
 
@@ -268,25 +273,20 @@ var LogicalExpressionAnalyser = (function() {
             var op = [Token.AND, Token.OR, Token.NOT, Token.LEFT, Token.RIGHT];
             return TypeHelper.Array.contains(op, token);
         };
-
         var isPostfixOperator = function(token) {
             var op = [Token.AND, Token.OR, Token.NOT];
             return TypeHelper.Array.contains(op, token);
         };
-
         var isUnaryOperator = function(token) {
             var op = [Token.NOT];
             return TypeHelper.Array.contains(op, token);
         };
-
         var isLeftBracket = function(token) {
             return Token.LEFT === token;
         };
-
         var isRightBracket = function(token) {
             return Token.RIGHT === token;
         };
-
         var containsLeftBracket = function(st) {
             return TypeHelper.Array.contains(st, Token.LEFT);
         };
@@ -331,11 +331,10 @@ var LogicalExpressionAnalyser = (function() {
                     break;
             }
         };
-
         var popCorrespondingUnaryOperators = function(operators, output) {
             var length = operators.length;
             for (var i = 0; i < length; i++) {
-                var top = operators[operators.length - 1];  // peek
+                var top = operators[operators.length - 1]; // peek
                 if (isUnaryOperator(top) && isPostfixOperator(top)) {
                     top = operators.pop();
                     output.push(top);
@@ -343,7 +342,6 @@ var LogicalExpressionAnalyser = (function() {
                     break;
             }
         };
-
         var popRemainingOperators = function(operators, output) {
             var length = operators.length;
             for (var i = 0; i < length; i++) {

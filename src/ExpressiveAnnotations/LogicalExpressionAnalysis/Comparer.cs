@@ -30,7 +30,7 @@ namespace ExpressiveAnnotations.LogicalExpressionAnalysis
         {
             return Equals(dependentValue, targetValue)
                    || (dependentValue is string && targetValue is string
-                       && string.Equals(((string) dependentValue).Trim(), ((string) targetValue).Trim()))
+                       && string.CompareOrdinal(dependentValue as string, targetValue as string) == 0)
                    || (!dependentValue.IsEmpty() && string.Equals(targetValue as string, "*"))
                    || (dependentValue.IsEmpty() && targetValue.IsEmpty());
         }
@@ -41,7 +41,7 @@ namespace ExpressiveAnnotations.LogicalExpressionAnalysis
                 return Convert.ToDouble(dependentValue) > Convert.ToDouble(targetValue);
             if (dependentValue.IsDateTime() && targetValue.IsDateTime())
                 return Convert.ToDateTime(dependentValue) > Convert.ToDateTime(targetValue);
-            if ((dependentValue == null || dependentValue is string) && (targetValue == null || targetValue is string))
+            if (dependentValue is string && targetValue is string)
                 return string.CompareOrdinal(dependentValue as string, targetValue as string) > 0;
             if (dependentValue == null || targetValue == null)
                 return false;
@@ -55,7 +55,7 @@ namespace ExpressiveAnnotations.LogicalExpressionAnalysis
                 return Convert.ToDouble(dependentValue) < Convert.ToDouble(targetValue);
             if (dependentValue.IsDateTime() && targetValue.IsDateTime())
                 return Convert.ToDateTime(dependentValue) < Convert.ToDateTime(targetValue);
-            if ((dependentValue == null || dependentValue is string) && (targetValue == null || targetValue is string))
+            if (dependentValue is string && targetValue is string)
                 return string.CompareOrdinal(dependentValue as string, targetValue as string) < 0;
             if (dependentValue == null || targetValue == null)
                 return false;
