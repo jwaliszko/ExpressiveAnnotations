@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.analysis.js - v1.1.3
+﻿/* expressive.annotations.analysis.js - v1.2.1
  * script responsible for logical expressions parsing and computation 
  * e.g. suppose there is "true && !false" expression given, and we need to know its final logical value:
  *     var evaluator = new Evaluator();

@@ -63,6 +63,9 @@ namespace ExpressiveAnnotations.Tests
             model = new Model { Email = "  jaroslaw.waliszko@gmail.com  ", WhatToDoAboutInsomnia = "write a script" };
             Assert.IsTrue(model.IsValid(m => m.WhatToDoAboutInsomnia));
 
+            model = new Model { Email = "  jaroslaw.waliszko@gmail.com  ", WhatToDoAboutInsomnia = "" };
+            Assert.IsTrue(model.IsValid(m => m.WhatToDoAboutInsomnia));
+
             model = new Model {Email = "Jaroslaw.Waliszko@gmail.com", WhatToDoAboutInsomnia = ""};
             Assert.IsTrue(model.IsValid(m => m.WhatToDoAboutInsomnia));            
         }
@@ -80,9 +83,6 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsFalse(model.IsValid(m => m.PassportNumber));            
 
             model = new Model {Email = "jaroslaw.waliszko@gmail.com", WhatToDoAboutInsomnia = ""};
-            Assert.IsFalse(model.IsValid(m => m.WhatToDoAboutInsomnia));
-
-            model = new Model { Email = "  jaroslaw.waliszko@gmail.com  ", WhatToDoAboutInsomnia = "" };
             Assert.IsFalse(model.IsValid(m => m.WhatToDoAboutInsomnia));
         }
 
