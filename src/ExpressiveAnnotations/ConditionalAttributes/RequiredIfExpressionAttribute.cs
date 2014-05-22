@@ -16,7 +16,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
     {
         private readonly RequiredAttribute _innerAttribute = new RequiredAttribute();
 
-        private const string _defaultErrorMessage = "The {0} field is required because is based on custom defined logic expression.";
+        private const string _defaultErrorMessage = "The {0} field is required by the following logic: {1}.";
 
         /// <summary>
         /// Logical expression based on which requirement condition is calculated. If condition is fulfilled, error message is displayed. 
@@ -49,6 +49,11 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             DependentProperties = new string[0];
             TargetValues = new object[0];
             RelationalOperators = new string[0];
+        }
+
+        public string FormatErrorMessage(string displayName, string expression)
+        {
+            return string.Format(ErrorMessageString, displayName, expression);
         }
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
@@ -90,7 +95,8 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                 // expression result is true => means we should try to validate this field (verify if required value is provided)  
                 if (!_innerAttribute.IsValid(value) || (value is bool && !(bool) value))
                     // validation failed - return an error
-                    return new ValidationResult(string.Format(ErrorMessageString, validationContext.DisplayName));
+                    return new ValidationResult(FormatErrorMessage(validationContext.DisplayName,
+                        PropHelper.ComposeExpression(Expression, DependentProperties, TargetValues, RelationalOperators)));
             }
 
             return ValidationResult.Success;

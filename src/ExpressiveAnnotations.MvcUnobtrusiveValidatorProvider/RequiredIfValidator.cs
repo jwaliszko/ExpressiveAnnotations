@@ -34,13 +34,13 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 
             var displayAttribute = dependentProperty.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
             var dependentPropertyName = displayAttribute != null ? displayAttribute.GetName() : attribute.DependentProperty;
-
-            _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), dependentPropertyName);
+            
             _dependentProperty = attribute.DependentProperty;
             _relationalOperator = relationalOperator;
             _targetValue = attribute.TargetValue;
 
             _type = TypeHelper.GetCoarseType(dependentProperty.PropertyType);
+            _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), dependentPropertyName);
         }
 
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()

@@ -53,9 +53,10 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 
                 _types[i] = TypeHelper.GetCoarseType(dependentProperty.PropertyType);
             }
-
-            _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName());
+            
             _expression = attribute.Expression;
+            _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(),
+                PropHelper.ComposeExpression(_expression, _dependentProperties, _targetValues, _relationalOperators));
         }
 
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()

@@ -23,7 +23,7 @@ namespace ExpressiveAnnotations.LogicalExpressionAnalysis
                     return !Greater(dependentValue, targetValue);
             }
 
-            throw new ArgumentException(string.Format("Relational operator {0} is invalid. Available operators: ==, !=, >, >=, <, <=.", relationalOperator));
+            throw new ArgumentException(string.Format("Relational operator \"{0}\" is invalid. Available operators: ==, !=, >, >=, <, <=.", relationalOperator));
         }
 
         public static bool Compare(object dependentValue, object targetValue)

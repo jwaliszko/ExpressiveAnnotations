@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -60,6 +61,22 @@ namespace ExpressiveAnnotations.Misc
             var compiledLambda = lambda.Compile();
             var value = compiledLambda.DynamicInvoke(source);
             return value;
+        }
+
+        public static string ComposeExpression(string expression, string[] dependentProperties, object[] targetValues, string[] relationalOperators)
+        {
+            var count = dependentProperties.Length;
+            var operands = new object[count];
+            for (var i = 0; i < count; i++)
+            {
+                string name;
+                var target = targetValues[i];
+                if (!TryExtractName(target, out name)) // if target value does not containan encapsulated property name, beautify it
+                    target = (target is string && (string)target != "*") ? string.Format("\"{0}\"", target) : target ?? "null";
+                target = (target is bool) ? target.ToString().ToLowerInvariant() : target;
+                operands[i] = string.Format("({0} {1} {2})", dependentProperties[i], relationalOperators.Any() ? relationalOperators[i] : "==", target);
+            }
+            return string.Format(expression, operands);
         }
     }
 }
