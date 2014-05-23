@@ -1,7 +1,7 @@
 ﻿using System;
-using ExpressiveAnnotations.LogicalExpressionAnalysis.SyntacticAnalysis;
+using ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis;
 
-namespace ExpressiveAnnotations.LogicalExpressionAnalysis
+namespace ExpressiveAnnotations.LogicalExpressionsAnalysis
 {
     public class Evaluator
     {

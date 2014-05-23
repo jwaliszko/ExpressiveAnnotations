@@ -7,7 +7,7 @@
  * copyright (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
  * licensed MIT: http://www.opensource.org/licenses/mit-license.php */
 
-var LogicalExpressionAnalyser = (function() {
+var LogicalExpressionsAnalyser = (function() {
 
     var TypeHelper = {
         Array: {
@@ -76,7 +76,7 @@ var LogicalExpressionAnalyser = (function() {
                     if (TypeHelper.isNumeric(milisec))
                         return new Date(milisec);
                 }
-                return { error: true, msg: 'Parsing error. Given value is not a string representing an RFC2822 or ISO 8601 date.' }
+                return { error: true, msg: 'Parsing error. Given value is not a string representing an RFC 2822 or ISO 8601 date.' }
             }
         },
         
@@ -84,7 +84,7 @@ var LogicalExpressionAnalyser = (function() {
             return value === null || value === '' || typeof value === 'undefined' || !/\S/.test(value);
         },
         isNumeric: function (value) {
-            return typeof value === 'number';
+            return typeof value === 'number' && !isNaN(value);
         },
         isDate: function (value) {
             return value instanceof Date;
@@ -138,11 +138,10 @@ var LogicalExpressionAnalyser = (function() {
         };
 
         var compare = function (dependentValue, targetValue) {
-            return (dependentValue === targetValue)
-                || (TypeHelper.isString(dependentValue) && TypeHelper.isString(targetValue)
-                    && TypeHelper.String.compareOrdinal(dependentValue, targetValue) === 0)
+            if(TypeHelper.isEmpty(dependentValue) && TypeHelper.isEmpty(targetValue))
+                return true;
+            return JSON.stringify(dependentValue) === JSON.stringify(targetValue)
                 || (!TypeHelper.isEmpty(dependentValue) && targetValue === '*')
-                || (TypeHelper.isEmpty(dependentValue) && TypeHelper.isEmpty(targetValue));
         };
         var greater = function (dependentValue, targetValue) {
             if (TypeHelper.isNumeric(dependentValue) && TypeHelper.isNumeric(targetValue))
@@ -157,7 +156,7 @@ var LogicalExpressionAnalyser = (function() {
             throw 'Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.';
         };
         var less = function (dependentValue, targetValue) {
-            if (TypeHelper.isNumber(dependentValue) && TypeHelper.isNumber(targetValue))
+            if (TypeHelper.isNumeric(dependentValue) && TypeHelper.isNumeric(targetValue))
                 return dependentValue < targetValue;
             if (TypeHelper.isDate(dependentValue) && TypeHelper.isDate(targetValue))
                 return dependentValue < targetValue;
@@ -397,6 +396,7 @@ var LogicalExpressionAnalyser = (function() {
             try {
                 return _parser.evaluate(_converter.convert(expression));
             } catch (e) {
+                console.error(e);
                 throw 'Logical expression computation failed. Expression is broken.';
             }
         };

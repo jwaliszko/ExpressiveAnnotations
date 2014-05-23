@@ -1,7 +1,8 @@
 ﻿using System;
 using ExpressiveAnnotations.Misc;
+using Newtonsoft.Json;
 
-namespace ExpressiveAnnotations.LogicalExpressionAnalysis
+namespace ExpressiveAnnotations.LogicalExpressionsAnalysis
 {
     public static class Comparer
     {
@@ -28,11 +29,10 @@ namespace ExpressiveAnnotations.LogicalExpressionAnalysis
 
         public static bool Compare(object dependentValue, object targetValue)
         {
-            return Equals(dependentValue, targetValue)
-                   || (dependentValue is string && targetValue is string
-                       && string.CompareOrdinal(dependentValue as string, targetValue as string) == 0)
-                   || (!dependentValue.IsEmpty() && string.Equals(targetValue as string, "*"))
-                   || (dependentValue.IsEmpty() && targetValue.IsEmpty());
+            if (dependentValue.IsEmpty() && targetValue.IsEmpty())
+                return true;
+            return JsonConvert.SerializeObject(dependentValue) == JsonConvert.SerializeObject(targetValue)
+                   || (!dependentValue.IsEmpty() && string.Equals(targetValue as string, "*"));
         }
 
         public static bool Greater(object dependentValue, object targetValue)

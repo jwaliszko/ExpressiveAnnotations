@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ExpressiveAnnotations.LogicalExpressionAnalysis.LexicalAnalysis
+namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.LexicalAnalysis
 {
     internal sealed class Lexer
     {

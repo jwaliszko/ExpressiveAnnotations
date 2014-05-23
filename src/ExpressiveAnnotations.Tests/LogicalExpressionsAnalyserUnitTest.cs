@@ -1,8 +1,10 @@
 ﻿using System;
-using ExpressiveAnnotations.LogicalExpressionAnalysis;
-using ExpressiveAnnotations.LogicalExpressionAnalysis.LexicalAnalysis;
-using ExpressiveAnnotations.LogicalExpressionAnalysis.SyntacticAnalysis;
+using ExpressiveAnnotations.LogicalExpressionsAnalysis;
+using ExpressiveAnnotations.LogicalExpressionsAnalysis.LexicalAnalysis;
+using ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis;
+using ExpressiveAnnotations.Misc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace ExpressiveAnnotations.Tests
 {
@@ -43,7 +45,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.AreEqual(tokens[5], ")");
             Assert.AreEqual(tokens[6], ")");
             Assert.AreEqual(tokens[7], "||");
-            Assert.AreEqual(tokens[8], "false");
+            Assert.AreEqual(tokens[8], "false");            
 
             try
             {
@@ -53,6 +55,7 @@ namespace ExpressiveAnnotations.Tests
             catch (Exception e)
             {
                 Assert.IsTrue(e is ArgumentException);
+                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at \"+ false\".");
             }
 
             try
@@ -63,6 +66,7 @@ namespace ExpressiveAnnotations.Tests
             catch (Exception e)
             {
                 Assert.IsTrue(e is ArgumentException);
+                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at \"7\".");
             }
         }
 
@@ -100,6 +104,7 @@ namespace ExpressiveAnnotations.Tests
             catch (Exception e)
             {
                 Assert.IsTrue(e is ArgumentException);
+                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at \"(false)\".");
             }
 
             try
@@ -110,6 +115,7 @@ namespace ExpressiveAnnotations.Tests
             catch (Exception e)
             {
                 Assert.IsTrue(e is ArgumentException);
+                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at \"+ 7\".");
             }
         }
 
@@ -127,37 +133,45 @@ namespace ExpressiveAnnotations.Tests
             try
             {
                 converter.Convert("(");
+                Assert.Fail();
             }
             catch (Exception e)
             {
                 Assert.IsTrue(e is ArgumentException);
+                Assert.IsTrue(e.Message == "Infix expression parsing error. Incorrect nesting.");
             }
 
             try
             {
                 converter.Convert(")");
+                Assert.Fail();
             }
             catch (Exception e)
             {
                 Assert.IsTrue(e is ArgumentException);
+                Assert.IsTrue(e.Message == "Infix expression parsing error. Incorrect nesting.");
             }
 
             try
             {
                 converter.Convert("(( true )");
+                Assert.Fail();
             }
             catch (Exception e)
             {
                 Assert.IsTrue(e is ArgumentException);
+                Assert.IsTrue(e.Message == "Infix expression parsing error. Incorrect nesting.");
             }
 
             try
             {
                 converter.Convert("( true && false ))");
+                Assert.Fail();
             }
             catch (Exception e)
             {
                 Assert.IsTrue(e is ArgumentException);
+                Assert.IsTrue(e.Message == "Infix expression parsing error. Incorrect nesting.");
             }
         }
 
@@ -167,27 +181,29 @@ namespace ExpressiveAnnotations.Tests
             var parser = new PostfixParser();
 
             Assert.IsTrue(parser.Evaluate("true"));
-            Assert.IsFalse(parser.Evaluate("false"));
+            Assert.IsTrue(!parser.Evaluate("false"));
 
             Assert.IsTrue(parser.Evaluate("true true &&"));
-            Assert.IsFalse(parser.Evaluate("true false &&"));
-            Assert.IsFalse(parser.Evaluate("false true &&"));
-            Assert.IsFalse(parser.Evaluate("false false &&"));
+            Assert.IsTrue(!parser.Evaluate("true false &&"));
+            Assert.IsTrue(!parser.Evaluate("false true &&"));
+            Assert.IsTrue(!parser.Evaluate("false false &&"));
 
             Assert.IsTrue(parser.Evaluate("true true ||"));
             Assert.IsTrue(parser.Evaluate("true false ||"));
             Assert.IsTrue(parser.Evaluate("false true ||"));
-            Assert.IsFalse(parser.Evaluate("false false ||"));
+            Assert.IsTrue(!parser.Evaluate("false false ||"));
 
             Assert.IsTrue(parser.Evaluate("true true false true || || || true true false false true true true false || && && || || && && false && ||"));
 
             try
             {
-                Assert.IsTrue(parser.Evaluate("(true)"));
+                parser.Evaluate("(true)");
+                Assert.Fail();
             }
             catch (Exception e)
             {
                 Assert.IsTrue(e is ArgumentException);
+                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at \"(true)\".");
             }
         }
 
@@ -197,6 +213,129 @@ namespace ExpressiveAnnotations.Tests
             var evaluator = new Evaluator();
             Assert.IsTrue(evaluator.Compute("(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false"));
             Assert.IsTrue(evaluator.Compute("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))"));
+        }
+
+        [TestMethod]
+        public void Verify_typehelper_is_empty()
+        {
+            object nullo = null;
+            Assert.IsTrue(nullo.IsEmpty());
+            Assert.IsTrue("".IsEmpty());
+            Assert.IsTrue(" ".IsEmpty());
+            Assert.IsTrue("\t".IsEmpty());
+            Assert.IsTrue("\n".IsEmpty());
+            Assert.IsTrue("\n\t ".IsEmpty());
+        }
+
+        [TestMethod]
+        public void Verify_typehelper_is_numeric()
+        {
+            Assert.IsTrue(1.IsNumeric());
+            Assert.IsTrue(!"1".IsNumeric());
+        }
+
+        [TestMethod]
+        public void Verify_typehelper_is_date()
+        {
+            Assert.IsTrue(DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT").IsDateTime());
+            Assert.IsTrue(!"Wed, 09 Aug 1995 00:00:00 GMT".IsDateTime());
+            Assert.IsTrue(!807926400000.IsDateTime());
+        }
+
+        [TestMethod]
+        public void Verify_typehelper_is_string()
+        {
+            object nullo = null;
+            Assert.IsTrue("".IsString());
+            Assert.IsTrue("123".IsString());
+            Assert.IsTrue(!123.IsString());
+            Assert.IsTrue(!new {}.IsString());
+            Assert.IsTrue(!nullo.IsString());
+        }
+
+        [TestMethod]
+        public void Verify_typehelper_is_bool()
+        {
+            Assert.IsTrue(true.IsBool());
+            Assert.IsTrue(!"true".IsBool());
+            Assert.IsTrue(!0.IsBool());
+        }
+
+        [TestMethod]
+        public void Verify_comparison_equals_non_empty()
+        {
+            Assert.IsTrue(Comparer.Compute("aAa", "aAa", "=="));
+            Assert.IsTrue(Comparer.Compute(0, 0, "=="));
+            Assert.IsTrue(Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), "=="));
+            Assert.IsTrue(Comparer.Compute(new {}, new {}, "=="));
+            Assert.IsTrue(Comparer.Compute(new {error = true}, new {error = true}, "=="));
+            Assert.IsTrue(Comparer.Compute(new[] {"a", "b"}, new[] {"a", "b"}, "=="));
+
+            Assert.IsTrue(!Comparer.Compute("aAa", "aaa", "=="));
+            Assert.IsTrue(!Comparer.Compute(0, 1, "=="));
+            Assert.IsTrue(!Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), "=="));
+            Assert.IsTrue(!Comparer.Compute(new {error = true}, new {error = false}, "=="));
+            Assert.IsTrue(!Comparer.Compute(new[] {"a", "b"}, new[] {"a", "B"}, "=="));
+        }
+
+        [TestMethod]
+        public void Verify_comparison_equals_empty()
+        {
+            Assert.IsTrue(Comparer.Compute("", "", "=="));
+            Assert.IsTrue(Comparer.Compute(" ", " ", "=="));
+            Assert.IsTrue(Comparer.Compute("\t", "\n", "=="));        
+            Assert.IsTrue(Comparer.Compute(null, null, "=="));
+            Assert.IsTrue(Comparer.Compute("", " ", "=="));
+            Assert.IsTrue(Comparer.Compute("\n\t ", null, "=="));
+        }
+
+        [TestMethod]
+        public void Verify_comparison_greater_and_less()
+        {
+            // assumption - arguments provided have exact types
+
+            Assert.IsTrue(Comparer.Compute("a", "A", ">"));
+            Assert.IsTrue(Comparer.Compute("abcd", "ABCD", ">"));
+            Assert.IsTrue(Comparer.Compute(1, 0, ">"));
+            Assert.IsTrue(Comparer.Compute(0, -1, ">"));
+            Assert.IsTrue(Comparer.Compute(1.1, 1.01, ">"));
+            Assert.IsTrue(Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), ">"));
+
+            Assert.IsTrue(!Comparer.Compute("a", "A", "<="));
+            Assert.IsTrue(!Comparer.Compute("abcd", "ABCD", "<="));
+            Assert.IsTrue(!Comparer.Compute(1, 0, "<="));
+            Assert.IsTrue(!Comparer.Compute(0, -1, "<="));
+            Assert.IsTrue(!Comparer.Compute(1.1, 1.01, "<="));
+            Assert.IsTrue(!Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), "<="));
+
+            Assert.IsTrue(!Comparer.Compute("a", null, ">"));
+            Assert.IsTrue(!Comparer.Compute(null, "a", ">"));
+            Assert.IsTrue(!Comparer.Compute("a", null, "<"));
+            Assert.IsTrue(!Comparer.Compute(null, "a", "<"));
+
+            try
+            {
+                Comparer.Compute(new {}, new {}, ">");
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.IsTrue(e.Message == "Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.");
+            }
+        }
+
+        [TestMethod]
+        public void Verify_composed_error_message()
+        {
+            const string expression = "{0} && ( (!{1} && {2}) || ({3} && {4}) ) && {5} && {6} && {7} || {1}";
+            var dependentProperties = new[] {"aaa", "bbb",  "ccc",  "ddd",  "ddd",  "eee",  "fff",  "ggg"};
+            var relationalOperators = new[] {"==",  "==",   "==",   ">",    "<=",   "!=",   "!=",   "=="};
+            var targetValues = new object[] {true,  "xXx",  "[yYy]",-1,     1.2,    null,   "*",    ""};
+
+            Assert.AreEqual(
+                PropHelper.ComposeExpression(expression, dependentProperties, targetValues, relationalOperators),
+                "(aaa == true) && ( (!(bbb == \"xXx\") && (ccc == [yYy])) || ((ddd > -1) && (ddd <= 1.2)) ) && (eee != null) && (fff != *) && (ggg == \"\") || (bbb == \"xXx\")");
         }
     }
 }

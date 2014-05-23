@@ -30,29 +30,35 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LogicalExpressionAnalysis\Evaluator.cs" />
-    <Compile Include="LogicalExpressionAnalysis\LexicalAnalysis\InfixLexer.cs" />
-    <Compile Include="LogicalExpressionAnalysis\LexicalAnalysis\Token.cs" />
-    <Compile Include="LogicalExpressionAnalysis\LexicalAnalysis\Lexer.cs" />
-    <Compile Include="LogicalExpressionAnalysis\LexicalAnalysis\RegexMatcher.cs" />
-    <Compile Include="LogicalExpressionAnalysis\LexicalAnalysis\PostfixLexer.cs" />
-    <Compile Include="LogicalExpressionAnalysis\LexicalAnalysis\TokenDefinition.cs" />
-    <Compile Include="LogicalExpressionAnalysis\SyntacticAnalysis\InfixToPostfixConverter.cs" />
-    <Compile Include="LogicalExpressionAnalysis\SyntacticAnalysis\PostfixParser.cs" />
+    <Compile Include="LogicalExpressionsAnalysis\Evaluator.cs" />
+    <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\InfixLexer.cs" />
+    <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\Token.cs" />
+    <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\Lexer.cs" />
+    <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\RegexMatcher.cs" />
+    <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\PostfixLexer.cs" />
+    <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\TokenDefinition.cs" />
+    <Compile Include="LogicalExpressionsAnalysis\SyntacticAnalysis\InfixToPostfixConverter.cs" />
+    <Compile Include="LogicalExpressionsAnalysis\SyntacticAnalysis\PostfixParser.cs" />
     <Compile Include="Misc\Assert.cs" />
-    <Compile Include="LogicalExpressionAnalysis\Comparer.cs" />
+    <Compile Include="LogicalExpressionsAnalysis\Comparer.cs" />
     <Compile Include="Misc\PropHelper.cs" />
     <Compile Include="ConditionalAttributes\RequiredIfAttribute.cs" />
     <Compile Include="ConditionalAttributes\RequiredIfExpressionAttribute.cs" />
     <Compile Include="Misc\TypeHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

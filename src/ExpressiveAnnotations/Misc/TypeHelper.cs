@@ -6,7 +6,7 @@ namespace ExpressiveAnnotations.Misc
     {
         public static bool IsEmpty(this object value)
         {
-            return value == null || (value is string && string.IsNullOrEmpty((string)value));
+            return value == null || (value is string && string.IsNullOrWhiteSpace((string)value));
         }
 
         public static bool IsNumeric(this object value)

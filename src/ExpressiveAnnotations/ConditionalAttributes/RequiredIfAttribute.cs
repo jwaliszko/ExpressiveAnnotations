@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using ExpressiveAnnotations.LogicalExpressionAnalysis;
+using ExpressiveAnnotations.LogicalExpressionsAnalysis;
 using ExpressiveAnnotations.Misc;
 
 namespace ExpressiveAnnotations.ConditionalAttributes
