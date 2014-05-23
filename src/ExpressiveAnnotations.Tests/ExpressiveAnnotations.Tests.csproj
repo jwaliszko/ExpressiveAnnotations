@@ -54,7 +54,7 @@
     <Compile Include="Misc\ModelHelper.cs" />
     <Compile Include="RequiredIfAttributeTest.cs" />
     <Compile Include="RequiredIfExpressionAttributeTest.cs" />
-    <Compile Include="LogicalExpressionsAnalyserUnitTest.cs" />
+    <Compile Include="LogicalExpressionsAnalyserTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

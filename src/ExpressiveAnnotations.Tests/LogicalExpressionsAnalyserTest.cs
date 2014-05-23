@@ -9,7 +9,7 @@ using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 namespace ExpressiveAnnotations.Tests
 {
     [TestClass]
-    public class LogicalExpressionsAnalyserUnitTest
+    public class LogicalExpressionsAnalyserTest
     {
         [TestMethod]
         public void Verify_infix_lexer_logic()
