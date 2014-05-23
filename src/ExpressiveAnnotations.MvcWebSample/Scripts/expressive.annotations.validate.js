@@ -126,4 +126,4 @@
         return true;
     }, '');
 
-})(jQuery, LogicalExpressionAnalyser);
+})(jQuery, LogicalExpressionsAnalyser);
