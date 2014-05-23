@@ -362,7 +362,9 @@ var LogicalExpressionsAnalyser = (function() {
             return result;
         };
 
-        var evaluate = function(st) {
+        var evaluate = function (st) {
+            if (st.length === 0)
+                throw 'Stack empty.';
             var top = st.pop();
 
             if ('true' === top || 'false' === top)
