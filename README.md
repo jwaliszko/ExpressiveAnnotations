@@ -31,7 +31,7 @@ public bool AgreeToContact { get; set; }
 [RequiredIfExpression(
 		Expression = "{0} && !{1} && {2}",
         DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry"},
-        TargetValues = new object[] {true, "Other", "[Country]"},
+        TargetValues = new object[] {true,       "Other",       "[Country]"},
         ErrorMessage = "If you plan to go abroad, why do you 
                         want to visit the same country twice?")]
 public string ReasonForTravel { get; set; }
@@ -49,8 +49,8 @@ public string ReasonForTravel { get; set; }
 [RequiredIfExpression(
 		Expression = "{0} && ( (!{1} && {2}) || ({3} && {4}) )",
 		DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry", "Age", "Age"},
-		RelationalOperators = new[] {"==", "==", "==", ">", "<="},
-		TargetValues = new object[] {true, "Other", "[Country]", 24, 55},
+		RelationalOperators = new[] {"==",       "==",          "==",          ">",   "<="},
+		TargetValues = new object[] {true,       "Other",       "[Country]",   24,    55},
         ErrorMessage = "If you plan to go abroad and you are between 25 and 55 or plan to 
 						visit the same foreign country twice, write down your reasons.")]
 public string ReasonForTravel { get; set; }
@@ -157,7 +157,7 @@ In our example it's more about metadata, e.g.
 [RequiredIfExpression(
     Expression = "{0} && !{1} && {2}",
     DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry"},
-    TargetValues = new object[] {true, "Other", "[Country]"},
+    TargetValues = new object[] {true,       "Other",       "[Country]"},
     ErrorMessage = "If you plan to go abroad, why do you 
                     want to visit the same country twice?")]
 public string ReasonForTravel { get; set; }

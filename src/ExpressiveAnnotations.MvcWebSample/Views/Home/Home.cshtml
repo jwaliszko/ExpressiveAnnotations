@@ -74,8 +74,8 @@
                         */
     Expression = "{0} && ( (!{1} && {2}) || ({3} && {4}) )",
     DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry", "Age", "Age"},
-    RelationalOperators = new[] {"==", "==", "==", "&gt;", "&le;"},
-    TargetValues = new object[] {true, "Other", "[Country]", 24, 55},
+    RelationalOperators = new[] {"==",       "==",          "==",          "&gt;",   "&le;"},
+    TargetValues = new object[] {true,       "Other",       "[Country]",   24,    55},
     ErrorMessage = "If you plan to go abroad and you are between 25 and 55 or plan 
                     to visit the same foreign country twice, write down your reasons.")]
 </pre>
@@ -85,7 +85,7 @@
                 @Html.ValidationMessageFor(model => model.ReasonForTravel)
             </li>
             <li>
-                @Html.EditorFor(x => x.LatestSuggestedReturnDate)   @*hidden backing field storing date in RFC2822 or ISO 8601 format*@
+                @Html.EditorFor(x => x.LatestSuggestedReturnDate)   @*hidden backing field storing date in RFC 2822 or ISO 8601 format*@
                 <pre class="code">
 [RequiredIf(
     DependentProperty = "GoAbroad", 
@@ -99,12 +99,12 @@
             <li>
                 <pre class="code">
 [RequiredIfExpression( /* interpretation => GoAbroad == true 
-                        *                   && ReturnDate > value_from_latest_suggested_return_date (stored in RFC2822 or ISO 8601 format)
+                        *                   && ReturnDate > value_from_latest_suggested_return_date (stored in RFC 2822 or ISO 8601 format)
                         */
             Expression = "{0} && {1}",
             DependentProperties = new[] {"GoAbroad", "ReturnDate"},
-            RelationalOperators = new[] {"==", ">"},
-            TargetValues = new object[] {true, "[LatestSuggestedReturnDate]"},
+            RelationalOperators = new[] {"==",       ">"},
+            TargetValues = new object[] {true,       "[LatestSuggestedReturnDate]"},
             ErrorMessage = "If you plan to stay abroad longer than one month from now, write down your reasons.")]
 </pre>
                 <pre class="action">[show attribute]</pre>
@@ -128,7 +128,7 @@
 [RequiredIfExpression( /* interpretation => PoliticalStability != null && PoliticalStability != Stability.High */
     Expression = "!{0} && !{1}",
     DependentProperties = new[] {"PoliticalStability", "PoliticalStability"},
-    TargetValues = new object[] {null, Stability.High},
+    TargetValues = new object[] {null,                 Stability.High},
     ErrorMessage = "You are required to agree that you are aware of the risks of travel.")]
 </pre>
                 <pre class="action">[show attribute]</pre>
@@ -149,7 +149,7 @@
 [RequiredIfExpression( /* interpretation => SportType == "Extreme" || (SportType != "None" && GoAbroad) */
     Expression = "{0} || (!{1} && {2})",
     DependentProperties = new[] {"SportType", "SportType", "GoAbroad"},
-    TargetValues = new object[] {"Extreme", "None", true},
+    TargetValues = new object[] {"Extreme",   "None",      true},
     ErrorMessage = "Blood type is required if you do extreme sports, 
                     or if you do any type of sport and plan to go abroad.")]
 </pre>
@@ -166,7 +166,7 @@
 [RequiredIfExpression( /* interpretation => ContactDetails.Email == "*" || ContactDetails.Phone == "*" */
     Expression = "{0} || {1}",
     DependentProperties = new[] {"ContactDetails.Email", "ContactDetails.Phone"}, /* nested properties are supported */
-    TargetValues = new object[] {"*", "*"}, /* any values */
+    TargetValues = new object[] {"*",                    "*"}, /* any values */
     ErrorMessage = "You have to authorize us to contact you.")]
 
 one of possible equivalents is:
@@ -174,7 +174,7 @@ one of possible equivalents is:
 [RequiredIfExpression( /* interpretation => ContactDetails.Email != null || ContactDetails.Phone != null */
     Expression = "!{0} || !{1}",
     DependentProperties = new[] {"ContactDetails.Email", "ContactDetails.Phone"},
-    TargetValues = new object[] {null, null}, /* no values */
+    TargetValues = new object[] {null,                   null}, /* no values */
     ErrorMessage = "You have to authorize us to contact you.")]
 </pre>
                 <pre class="action">[show attribute]</pre>

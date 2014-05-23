@@ -69,8 +69,8 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
                                 */
             Expression = "{0} && ( (!{1} && {2}) || ({3} && {4}) )",
             DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry", "Age", "Age"},
-            RelationalOperators = new[] {"==", "==", "==", ">", "<="},
-            TargetValues = new object[] {true, "Other", "[Country]", 24, 55},
+            RelationalOperators = new[] {"==",       "==",          "==",          ">",   "<="},
+            TargetValues = new object[] {true,       "Other",       "[Country]",   24,    55},
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ReasonForTravelRequired")]
         [Display(ResourceType = typeof (Resources), Name = "ReasonForTravel")]
         public string ReasonForTravel { get; set; }
@@ -86,16 +86,16 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public DateTime? ReturnDate { get; set; }
 
         [RequiredIfExpression( /* interpretation => GoAbroad == true 
-                                *                   && ReturnDate > value_from_latest_suggested_return_date (stored in RFC2822 or ISO 8601 format)
+                                *                   && ReturnDate > value_from_latest_suggested_return_date (stored in RFC 2822 or ISO 8601 format)
                                 */
             Expression = "{0} && {1}",
-            DependentProperties = new[] { "GoAbroad", "ReturnDate" },
-            RelationalOperators = new[] { "==", ">" },
-            TargetValues = new object[] { true, "[LatestSuggestedReturnDate]" },
-            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "ReasonForLongTravelRequired")]
-        [Display(ResourceType = typeof(Resources), Name = "ReasonForLongTravel")]
+            DependentProperties = new[] {"GoAbroad", "ReturnDate"},
+            RelationalOperators = new[] {"==",       ">"},
+            TargetValues = new object[] {true,       "[LatestSuggestedReturnDate]"},
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ReasonForLongTravelRequired")]
+        [Display(ResourceType = typeof (Resources), Name = "ReasonForLongTravel")]
         public string ReasonForLongTravel { get; set; }
-        
+
         [RequiredIf(
             DependentProperty = "GoAbroad",
             TargetValue = true,
@@ -106,7 +106,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [RequiredIfExpression( /* interpretation => PoliticalStability != null && PoliticalStability != Stability.High */
             Expression = "!{0} && !{1}",
             DependentProperties = new[] {"PoliticalStability", "PoliticalStability"},
-            TargetValues = new object[] {null, Stability.High},
+            TargetValues = new object[] {null,                 Stability.High},
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "AwareOfTheRisksRequired")]
         [Display(ResourceType = typeof (Resources), Name = "AwareOfTheRisks")]
         public bool AwareOfTheRisks { get; set; }
@@ -117,7 +117,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [RequiredIfExpression( /* interpretation => SportType == "Extreme" || (SportType != "None" && GoAbroad == true) */
             Expression = "{0} || (!{1} && {2})",
             DependentProperties = new[] {"SportType", "SportType", "GoAbroad"},
-            TargetValues = new object[] {"Extreme", "None", true},
+            TargetValues = new object[] {"Extreme",    "None",     true},
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "BloodTypeRequired")]
         [Display(ResourceType = typeof (Resources), Name = "BloodType")]
         public string BloodType { get; set; }
@@ -125,7 +125,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [RequiredIfExpression( /* interpretation => ContactDetails.Email == "*" || ContactDetails.Phone == "*" */
             Expression = "{0} || {1}",
             DependentProperties = new[] {"ContactDetails.Email", "ContactDetails.Phone"}, /* nested properties are supported */
-            TargetValues = new object[] {"*", "*"}, /* any values */
+            TargetValues = new object[] {"*",                    "*"}, /* any values */
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "AgreeForContactRequired")]
         [Display(ResourceType = typeof (Resources), Name = "AgreeForContact")]
         public bool AgreeForContact { get; set; }
