@@ -213,6 +213,106 @@ namespace ExpressiveAnnotations.Tests
             var evaluator = new Evaluator();
             Assert.IsTrue(evaluator.Compute("(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false"));
             Assert.IsTrue(evaluator.Compute("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))"));
+
+            try
+            {
+                evaluator.Compute("");
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.IsTrue(e.Message == "Logical expression computation failed. Expression is broken.");
+            }
+            try
+            {
+                evaluator.Compute(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.IsTrue(e.Message == "Logical expression computation failed. Expression is broken.");
+            }
+        }
+
+        [TestMethod]
+        public void Verify_comparison_equals_non_empty()
+        {
+            Assert.IsTrue(Comparer.Compute("aAa", "aAa", "=="));
+            Assert.IsTrue(Comparer.Compute(0, 0, "=="));
+            Assert.IsTrue(Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), "=="));
+            Assert.IsTrue(Comparer.Compute(new {}, new {}, "=="));
+            Assert.IsTrue(Comparer.Compute(new {error = true}, new {error = true}, "=="));
+            Assert.IsTrue(Comparer.Compute(new[] {"a", "b"}, new[] {"a", "b"}, "=="));
+
+            Assert.IsTrue(!Comparer.Compute("aAa", "aAa ", "=="));
+            Assert.IsTrue(!Comparer.Compute("aAa", " aAa ", "=="));
+            Assert.IsTrue(!Comparer.Compute("aAa", "aaa", "=="));
+            Assert.IsTrue(!Comparer.Compute(0, 1, "=="));
+            Assert.IsTrue(!Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), "=="));
+            Assert.IsTrue(!Comparer.Compute(new {error = true}, new {error = false}, "=="));
+            Assert.IsTrue(!Comparer.Compute(new[] {"a", "b"}, new[] {"a", "B"}, "=="));
+        }
+
+        [TestMethod]
+        public void Verify_comparison_equals_empty()
+        {
+            Assert.IsTrue(Comparer.Compute("", "", "=="));
+            Assert.IsTrue(Comparer.Compute(" ", " ", "=="));
+            Assert.IsTrue(Comparer.Compute("\t", "\n", "=="));
+            Assert.IsTrue(Comparer.Compute(null, null, "=="));
+            Assert.IsTrue(Comparer.Compute("", " ", "=="));
+            Assert.IsTrue(Comparer.Compute("\n\t ", null, "=="));
+        }
+
+        [TestMethod]
+        public void Verify_comparison_greater_and_less()
+        {
+            // assumption - arguments provided have exact types
+
+            Assert.IsTrue(Comparer.Compute("a", "A", ">"));
+            Assert.IsTrue(Comparer.Compute("abcd", "ABCD", ">"));
+            Assert.IsTrue(Comparer.Compute(1, 0, ">"));
+            Assert.IsTrue(Comparer.Compute(0, -1, ">"));
+            Assert.IsTrue(Comparer.Compute(1.1, 1.01, ">"));
+            Assert.IsTrue(Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), ">"));
+
+            Assert.IsTrue(!Comparer.Compute("a", "A", "<="));
+            Assert.IsTrue(!Comparer.Compute("abcd", "ABCD", "<="));
+            Assert.IsTrue(!Comparer.Compute(1, 0, "<="));
+            Assert.IsTrue(!Comparer.Compute(0, -1, "<="));
+            Assert.IsTrue(!Comparer.Compute(1.1, 1.01, "<="));
+            Assert.IsTrue(!Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), "<="));
+
+            Assert.IsTrue(!Comparer.Compute("a", null, ">"));
+            Assert.IsTrue(!Comparer.Compute(null, "a", ">"));
+            Assert.IsTrue(!Comparer.Compute("a", null, "<"));
+            Assert.IsTrue(!Comparer.Compute(null, "a", "<"));
+
+            try
+            {
+                Comparer.Compute(new {}, new {}, ">");
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.IsTrue(e.Message == "Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.");
+            }
+        }
+
+        [TestMethod]
+        public void Verify_composed_error_message()
+        {
+            const string expression = "{0} && ( (!{1} && {2}) || ({3} && {4}) ) && {5} && {6} && {7} || {1}";
+var dependentProperties = new[] {"aaa", "bbb",  "ccc",  "ddd",  "ddd",  "eee",  "fff",  "ggg"};
+            var relationalOperators = new[] {"==",  "==",   "==",   ">",    "<=",   "!=",   "!=",   "=="};
+            var targetValues = new object[] {true,  "xXx",  "[yYy]",-1,     1.2,    null,   "*",    ""};
+
+            Assert.AreEqual(
+                PropHelper.ComposeExpression(expression, dependentProperties, targetValues, relationalOperators),
+                "(aaa == true) && ( (!(bbb == \"xXx\") && (ccc == [yYy])) || ((ddd > -1) && (ddd <= 1.2)) ) && (eee != null) && (fff != *) && (ggg == \"\") || (bbb == \"xXx\")");
         }
 
         [TestMethod]
@@ -259,83 +359,6 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(true.IsBool());
             Assert.IsTrue(!"true".IsBool());
             Assert.IsTrue(!0.IsBool());
-        }
-
-        [TestMethod]
-        public void Verify_comparison_equals_non_empty()
-        {
-            Assert.IsTrue(Comparer.Compute("aAa", "aAa", "=="));
-            Assert.IsTrue(Comparer.Compute(0, 0, "=="));
-            Assert.IsTrue(Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), "=="));
-            Assert.IsTrue(Comparer.Compute(new {}, new {}, "=="));
-            Assert.IsTrue(Comparer.Compute(new {error = true}, new {error = true}, "=="));
-            Assert.IsTrue(Comparer.Compute(new[] {"a", "b"}, new[] {"a", "b"}, "=="));
-
-            Assert.IsTrue(!Comparer.Compute("aAa", "aaa", "=="));
-            Assert.IsTrue(!Comparer.Compute(0, 1, "=="));
-            Assert.IsTrue(!Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), "=="));
-            Assert.IsTrue(!Comparer.Compute(new {error = true}, new {error = false}, "=="));
-            Assert.IsTrue(!Comparer.Compute(new[] {"a", "b"}, new[] {"a", "B"}, "=="));
-        }
-
-        [TestMethod]
-        public void Verify_comparison_equals_empty()
-        {
-            Assert.IsTrue(Comparer.Compute("", "", "=="));
-            Assert.IsTrue(Comparer.Compute(" ", " ", "=="));
-            Assert.IsTrue(Comparer.Compute("\t", "\n", "=="));        
-            Assert.IsTrue(Comparer.Compute(null, null, "=="));
-            Assert.IsTrue(Comparer.Compute("", " ", "=="));
-            Assert.IsTrue(Comparer.Compute("\n\t ", null, "=="));
-        }
-
-        [TestMethod]
-        public void Verify_comparison_greater_and_less()
-        {
-            // assumption - arguments provided have exact types
-
-            Assert.IsTrue(Comparer.Compute("a", "A", ">"));
-            Assert.IsTrue(Comparer.Compute("abcd", "ABCD", ">"));
-            Assert.IsTrue(Comparer.Compute(1, 0, ">"));
-            Assert.IsTrue(Comparer.Compute(0, -1, ">"));
-            Assert.IsTrue(Comparer.Compute(1.1, 1.01, ">"));
-            Assert.IsTrue(Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), ">"));
-
-            Assert.IsTrue(!Comparer.Compute("a", "A", "<="));
-            Assert.IsTrue(!Comparer.Compute("abcd", "ABCD", "<="));
-            Assert.IsTrue(!Comparer.Compute(1, 0, "<="));
-            Assert.IsTrue(!Comparer.Compute(0, -1, "<="));
-            Assert.IsTrue(!Comparer.Compute(1.1, 1.01, "<="));
-            Assert.IsTrue(!Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), "<="));
-
-            Assert.IsTrue(!Comparer.Compute("a", null, ">"));
-            Assert.IsTrue(!Comparer.Compute(null, "a", ">"));
-            Assert.IsTrue(!Comparer.Compute("a", null, "<"));
-            Assert.IsTrue(!Comparer.Compute(null, "a", "<"));
-
-            try
-            {
-                Comparer.Compute(new {}, new {}, ">");
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(e is InvalidOperationException);
-                Assert.IsTrue(e.Message == "Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.");
-            }
-        }
-
-        [TestMethod]
-        public void Verify_composed_error_message()
-        {
-            const string expression = "{0} && ( (!{1} && {2}) || ({3} && {4}) ) && {5} && {6} && {7} || {1}";
-            var dependentProperties = new[] {"aaa", "bbb",  "ccc",  "ddd",  "ddd",  "eee",  "fff",  "ggg"};
-            var relationalOperators = new[] {"==",  "==",   "==",   ">",    "<=",   "!=",   "!=",   "=="};
-            var targetValues = new object[] {true,  "xXx",  "[yYy]",-1,     1.2,    null,   "*",    ""};
-
-            Assert.AreEqual(
-                PropHelper.ComposeExpression(expression, dependentProperties, targetValues, relationalOperators),
-                "(aaa == true) && ( (!(bbb == \"xXx\") && (ccc == [yYy])) || ((ddd > -1) && (ddd <= 1.2)) ) && (eee != null) && (fff != *) && (ggg == \"\") || (bbb == \"xXx\")");
         }
     }
 }

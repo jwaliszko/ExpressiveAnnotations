@@ -43,6 +43,9 @@ namespace ExpressiveAnnotations.ConditionalAttributes
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
+            if (validationContext == null)
+                throw new ArgumentNullException("validationContext", "ValidationContext not provided.");
+
             var dependentProperty = PropHelper.ExtractProperty(validationContext.ObjectInstance, DependentProperty);
             
             var dependentValue = PropHelper.ExtractValue(validationContext.ObjectInstance, DependentProperty);

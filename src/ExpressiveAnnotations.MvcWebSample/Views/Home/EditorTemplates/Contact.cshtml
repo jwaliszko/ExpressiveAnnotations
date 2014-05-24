@@ -5,7 +5,7 @@
     <ol>
         <li>
             <pre class="code">
-[RequiredIfExpression(
+[RequiredIfExpression( /* interpretation => Email == null && Phone == null */
     Expression = "{0} && {1}",
     DependentProperties = new[] {"Email", "Phone"},
     TargetValues = new object[] {null,    null},
@@ -18,7 +18,7 @@
         </li>
         <li>
             <pre class="code">
-[RequiredIfExpression(
+[RequiredIfExpression( /* interpretation => Email == null && Phone == null */
     Expression = "{0} && {1}",
     DependentProperties = new[] {"Email", "Phone"},
     TargetValues = new object[] {null,    null},

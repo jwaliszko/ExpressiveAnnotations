@@ -58,6 +58,9 @@ namespace ExpressiveAnnotations.ConditionalAttributes
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
+            if (validationContext == null)
+                throw new ArgumentNullException("validationContext", "ValidationContext not provided.");
+
             if (DependentProperties.Length != TargetValues.Length)
                 throw new ArgumentException("Number of elements in DependentProperties and TargetValues must match.");
             if (RelationalOperators.Any() && RelationalOperators.Length != DependentProperties.Length)

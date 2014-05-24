@@ -137,11 +137,12 @@ var LogicalExpressionsAnalyser = (function() {
             throw TypeHelper.String.format('Relational operator {0} is invalid. Available operators: ==, !=, >, >=, <, <=.', relationalOperator);
         };
 
-        var compare = function (dependentValue, targetValue) {
-            if(TypeHelper.isEmpty(dependentValue) && TypeHelper.isEmpty(targetValue))
+        var compare = function(dependentValue, targetValue) {
+            if (TypeHelper.isEmpty(dependentValue) && TypeHelper.isEmpty(targetValue))
                 return true;
-            return JSON.stringify(dependentValue) === JSON.stringify(targetValue)
-                || (!TypeHelper.isEmpty(dependentValue) && targetValue === '*')
+            if (!TypeHelper.isEmpty(dependentValue) && targetValue === '*')
+                return true;
+            return JSON.stringify(dependentValue) === JSON.stringify(targetValue);
         };
         var greater = function (dependentValue, targetValue) {
             if (TypeHelper.isNumeric(dependentValue) && TypeHelper.isNumeric(targetValue))
@@ -215,7 +216,7 @@ var LogicalExpressionsAnalyser = (function() {
         };
 
         var next = function() {
-            if (_expression === '')
+            if (_expression === '' || _expression === null)
                 return false;
 
             var length = _tokenDefinitions.length;
@@ -377,15 +378,15 @@ var LogicalExpressionsAnalyser = (function() {
             var x = evaluate(st);
 
             switch (top) {
-            case Token.AND:
-                x &= y;
-                break;
-            case Token.OR:
-                x |= y;
-                break;
-            default:
-                throw TypeHelper.String.format('RPN expression parsing error. Token "{0}" not expected.', top);
-            }
+                case Token.AND:
+                    x &= y;
+                    break;
+                case Token.OR:
+                    x |= y;
+                    break;
+                default:
+                    throw TypeHelper.String.format('RPN expression parsing error. Token "{0}" not expected.', top);
+                }
             return x;
         };
     }

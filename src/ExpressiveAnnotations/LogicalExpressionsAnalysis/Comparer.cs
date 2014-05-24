@@ -31,8 +31,9 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis
         {
             if (dependentValue.IsEmpty() && targetValue.IsEmpty())
                 return true;
-            return JsonConvert.SerializeObject(dependentValue) == JsonConvert.SerializeObject(targetValue)
-                   || (!dependentValue.IsEmpty() && string.Equals(targetValue as string, "*"));
+            if(!dependentValue.IsEmpty() && string.Equals(targetValue as string, "*"))
+                return true;
+            return JsonConvert.SerializeObject(dependentValue) == JsonConvert.SerializeObject(targetValue);
         }
 
         public static bool Greater(object dependentValue, object targetValue)
