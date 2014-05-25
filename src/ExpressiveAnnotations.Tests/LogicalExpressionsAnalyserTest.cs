@@ -311,7 +311,7 @@ var dependentProperties = new[] {"aaa", "bbb",  "ccc",  "ddd",  "ddd",  "eee",  
             var targetValues = new object[] {true,  "xXx",  "[yYy]",-1,     1.2,    null,   "*",    ""};
 
             Assert.AreEqual(
-                PropHelper.ComposeExpression(expression, dependentProperties, targetValues, relationalOperators),
+                MiscHelper.ComposeExpression(expression, dependentProperties, targetValues, relationalOperators),
                 "(aaa == true) && ( (!(bbb == \"xXx\") && (ccc == [yYy])) || ((ddd > -1) && (ddd <= 1.2)) ) && (eee != null) && (fff != *) && (ggg == \"\") || (bbb == \"xXx\")");
         }
 
