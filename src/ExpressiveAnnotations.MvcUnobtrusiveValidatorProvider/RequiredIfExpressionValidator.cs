@@ -49,13 +49,13 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 
             for (var i = 0; i < count; i++)
             {
-                var dependentProperty = PropHelper.ExtractProperty(metadata.ContainerType, attribute.DependentProperties[i]);
+                var dependentProperty = MiscHelper.ExtractProperty(metadata.ContainerType, attribute.DependentProperties[i]);
                 var relationalOperator = attribute.RelationalOperators.Any() ? attribute.RelationalOperators[i] : "==";
 
                 string targetPropertyName;
-                if (PropHelper.TryExtractName(attribute.TargetValues[i], out targetPropertyName))
+                if (MiscHelper.TryExtractName(attribute.TargetValues[i], out targetPropertyName))
                 {
-                    var targetProperty = PropHelper.ExtractProperty(metadata.ContainerType, targetPropertyName);
+                    var targetProperty = MiscHelper.ExtractProperty(metadata.ContainerType, targetPropertyName);
                     Assert.ConsistentTypes(dependentProperty, targetProperty, metadata.PropertyName, attributeName, relationalOperator);
                 }
                 else
@@ -70,11 +70,11 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             
             _expression = attribute.Expression;
             _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(),
-                PropHelper.ComposeExpression(_expression, _dependentProperties, _targetValues, _relationalOperators));
+                MiscHelper.ComposeExpression(_expression, _dependentProperties, _targetValues, _relationalOperators));
         }
 
         /// <summary>
-        /// Retrieves a collection of client validation rules.
+        /// Retrieves a collection of client validation rules (rules sent to browsers).
         /// </summary>
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()
         {

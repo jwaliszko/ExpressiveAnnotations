@@ -16,13 +16,13 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         private const string _defaultErrorMessage = "The {0} field is required because depends on {1} field.";
 
         /// <summary>
-        /// Gets or sets the dependent field from which runtime value is extracted.
+        /// Gets or sets the name of dependent field from which runtime value is extracted.
         /// </summary>
         public string DependentProperty { get; set; }
 
         /// <summary>
         /// Gets or sets the expected value for dependent field (wildcard character * stands for any value). There is also possibility 
-        /// for dynamic extraction of target value from backing field, by providing its name [inside square brackets].
+        /// of value runtime extraction from backing field, by providing its name [inside square brackets].
         /// </summary>
         public object TargetValue { get; set; }
 
@@ -41,6 +41,20 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="RequiredIfAttribute"/> class.
+        /// </summary>
+        /// <param name="dependentProperty">The name of dependent field from which runtime value is extracted.</param>
+        /// <param name="targetValue">The expected value for dependent field (wildcard character * stands for any value). There is also possibility of value runtime extraction from backing field, by providing its name [inside square brackets].</param>
+        /// <param name="relationalOperator">The relational operator describing relation between dependent field and target value. Available operators: ==, !=, >, >=, &lt;, &lt;=. If this property is not provided, equality operator == is used by default.</param>
+        public RequiredIfAttribute(string dependentProperty, object targetValue, string relationalOperator = null)
+            : base(_defaultErrorMessage)
+        {
+            DependentProperty = dependentProperty;
+            TargetValue = targetValue;
+            RelationalOperator = relationalOperator;
+        }
+
+        /// <summary>
         /// Formats the error message.
         /// </summary>
         /// <param name="displayName">The user-visible name of the required field to include in the formatted message.</param>
@@ -51,24 +65,33 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             return string.Format(ErrorMessageString, displayName, dependentPropertyName);
         }
 
+        /// <summary>
+        /// Validates the specified value with respect to the current validation attribute.
+        /// </summary>
+        /// <param name="value">The value to validate.</param>
+        /// <param name="validationContext">The context information about the validation operation.</param>
+        /// <returns>
+        /// An instance of the <see cref="T:System.ComponentModel.DataAnnotations.ValidationResult" /> class.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">validationContext;ValidationContext not provided.</exception>
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             if (validationContext == null)
                 throw new ArgumentNullException("validationContext", "ValidationContext not provided.");
 
-            var dependentProperty = PropHelper.ExtractProperty(validationContext.ObjectInstance, DependentProperty);
+            var dependentProperty = MiscHelper.ExtractProperty(validationContext.ObjectInstance.GetType(), DependentProperty);
             
-            var dependentValue = PropHelper.ExtractValue(validationContext.ObjectInstance, DependentProperty);
+            var dependentValue = MiscHelper.ExtractValue(validationContext.ObjectInstance, DependentProperty);
             var relationalOperator = RelationalOperator ?? "==";
             var targetValue = TargetValue;            
 
             string targetPropertyName;
             var attributeName = GetType().Name;
-            if (PropHelper.TryExtractName(targetValue, out targetPropertyName)) // check if target value does not containan encapsulated property name
+            if (MiscHelper.TryExtractName(targetValue, out targetPropertyName)) // check if target value does not containan encapsulated property name
             {
-                var targetProperty = PropHelper.ExtractProperty(validationContext.ObjectInstance, targetPropertyName);
+                var targetProperty = MiscHelper.ExtractProperty(validationContext.ObjectInstance.GetType(), targetPropertyName);
                 Assert.ConsistentTypes(dependentProperty, targetProperty, validationContext.DisplayName, attributeName, relationalOperator);
-                targetValue = PropHelper.ExtractValue(validationContext.ObjectInstance, targetPropertyName);
+                targetValue = MiscHelper.ExtractValue(validationContext.ObjectInstance, targetPropertyName);
             }
             else
                 Assert.ConsistentTypes(dependentProperty, targetValue, validationContext.DisplayName, attributeName, relationalOperator);

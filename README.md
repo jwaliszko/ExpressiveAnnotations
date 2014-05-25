@@ -41,7 +41,7 @@ public string ReasonForTravel { get; set; }
 
  ```GoAbroad == true && !(NextCountry == "Other") && NextCountry == value_from_country```
  
- Besides parsing interpretation of the conditional expression, this sample shows as well that instead of hardcoding there is also possibility for dynamic extraction of target values from backing fields, by providing their names inside square brackets `[]`.
+ Besides parsing interpretation of the conditional expression, this sample shows as well that instead of hardcoding there is also possibility of dynamic extraction of target values from backing fields, by providing their names inside square brackets `[]`.
 
  Finally, if we are slightly familiar with this syntax above, let's move to even more enriched use case of the same attribute:
  
@@ -77,14 +77,15 @@ RequiredIfAttribute([string DependentProperty],
                     [object TargetValue],
 					[string RelationalOperator], ...)
 
-    DependentProperty  - Gets or sets the dependent field from which runtime value is extracted.
+    DependentProperty  - Gets or sets the name of dependent field, from which runtime value is 
+						 extracted.
     TargetValue        - Gets or sets the expected value for dependent field (wildcard character * 
-						 stands for any value). Instead of hardcoding there is also possibility for 
-						 dynamic extraction of target value from backing field, by providing its 
-						 name [inside square brackets].
+						 stands for any value). Instead of hardcoding there is also possibility of 
+						 value runtime extraction from backing field, by providing its name 
+						 [inside square brackets].
 	RelationalOperator - Gets or sets the relational operator indicating relation between dependent 
-						 field and target value. Available operators: ==, !=, >, >=, <, <=. 
-						 If this property is not provided, equality operator == is used by default.
+						 field and target value. Available operators: ==, !=, >, >=, <, <=. If this 
+						 property is not provided, equality operator == is used by default.
 ```
 ```
 Indicates that annotated field is required when computed result of given logical expression is true.
@@ -96,29 +97,30 @@ RequiredIfExpressionAttribute([string Expression],
     Expression          - Gets or sets the logical expression based on which requirement condition 
 						  is computed. Available expression tokens: &&, ||, !, {, }, numbers and 
 						  whitespaces.
-    DependentProperties - Gets or sets the dependent fields from which runtime values are extracted.
+    DependentProperties - Gets or sets the names of dependent fields from which runtime values are 
+						  extracted.
     TargetValues        - Gets or sets the expected values for corresponding dependent fields 
-						  (wildcard character * stands for any value). There is also possibility for 
-						  dynamic extraction of target values from backing fields, by providing 
-						  their names [inside square brackets].
-	RelationalOperators - Gets or sets the relational operators indicating relations between dependent 
-						  fields and corresponding target values. Available operators: ==, !=, >, 
-						  >=, <, <=. If this property is not provided, equality operator == is used 
-						  by default.
+						  (wildcard character * stands for any value). There is also possibility of 
+						  values runtime extraction from backing fields, by providing their names 
+						  [inside square brackets].
+	RelationalOperators - Gets or sets the relational operators indicating relations between 
+						  dependent fields and corresponding target values. Available operators: 
+						  ==, !=, >, >=, <, <=. If this property is not provided, equality operator 
+						  == is used by default.
 ```
 
 #####Theoretical background:
 Logical expression is an expression in which relationship between operands is specified by logical operators AND `&&` and OR `||`. The logical operator NOT `!` is used to negate logical variables or constants. It is the type of operator (AND, OR) that characterizes the expression as logical, not the type of operand. Basic logical expression consists of three parts: two operands and one operator. Operands on the other hand can be logical variables or other expressions, such as relational expressions. Relational expressions are characterized by relational operators EQ `==`, NE `!=`, GT `>`, GE `>=`, LT `<`, LE `<=`. 
 
-#####Logical expression schematic interpretation:
+#####Logical expressions schematic interpretation:
 
  ```
        == (by default), !=, >, >=, <, <=         binary logical operators
                    .---------.                .----.
-(!)(DependProps[0] RelOpers[0] TargetVals[0]) ||, && (!)(DependProps[1] RelOpers[1] TargetVals[1]) ...
- | '----------------------------------------'         | '----------------------------------------'  ^
- |     {0} - 0th operand (relational expr)            |     {1} - 1st operand (relational expr)     |
- |                                                    |     {N} - nth operand ----------------------'
+(!)(DependProps[0] RelOpers[0] TargetVals[0]) ||, && (!)(DependProps[1] RelOpers[1] TargetVals[1]) …
+ | '----------------------------------------'         | '----------------------------------------' ^
+ |     {0} - 0th operand (relational expr)            |     {1} - 1st operand (relational expr)    |
+ |                                                    |     {n} - nth operand ---------------------'
  '----------------------------------------------------'> unary logical operators (optional)
 ```
 

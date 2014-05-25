@@ -3,11 +3,25 @@ using System.Reflection;
 
 namespace ExpressiveAnnotations.Misc
 {
-    public class Assert
+    /// <summary>
+    /// Assertions class.
+    /// </summary>
+    public static class Assert
     {
+        /// <summary>
+        /// Forces the dependent property and target object to represent exact types.
+        /// This requirement doesn't apply when taret value is null or asterisk.
+        /// </summary>
+        /// <param name="dependentProperty">The dependent property.</param>
+        /// <param name="targetValue">The target value.</param>
+        /// <param name="annotatedPropertyName">Name of the annotated property.</param>
+        /// <param name="attributeName">Name of the attribute.</param>
+        /// <param name="relationalOperator">The relational operator.</param>
+        /// <exception cref="System.InvalidOperationException">
+        /// </exception>
         public static void ConsistentTypes(PropertyInfo dependentProperty, object targetValue, string annotatedPropertyName, string attributeName, string relationalOperator)
         {
-            if (targetValue == null || string.Equals(targetValue as string, "*")) // type doesn't matter when null or asterisk is involved in target value
+            if (targetValue == null || string.Equals(targetValue as string, "*")) // type doesn't matter when null or asterisk is provided into target value
                 return;
 
             if (!ConsistentTypes(dependentProperty.PropertyType, targetValue.GetType()))
@@ -26,6 +40,16 @@ namespace ExpressiveAnnotations.Misc
                         attributeName, annotatedPropertyName, dependentProperty.Name, relationalOperator));
         }
 
+        /// <summary>
+        /// Forces the dependent and target properties to represent exact types.
+        /// </summary>
+        /// <param name="dependentProperty">The dependent property.</param>
+        /// <param name="targetProperty">The target property.</param>
+        /// <param name="annotatedPropertyName">Name of the annotated property.</param>
+        /// <param name="attributeName">Name of the attribute.</param>
+        /// <param name="relationalOperator">The relational operator.</param>
+        /// <exception cref="System.InvalidOperationException">
+        /// </exception>
         public static void ConsistentTypes(PropertyInfo dependentProperty, PropertyInfo targetProperty, string annotatedPropertyName, string attributeName, string relationalOperator)
         {
             if (!ConsistentTypes(dependentProperty.PropertyType, targetProperty.PropertyType))

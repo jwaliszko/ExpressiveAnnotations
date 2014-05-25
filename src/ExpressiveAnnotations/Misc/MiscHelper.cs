@@ -6,8 +6,17 @@ using System.Text.RegularExpressions;
 
 namespace ExpressiveAnnotations.Misc
 {
-    public static class PropHelper
+    /// <summary>
+    /// Helper class containing various utility methods.
+    /// </summary>
+    public static class MiscHelper
     {
+        /// <summary>
+        /// Tries to extract the name if given inside square brackets in string source.
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <param name="name">The name.</param>
+        /// <returns></returns>
         public static bool TryExtractName(object source, out string name)
         {
             name = null;
@@ -22,11 +31,13 @@ namespace ExpressiveAnnotations.Misc
             return false;
         }
 
-        public static PropertyInfo ExtractProperty(object source, string property)
-        {
-            return ExtractProperty(source.GetType(), property);
-        }
-
+        /// <summary>
+        /// Extracts the property from given type.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="property">The property.</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentException"></exception>
         public static PropertyInfo ExtractProperty(Type type, string property)
         {
             var props = property.Split('.');
@@ -41,6 +52,13 @@ namespace ExpressiveAnnotations.Misc
             return pi;
         }
 
+        /// <summary>
+        /// Extracts the value of property from given source.
+        /// </summary>
+        /// <param name="source">The source.</param>
+        /// <param name="property">The property.</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentException"></exception>
         public static object ExtractValue(object source, string property)
         {
             var props = property.Split('.');
@@ -63,6 +81,14 @@ namespace ExpressiveAnnotations.Misc
             return value;
         }
 
+        /// <summary>
+        /// Composes the expression into the printable, user friendly form.
+        /// </summary>
+        /// <param name="expression">The logical expression.</param>
+        /// <param name="dependentProperties">The dependent properties.</param>
+        /// <param name="targetValues">The target values.</param>
+        /// <param name="relationalOperators">The relational operators.</param>
+        /// <returns></returns>
         public static string ComposeExpression(string expression, string[] dependentProperties, object[] targetValues, string[] relationalOperators)
         {
             var count = dependentProperties.Length;

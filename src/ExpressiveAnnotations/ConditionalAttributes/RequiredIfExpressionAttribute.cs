@@ -23,13 +23,13 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         public string Expression { get; set; }
         
         /// <summary>
-        /// Gets or sets the dependent fields from which runtime values are extracted.
+        /// Gets or sets the names of dependent fields from which runtime values are extracted.
         /// </summary>
         public string[] DependentProperties { get; set; }
         
         /// <summary>
         /// Gets or sets the expected values for corresponding dependent fields (wildcard character * stands for any value). There is also 
-        /// possibility for dynamic extraction of target values from backing fields, by providing their names [inside square brackets].
+        /// possibility of values runtime extraction from backing fields, by providing their names [inside square brackets].
         /// </summary>
         public object[] TargetValues { get; set; }
         
@@ -51,6 +51,22 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="RequiredIfExpressionAttribute"/> class.
+        /// </summary>
+        /// <param name="expression">The logical expression based on which requirement condition is computed. Available expression tokens: &amp;&amp;, ||, !, {, }, numbers and whitespaces.</param>
+        /// <param name="dependentProperties">The names of dependent fields from which runtime values are extracted.</param>
+        /// <param name="targetValues">The expected values for corresponding dependent fields (wildcard character * stands for any value). There is also possibility of values runtime extraction from backing fields, by providing their names [inside square brackets].</param>
+        /// <param name="relationalOperators">The relational operators describing relations between dependent fields and corresponding target values. Available operators: ==, !=, >, >=, &lt;, &lt;=. If this property is not provided, equality operator == is used by default.</param>
+        public RequiredIfExpressionAttribute(string expression, string[] dependentProperties, object[] targetValues, string[] relationalOperators = null)
+            : base(_defaultErrorMessage)
+        {
+            Expression = expression;
+            DependentProperties = dependentProperties ?? new string[0];
+            TargetValues = targetValues ?? new object[0];
+            RelationalOperators = relationalOperators ?? new string[0];
+        }
+
+        /// <summary>
         /// Formats the error message.
         /// </summary>
         /// <param name="displayName">The user-visible name of the required field to include in the formatted message.</param>
@@ -61,6 +77,20 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             return string.Format(ErrorMessageString, displayName, preprocessedExpression);
         }
 
+        /// <summary>
+        /// Validates the specified value with respect to the current validation attribute.
+        /// </summary>
+        /// <param name="value">The value to validate.</param>
+        /// <param name="validationContext">The context information about the validation operation.</param>
+        /// <returns>
+        /// An instance of the <see cref="T:System.ComponentModel.DataAnnotations.ValidationResult" /> class.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">validationContext;ValidationContext not provided.</exception>
+        /// <exception cref="System.ArgumentException">
+        /// Number of elements in DependentProperties and TargetValues must match.
+        /// or
+        /// Number of explicitly provided relational operators is incorrect.
+        /// </exception>
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             if (validationContext == null)
@@ -76,18 +106,18 @@ namespace ExpressiveAnnotations.ConditionalAttributes
 
             for (var i = 0; i < DependentProperties.Count(); i++)
             {
-                var dependentProperty = PropHelper.ExtractProperty(validationContext.ObjectInstance, DependentProperties[i]);
+                var dependentProperty = MiscHelper.ExtractProperty(validationContext.ObjectInstance.GetType(), DependentProperties[i]);
 
-                var dependentValue = PropHelper.ExtractValue(validationContext.ObjectInstance, DependentProperties[i]);
+                var dependentValue = MiscHelper.ExtractValue(validationContext.ObjectInstance, DependentProperties[i]);
                 var relationalOperator = RelationalOperators.Any() ? RelationalOperators[i] : "==";
                 var targetValue = TargetValues[i];                                
 
                 string targetPropertyName;
-                if (PropHelper.TryExtractName(targetValue, out targetPropertyName)) // check if target value does not containan encapsulated property name
+                if (MiscHelper.TryExtractName(targetValue, out targetPropertyName)) // check if target value does not containan encapsulated property name
                 {
-                    var targetProperty = PropHelper.ExtractProperty(validationContext.ObjectInstance, targetPropertyName);
+                    var targetProperty = MiscHelper.ExtractProperty(validationContext.ObjectInstance.GetType(), targetPropertyName);
                     Assert.ConsistentTypes(dependentProperty, targetProperty, validationContext.DisplayName, attributeName, relationalOperator);
-                    targetValue = PropHelper.ExtractValue(validationContext.ObjectInstance, targetPropertyName);
+                    targetValue = MiscHelper.ExtractValue(validationContext.ObjectInstance, targetPropertyName);
                 }
                 else
                     Assert.ConsistentTypes(dependentProperty, targetValue, validationContext.DisplayName, attributeName, relationalOperator);
@@ -104,7 +134,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                 if (!_innerAttribute.IsValid(value) || (value is bool && !(bool) value))
                     // validation failed - return an error
                     return new ValidationResult(FormatErrorMessage(validationContext.DisplayName,
-                        PropHelper.ComposeExpression(Expression, DependentProperties, TargetValues, RelationalOperators)));
+                        MiscHelper.ComposeExpression(Expression, DependentProperties, TargetValues, RelationalOperators)));
             }
 
             return ValidationResult.Success;

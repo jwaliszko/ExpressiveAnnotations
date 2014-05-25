@@ -28,14 +28,14 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         public RequiredIfValidator(ModelMetadata metadata, ControllerContext context, RequiredIfAttribute attribute)
             : base(metadata, context, attribute)
         {
-            var dependentProperty = PropHelper.ExtractProperty(metadata.ContainerType, attribute.DependentProperty);
+            var dependentProperty = MiscHelper.ExtractProperty(metadata.ContainerType, attribute.DependentProperty);
             var relationalOperator = attribute.RelationalOperator ?? "==";
 
             string targetPropertyName;
             var attributeName = GetType().BaseType.GetGenericArguments().Single().Name;
-            if (PropHelper.TryExtractName(attribute.TargetValue, out targetPropertyName))
+            if (MiscHelper.TryExtractName(attribute.TargetValue, out targetPropertyName))
             {
-                var targetProperty = PropHelper.ExtractProperty(metadata.ContainerType, targetPropertyName);
+                var targetProperty = MiscHelper.ExtractProperty(metadata.ContainerType, targetPropertyName);
                 Assert.ConsistentTypes(dependentProperty, targetProperty, metadata.PropertyName, attributeName, relationalOperator);
             }
             else
@@ -53,7 +53,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         }
 
         /// <summary>
-        /// Retrieves a collection of client validation rules.
+        /// Retrieves a collection of client validation rules (rules sent to browsers).
         /// </summary>
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()
         {
