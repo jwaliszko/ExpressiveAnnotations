@@ -7,35 +7,45 @@ using ExpressiveAnnotations.Misc;
 namespace ExpressiveAnnotations.ConditionalAttributes
 {
     /// <summary>
-    /// Provides conditional attribute to calculate validation result based on related property value.
+    /// Validation attribute which indicates that annotated field is required when dependent field has appropriate value.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class RequiredIfAttribute : ValidationAttribute
+    public sealed class RequiredIfAttribute : ValidationAttribute
     {
         private readonly RequiredAttribute _innerAttribute = new RequiredAttribute();
-
         private const string _defaultErrorMessage = "The {0} field is required because depends on {1} field.";
 
         /// <summary>
-        /// Field from which runtime value is extracted.
+        /// Gets or sets the dependent field from which runtime value is extracted.
         /// </summary>
         public string DependentProperty { get; set; }
+
         /// <summary>
-        /// Expected value for dependent field. Instead of hardcoding there is also possibility for dynamic extraction of 
-        /// target value from other field, by providing its name inside square parentheses. Star character stands for any value.
+        /// Gets or sets the expected value for dependent field (wildcard character * stands for any value). There is also possibility 
+        /// for dynamic extraction of target value from backing field, by providing its name [inside square brackets].
         /// </summary>
         public object TargetValue { get; set; }
+
         /// <summary>
-        /// Operator describing relation between dependent property and target value.
-        /// Available operators: ==, !=, >, >=, &lt;, &le;. If this property is not provided, default relation is ==.
+        /// Gets or sets the relational operator describing relation between dependent field and target value. Available operators: 
+        /// ==, !=, >, >=, &lt;, &lt;=. If this property is not provided, equality operator == is used by default.
         /// </summary>
         public string RelationalOperator { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RequiredIfAttribute"/> class.
+        /// </summary>
         public RequiredIfAttribute()
             : base(_defaultErrorMessage)
         {
         }
 
+        /// <summary>
+        /// Formats the error message.
+        /// </summary>
+        /// <param name="displayName">The user-visible name of the required field to include in the formatted message.</param>
+        /// <param name="dependentPropertyName">The user-visible name of the dependent field to include in the formatted message.</param>
+        /// <returns>The localized message to present to the user.</returns>
         public string FormatErrorMessage(string displayName, string dependentPropertyName)
         {
             return string.Format(ErrorMessageString, displayName, dependentPropertyName);

@@ -8,14 +8,23 @@ using Newtonsoft.Json;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 {
+    /// <summary>
+    /// Model validator for <see cref="RequiredIfAttribute"/>.
+    /// </summary>
     public class RequiredIfValidator : DataAnnotationsModelValidator<RequiredIfAttribute>
     {
         private readonly string _errorMessage;
         private readonly string _dependentProperty;
         private readonly string _relationalOperator;
         private readonly object _targetValue;
-        private readonly string _type; 
+        private readonly string _type;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RequiredIfValidator"/> class.
+        /// </summary>
+        /// <param name="metadata">The metadata.</param>
+        /// <param name="context">The context.</param>
+        /// <param name="attribute">The attribute.</param>
         public RequiredIfValidator(ModelMetadata metadata, ControllerContext context, RequiredIfAttribute attribute)
             : base(metadata, context, attribute)
         {
@@ -43,6 +52,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), dependentPropertyName);
         }
 
+        /// <summary>
+        /// Retrieves a collection of client validation rules.
+        /// </summary>
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()
         {
             var rule = new ModelClientValidationRule

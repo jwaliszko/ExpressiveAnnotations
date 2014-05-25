@@ -8,6 +8,9 @@ using Newtonsoft.Json;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 {
+    /// <summary>
+    /// Model validator for <see cref="RequiredIfExpressionAttribute"/>.
+    /// </summary>
     public class RequiredIfExpressionValidator : DataAnnotationsModelValidator<RequiredIfExpressionAttribute>
     {
         private readonly string _errorMessage;
@@ -17,6 +20,17 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         private readonly string[] _types;
         private readonly string _expression;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RequiredIfExpressionValidator"/> class.
+        /// </summary>
+        /// <param name="metadata">The metadata.</param>
+        /// <param name="context">The context.</param>
+        /// <param name="attribute">The attribute.</param>
+        /// <exception cref="System.ArgumentException">
+        /// Number of elements in DependentProperties and TargetValues must match.
+        /// or
+        /// Number of explicitly provided relational operators is incorrect.
+        /// </exception>
         public RequiredIfExpressionValidator(ModelMetadata metadata, ControllerContext context, RequiredIfExpressionAttribute attribute)
             : base(metadata, context, attribute)
         {
@@ -59,6 +73,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
                 PropHelper.ComposeExpression(_expression, _dependentProperties, _targetValues, _relationalOperators));
         }
 
+        /// <summary>
+        /// Retrieves a collection of client validation rules.
+        /// </summary>
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()
         {
             var rule = new ModelClientValidationRule

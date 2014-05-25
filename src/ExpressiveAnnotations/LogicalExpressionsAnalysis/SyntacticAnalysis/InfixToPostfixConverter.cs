@@ -5,7 +5,7 @@ using ExpressiveAnnotations.LogicalExpressionsAnalysis.LexicalAnalysis;
 
 namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis
 {
-    public class InfixToPostfixConverter
+    internal class InfixToPostfixConverter
     {
         private readonly InfixLexer _infixLexer;
 

@@ -1,6 +1,6 @@
 ﻿namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.LexicalAnalysis
 {
-    public sealed class Token
+    internal sealed class Token
     {
         public const string TRUE = "true";
         public const string FALSE = "false";

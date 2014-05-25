@@ -1,6 +1,6 @@
 ﻿namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.LexicalAnalysis
 {
-    public sealed class PostfixLexer
+    internal sealed class PostfixLexer
     {
         private readonly Lexer _lexer;
 

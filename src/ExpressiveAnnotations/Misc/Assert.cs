@@ -7,7 +7,7 @@ namespace ExpressiveAnnotations.Misc
     {
         public static void ConsistentTypes(PropertyInfo dependentProperty, object targetValue, string annotatedPropertyName, string attributeName, string relationalOperator)
         {
-            if (targetValue == null || string.Equals(targetValue as string, "*")) // type doesn't matter when null or * is involved in target value
+            if (targetValue == null || string.Equals(targetValue as string, "*")) // type doesn't matter when null or asterisk is involved in target value
                 return;
 
             if (!ConsistentTypes(dependentProperty.PropertyType, targetValue.GetType()))

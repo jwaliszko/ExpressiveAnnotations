@@ -4,7 +4,7 @@ using ExpressiveAnnotations.LogicalExpressionsAnalysis.LexicalAnalysis;
 
 namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis
 {
-    public class PostfixParser
+    internal class PostfixParser
     {
         private readonly PostfixLexer _postfixLexer;
 

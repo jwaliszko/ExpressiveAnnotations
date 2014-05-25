@@ -8,41 +8,40 @@ using ExpressiveAnnotations.Misc;
 namespace ExpressiveAnnotations.ConditionalAttributes
 {
     /// <summary>
-    /// Provides conditional attribute to calculate validation result based on related properties values
-    /// and relations between them, which are defined in logical expression.
+    /// Validation attribute which indicates that annotated field is required when computed result of given logical expression is true.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public class RequiredIfExpressionAttribute : ValidationAttribute
+    public sealed class RequiredIfExpressionAttribute : ValidationAttribute
     {
         private readonly RequiredAttribute _innerAttribute = new RequiredAttribute();
-
         private const string _defaultErrorMessage = "The {0} field is required by the following logic: {1}.";
 
         /// <summary>
-        /// Logical expression based on which requirement condition is calculated. If condition is fulfilled, error message is displayed. 
-        /// Attribute logic replaces one or more format items in specific expression string with comparison results of dependent fields 
-        /// and corresponding target values. 
-        /// 
-        /// Available expression tokens are: &amp;&amp;, ||, !, {, }, numbers and whitespaces.
-        /// 
-        /// Example: "{0} &amp;&amp; !{1}" is parsed to (DependentProperties[0] == TargetValues[0]) &amp;&amp; (DependentProperties[1] != TargetValues[1]).
+        /// Gets or sets the logical expression based on which requirement condition is computed. 
+        /// Available expression tokens: &amp;&amp;, ||, !, {, }, numbers and whitespaces.
         /// </summary>
         public string Expression { get; set; }
+        
         /// <summary>
-        /// Dependent fields from which runtime values are extracted.
+        /// Gets or sets the dependent fields from which runtime values are extracted.
         /// </summary>
         public string[] DependentProperties { get; set; }
+        
         /// <summary>
-        /// Expected values for corresponding dependent fields. Instead of hardcoding there is also possibility for dynamic extraction of 
-        /// target values from other fields, by providing their names inside square parentheses. Star character stands for any value.
+        /// Gets or sets the expected values for corresponding dependent fields (wildcard character * stands for any value). There is also 
+        /// possibility for dynamic extraction of target values from backing fields, by providing their names [inside square brackets].
         /// </summary>
         public object[] TargetValues { get; set; }
+        
         /// <summary>
-        /// Operators describing relations between dependent properties and corresponding target values.
-        /// Available operators: ==, !=, >, >=, &lt;, &le;. If this property is not provided, default relation for all operands is ==.
+        /// Gets or sets the relational operators describing relations between dependent fields and corresponding target values.
+        /// Available operators: ==, !=, >, >=, &lt;, &lt;=. If this property is not provided, equality operator == is used by default.
         /// </summary>
         public string[] RelationalOperators { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RequiredIfExpressionAttribute"/> class.
+        /// </summary>
         public RequiredIfExpressionAttribute()
             : base(_defaultErrorMessage)
         {
@@ -51,9 +50,15 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             RelationalOperators = new string[0];
         }
 
-        public string FormatErrorMessage(string displayName, string expression)
+        /// <summary>
+        /// Formats the error message.
+        /// </summary>
+        /// <param name="displayName">The user-visible name of the required field to include in the formatted message.</param>
+        /// <param name="preprocessedExpression">The user-visible expression to include in the formatted message.</param>
+        /// <returns>The localized message to present to the user.</returns>
+        public string FormatErrorMessage(string displayName, string preprocessedExpression)
         {
-            return string.Format(ErrorMessageString, displayName, expression);
+            return string.Format(ErrorMessageString, displayName, preprocessedExpression);
         }
 
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)

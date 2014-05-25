@@ -6,14 +6,14 @@
 
 For sample usages go to [**demo project**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations.MvcWebSample).
 
-* Simplest, using *RequiredIfAttribute* which *provides conditional attribute to calculate validation result based on related property value*:
+* Simplest, using RequiredIfAttribute which indicates that annotated field is required when related field has appropriate value:
  
  ```
 [RequiredIf(DependentProperty = "GoAbroad", TargetValue = true)]
 public string PassportNumber { get; set; }
 ```
 
- This construction says that *passport number is required, if go abroad option is selected*. Because it is simple, let's move forward to another usage sample of this attribute:
+ This construction says, that passport number is required, if go abroad option is selected. Because it is simple, let's move forward to another usage sample of this attribute:
 
  ```
 [RequiredIf(
@@ -23,9 +23,9 @@ public string PassportNumber { get; set; }
 public bool AgreeToContact { get; set; }
 ```
 
- This one means that *if email is not empty (has any value), boolean value indicating contact permission has to be true*. What's more, we can see that nested properties are supported by the mechanism. The last thing shown here is star character `*` used as target value - it is special character which stands for any value.
+ This one means, that if email is not empty (has any value), boolean value indicating contact permission has to be true. What's more, we can see that nested properties are supported by the mechanism. The last thing shown here is wildcard character `*` used as target value - it is special character which stands for any value.
 
-* More complex, using *RequiredIfExpressionAttribute* which *provides conditional attribute to calculate validation result based on related properties values and relations between them, which are defined in logical expression*:
+* More complex, using RequiredIfExpressionAttribute which indicates that annotated field is required when computed result of given logical expression is true:
  
  ```
 [RequiredIfExpression(
@@ -41,9 +41,9 @@ public string ReasonForTravel { get; set; }
 
  ```GoAbroad == true && !(NextCountry == "Other") && NextCountry == value_from_country```
  
- Besides parsing interpretation of the conditional expression, this sample shows as well that instead of hardcoding there is also possibility for dynamic extraction of target values from other fields, by providing their names inside square brackets `[]`.
+ Besides parsing interpretation of the conditional expression, this sample shows as well that instead of hardcoding there is also possibility for dynamic extraction of target values from backing fields, by providing their names inside square brackets `[]`.
 
- Finally, if we are slightly familiar with this syntax above, let's move to even more enriched use case of the same attribute *(available in version >= 1.2)*:
+ Finally, if we are slightly familiar with this syntax above, let's move to even more enriched use case of the same attribute:
  
  ```
 [RequiredIfExpression(
@@ -66,82 +66,87 @@ public string ReasonForTravel { get; set; }
      )
 ```
 
- Comparing to the previous example, this one basically introduces the usage of relational operators. Such operators describe relationships between dependent properties and corresponding target values (you should be also aware, that if relational operators are not explicitly provided, these relationships are by default defined by equality operator - just like in the example before).
+ Comparing to the previous example, this one basically introduces the usage of relational operators. Such operators indicate relationships between dependent fields and corresponding target values (you should be also aware, that if relational operators are not explicitly provided, these relationships are by default defined by equality operator `==`, just like it was done in the preceding examples).
 
 ###How to construct conditional validation attributes?
 #####Signatures:
 
 ```
+Indicates that annotated field is required when dependent field has appropriate value.
 RequiredIfAttribute([string DependentProperty],
                     [object TargetValue],
 					[string RelationalOperator], ...)
 
-    DependentProperty  - Field from which runtime value is extracted.
-    TargetValue        - Expected value for dependent field. Instead of hardcoding there is also
-                         possibility for dynamic extraction of target value from other field, by
-                         providing its name inside square parentheses. Star character stands for 
-						 any value.
-	RelationalOperator - Operator describing relation between dependent property and target value.
-						 Available operators: ==, !=, >, >=, <, <=. If this property is not 
-						 provided, default relation is ==.
+    DependentProperty  - Gets or sets the dependent field from which runtime value is extracted.
+    TargetValue        - Gets or sets the expected value for dependent field (wildcard character * 
+						 stands for any value). Instead of hardcoding there is also possibility for 
+						 dynamic extraction of target value from backing field, by providing its 
+						 name [inside square brackets].
+	RelationalOperator - Gets or sets the relational operator indicating relation between dependent 
+						 field and target value. Available operators: ==, !=, >, >=, <, <=. 
+						 If this property is not provided, equality operator == is used by default.
 ```
 ```
+Indicates that annotated field is required when computed result of given logical expression is true.
 RequiredIfExpressionAttribute([string Expression],
                               [string[] DependentProperties],
                               [object[] TargetValues],
 							  [string[] RelationalOperators], ...)
 
-    Expression          - Logical expression based on which requirement condition is calculated.
-                          If condition is fulfilled, error message is displayed. Attribute logic
-                          replaces one or more format items in specific expression string with
-                          comparison results of dependent fields and corresponding target values.
-                          Available expression tokens are: &&, ||, !, {, }, numbers and whitespaces.
-    DependentProperties - Dependent fields from which runtime values are extracted.
-    TargetValues        - Expected values for corresponding dependent fields. Instead of hardcoding
-                          there is also possibility for dynamic extraction of target values from
-                          other fields, by providing their names inside square parentheses. Star 
-                          character stands for any value.
-	RelationalOperators - Operators describing relations between dependent properties and target 
-						  values. Available operators: ==, !=, >, >=, <, <=. If this property is 
-						  not provided, default relation for all operands is ==.
+    Expression          - Gets or sets the logical expression based on which requirement condition 
+						  is computed. Available expression tokens: &&, ||, !, {, }, numbers and 
+						  whitespaces.
+    DependentProperties - Gets or sets the dependent fields from which runtime values are extracted.
+    TargetValues        - Gets or sets the expected values for corresponding dependent fields 
+						  (wildcard character * stands for any value). There is also possibility for 
+						  dynamic extraction of target values from backing fields, by providing 
+						  their names [inside square brackets].
+	RelationalOperators - Gets or sets the relational operators indicating relations between dependent 
+						  fields and corresponding target values. Available operators: ==, !=, >, 
+						  >=, <, <=. If this property is not provided, equality operator == is used 
+						  by default.
 ```
 
 #####Theoretical background:
-Logical expression is an expression in which relationship between operands is specified by logical operators `AND (&&)` and `OR (||)`. The logical operator `NOT (!)` is used to negate logical variables or constants. It is the type of operator `(AND, OR)` that characterizes the expression as logical, not the type of operand. Basic logical expression consists of three parts: two operands and one operator, e.g. `{idx0} && {idx1}`. Operands on the other hand can be logical variables or other expressions, such as relational expressions. Relational expressions are characterized by relational operators `EQ (==), NE (!=), GT (>), GE (>=), LT (<), LE (<=)`. In our example, operands `{idx}` are actually expanded into basic relational expressions (e.g. `DependentProperties[idx] RelationalOperators[idx] TargetValues[idx]`).
+Logical expression is an expression in which relationship between operands is specified by logical operators AND `&&` and OR `||`. The logical operator NOT `!` is used to negate logical variables or constants. It is the type of operator (AND, OR) that characterizes the expression as logical, not the type of operand. Basic logical expression consists of three parts: two operands and one operator. Operands on the other hand can be logical variables or other expressions, such as relational expressions. Relational expressions are characterized by relational operators EQ `==`, NE `!=`, GT `>`, GE `>=`, LT `<`, LE `<=`. 
 
 #####Logical expression schematic interpretation:
 
  ```
        == (by default), !=, >, >=, <, <=         binary logical operators
-                   /---------\                 /----\
-(!)(DependProps[0] RelOpers[0] TargetVals[0])  ||, &&  (!)(DependProps[1] RelOpers[1] TargetVals[1])
- | \----------------------------------------/           | \----------------------------------------/
- |       {operand 0} (relational expr)                  |       {operand 1} (relational expr)
- |                                                      |
-  ------------------------------------------------------ > unary logical operators (optional)
+                   .---------.                .----.
+(!)(DependProps[0] RelOpers[0] TargetVals[0]) ||, && (!)(DependProps[1] RelOpers[1] TargetVals[1]) ...
+ | '----------------------------------------'         | '----------------------------------------'  ^
+ |     {0} - 0th operand (relational expr)            |     {1} - 1st operand (relational expr)     |
+ |                                                    |     {N} - nth operand ----------------------'
+ '----------------------------------------------------'> unary logical operators (optional)
 ```
-Notice: Forgive the usage of abbreviated names (due to narrow space).
+
+<sub>Notice: Schematic view uses abbreviated names.</sub>
 
 #####Evaluation steps for sample `{0} && !{1}` logical expression:
 
-1. Expression is interpreted as:
+1. Operands `{n}` are expanded into basic relational expressions:
+
+ ```DependentProperties[n] RelationalOperators[n] TargetValues[n]```
+
+  <sub>Notice: It's easy to infer that arrays indexes of dependent fields and its corresponding target values are given inside curly brackets `{}`.</sub>
+2. Based on the assumption from previous step, our expression is interpreted as:
 
  ```(DependentProperties[0] == TargetValues[0]) && !(DependentProperties[1] == TargetValues[1])```
 
- Notice 1: Interpretation is based on assumption that relational operators are not provided - when computing operands, equality opereator is taken by default.
-
- Notice 2: It's easy to guess that arrays indexes of dependent properties and its corresponding target values are given inside curly brackets `{}`.
-2. Values are extracted from arrays and computed (compared for equality in this case). Next, computation results (boolean flags) are injected into corresponding brackets, let's say:
+ <sub>Notice: Interpretation is based on assumption that relational operators are not provided, so equality opereator `==` is taken by default when computing operands.</sub>
+3. Values are extracted from arrays and computed (compared for equality in this case). Next, computation results (boolean flags) are injected into corresponding brackets, let's say:
 
  ```true && !false```
-3. Such preprocessed expression is then converted from infix notation syntax into postfix one using [shunting-yard algorithm](http://en.wikipedia.org/wiki/Shunting-yard_algorithm):
+4. Such preprocessed expression is then converted from infix notation syntax into postfix one using [shunting-yard algorithm](http://en.wikipedia.org/wiki/Shunting-yard_algorithm):
 
  ```true false ! &&```
-4. Reverse Polish Notation (RPN) expression is finally evaluated using [postfix algorithm](http://en.wikipedia.org/wiki/Reverse_Polish_notation) to give validation result: 
+5. Reverse Polish Notation (RPN) expression is finally evaluated using [postfix algorithm](http://en.wikipedia.org/wiki/Reverse_Polish_notation) to give validation result: 
 
- ```true false ! &&``` => ```true true &&``` => ```true```
+ ```true false ! &&      =>      true true &&      =>      true```
 
-Here the result is `true`, which means that requirement condition is fulfilled, so error message is shown if annotated field is not filled (i.e. is empty or false).
+ Here the computed result is true, which means that requirement condition is fulfilled, so error message is risen if annotated field value is not provided (i.e. is empty or has false boolean meaning).
 
 ###What is the context behind this implementation? 
 
