@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -16,7 +15,9 @@ namespace ExpressiveAnnotations.Misc
         /// </summary>
         /// <param name="source">The source.</param>
         /// <param name="name">The name.</param>
-        /// <returns></returns>
+        /// <returns>
+        /// Extracted property name.
+        /// </returns>
         public static bool TryExtractName(object source, out string name)
         {
             name = null;
@@ -36,17 +37,29 @@ namespace ExpressiveAnnotations.Misc
         /// </summary>
         /// <param name="type">The type.</param>
         /// <param name="property">The property.</param>
-        /// <returns></returns>
+        /// <returns>
+        /// Extracted property.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// type
+        /// or
+        /// property
+        /// </exception>
         /// <exception cref="System.ArgumentException"></exception>
         public static PropertyInfo ExtractProperty(Type type, string property)
         {
+            if (type == null)
+                throw new ArgumentNullException("type");
+            if(property == null)
+                throw new ArgumentNullException("property");
+
             var props = property.Split('.');
             PropertyInfo pi = null;
             foreach (var prop in props)
             {
                 pi = type.GetProperty(prop);
                 if (pi == null)
-                    throw new ArgumentException(string.Format("Field {0} not found.", prop));
+                    throw new ArgumentException(string.Format("Dynamic extraction interrupted. Field {0} not found.", prop), property);
                 type = pi.PropertyType;
             }
             return pi;
@@ -57,38 +70,49 @@ namespace ExpressiveAnnotations.Misc
         /// </summary>
         /// <param name="source">The source.</param>
         /// <param name="property">The property.</param>
-        /// <returns></returns>
+        /// <returns>
+        /// Extracted property value.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// source
+        /// or
+        /// property
+        /// or
+        /// Nested field value dynamic extraction interrupted.
+        /// </exception>
         /// <exception cref="System.ArgumentException"></exception>
         public static object ExtractValue(object source, string property)
         {
+            if (source == null)
+                throw new ArgumentNullException("source");
+            if (property == null)
+                throw new ArgumentNullException("property");
+
             var props = property.Split('.');
-            var type = source.GetType();
-            var arg = Expression.Parameter(type, "x");
-            Expression expr = arg;
-            foreach (var prop in props)
+            for (var i = 0; i < props.Length; i++)
             {
+                var type = source.GetType();
+                var prop = props[i];
                 var pi = type.GetProperty(prop);
                 if (pi == null)
-                    throw new ArgumentException(string.Format("Field {0} not found.", prop));
-                expr = Expression.Property(expr, pi);
-                type = pi.PropertyType;
+                    throw new ArgumentException(string.Format("Dynamic extraction interrupted. Field {0} not found.", prop), property);
+                source = pi.GetValue(source, null);
+                if (source == null && i < props.Length - 1) // check for nulls except last loop (final value can be null)
+                    throw new ArgumentNullException(pi.Name, "Nested field value dynamic extraction interrupted.");
             }
-            var delegateType = typeof(Func<,>).MakeGenericType(source.GetType(), type);
-            var lambda = Expression.Lambda(delegateType, expr, arg);
-
-            var compiledLambda = lambda.Compile();
-            var value = compiledLambda.DynamicInvoke(source);
-            return value;
+            return source;
         }
 
         /// <summary>
-        /// Composes the expression into the printable, user friendly form.
+        /// Process expression to user-friendly form.
         /// </summary>
         /// <param name="expression">The logical expression.</param>
         /// <param name="dependentProperties">The dependent properties.</param>
         /// <param name="targetValues">The target values.</param>
         /// <param name="relationalOperators">The relational operators.</param>
-        /// <returns></returns>
+        /// <returns>
+        /// Expression processed to user-friendly form.
+        /// </returns>
         public static string ComposeExpression(string expression, string[] dependentProperties, object[] targetValues, string[] relationalOperators)
         {
             var count = dependentProperties.Length;

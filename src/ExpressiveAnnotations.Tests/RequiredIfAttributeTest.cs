@@ -38,6 +38,9 @@ namespace ExpressiveAnnotations.Tests
             [RequiredIf(DependentProperty = "GoAbroad", TargetValue = "[Secret.ShowSecretData]")]
             public string DebetCardNumber { get; set; }
 
+            [RequiredIf(DependentProperty = "GoAbroad", TargetValue = "[Secret.ShowID]")]
+            public string IDNumber { get; set; }
+
             [RequiredIf(DependentProperty = "Email", TargetValue = "jaroslaw.waliszko@gmail.com")]
             public string WhatToDoAboutInsomnia { get; set; }
 
@@ -95,6 +98,46 @@ namespace ExpressiveAnnotations.Tests
                 WhatIsTheSecret = "the secret is..."
             };
             Assert.IsTrue(model.IsValid(m => m.WhatIsTheSecret));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void Verify_if_proper_exception_thrown_when_extraction_fails_because_of_not_initializecd_prop_in_props_chain()
+        {
+            try
+            {
+                var model = new Model
+                {
+                    Secret = null,
+                    WhatIsTheSecret = "the secret is..."
+                };
+                model.IsValid(m => m.WhatIsTheSecret);
+            }
+            catch (ArgumentNullException e)
+            {
+                Assert.AreEqual(
+                    "Nested field value dynamic extraction interrupted.\r\nParameter name: Secret",
+                    e.Message);
+                throw;
+            }
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Verify_if_proper_exception_thrown_when_extraction_fails_because_of_incorrect_prop_name()
+        {
+            try
+            {
+                var model = new Model();
+                model.IsValid(m => m.IDNumber);
+            }
+            catch (ArgumentException e)
+            {
+                Assert.AreEqual(
+                    "Dynamic extraction interrupted. Field ShowID not found.\r\nParameter name: Secret.ShowID",
+                    e.Message);
+                throw;
+            }
         }
 
         [TestMethod]
