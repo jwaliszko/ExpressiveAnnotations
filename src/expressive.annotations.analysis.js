@@ -121,23 +121,23 @@ var LogicalExpressionsAnalyser = (function() {
         this.compute = function (dependentValue, targetValue, relationalOperator) {
             switch (relationalOperator) {
                 case '==':
-                    return compare(dependentValue, targetValue);
+                    return equal(dependentValue, targetValue);
                 case '!=':
-                    return !compare(dependentValue, targetValue);
+                    return !equal(dependentValue, targetValue);
                 case '>':
                     return greater(dependentValue, targetValue);
                 case '>=':
-                    return !less(dependentValue, targetValue);
+                    return greater(dependentValue, targetValue) || equal(dependentValue, targetValue);
                 case '<':
                     return less(dependentValue, targetValue);
                 case '<=':
-                    return !greater(dependentValue, targetValue);
+                    return less(dependentValue, targetValue) || equal(dependentValue, targetValue);
             }
 
             throw TypeHelper.String.format('Relational operator {0} is invalid. Available operators: ==, !=, >, >=, <, <=.', relationalOperator);
         };
 
-        var compare = function(dependentValue, targetValue) {
+        var equal = function (dependentValue, targetValue) {
             if (TypeHelper.isEmpty(dependentValue) && TypeHelper.isEmpty(targetValue))
                 return true;
             if (!TypeHelper.isEmpty(dependentValue) && targetValue === '*')

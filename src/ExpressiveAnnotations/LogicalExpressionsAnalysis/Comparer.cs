@@ -10,7 +10,7 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis
     public static class Comparer
     {
         /// <summary>
-        /// Computes the specified dependent value.
+        /// Computes relation result.
         /// </summary>
         /// <param name="dependentValue">The dependent value.</param>
         /// <param name="targetValue">The target value.</param>
@@ -22,29 +22,29 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis
             switch (relationalOperator)
             {
                 case "==":
-                    return Compare(dependentValue, targetValue);
+                    return Equal(dependentValue, targetValue);
                 case "!=":
-                    return !Compare(dependentValue, targetValue);
+                    return !Equal(dependentValue, targetValue);
                 case ">":
                     return Greater(dependentValue, targetValue);
                 case ">=":
-                    return !Less(dependentValue, targetValue);
+                    return Greater(dependentValue, targetValue) || Equal(dependentValue, targetValue);
                 case "<":
                     return Less(dependentValue, targetValue);
                 case "<=":
-                    return !Greater(dependentValue, targetValue);
+                    return Less(dependentValue, targetValue) || Equal(dependentValue, targetValue);
             }
 
             throw new ArgumentException(string.Format("Relational operator \"{0}\" is invalid. Available operators: ==, !=, >, >=, <, <=.", relationalOperator));
         }
 
         /// <summary>
-        /// Compares the specified dependent value.
+        /// Computes equality comparison.
         /// </summary>
         /// <param name="dependentValue">The dependent value.</param>
         /// <param name="targetValue">The target value.</param>
         /// <returns></returns>
-        public static bool Compare(object dependentValue, object targetValue)
+        public static bool Equal(object dependentValue, object targetValue)
         {
             if (dependentValue.IsEmpty() && targetValue.IsEmpty())
                 return true;
@@ -54,7 +54,7 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis
         }
 
         /// <summary>
-        /// Greaters the specified dependent value.
+        /// Computes "greater than" comparison.
         /// </summary>
         /// <param name="dependentValue">The dependent value.</param>
         /// <param name="targetValue">The target value.</param>
@@ -75,7 +75,7 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis
         }
 
         /// <summary>
-        /// Lesses the specified dependent value.
+        /// Computes "less than" comparison.
         /// </summary>
         /// <param name="dependentValue">The dependent value.</param>
         /// <param name="targetValue">The target value.</param>

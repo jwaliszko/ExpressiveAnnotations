@@ -209,23 +209,41 @@
         // assumption - arguments provided have exact types
 
         wnd.ok(comparer.compute("a", "A", ">"));
+        wnd.ok(comparer.compute("a", "A", ">="));
         wnd.ok(comparer.compute("abcd", "ABCD", ">"));
+        wnd.ok(comparer.compute("abcd", "ABCD", ">="));
         wnd.ok(comparer.compute(1, 0, ">"));
+        wnd.ok(comparer.compute(1, 0, ">="));
         wnd.ok(comparer.compute(0, -1, ">"));
+        wnd.ok(comparer.compute(0, -1, ">="));
         wnd.ok(comparer.compute(1.1, 1.01, ">"));
+        wnd.ok(comparer.compute(1.1, 1.01, ">="));
         wnd.ok(comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), ">"));
-
-        wnd.ok(!comparer.compute("a", "A", "<="));
-        wnd.ok(!comparer.compute("abcd", "ABCD", "<="));
-        wnd.ok(!comparer.compute(1, 0, "<="));
-        wnd.ok(!comparer.compute(0, -1, "<="));
-        wnd.ok(!comparer.compute(1.1, 1.01, "<="));
-        wnd.ok(!comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), "<="));
+        wnd.ok(comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), ">="));
 
         wnd.ok(!comparer.compute("a", null, ">"));
+        wnd.ok(!comparer.compute("a", null, ">="));
         wnd.ok(!comparer.compute(null, "a", ">"));
+        wnd.ok(!comparer.compute(null, "a", ">="));
+        
+        wnd.ok(!comparer.compute("a", "A", "<"));
+        wnd.ok(!comparer.compute("a", "A", "<="));
+        wnd.ok(!comparer.compute("abcd", "ABCD", "<"));
+        wnd.ok(!comparer.compute("abcd", "ABCD", "<="));
+        wnd.ok(!comparer.compute(1, 0, "<"));
+        wnd.ok(!comparer.compute(1, 0, "<="));
+        wnd.ok(!comparer.compute(0, -1, "<"));
+        wnd.ok(!comparer.compute(0, -1, "<="));
+        wnd.ok(!comparer.compute(1.1, 1.01, "<"));
+        wnd.ok(!comparer.compute(1.1, 1.01, "<="));
+        wnd.ok(!comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), "<"));
+        wnd.ok(!comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), "<="));
+
         wnd.ok(!comparer.compute("a", null, "<"));
+        wnd.ok(!comparer.compute("a", null, "<="));
         wnd.ok(!comparer.compute(null, "a", "<"));
+        wnd.ok(!comparer.compute(null, "a", "<="));
+        
 
         wnd.raises(function () {
             comparer.compute({}, {}, ">");
