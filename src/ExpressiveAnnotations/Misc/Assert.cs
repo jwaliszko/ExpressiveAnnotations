@@ -15,11 +15,10 @@ namespace ExpressiveAnnotations.Misc
         /// <param name="dependentProperty">The dependent property.</param>
         /// <param name="targetValue">The target value.</param>
         /// <param name="annotatedPropertyName">Name of the annotated property.</param>
-        /// <param name="attributeName">Name of the attribute.</param>
         /// <param name="relationalOperator">The relational operator.</param>
         /// <exception cref="System.InvalidOperationException">
         /// </exception>
-        public static void ConsistentTypes(PropertyInfo dependentProperty, object targetValue, string annotatedPropertyName, string attributeName, string relationalOperator)
+        public static void ConsistentTypes(PropertyInfo dependentProperty, object targetValue, string annotatedPropertyName, string relationalOperator)
         {
             if (targetValue == null || string.Equals(targetValue as string, "*")) // type doesn't matter when null or asterisk is provided into target value
                 return;
@@ -27,17 +26,17 @@ namespace ExpressiveAnnotations.Misc
             if (!ConsistentTypes(dependentProperty.PropertyType, targetValue.GetType()))
                 throw new InvalidOperationException(
                     string.Format(
-                        "Type mismatch detected in {0} definition for {1} field. Types consistency is required for {2} field and its corresponding, " +
+                        "Type mismatch detected in attribute definition for {0} field. Types consistency is required for {1} field and its corresponding, " +
                         "explicitly provided, target value (explicit target values, if null or *, does not interfere with types consistency assertions).",
-                        attributeName, annotatedPropertyName, dependentProperty.Name));
+                        annotatedPropertyName, dependentProperty.Name));
 
             if (!OperationAllowedForType(dependentProperty.PropertyType, relationalOperator))
                 throw new InvalidOperationException(
                     string.Format(
-                        "Relation abuse detected in {0} definition for {1} field. The type of {2} field and its corresponding, explicitly provided, " +
-                        "target value, is invalid for {3} relation. Greater than and less than relational operations not allowed for arguments " +
+                        "Relation abuse detected in attribute definition for {0} field. The type of {1} field and its corresponding, explicitly provided, " +
+                        "target value, is invalid for {2} relation. Greater than and less than relational operations not allowed for arguments " +
                         "of types other than: numeric, string or datetime.",
-                        attributeName, annotatedPropertyName, dependentProperty.Name, relationalOperator));
+                        annotatedPropertyName, dependentProperty.Name, relationalOperator));
         }
 
         /// <summary>
@@ -46,26 +45,25 @@ namespace ExpressiveAnnotations.Misc
         /// <param name="dependentProperty">The dependent property.</param>
         /// <param name="targetProperty">The target property.</param>
         /// <param name="annotatedPropertyName">Name of the annotated property.</param>
-        /// <param name="attributeName">Name of the attribute.</param>
         /// <param name="relationalOperator">The relational operator.</param>
         /// <exception cref="System.InvalidOperationException">
         /// </exception>
-        public static void ConsistentTypes(PropertyInfo dependentProperty, PropertyInfo targetProperty, string annotatedPropertyName, string attributeName, string relationalOperator)
+        public static void ConsistentTypes(PropertyInfo dependentProperty, PropertyInfo targetProperty, string annotatedPropertyName, string relationalOperator)
         {
             if (!ConsistentTypes(dependentProperty.PropertyType, targetProperty.PropertyType))
                 throw new InvalidOperationException(
                     string.Format(
-                        "Type mismatch detected in {0} definition for {1} field. Types consistency is required for {2} field and its corresponding, " +
+                        "Type mismatch detected in attribute definition for {0} field. Types consistency is required for {1} field and its corresponding, " +
                         "provided indirectly through backing field, target value.",
-                        attributeName, annotatedPropertyName, dependentProperty.Name));
+                        annotatedPropertyName, dependentProperty.Name));
 
             if (!OperationAllowedForType(dependentProperty.PropertyType, relationalOperator))
                 throw new InvalidOperationException(
                     string.Format(
-                        "Relation abuse detected in {0} definition for {1} field. The type of {2} field and its corresponding, provided indirectly " +
-                        "through backing field, target value, is invalid for {3} relation. Greater than and less than relational operations " +
+                        "Relation abuse detected in attribute definition for {0} field. The type of {1} field and its corresponding, provided indirectly " +
+                        "through backing field, target value, is invalid for {2} relation. Greater than and less than relational operations " +
                         "not allowed for arguments of types other than: numeric, string or datetime.",
-                        attributeName, annotatedPropertyName, dependentProperty.Name, relationalOperator));
+                        annotatedPropertyName, dependentProperty.Name, relationalOperator));
         }
 
         private static bool ConsistentTypes(Type dependentType, Type targetType)

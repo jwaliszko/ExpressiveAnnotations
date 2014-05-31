@@ -40,6 +40,12 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConditionalAttributes\AssertThatAttribute.cs" />
+    <Compile Include="ConditionalAttributes\AssertThatExpressionAttribute.cs" />
+    <Compile Include="ConditionalAttributes\ExpressionAttributeInternals.cs" />
+    <Compile Include="ConditionalAttributes\AttributeInternals.cs" />
+    <Compile Include="ConditionalAttributes\IAttribute.cs" />
+    <Compile Include="ConditionalAttributes\IExpressionAttribute.cs" />
     <Compile Include="LogicalExpressionsAnalysis\Evaluator.cs" />
     <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\InfixLexer.cs" />
     <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\Token.cs" />

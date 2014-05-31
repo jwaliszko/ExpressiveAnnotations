@@ -5,13 +5,12 @@ using ExpressiveAnnotations.Misc;
 namespace ExpressiveAnnotations.ConditionalAttributes
 {
     /// <summary>
-    /// Validation attribute which indicates that annotated field is required when dependent field has appropriate value.
+    /// Validation attribute, executed for non-empty annotated field, which indicates that given assertion has to be satisfied, for such field to be considered as valid.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public sealed class RequiredIfAttribute : ValidationAttribute, IAttribute
+    public sealed class AssertThatAttribute : ValidationAttribute, IAttribute
     {
-        private const string _defaultErrorMessage = "The {0} field is required by the following logic: {1}.";
-        private readonly RequiredAttribute _requiredAttribute = new RequiredAttribute();
+        private const string _defaultErrorMessage = "Assertion for {0} field is not satisfied by the following logic: {1}.";
 
         /// <summary>
         /// Gets or sets the name of dependent field from which runtime value is extracted.
@@ -31,20 +30,20 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         public string RelationalOperator { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RequiredIfAttribute"/> class.
+        /// Initializes a new instance of the <see cref="AssertThatAttribute"/> class.
         /// </summary>
-        public RequiredIfAttribute()
+        public AssertThatAttribute()
             : base(_defaultErrorMessage)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RequiredIfAttribute"/> class.
+        /// Initializes a new instance of the <see cref="AssertThatAttribute"/> class.
         /// </summary>
         /// <param name="dependentProperty">The name of dependent field from which runtime value is extracted.</param>
         /// <param name="targetValue">The expected value for dependent field (wildcard character * stands for any value). There is also possibility of value runtime extraction from backing field, by providing its name [inside square brackets].</param>
         /// <param name="relationalOperator">The relational operator describing relation between dependent field and target value. Available operators: ==, !=, >, >=, &lt;, &lt;=. If this property is not provided, equality operator == is used by default.</param>
-        public RequiredIfAttribute(string dependentProperty, object targetValue, string relationalOperator = null)
+        public AssertThatAttribute(string dependentProperty, object targetValue, string relationalOperator = null)
             : base(_defaultErrorMessage)
         {
             DependentProperty = dependentProperty;
@@ -78,19 +77,12 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             {
                 DependentProperty = DependentProperty,
                 TargetValue = TargetValue,
-                RelationalOperator = RelationalOperator                
+                RelationalOperator = RelationalOperator
             };
 
-            if (internals.Validate(value, validationContext))
-            {                
-                // match => means we should try to validate this field (verify if required value is provided)  
-                if (!_requiredAttribute.IsValid(value) || (value is bool && !(bool) value))
-                {
-                    // validation failed - return an error
-                    return new ValidationResult(FormatErrorMessage(validationContext.DisplayName,
-                        MiscHelper.ComposeRelationalExpression(DependentProperty, TargetValue, RelationalOperator)));
-                }
-            }
+            if (!value.IsEmpty() && !internals.Validate(value, validationContext)) // executed for non-empty fields
+                return new ValidationResult(FormatErrorMessage(validationContext.DisplayName,
+                    MiscHelper.ComposeRelationalExpression(DependentProperty, TargetValue, RelationalOperator)));
             return ValidationResult.Success;
         }
     }

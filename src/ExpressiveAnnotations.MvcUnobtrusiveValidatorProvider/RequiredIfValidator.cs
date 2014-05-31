@@ -1,9 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using ExpressiveAnnotations.ConditionalAttributes;
 using System.Collections.Generic;
-using ExpressiveAnnotations.Misc;
 using Newtonsoft.Json;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
@@ -13,11 +10,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
     /// </summary>
     public class RequiredIfValidator : DataAnnotationsModelValidator<RequiredIfAttribute>
     {
-        private readonly string _errorMessage;
-        private readonly string _dependentProperty;
-        private readonly string _relationalOperator;
-        private readonly object _targetValue;
-        private readonly string _type;
+        private readonly ValidatorInternals m_internals = new ValidatorInternals();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequiredIfValidator"/> class.
@@ -28,28 +21,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         public RequiredIfValidator(ModelMetadata metadata, ControllerContext context, RequiredIfAttribute attribute)
             : base(metadata, context, attribute)
         {
-            var dependentProperty = MiscHelper.ExtractProperty(metadata.ContainerType, attribute.DependentProperty);
-            var relationalOperator = attribute.RelationalOperator ?? "==";
-
-            string targetPropertyName;
-            var attributeName = GetType().BaseType.GetGenericArguments().Single().Name;
-            if (MiscHelper.TryExtractName(attribute.TargetValue, out targetPropertyName))
-            {
-                var targetProperty = MiscHelper.ExtractProperty(metadata.ContainerType, targetPropertyName);
-                Assert.ConsistentTypes(dependentProperty, targetProperty, metadata.PropertyName, attributeName, relationalOperator);
-            }
-            else
-                Assert.ConsistentTypes(dependentProperty, attribute.TargetValue, metadata.PropertyName, attributeName, relationalOperator);
-
-            var displayAttribute = dependentProperty.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
-            var dependentPropertyName = displayAttribute != null ? displayAttribute.GetName() : attribute.DependentProperty;
-            
-            _dependentProperty = attribute.DependentProperty;
-            _relationalOperator = relationalOperator;
-            _targetValue = attribute.TargetValue;
-
-            _type = TypeHelper.GetCoarseType(dependentProperty.PropertyType);
-            _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), dependentPropertyName);
+            m_internals.Prepare(metadata, attribute);
         }
 
         /// <summary>
@@ -59,13 +31,13 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         {
             var rule = new ModelClientValidationRule
             {
-                ErrorMessage = _errorMessage,
+                ErrorMessage = m_internals.ErrorMessage,
                 ValidationType = "requiredif",
             };
-            rule.ValidationParameters.Add("dependentproperty", JsonConvert.SerializeObject(_dependentProperty));
-            rule.ValidationParameters.Add("relationaloperator", JsonConvert.SerializeObject(_relationalOperator));
-            rule.ValidationParameters.Add("targetvalue", JsonConvert.SerializeObject(_targetValue));
-            rule.ValidationParameters.Add("type", JsonConvert.SerializeObject(_type));
+            rule.ValidationParameters.Add("dependentproperty", JsonConvert.SerializeObject(m_internals.DependentProperty));
+            rule.ValidationParameters.Add("relationaloperator", JsonConvert.SerializeObject(m_internals.RelationalOperator));
+            rule.ValidationParameters.Add("targetvalue", JsonConvert.SerializeObject(m_internals.TargetValue));
+            rule.ValidationParameters.Add("type", JsonConvert.SerializeObject(m_internals.Type));
             yield return rule;
         }
     }

@@ -104,7 +104,7 @@ namespace ExpressiveAnnotations.Misc
         }
 
         /// <summary>
-        /// Process expression to user-friendly form.
+        /// Prepares expression to be shown in user-friendly form.
         /// </summary>
         /// <param name="expression">The logical expression.</param>
         /// <param name="dependentProperties">The dependent properties.</param>
@@ -124,9 +124,21 @@ namespace ExpressiveAnnotations.Misc
                 if (!TryExtractName(target, out name)) // if target value does not containan encapsulated property name, beautify it
                     target = (target is string && (string)target != "*") ? string.Format("\"{0}\"", target) : target ?? "null";
                 target = (target is bool) ? target.ToString().ToLowerInvariant() : target;
-                operands[i] = string.Format("({0} {1} {2})", dependentProperties[i], relationalOperators.Any() ? relationalOperators[i] : "==", target);
+                operands[i] = string.Format("({0})", ComposeRelationalExpression(dependentProperties[i], target, relationalOperators.Any() ? relationalOperators[i] : "=="));
             }
             return string.Format(expression, operands);
+        }
+
+        /// <summary>
+        /// Prepares single relational expression to be shown in user-friendly form.
+        /// </summary>
+        /// <param name="dependentProperty">The dependent property.</param>
+        /// <param name="targetValue">The target value.</param>
+        /// <param name="relationalOperator">The relational operator.</param>
+        /// <returns></returns>
+        public static string ComposeRelationalExpression(string dependentProperty, object targetValue, string relationalOperator)
+        {
+            return string.Format("{0} {1} {2}", dependentProperty, relationalOperator ?? "==", targetValue);
         }
     }
 }

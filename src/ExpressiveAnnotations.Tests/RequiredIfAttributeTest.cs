@@ -197,7 +197,7 @@ namespace ExpressiveAnnotations.Tests
             catch (InvalidOperationException e)
             {
                 Assert.AreEqual(
-                    "Type mismatch detected in RequiredIfAttribute definition for CreditCardNumber field. Types consistency is required for GoAbroad field and its corresponding, " +
+                    "Type mismatch detected in attribute definition for CreditCardNumber field. Types consistency is required for GoAbroad field and its corresponding, " +
                     "explicitly provided, target value (explicit target values, if null or *, does not interfere with types consistency assertions).",
                     e.Message);
                 throw;
@@ -216,7 +216,7 @@ namespace ExpressiveAnnotations.Tests
             catch (InvalidOperationException e)
             {
                 Assert.AreEqual(
-                    "Type mismatch detected in RequiredIfAttribute definition for DebetCardNumber field. Types consistency is required for GoAbroad field and its corresponding, " +
+                    "Type mismatch detected in attribute definition for DebetCardNumber field. Types consistency is required for GoAbroad field and its corresponding, " +
                     "provided indirectly through backing field, target value.",
                     e.Message);
                 throw;

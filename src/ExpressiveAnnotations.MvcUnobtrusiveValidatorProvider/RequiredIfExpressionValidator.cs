@@ -1,9 +1,6 @@
-﻿using System.Linq;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using ExpressiveAnnotations.ConditionalAttributes;
 using System.Collections.Generic;
-using System;
-using ExpressiveAnnotations.Misc;
 using Newtonsoft.Json;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
@@ -13,12 +10,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
     /// </summary>
     public class RequiredIfExpressionValidator : DataAnnotationsModelValidator<RequiredIfExpressionAttribute>
     {
-        private readonly string _errorMessage;
-        private readonly string[] _dependentProperties;
-        private readonly string[] _relationalOperators;
-        private readonly object[] _targetValues;
-        private readonly string[] _types;
-        private readonly string _expression;
+        private readonly ExpressionValidatorInternals m_internals = new ExpressionValidatorInternals();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequiredIfExpressionValidator"/> class.
@@ -34,43 +26,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         public RequiredIfExpressionValidator(ModelMetadata metadata, ControllerContext context, RequiredIfExpressionAttribute attribute)
             : base(metadata, context, attribute)
         {
-            if (attribute.DependentProperties.Length != attribute.TargetValues.Length)
-                throw new ArgumentException("Number of elements in DependentProperties and TargetValues must match.");
-            if (attribute.RelationalOperators.Any() && attribute.RelationalOperators.Length != attribute.DependentProperties.Length)
-                throw new ArgumentException("Number of explicitly provided relational operators is incorrect.");           
-
-            var count = attribute.DependentProperties.Count();
-            _dependentProperties = new string[count];
-            _relationalOperators = new string[count];
-            _targetValues = new object[count];
-            _types = new string[count];
-
-            var attributeName = GetType().BaseType.GetGenericArguments().Single().Name;
-
-            for (var i = 0; i < count; i++)
-            {
-                var dependentProperty = MiscHelper.ExtractProperty(metadata.ContainerType, attribute.DependentProperties[i]);
-                var relationalOperator = attribute.RelationalOperators.Any() ? attribute.RelationalOperators[i] : "==";
-
-                string targetPropertyName;
-                if (MiscHelper.TryExtractName(attribute.TargetValues[i], out targetPropertyName))
-                {
-                    var targetProperty = MiscHelper.ExtractProperty(metadata.ContainerType, targetPropertyName);
-                    Assert.ConsistentTypes(dependentProperty, targetProperty, metadata.PropertyName, attributeName, relationalOperator);
-                }
-                else
-                    Assert.ConsistentTypes(dependentProperty, attribute.TargetValues[i], metadata.PropertyName, attributeName, relationalOperator);
-
-                _dependentProperties[i] = attribute.DependentProperties[i];
-                _relationalOperators[i] = relationalOperator;
-                _targetValues[i] = attribute.TargetValues[i];
-
-                _types[i] = TypeHelper.GetCoarseType(dependentProperty.PropertyType);
-            }
-            
-            _expression = attribute.Expression;
-            _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(),
-                MiscHelper.ComposeExpression(_expression, _dependentProperties, _targetValues, _relationalOperators));
+            m_internals.Prepare(metadata, attribute);
         }
 
         /// <summary>
@@ -80,14 +36,14 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         {
             var rule = new ModelClientValidationRule
             {
-                ErrorMessage = _errorMessage,
+                ErrorMessage = m_internals.ErrorMessage,
                 ValidationType = "requiredifexpression",
             };
-            rule.ValidationParameters.Add("dependentproperties", JsonConvert.SerializeObject(_dependentProperties));
-            rule.ValidationParameters.Add("relationaloperators", JsonConvert.SerializeObject(_relationalOperators));
-            rule.ValidationParameters.Add("targetvalues", JsonConvert.SerializeObject(_targetValues));
-            rule.ValidationParameters.Add("types", JsonConvert.SerializeObject(_types)); 
-            rule.ValidationParameters.Add("expression", _expression);
+            rule.ValidationParameters.Add("dependentproperties", JsonConvert.SerializeObject(m_internals.DependentProperties));
+            rule.ValidationParameters.Add("relationaloperators", JsonConvert.SerializeObject(m_internals.RelationalOperators));
+            rule.ValidationParameters.Add("targetvalues", JsonConvert.SerializeObject(m_internals.TargetValues));
+            rule.ValidationParameters.Add("types", JsonConvert.SerializeObject(m_internals.Types)); 
+            rule.ValidationParameters.Add("expression", m_internals.Expression);
             yield return rule;
         }
     }

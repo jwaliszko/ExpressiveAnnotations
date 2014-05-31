@@ -5,16 +5,15 @@ using ExpressiveAnnotations.Misc;
 namespace ExpressiveAnnotations.ConditionalAttributes
 {
     /// <summary>
-    /// Validation attribute which indicates that annotated field is required when computed result of given logical expression is true.
+    /// Validation attribute, executed for non-empty annotated field, which indicates that assertion given in logical expression has to be satisfied, for such field to be considered as valid.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    public sealed class RequiredIfExpressionAttribute : ValidationAttribute, IExpressionAttribute
+    public sealed class AssertThatExpressionAttribute : ValidationAttribute, IExpressionAttribute
     {
-        private const string _defaultErrorMessage = "The {0} field is required by the following logic: {1}.";
-        private readonly RequiredAttribute _requiredAttribute = new RequiredAttribute();
+        private const string _defaultErrorMessage = "Assertion for {0} field is not satisfied by the following logic: {1}.";
 
         /// <summary>
-        /// Gets or sets the logical expression based on which requirement condition is computed. 
+        /// Gets or sets the logical expression based on which requirement condition is computed.
         /// Available expression tokens: &amp;&amp;, ||, !, {, }, numbers and whitespaces.
         /// </summary>
         public string Expression { get; set; }
@@ -25,7 +24,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         public string[] DependentProperties { get; set; }
 
         /// <summary>
-        /// Gets or sets the expected values for corresponding dependent fields (wildcard character * stands for any value). There is also 
+        /// Gets or sets the expected values for corresponding dependent fields (wildcard character * stands for any value). There is also
         /// possibility of values runtime extraction from backing fields, by providing their names [inside square brackets].
         /// </summary>
         public object[] TargetValues { get; set; }
@@ -37,9 +36,9 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         public string[] RelationalOperators { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RequiredIfExpressionAttribute"/> class.
+        /// Initializes a new instance of the <see cref="AssertThatExpressionAttribute"/> class.
         /// </summary>
-        public RequiredIfExpressionAttribute()
+        public AssertThatExpressionAttribute()
             : base(_defaultErrorMessage)
         {
             DependentProperties = new string[0];
@@ -48,13 +47,13 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RequiredIfExpressionAttribute"/> class.
+        /// Initializes a new instance of the <see cref="AssertThatExpressionAttribute"/> class.
         /// </summary>
         /// <param name="expression">The logical expression based on which requirement condition is computed. Available expression tokens: &amp;&amp;, ||, !, {, }, numbers and whitespaces.</param>
         /// <param name="dependentProperties">The names of dependent fields from which runtime values are extracted.</param>
         /// <param name="targetValues">The expected values for corresponding dependent fields (wildcard character * stands for any value). There is also possibility of values runtime extraction from backing fields, by providing their names [inside square brackets].</param>
         /// <param name="relationalOperators">The relational operators describing relations between dependent fields and corresponding target values. Available operators: ==, !=, >, >=, &lt;, &lt;=. If this property is not provided, equality operator == is used by default.</param>
-        public RequiredIfExpressionAttribute(string expression, string[] dependentProperties, object[] targetValues, string[] relationalOperators = null)
+        public AssertThatExpressionAttribute(string expression, string[] dependentProperties, object[] targetValues, string[] relationalOperators = null)
             : base(_defaultErrorMessage)
         {
             Expression = expression;
@@ -98,14 +97,9 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                 RelationalOperators = RelationalOperators
             };
 
-            if (internals.Validate(value, validationContext))
-            {
-                // expression result is true => means we should try to validate this field (verify if required value is provided)  
-                if (!_requiredAttribute.IsValid(value) || (value is bool && !(bool) value))
-                    // validation failed - return an error
-                    return new ValidationResult(FormatErrorMessage(validationContext.DisplayName,
-                        MiscHelper.ComposeExpression(Expression, DependentProperties, TargetValues, RelationalOperators)));
-            }
+            if (!value.IsEmpty() && !internals.Validate(value, validationContext)) // executed for non-empty fields
+                return new ValidationResult(FormatErrorMessage(validationContext.DisplayName,
+                    MiscHelper.ComposeExpression(Expression, DependentProperties, TargetValues, RelationalOperators)));
             return ValidationResult.Success;
         }
     }
