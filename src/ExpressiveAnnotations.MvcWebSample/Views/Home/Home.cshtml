@@ -86,10 +86,15 @@
             </li>
             <li>
                 @Html.EditorFor(x => x.LatestSuggestedReturnDate)   @*hidden backing field storing date in RFC 2822 or ISO 8601 format*@
+                @Html.EditorFor(x => x.Today)
                 <pre class="code">
 [RequiredIf(
     DependentProperty = "GoAbroad", 
     TargetValue = true)]
+[AssertThat(
+    DependentProperty = "ReturnDate",
+    RelationalOperator = ">=" ,
+    TargetValue = "[Today]")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.ReturnDate, new { @class = "inline prefix" })
@@ -170,7 +175,7 @@
     ErrorMessage = "You have to authorize us to contact you.")]
 
 one of possible equivalents is:
-                    
+
 [RequiredIfExpression( /* interpretation => ContactDetails.Email != null || ContactDetails.Phone != null */
     Expression = "!{0} || !{1}",
     DependentProperties = new[] {"ContactDetails.Email", "ContactDetails.Phone"},

@@ -126,6 +126,9 @@
   <data name="AgreeForContactRequired" xml:space="preserve">
     <value>You have to authorize us to contact you.</value>
   </data>
+  <data name="AssertionNotSatisfied" xml:space="preserve">
+    <value>Assertion for {0} field is not satisfied by the following logic: {1}.</value>
+  </data>
   <data name="AwareOfTheRisks" xml:space="preserve">
     <value>I am aware of the possible risks</value>
   </data>
@@ -151,7 +154,7 @@
     <value>Extreme</value>
   </data>
   <data name="FieldConditionallyRequired" xml:space="preserve">
-    <value>The {0} field is required because depends on {1} field.</value>
+    <value>The {0} field is required by the following logic: {1}.</value>
   </data>
   <data name="FieldRequired" xml:space="preserve">
     <value>The {0} field is required.</value>
@@ -159,11 +162,14 @@
   <data name="France" xml:space="preserve">
     <value>France</value>
   </data>
+  <data name="FutureDateRequired" xml:space="preserve">
+    <value>We are afraid that going back to the past is not an option nowadays.</value>
+  </data>
   <data name="Germany" xml:space="preserve">
     <value>Germany</value>
   </data>
   <data name="GoAbroad" xml:space="preserve">
-    <value>I'm going abroad</value>
+    <value>I am going abroad</value>
   </data>
   <data name="High" xml:space="preserve">
     <value>High</value>
@@ -217,7 +223,7 @@
     <value>I agree for contact</value>
   </data>
   <data name="SpamForbidden" xml:space="preserve">
-    <value>I don't agree for contact</value>
+    <value>I do not agree for contact</value>
   </data>
   <data name="SportType" xml:space="preserve">
     <value>Sports you like the most</value>

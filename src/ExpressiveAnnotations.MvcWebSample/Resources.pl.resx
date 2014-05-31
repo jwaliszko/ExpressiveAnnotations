@@ -126,6 +126,9 @@
   <data name="AgreeForContactRequired" xml:space="preserve">
     <value>Twoja zgoda jest wymagana w celu nawiązania kontaktu.</value>
   </data>
+  <data name="AssertionNotSatisfied" xml:space="preserve">
+    <value>Założenie dla pola {0} nie jest spełnione dla następującej logiki: {1}.</value>
+  </data>
   <data name="AwareOfTheRisks" xml:space="preserve">
     <value>Jestem świadomy ewentualnych zagrożeń</value>
   </data>
@@ -151,13 +154,16 @@
     <value>Ekstremalny</value>
   </data>
   <data name="FieldConditionallyRequired" xml:space="preserve">
-    <value>Pole {0} jest wymagane ponieważ zależy od pola {1}.</value>
+    <value>Pole {0} jest wymagane ponieważ wymusza go następująca logika: {1}.</value>
   </data>
   <data name="FieldRequired" xml:space="preserve">
     <value>Pole {0} jest wymagane.</value>
   </data>
   <data name="France" xml:space="preserve">
     <value>Francja</value>
+  </data>
+  <data name="FutureDateRequired" xml:space="preserve">
+    <value>Data nie może wskazywać na czas przeszły.</value>
   </data>
   <data name="Germany" xml:space="preserve">
     <value>Niemcy</value>

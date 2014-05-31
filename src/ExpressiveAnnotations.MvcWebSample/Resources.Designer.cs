@@ -88,6 +88,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Assertion for {0} field is not satisfied by the following logic: {1}..
+        /// </summary>
+        public static string AssertionNotSatisfied {
+            get {
+                return ResourceManager.GetString("AssertionNotSatisfied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to I am aware of the possible risks.
         /// </summary>
         public static string AwareOfTheRisks {
@@ -160,7 +169,7 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The {0} field is required because depends on {1} field..
+        ///   Looks up a localized string similar to The {0} field is required by the following logic: {1}..
         /// </summary>
         public static string FieldConditionallyRequired {
             get {
@@ -187,6 +196,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to We are afraid that going back to the past is not an option nowadays..
+        /// </summary>
+        public static string FutureDateRequired {
+            get {
+                return ResourceManager.GetString("FutureDateRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Germany.
         /// </summary>
         public static string Germany {
@@ -196,7 +214,7 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to I&apos;m going abroad.
+        ///   Looks up a localized string similar to I am going abroad.
         /// </summary>
         public static string GoAbroad {
             get {
@@ -358,7 +376,7 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to I don&apos;t agree for contact.
+        ///   Looks up a localized string similar to I do not agree for contact.
         /// </summary>
         public static string SpamForbidden {
             get {

@@ -10,11 +10,14 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
         {
             var model = new Query
             {
-                GoAbroad = true, 
-                Country = "Poland", 
-                NextCountry = "Other", 
+                GoAbroad = true,
+                Country = "Poland",
+                NextCountry = "Other",
                 SportType = "Extreme",
-                LatestSuggestedReturnDate = DateTime.UtcNow.AddMonths(1)
+                AgreeForContact = false,
+                LatestSuggestedReturnDate = DateTime.Today.AddMonths(1),
+                Today = DateTime.Today,
+                ContactDetails = new Contact()
             };
             return View("Home", model);
         }

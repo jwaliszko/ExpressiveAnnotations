@@ -77,11 +77,18 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 
         [UIHint("ISO8601Date")]
         public DateTime LatestSuggestedReturnDate { get; set; }
+        [UIHint("ISO8601Date")]
+        public DateTime Today { get; set; }
 
         [RequiredIf(
             DependentProperty = "GoAbroad",
             TargetValue = true,
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]
+        [AssertThat(
+            DependentProperty = "ReturnDate",
+            RelationalOperator = ">=",
+            TargetValue = "[Today]",
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "FutureDateRequired")]
         [Display(ResourceType = typeof(Resources), Name = "ReturnDate")]
         public DateTime? ReturnDate { get; set; }
 
