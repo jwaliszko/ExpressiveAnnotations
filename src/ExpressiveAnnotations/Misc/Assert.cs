@@ -23,6 +23,10 @@ namespace ExpressiveAnnotations.Misc
             if (targetValue == null || string.Equals(targetValue as string, "*")) // type doesn't matter when null or asterisk is provided into target value
                 return;
 
+            DateTime date;
+            if (dependentProperty.PropertyType.IsDateTime() && DateTime.TryParse(targetValue as string, out date)) // target date is allowed to be explicitly provided as string
+                return;
+
             if (!ConsistentTypes(dependentProperty.PropertyType, targetValue.GetType()))
                 throw new InvalidOperationException(
                     string.Format(

@@ -52,6 +52,9 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis
                 return true;
             if(!dependentValue.IsEmpty() && string.Equals(targetValue as string, "*"))
                 return true;
+            DateTime date;
+            if (dependentValue.IsDateTime() && DateTime.TryParse(targetValue as string, out date)) // parsing here? - it is an exception when incompatible types are allowed, because date targets can be provided as strings
+                return Convert.ToDateTime(dependentValue) == date;
             return
                 string.Compare(
                     JsonConvert.SerializeObject(dependentValue),
@@ -74,6 +77,9 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis
                 return Convert.ToDateTime(dependentValue) > Convert.ToDateTime(targetValue);
             if (dependentValue is string && targetValue is string)
                 return string.CompareOrdinal(dependentValue as string, targetValue as string) > 0;
+            DateTime date;
+            if (dependentValue.IsDateTime() && DateTime.TryParse(targetValue as string, out date))
+                return Convert.ToDateTime(dependentValue) > date;
             if (dependentValue == null || targetValue == null)
                 return false;
 
@@ -95,6 +101,9 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis
                 return Convert.ToDateTime(dependentValue) < Convert.ToDateTime(targetValue);
             if (dependentValue is string && targetValue is string)
                 return string.CompareOrdinal(dependentValue as string, targetValue as string) < 0;
+            DateTime date;
+            if (dependentValue.IsDateTime() && DateTime.TryParse(targetValue as string, out date))
+                return Convert.ToDateTime(dependentValue) < date;
             if (dependentValue == null || targetValue == null)
                 return false;
 

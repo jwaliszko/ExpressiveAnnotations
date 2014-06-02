@@ -142,6 +142,9 @@ var LogicalExpressionsAnalyser = (function() {
                 return true;
             if (!TypeHelper.isEmpty(dependentValue) && targetValue === '*')
                 return true;
+            var date = TypeHelper.Date.tryParse(targetValue); // parsing here? - it is an exception when incompatible types are allowed, because date targets can be provided as strings
+            if (TypeHelper.isDate(dependentValue) && !date.error)
+                return dependentValue == date;
             return sensitiveComparisons
                 ? JSON.stringify(dependentValue) === JSON.stringify(targetValue)
                 : JSON.stringify(dependentValue).toLowerCase() === JSON.stringify(targetValue).toLowerCase();
@@ -153,6 +156,9 @@ var LogicalExpressionsAnalyser = (function() {
                 return dependentValue > targetValue;
             if (TypeHelper.isString(dependentValue) && TypeHelper.isString(targetValue))
                 return TypeHelper.String.compareOrdinal(dependentValue, targetValue) > 0;
+            var date = TypeHelper.Date.tryParse(targetValue);
+            if (TypeHelper.isDate(dependentValue) && !date.error)
+                return dependentValue > date;
             if (TypeHelper.isEmpty(dependentValue) || TypeHelper.isEmpty(targetValue))
                 return false;
 
@@ -165,6 +171,9 @@ var LogicalExpressionsAnalyser = (function() {
                 return dependentValue < targetValue;
             if (TypeHelper.isString(dependentValue) && TypeHelper.isString(targetValue))
                 return TypeHelper.String.compareOrdinal(dependentValue, targetValue) < 0;
+            var date = TypeHelper.Date.tryParse(targetValue);
+            if (TypeHelper.isDate(dependentValue) && !date.error)
+                return dependentValue < date;
             if (TypeHelper.isEmpty(dependentValue) || TypeHelper.isEmpty(targetValue))
                 return false;
 

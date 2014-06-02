@@ -31,13 +31,13 @@ public bool AgreeToContact { get; set; }
 
  ```
 [AssertThat(
-    DependentProperty = "ReturnDate",
-    RelationalOperator = ">=",
-    TargetValue = "[Today]")]
+        DependentProperty = "ReturnDate",
+        RelationalOperator = ">=",
+        TargetValue = "[Today]")]
 public DateTime? ReturnDate { get; set; }
 ```
 
-Here we are not validating requirement condition as previously. This attribute puts restriction for return date, if such is provided. This date needs to be greater than or equal to the date given in target value. The second thing shown here is possibility of dynamic extraction of target values from backing fields, by providing their names inside square brackets `[]` (no hardcoding needed). Comparing to the previous examples, this one introduces in addition the usage of explicitly provided relational operator. Such operator indicates relationship between dependent field value and target value. If relational operator is not explicitly provided, relationship is by default defined by equality operator `==` (just like in the preceding examples).
+ Here we are not validating requirement condition as previously. This attribute puts restriction for return date, if such is provided. This date needs to be greater than or equal to the date given in target value. The second thing shown here is possibility of dynamic extraction of target values from backing fields, by providing their names inside square brackets `[]` (no hardcoding needed, but date target value can be provided as RFC 2822 or ISO 8601 formatted string). Comparing to the previous examples, this one introduces in addition the usage of explicitly provided relational operator. Such operator indicates relationship between dependent field value and target value. If relational operator is not explicitly provided, relationship is by default defined by equality operator `==` (just like in the preceding examples).
 
 * More complex (using logical expressions):
  
@@ -85,37 +85,37 @@ public string ReasonForTravel { get; set; }
 RequiredIfAttribute([string DependentProperty],
                     [object TargetValue],
 					[string RelationalOperator],
-					[bool SensitiveComparisons] ...)   - Validation attribute which indicates that 
-														 annotated field is required when dependent 
-														 field has appropriate value.
+					[bool SensitiveComparisons] ...) - Validation attribute which indicates that 
+													   annotated field is required when dependent 
+													   field has appropriate value.
 AssertThatAttribute([string DependentProperty],
                     [object TargetValue],
 					[string RelationalOperator],
-					[bool SensitiveComparisons] ...)   - Validation attribute, executed for non-empty 
-														 annotated field, which indicates that given 
-														 assertion has to be satisfied, for such 
-														 field to be considered as valid.
+					[bool SensitiveComparisons] ...) - Validation attribute, executed for non-empty 
+													   annotated field, which indicates that given 
+													   assertion has to be satisfied, for such 
+													   field to be considered as valid.
 
-    DependentProperty    - Gets or sets the name of dependent field, from which runtime value is 
-						   extracted.
-    TargetValue          - Gets or sets the expected value for dependent field (wildcard character * 
-						   stands for any value). Instead of hardcoding there is also possibility of 
-						   value runtime extraction from backing field, by providing its name 
-						   [inside square brackets].
-	RelationalOperator   - Gets or sets the relational operator indicating relation between dependent 
-						   field and target value. Available operators: ==, !=, >, >=, <, <=. If this 
-						   property is not provided, equality operator == is used by default.
-	SensitiveComparisons - Gets or sets whether the string comparisons are case sensitive or not.
+  DependentProperty    - Gets or sets the name of dependent field, from which runtime value is 
+						 extracted.
+  TargetValue          - Gets or sets the expected value for dependent field (wildcard character * 
+						 stands for any value). Instead of hardcoding there is also possibility of 
+						 value runtime extraction from backing field, by providing its name 
+						 [inside square brackets].
+  RelationalOperator   - Gets or sets the relational operator indicating relation between dependent 
+						 field and target value. Available operators: ==, !=, >, >=, <, <=. If this 
+						 property is not provided, equality operator == is used by default.
+  SensitiveComparisons - Gets or sets whether the string comparisons are case sensitive or not.
 ```
 ```
 RequiredIfExpressionAttribute([string Expression],
                               [string[] DependentProperties],
                               [object[] TargetValues],
 							  [string[] RelationalOperators],
-							  [bool SensitiveComparisons] ...) - Validation attribute which indicates 
-							                                     that annotated field is required 
-																 when computed result of given 
-																 logical expression is true.
+							  [bool SensitiveComparisons] ...) - Validation attribute which 
+							                                     indicates that annotated field is 
+																 required when computed result of 
+																 given logical expression is true.
 AssertThatExpressionAttribute([string Expression],
                               [string[] DependentProperties],
                               [object[] TargetValues],
@@ -127,20 +127,20 @@ AssertThatExpressionAttribute([string Expression],
 																 satisfied, for such field to be 
 																 considered as valid.
 
-    Expression           - Gets or sets the logical expression based on which requirement condition 
-						   is computed. Available expression tokens: &&, ||, !, {, }, numbers and 
-						   whitespaces.
-    DependentProperties  - Gets or sets the names of dependent fields from which runtime values are 
-						   extracted.
-    TargetValues         - Gets or sets the expected values for corresponding dependent fields 
-					 	   (wildcard character * stands for any value). There is also possibility of 
-						   values runtime extraction from backing fields, by providing their names 
-						   [inside square brackets].
-	RelationalOperators  - Gets or sets the relational operators indicating relations between 
-						   dependent fields and corresponding target values. Available operators: 
-						   ==, !=, >, >=, <, <=. If this property is not provided, equality operator 
-						   == is used by default.
-	SensitiveComparisons - Gets or sets whether the string comparisons are case sensitive or not.
+  Expression           - Gets or sets the logical expression based on which requirement condition 
+        				 is computed. Available expression tokens: &&, ||, !, {, }, numbers and 
+					     whitespaces.
+  DependentProperties  - Gets or sets the names of dependent fields from which runtime values are 
+						 extracted.
+  TargetValues         - Gets or sets the expected values for corresponding dependent fields 
+					 	 (wildcard character * stands for any value). There is also possibility of 
+						 values runtime extraction from backing fields, by providing their names 
+						 [inside square brackets].
+  RelationalOperators  - Gets or sets the relational operators indicating relations between 
+						 dependent fields and corresponding target values. Available operators: 
+						 ==, !=, >, >=, <, <=. If this property is not provided, equality operator 
+						 == is used by default.
+  SensitiveComparisons - Gets or sets whether the string comparisons are case sensitive or not.
 ```
 
 #####Theoretical background:
