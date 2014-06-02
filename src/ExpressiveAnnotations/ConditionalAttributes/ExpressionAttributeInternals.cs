@@ -15,7 +15,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         public string[] RelationalOperators { get; set; }
         public bool SensitiveComparisons { get; set; }
 
-        public bool Validate(object value, ValidationContext validationContext)
+        public bool Verify(ValidationContext validationContext)
         {
             if (validationContext == null)
                 throw new ArgumentNullException("validationContext", "ValidationContext not provided.");

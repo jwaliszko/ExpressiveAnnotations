@@ -107,14 +107,12 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                 SensitiveComparisons = SensitiveComparisons
             };
 
-            if (internals.Validate(value, validationContext))
-            {
-                // expression result is true => means we should try to validate this field (verify if required value is provided)  
-                if (!_requiredAttribute.IsValid(value) || (value is bool && !(bool) value))
-                    // validation failed - return an error
-                    return new ValidationResult(FormatErrorMessage(validationContext.DisplayName,
-                        MiscHelper.ComposeExpression(Expression, DependentProperties, TargetValues, RelationalOperators)));
-            }
+            if (!_requiredAttribute.IsValid(value) || (value is bool && !(bool)value))
+                if (internals.Verify(validationContext))
+                    return new ValidationResult(
+                        FormatErrorMessage(validationContext.DisplayName,
+                            MiscHelper.ComposeExpression(Expression, DependentProperties, TargetValues, RelationalOperators)));
+
             return ValidationResult.Success;
         }
     }

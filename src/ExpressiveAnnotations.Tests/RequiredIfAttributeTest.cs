@@ -109,7 +109,7 @@ namespace ExpressiveAnnotations.Tests
                 var model = new Model
                 {
                     Secret = null,
-                    WhatIsTheSecret = "the secret is..."
+                    WhatIsTheSecret = ""
                 };
                 model.IsValid(m => m.WhatIsTheSecret);
             }

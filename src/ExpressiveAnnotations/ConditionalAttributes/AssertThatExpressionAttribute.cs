@@ -106,9 +106,12 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                 SensitiveComparisons = SensitiveComparisons
             };
 
-            if (!value.IsEmpty() && !internals.Validate(value, validationContext)) // executed for non-empty fields
-                return new ValidationResult(FormatErrorMessage(validationContext.DisplayName,
-                    MiscHelper.ComposeExpression(Expression, DependentProperties, TargetValues, RelationalOperators)));
+            if (!value.IsEmpty())
+                if (!internals.Verify(validationContext))
+                    return new ValidationResult(
+                        FormatErrorMessage(validationContext.DisplayName,
+                            MiscHelper.ComposeExpression(Expression, DependentProperties, TargetValues, RelationalOperators)));
+
             return ValidationResult.Success;
         }
     }

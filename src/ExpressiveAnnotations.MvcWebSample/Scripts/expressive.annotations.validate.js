@@ -55,7 +55,7 @@
     }
 
     var AttributeInternals = {
-        validate: function(value, element, params) {
+        verify: function(element, params) {
             var dependentValue = MiscHelper.extractValue(params.form, params.dependentproperty, params.prefix, params.type);
             var targetValue = params.targetvalue;
 
@@ -68,7 +68,7 @@
         }
     }
     var ExpressionAttributeInternals = {
-        validate: function(value, element, params) {
+        verify: function (element, params) {
             var tokens = new Array();
             var length = params.dependentproperties.length;
             for (var i = 0; i < length; i++) {
@@ -148,32 +148,34 @@
             options.messages['requiredifexpression'] = options.message;
     });
 
-    $.validator.addMethod('assertthat', function (value, element, params) { // executed for non-empty fields
-        return analyser.TypeHelper.isEmpty(value) || AttributeInternals.validate(value, element, params);
+    $.validator.addMethod('assertthat', function(value, element, params) {
+        if (!analyser.TypeHelper.isEmpty(value)) // check if the field is non-empty (continue if so, otherwise skip condition verification)
+            if (!AttributeInternals.verify(element, params)) // check if the assertion condition is not satisfied
+                return false; // assertion not satisfied => notify
+        return true;
     }, '');
 
-    $.validator.addMethod('assertthatexpression', function (value, element, params) { // executed for non-empty fields
-        return analyser.TypeHelper.isEmpty(value) || ExpressionAttributeInternals.validate(value, element, params);
+    $.validator.addMethod('assertthatexpression', function(value, element, params) {
+        if (!analyser.TypeHelper.isEmpty(value))
+            if (!ExpressionAttributeInternals.verify(element, params))
+                return false;
+        return true;
     }, '');
 
     $.validator.addMethod('requiredif', function(value, element, params) {
-        if (AttributeInternals.validate(value, element, params)) {
-            // match (condition fulfilled) => means we should try to validate this field (verify if required value is provided)
-            var boolValue = analyser.TypeHelper.Bool.tryParse(value);
-            if (analyser.TypeHelper.isEmpty(value) || (!boolValue.error && !boolValue))
-                return false;
-        }
+        var boolValue = analyser.TypeHelper.Bool.tryParse(value);
+        if (analyser.TypeHelper.isEmpty(value) || (!boolValue.error && !boolValue)) // check if the field is empty or false (continue if so, otherwise skip condition verification)
+            if (AttributeInternals.verify(element, params)) // check if the requirement condition is satisfied 
+                return false; // requirement confirmed => notify
         return true;
     }, '');
 
     $.validator.addMethod('requiredifexpression', function(value, element, params) {
-        if (ExpressionAttributeInternals.validate(value, element, params)) {
-            // expression result is true => means we should try to validate this field (verify if required value is provided)            
-            var boolValue = analyser.TypeHelper.Bool.tryParse(value);
-            if (analyser.TypeHelper.isEmpty(value) || (!boolValue.error && !boolValue))
+        var boolValue = analyser.TypeHelper.Bool.tryParse(value);
+        if (analyser.TypeHelper.isEmpty(value) || (!boolValue.error && !boolValue))
+            if (ExpressionAttributeInternals.verify(element, params))
                 return false;
-        }
         return true;
-    }, '');    
+    }, '');
 
 })(jQuery, LogicalExpressionsAnalyser);
