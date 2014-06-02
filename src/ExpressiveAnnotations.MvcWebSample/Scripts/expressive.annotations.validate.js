@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.validate.js - v1.2.2
+﻿/* expressive.annotations.validate.js - v1.3.0
  * this script is a part of client side component of ExpresiveAnnotations - annotation-based conditional validation library
  * copyright (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
  * licensed MIT: http://www.opensource.org/licenses/mit-license.php */
