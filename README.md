@@ -1,6 +1,6 @@
 ﻿#ExpressiveAnnotations - annotation-based conditional validation
 
-[**ExpressiveAnnotations**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations) is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given implementation of RequiredIf, AssertThat, RequiredIfExpression and AssertThatExpression attributes allows to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more compacted, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
+[**ExpressiveAnnotations**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations) is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given implementations of RequiredIf, RequiredIfExpression, AssertThat and AssertThatExpression attributes allows to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more compacted, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
 
 ###RequiredIf/Expression vs AssertThat/Expression attributes?
 
@@ -27,7 +27,7 @@ public string PassportNumber { get; set; }
 public bool AgreeToContact { get; set; }
 ```
 
- This one means, that if email is non-empty, boolean value indicating contact permission has to be true. What is more, we can see that nested properties are supported by the mechanism. The last thing shown here is wildcard character `*` used as target value. It is special character which stands for any value.
+ This one means, that if email is non-empty, boolean value indicating contact permission has to be true. What is more, we can see here that nested properties are supported by the mechanism. The last thing shown is wildcard character `*` used as target value. It is special character which stands for any value.
 
  ```
 [AssertThat(
@@ -37,7 +37,11 @@ public bool AgreeToContact { get; set; }
 public DateTime? ReturnDate { get; set; }
 ```
 
- Here we are not validating requirement condition as previously. This attribute puts restriction for return date, if such is provided. This date needs to be greater than or equal to the date given in target value. The second thing shown here is possibility of dynamic extraction of target values from backing fields, by providing their names inside square brackets `[]` (here the value from today field is extracted). Therefore, not only hardcoded values are accepted (date can be hardcoded as RFC 2822 or ISO 8601 formatted string). Comparing to the previous examples, this one introduces in addition the usage of explicitly provided relational operator. Such operator indicates relationship between dependent field value and target value. If relational operator is not explicitly provided, relationship is by default defined by equality operator `==` (just like in the preceding examples).
+ Here return date needs to be greater than or equal to the date given in target value. This time we are not validating field requirement as before. Now attribute puts restriction on field, which needs to be satisfied for such field to be considered as valid (restriction verification is executed for non-empty field). 
+ 
+ The second thing shown here is the possibility of dynamic extraction of target values from backing fields, by providing their names inside square brackets `[]` (here today field value is extracted). Therefore not only hardcoded values are accepted as target values (nevertheless date can be hardcoded as RFC 2822 or ISO 8601 formatted string). 
+ 
+ Comparing to the previous examples, this one introduces in addition one more new concept, namely the usage of explicitly provided relational operators. Such operators indicate relationships between dependent fields values and corresponding target values. If relational operators are not explicitly provided, relationships are by default defined by equality operator `==` (just like in the preceding examples).
 
 * More complex (using logical expressions):
  
