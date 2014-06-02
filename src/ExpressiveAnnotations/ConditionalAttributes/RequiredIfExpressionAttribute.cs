@@ -37,6 +37,11 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         public string[] RelationalOperators { get; set; }
 
         /// <summary>
+        /// Gets or sets whether the string comparisons are case sensitive or not.
+        /// </summary>
+        public bool SensitiveComparisons { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="RequiredIfExpressionAttribute"/> class.
         /// </summary>
         public RequiredIfExpressionAttribute()
@@ -45,6 +50,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             DependentProperties = new string[0];
             TargetValues = new object[0];
             RelationalOperators = new string[0];
+            SensitiveComparisons = true;
         }
 
         /// <summary>
@@ -53,14 +59,16 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         /// <param name="expression">The logical expression based on which requirement condition is computed. Available expression tokens: &amp;&amp;, ||, !, {, }, numbers and whitespaces.</param>
         /// <param name="dependentProperties">The names of dependent fields from which runtime values are extracted.</param>
         /// <param name="targetValues">The expected values for corresponding dependent fields (wildcard character * stands for any value). There is also possibility of values runtime extraction from backing fields, by providing their names [inside square brackets].</param>
-        /// <param name="relationalOperators">The relational operators describing relations between dependent fields and corresponding target values. Available operators: ==, !=, >, >=, &lt;, &lt;=. If this property is not provided, equality operator == is used by default.</param>
-        public RequiredIfExpressionAttribute(string expression, string[] dependentProperties, object[] targetValues, string[] relationalOperators = null)
+        /// <param name="relationalOperators">The relational operators describing relations between dependent fields and corresponding target values. Available operators: ==, !=, &gt;, &gt;=, &lt;, &lt;=. If this property is not provided, equality operator == is used by default.</param>
+        /// <param name="sensitiveComparisons">Case sensitivity of string comparisons.</param>
+        public RequiredIfExpressionAttribute(string expression, string[] dependentProperties, object[] targetValues, string[] relationalOperators = null, bool sensitiveComparisons = true)
             : base(_defaultErrorMessage)
         {
             Expression = expression;
             DependentProperties = dependentProperties ?? new string[0];
             TargetValues = targetValues ?? new object[0];
             RelationalOperators = relationalOperators ?? new string[0];
+            SensitiveComparisons = sensitiveComparisons;
         }
 
         /// <summary>
@@ -95,7 +103,8 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                 Expression = Expression,
                 DependentProperties = DependentProperties,
                 TargetValues = TargetValues,
-                RelationalOperators = RelationalOperators
+                RelationalOperators = RelationalOperators,
+                SensitiveComparisons = SensitiveComparisons
             };
 
             if (internals.Validate(value, validationContext))

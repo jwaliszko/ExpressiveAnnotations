@@ -44,6 +44,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             rule.ValidationParameters.Add("targetvalues", JsonConvert.SerializeObject(_internals.TargetValues));
             rule.ValidationParameters.Add("types", JsonConvert.SerializeObject(_internals.Types));
             rule.ValidationParameters.Add("expression", _internals.Expression);
+            rule.ValidationParameters.Add("sensitivecomparisons", JsonConvert.SerializeObject(_internals.SensitiveComparisons));
             yield return rule;
         }
     }

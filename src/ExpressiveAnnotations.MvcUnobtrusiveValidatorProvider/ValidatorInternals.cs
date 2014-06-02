@@ -11,6 +11,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         public string RelationalOperator { get; private set; }
         public object TargetValue { get; private set; }
         public string Type { get; private set; }
+        public bool SensitiveComparisons { get; set; }
 
         public void Prepare(ModelMetadata metadata, IAttribute attribute)
         {
@@ -33,6 +34,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             Type = TypeHelper.GetCoarseType(dependentProperty.PropertyType);
             ErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(),
                 MiscHelper.ComposeRelationalExpression(DependentProperty, TargetValue, RelationalOperator));
+
+            SensitiveComparisons = attribute.SensitiveComparisons;
         }
     }
 }

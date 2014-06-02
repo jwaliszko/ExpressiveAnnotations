@@ -38,6 +38,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             rule.ValidationParameters.Add("relationaloperator", JsonConvert.SerializeObject(_internals.RelationalOperator));
             rule.ValidationParameters.Add("targetvalue", JsonConvert.SerializeObject(_internals.TargetValue));
             rule.ValidationParameters.Add("type", JsonConvert.SerializeObject(_internals.Type));
+            rule.ValidationParameters.Add("sensitivecomparisons", JsonConvert.SerializeObject(_internals.SensitiveComparisons));
             yield return rule;
         }
     }

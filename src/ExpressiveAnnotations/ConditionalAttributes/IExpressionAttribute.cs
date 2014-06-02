@@ -29,6 +29,11 @@
         string[] RelationalOperators { get; set; }
 
         /// <summary>
+        /// Gets or sets whether the string comparisons are case sensitive or not.
+        /// </summary>
+        bool SensitiveComparisons { get; set; }
+
+        /// <summary>
         /// Formats the error message.
         /// </summary>
         /// <param name="displayName">The user-visible name of the required field to include in the formatted message.</param>

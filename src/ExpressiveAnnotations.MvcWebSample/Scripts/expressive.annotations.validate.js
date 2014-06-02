@@ -64,7 +64,7 @@
                 targetValue = MiscHelper.extractValue(params.form, targetPropertyName, params.prefix, params.type);
 
             var comparer = new analyser.Comparer();
-            return comparer.compute(dependentValue, targetValue, params.relationaloperator);
+            return comparer.compute(dependentValue, targetValue, params.relationaloperator, params.sensitivecomparisons);
         }
     }
     var ExpressionAttributeInternals = {
@@ -80,7 +80,7 @@
                     targetValue = MiscHelper.extractValue(params.form, targetPropertyName, params.prefix, params.types[i]);
 
                 var comparer = new analyser.Comparer();
-                var result = comparer.compute(dependentValue, targetValue, params.relationaloperators[i]);
+                var result = comparer.compute(dependentValue, targetValue, params.relationaloperators[i], params.sensitivecomparisons);
                 tokens.push(result.toString());
             }
 
@@ -90,20 +90,21 @@
         }
     }
 
-    $.validator.unobtrusive.adapters.add('assertthat', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type'], function (options) {
+    $.validator.unobtrusive.adapters.add('assertthat', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type', 'sensitivecomparisons'], function (options) {
         options.rules['assertthat'] = {
             prefix: ModelPrefix.get(options.element.name),
             form: options.form,
             dependentproperty: $.parseJSON(options.params.dependentproperty),
             relationaloperator: $.parseJSON(options.params.relationaloperator),
             targetvalue: $.parseJSON(options.params.targetvalue),
-            type: $.parseJSON(options.params.type)
+            type: $.parseJSON(options.params.type),
+            sensitivecomparisons : $.parseJSON(options.params.sensitivecomparisons)
         };
         if (options.message)
             options.messages['assertthat'] = options.message;
     });
 
-    $.validator.unobtrusive.adapters.add('assertthatexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression'], function (options) {
+    $.validator.unobtrusive.adapters.add('assertthatexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression', 'sensitivecomparisons'], function (options) {
         options.rules['assertthatexpression'] = {
             prefix: ModelPrefix.get(options.element.name),
             form: options.form,
@@ -111,26 +112,28 @@
             relationaloperators: $.parseJSON(options.params.relationaloperators),
             targetvalues: $.parseJSON(options.params.targetvalues),
             types: $.parseJSON(options.params.types),
-            expression: options.params.expression
+            expression: options.params.expression,
+            sensitivecomparisons : $.parseJSON(options.params.sensitivecomparisons)
         };
         if (options.message)
             options.messages['assertthatexpression'] = options.message;
     });
 
-    $.validator.unobtrusive.adapters.add('requiredif', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type'], function (options) {
+    $.validator.unobtrusive.adapters.add('requiredif', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type', 'sensitivecomparisons'], function(options) {
         options.rules['requiredif'] = {
             prefix: ModelPrefix.get(options.element.name),
             form: options.form,
             dependentproperty: $.parseJSON(options.params.dependentproperty),
             relationaloperator: $.parseJSON(options.params.relationaloperator),
             targetvalue: $.parseJSON(options.params.targetvalue),
-            type: $.parseJSON(options.params.type)
+            type: $.parseJSON(options.params.type),
+            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons)
         };
         if (options.message)
             options.messages['requiredif'] = options.message;
     });
 
-    $.validator.unobtrusive.adapters.add('requiredifexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression'], function (options) {
+    $.validator.unobtrusive.adapters.add('requiredifexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression', 'sensitivecomparisons'], function (options) {
         options.rules['requiredifexpression'] = {
             prefix: ModelPrefix.get(options.element.name),
             form: options.form,
@@ -138,7 +141,8 @@
             relationaloperators: $.parseJSON(options.params.relationaloperators),
             targetvalues: $.parseJSON(options.params.targetvalues),
             types: $.parseJSON(options.params.types),
-            expression: options.params.expression
+            expression: options.params.expression,
+            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons)
         };
         if (options.message)
             options.messages['requiredifexpression'] = options.message;

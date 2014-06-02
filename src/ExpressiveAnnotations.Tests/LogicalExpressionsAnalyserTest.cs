@@ -237,33 +237,49 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
+        public void Verify_comparison_options()
+        {
+            Assert.IsTrue(Comparer.Compute("aAa", "aAa", "==", true));
+            Assert.IsTrue(!Comparer.Compute("aAa", "aaa", "==", true));
+
+            Assert.IsTrue(!Comparer.Compute("aAa", "aAa", "!=", true));
+            Assert.IsTrue(Comparer.Compute("aAa", "aaa", "!=", true));
+
+            Assert.IsTrue(Comparer.Compute("aAa", "aAa", "==", sensitiveComparisons: false));
+            Assert.IsTrue(Comparer.Compute("aAa", "aaa", "==", sensitiveComparisons: false));
+
+            Assert.IsTrue(!Comparer.Compute("aAa", "aAa", "!=", sensitiveComparisons: false));
+            Assert.IsTrue(!Comparer.Compute("aAa", "aaa", "!=", sensitiveComparisons: false));
+        }
+
+        [TestMethod]
         public void Verify_comparison_equals_non_empty()
         {
-            Assert.IsTrue(Comparer.Compute("aAa", "aAa", "=="));
-            Assert.IsTrue(Comparer.Compute(0, 0, "=="));
-            Assert.IsTrue(Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), "=="));
-            Assert.IsTrue(Comparer.Compute(new {}, new {}, "=="));
-            Assert.IsTrue(Comparer.Compute(new {error = true}, new {error = true}, "=="));
-            Assert.IsTrue(Comparer.Compute(new[] {"a", "b"}, new[] {"a", "b"}, "=="));
+            Assert.IsTrue(Comparer.Compute("aAa", "aAa", "==", true));
+            Assert.IsTrue(Comparer.Compute(0, 0, "==", true));
+            Assert.IsTrue(Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), "==", true));
+            Assert.IsTrue(Comparer.Compute(new {}, new {}, "==", true));
+            Assert.IsTrue(Comparer.Compute(new {error = true}, new {error = true}, "==", true));
+            Assert.IsTrue(Comparer.Compute(new[] {"a", "b"}, new[] {"a", "b"}, "==", true));
 
-            Assert.IsTrue(!Comparer.Compute("aAa", "aAa ", "=="));
-            Assert.IsTrue(!Comparer.Compute("aAa", " aAa ", "=="));
-            Assert.IsTrue(!Comparer.Compute("aAa", "aaa", "=="));
-            Assert.IsTrue(!Comparer.Compute(0, 1, "=="));
-            Assert.IsTrue(!Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), "=="));
-            Assert.IsTrue(!Comparer.Compute(new {error = true}, new {error = false}, "=="));
-            Assert.IsTrue(!Comparer.Compute(new[] {"a", "b"}, new[] {"a", "B"}, "=="));
+            Assert.IsTrue(!Comparer.Compute("aAa", "aAa ", "==", true));
+            Assert.IsTrue(!Comparer.Compute("aAa", " aAa ", "==", true));
+            Assert.IsTrue(!Comparer.Compute("aAa", "aaa", "==", true));
+            Assert.IsTrue(!Comparer.Compute(0, 1, "==", true));
+            Assert.IsTrue(!Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), "==", true));
+            Assert.IsTrue(!Comparer.Compute(new {error = true}, new {error = false}, "==", true));
+            Assert.IsTrue(!Comparer.Compute(new[] {"a", "b"}, new[] {"a", "B"}, "==", true));
         }
 
         [TestMethod]
         public void Verify_comparison_equals_empty()
         {
-            Assert.IsTrue(Comparer.Compute("", "", "=="));
-            Assert.IsTrue(Comparer.Compute(" ", " ", "=="));
-            Assert.IsTrue(Comparer.Compute("\t", "\n", "=="));
-            Assert.IsTrue(Comparer.Compute(null, null, "=="));
-            Assert.IsTrue(Comparer.Compute("", " ", "=="));
-            Assert.IsTrue(Comparer.Compute("\n\t ", null, "=="));
+            Assert.IsTrue(Comparer.Compute("", "", "==", true));
+            Assert.IsTrue(Comparer.Compute(" ", " ", "==", true));
+            Assert.IsTrue(Comparer.Compute("\t", "\n", "==", true));
+            Assert.IsTrue(Comparer.Compute(null, null, "==", true));
+            Assert.IsTrue(Comparer.Compute("", " ", "==", true));
+            Assert.IsTrue(Comparer.Compute("\n\t ", null, "==", true));
         }
 
         [TestMethod]
@@ -271,51 +287,52 @@ namespace ExpressiveAnnotations.Tests
         {
             // assumption - arguments provided have exact types
 
-            Assert.IsTrue(Comparer.Compute("a", "A", ">"));
-            Assert.IsTrue(Comparer.Compute("a", "A", ">="));
-            Assert.IsTrue(Comparer.Compute("abcd", "ABCD", ">"));
-            Assert.IsTrue(Comparer.Compute("abcd", "ABCD", ">"));
-            Assert.IsTrue(Comparer.Compute(1, 0, ">"));
-            Assert.IsTrue(Comparer.Compute(1, 0, ">="));
-            Assert.IsTrue(Comparer.Compute(0, -1, ">"));
-            Assert.IsTrue(Comparer.Compute(0, -1, ">="));
-            Assert.IsTrue(Comparer.Compute(1.1, 1.01, ">"));
-            Assert.IsTrue(Comparer.Compute(1.1, 1.01, ">="));
-            Assert.IsTrue(Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), ">"));
-            Assert.IsTrue(Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), ">="));
+            Assert.IsTrue(Comparer.Compute("a", "A", ">", true));
+            Assert.IsTrue(Comparer.Compute("a", "A", ">=", true));
+            Assert.IsTrue(Comparer.Compute("abcd", "ABCD", ">", true));
+            Assert.IsTrue(Comparer.Compute("abcd", "ABCD", ">", true));
+            Assert.IsTrue(Comparer.Compute(1, 0, ">", true));
+            Assert.IsTrue(Comparer.Compute(1, 0, ">=", true));
+            Assert.IsTrue(Comparer.Compute(0, -1, ">", true));
+            Assert.IsTrue(Comparer.Compute(0, -1, ">=", true));
+            Assert.IsTrue(Comparer.Compute(1.1, 1.01, ">", true));
+            Assert.IsTrue(Comparer.Compute(1.1, 1.01, ">=", true));
+            Assert.IsTrue(Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), ">", true));
+            Assert.IsTrue(Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), ">=", true));
 
-            Assert.IsTrue(!Comparer.Compute("a", null, ">"));
-            Assert.IsTrue(!Comparer.Compute("a", null, ">="));
-            Assert.IsTrue(!Comparer.Compute(null, "a", ">"));
-            Assert.IsTrue(!Comparer.Compute(null, "a", ">="));
+            Assert.IsTrue(!Comparer.Compute("a", null, ">", true));
+            Assert.IsTrue(!Comparer.Compute("a", null, ">=", true));
+            Assert.IsTrue(!Comparer.Compute(null, "a", ">", true));
+            Assert.IsTrue(!Comparer.Compute(null, "a", ">=", true));
 
-            Assert.IsTrue(!Comparer.Compute("a", "A", "<"));
-            Assert.IsTrue(!Comparer.Compute("a", "A", "<="));
-            Assert.IsTrue(!Comparer.Compute("abcd", "ABCD", "<"));
-            Assert.IsTrue(!Comparer.Compute("abcd", "ABCD", "<="));
-            Assert.IsTrue(!Comparer.Compute(1, 0, "<"));
-            Assert.IsTrue(!Comparer.Compute(1, 0, "<="));
-            Assert.IsTrue(!Comparer.Compute(0, -1, "<"));
-            Assert.IsTrue(!Comparer.Compute(0, -1, "<="));
-            Assert.IsTrue(!Comparer.Compute(1.1, 1.01, "<"));
-            Assert.IsTrue(!Comparer.Compute(1.1, 1.01, "<="));
-            Assert.IsTrue(!Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), "<"));
-            Assert.IsTrue(!Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), "<="));
-            
-            Assert.IsTrue(!Comparer.Compute("a", null, "<"));
-            Assert.IsTrue(!Comparer.Compute("a", null, "<="));
-            Assert.IsTrue(!Comparer.Compute(null, "a", "<"));
-            Assert.IsTrue(!Comparer.Compute(null, "a", "<="));
+            Assert.IsTrue(!Comparer.Compute("a", "A", "<", true));
+            Assert.IsTrue(!Comparer.Compute("a", "A", "<=", true));
+            Assert.IsTrue(!Comparer.Compute("abcd", "ABCD", "<", true));
+            Assert.IsTrue(!Comparer.Compute("abcd", "ABCD", "<=", true));
+            Assert.IsTrue(!Comparer.Compute(1, 0, "<", true));
+            Assert.IsTrue(!Comparer.Compute(1, 0, "<=", true));
+            Assert.IsTrue(!Comparer.Compute(0, -1, "<", true));
+            Assert.IsTrue(!Comparer.Compute(0, -1, "<=", true));
+            Assert.IsTrue(!Comparer.Compute(1.1, 1.01, "<", true));
+            Assert.IsTrue(!Comparer.Compute(1.1, 1.01, "<=", true));
+            Assert.IsTrue(!Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), "<", true));
+            Assert.IsTrue(!Comparer.Compute(DateTime.Parse("Wed, 09 Aug 1995 00:00:01 GMT"), DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT"), "<=", true));
+
+            Assert.IsTrue(!Comparer.Compute("a", null, "<", true));
+            Assert.IsTrue(!Comparer.Compute("a", null, "<=", true));
+            Assert.IsTrue(!Comparer.Compute(null, "a", "<", true));
+            Assert.IsTrue(!Comparer.Compute(null, "a", "<=", true));
 
             try
             {
-                Comparer.Compute(new {}, new {}, ">");
+                Comparer.Compute(new {}, new {}, ">", true);
                 Assert.Fail();
             }
             catch (Exception e)
             {
                 Assert.IsTrue(e is InvalidOperationException);
-                Assert.IsTrue(e.Message == "Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.");
+                Assert.IsTrue(e.Message ==
+                              "Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.");
             }
         }
 

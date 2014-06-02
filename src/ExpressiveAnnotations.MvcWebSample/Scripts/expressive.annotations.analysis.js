@@ -118,31 +118,33 @@ var LogicalExpressionsAnalyser = (function() {
     };
 
     function Comparer() {
-        this.compute = function (dependentValue, targetValue, relationalOperator) {
+        this.compute = function (dependentValue, targetValue, relationalOperator, sensitiveComparisons) {
             switch (relationalOperator) {
                 case '==':
-                    return equal(dependentValue, targetValue);
+                    return equal(dependentValue, targetValue, sensitiveComparisons);
                 case '!=':
-                    return !equal(dependentValue, targetValue);
+                    return !equal(dependentValue, targetValue, sensitiveComparisons);
                 case '>':
                     return greater(dependentValue, targetValue);
                 case '>=':
-                    return greater(dependentValue, targetValue) || equal(dependentValue, targetValue);
+                    return greater(dependentValue, targetValue) || equal(dependentValue, targetValue, sensitiveComparisons);
                 case '<':
                     return less(dependentValue, targetValue);
                 case '<=':
-                    return less(dependentValue, targetValue) || equal(dependentValue, targetValue);
+                    return less(dependentValue, targetValue) || equal(dependentValue, targetValue, sensitiveComparisons);
             }
 
             throw TypeHelper.String.format('Relational operator {0} is invalid. Available operators: ==, !=, >, >=, <, <=.', relationalOperator);
         };
 
-        var equal = function (dependentValue, targetValue) {
+        var equal = function (dependentValue, targetValue, sensitiveComparisons) {
             if (TypeHelper.isEmpty(dependentValue) && TypeHelper.isEmpty(targetValue))
                 return true;
             if (!TypeHelper.isEmpty(dependentValue) && targetValue === '*')
                 return true;
-            return JSON.stringify(dependentValue) === JSON.stringify(targetValue);
+            return sensitiveComparisons
+                ? JSON.stringify(dependentValue) === JSON.stringify(targetValue)
+                : JSON.stringify(dependentValue).toLowerCase() === JSON.stringify(targetValue).toLowerCase();
         };
         var greater = function (dependentValue, targetValue) {
             if (TypeHelper.isNumeric(dependentValue) && TypeHelper.isNumeric(targetValue))

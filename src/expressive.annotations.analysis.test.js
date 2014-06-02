@@ -172,82 +172,98 @@
         });
     });
 
-    test("Verify_comparison_equals_non_empty", function () {
+    test("Verify_comparison_options", function () {
         var comparer = new analyser.Comparer();
 
-        wnd.ok(comparer.compute("aAa", "aAa", "=="));
-        wnd.ok(comparer.compute(0, 0, "=="));
-        wnd.ok(comparer.compute(new Date("Wed, 09 Aug 1995 00:00:00 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), "=="));
-        wnd.ok(comparer.compute({}, {}, "=="));
-        wnd.ok(comparer.compute({ error: true }, { error: true }, "=="));
-        wnd.ok(comparer.compute(["a", "b"], ["a", "b"], "=="));
+        wnd.ok(comparer.compute("aAa", "aAa", "==", true));
+        wnd.ok(!comparer.compute("aAa", "aaa", "==", true));
 
-        wnd.ok(!comparer.compute("aAa", "aAa ", "=="));
-        wnd.ok(!comparer.compute("aAa", " aAa", "=="));
-        wnd.ok(!comparer.compute("aAa", "aaa", "=="));
-        wnd.ok(!comparer.compute(0, 1, "=="));
-        wnd.ok(!comparer.compute(new Date("Wed, 09 Aug 1995 00:00:00 GMT"), new Date("Wed, 09 Aug 1995 00:00:01 GMT"), "=="));
-        wnd.ok(!comparer.compute({ error: true }, { error: false }, "=="));
-        wnd.ok(!comparer.compute(["a", "b"], ["a", "B"], "=="));
+        wnd.ok(!comparer.compute("aAa", "aAa", "!=", true));
+        wnd.ok(comparer.compute("aAa", "aaa", "!=", true));
+
+        wnd.ok(comparer.compute("aAa", "aAa", "==", false));
+        wnd.ok(comparer.compute("aAa", "aaa", "==", false));
+
+        wnd.ok(!comparer.compute("aAa", "aAa", "!=", false));
+        wnd.ok(!comparer.compute("aAa", "aaa", "!=", false));
     });
 
-    test("Verify_comparison_equals_empty", function () {
+    test("Verify_comparison_equals_non_empty", function() {
         var comparer = new analyser.Comparer();
 
-        wnd.ok(comparer.compute("", "", "=="));
-        wnd.ok(comparer.compute(" ", " ", "=="));
-        wnd.ok(comparer.compute("\t", "\n", "=="));
-        wnd.ok(comparer.compute(null, null, "=="));
-        wnd.ok(comparer.compute("", " ", "=="));
-        wnd.ok(comparer.compute("\n\t ", null, "=="));
-        wnd.ok(comparer.compute(null, undefined, "=="));
+        wnd.ok(comparer.compute("aAa", "aAa", "==", true));
+        wnd.ok(comparer.compute(0, 0, "==", true));
+        wnd.ok(comparer.compute(new Date("Wed, 09 Aug 1995 00:00:00 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), "==", true));
+        wnd.ok(comparer.compute({}, {}, "==", true));
+        wnd.ok(comparer.compute({ error: true }, { error: true }, "==", true));
+        wnd.ok(comparer.compute(["a", "b"], ["a", "b"], "==", true));
+
+        wnd.ok(!comparer.compute("aAa", "aAa ", "==", true));
+        wnd.ok(!comparer.compute("aAa", " aAa", "==", true));
+        wnd.ok(!comparer.compute("aAa", "aaa", "==", true));
+        wnd.ok(!comparer.compute(0, 1, "==", true));
+        wnd.ok(!comparer.compute(new Date("Wed, 09 Aug 1995 00:00:00 GMT"), new Date("Wed, 09 Aug 1995 00:00:01 GMT"), "==", true));
+        wnd.ok(!comparer.compute({ error: true }, { error: false }, "==", true));
+        wnd.ok(!comparer.compute(["a", "b"], ["a", "B"], "==", true));
     });
 
-    test("Verify_comparison_greater_and_less", function () {
+    test("Verify_comparison_equals_empty", function() {
+        var comparer = new analyser.Comparer();
+
+        wnd.ok(comparer.compute("", "", "==", true));
+        wnd.ok(comparer.compute(" ", " ", "==", true));
+        wnd.ok(comparer.compute("\t", "\n", "==", true));
+        wnd.ok(comparer.compute(null, null, "==", true));
+        wnd.ok(comparer.compute("", " ", "==", true));
+        wnd.ok(comparer.compute("\n\t ", null, "==", true));
+        wnd.ok(comparer.compute(null, undefined, "==", true));
+    });
+
+    test("Verify_comparison_greater_and_less", function() {
         var comparer = new analyser.Comparer();
 
         // assumption - arguments provided have exact types
 
-        wnd.ok(comparer.compute("a", "A", ">"));
-        wnd.ok(comparer.compute("a", "A", ">="));
-        wnd.ok(comparer.compute("abcd", "ABCD", ">"));
-        wnd.ok(comparer.compute("abcd", "ABCD", ">="));
-        wnd.ok(comparer.compute(1, 0, ">"));
-        wnd.ok(comparer.compute(1, 0, ">="));
-        wnd.ok(comparer.compute(0, -1, ">"));
-        wnd.ok(comparer.compute(0, -1, ">="));
-        wnd.ok(comparer.compute(1.1, 1.01, ">"));
-        wnd.ok(comparer.compute(1.1, 1.01, ">="));
-        wnd.ok(comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), ">"));
-        wnd.ok(comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), ">="));
+        wnd.ok(comparer.compute("a", "A", ">", true));
+        wnd.ok(comparer.compute("a", "A", ">=", true));
+        wnd.ok(comparer.compute("abcd", "ABCD", ">", true));
+        wnd.ok(comparer.compute("abcd", "ABCD", ">=", true));
+        wnd.ok(comparer.compute(1, 0, ">", true));
+        wnd.ok(comparer.compute(1, 0, ">=", true));
+        wnd.ok(comparer.compute(0, -1, ">", true));
+        wnd.ok(comparer.compute(0, -1, ">=", true));
+        wnd.ok(comparer.compute(1.1, 1.01, ">", true));
+        wnd.ok(comparer.compute(1.1, 1.01, ">=", true));
+        wnd.ok(comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), ">", true));
+        wnd.ok(comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), ">=", true));
 
-        wnd.ok(!comparer.compute("a", null, ">"));
-        wnd.ok(!comparer.compute("a", null, ">="));
-        wnd.ok(!comparer.compute(null, "a", ">"));
-        wnd.ok(!comparer.compute(null, "a", ">="));
-        
-        wnd.ok(!comparer.compute("a", "A", "<"));
-        wnd.ok(!comparer.compute("a", "A", "<="));
-        wnd.ok(!comparer.compute("abcd", "ABCD", "<"));
-        wnd.ok(!comparer.compute("abcd", "ABCD", "<="));
-        wnd.ok(!comparer.compute(1, 0, "<"));
+        wnd.ok(!comparer.compute("a", null, ">", true));
+        wnd.ok(!comparer.compute("a", null, ">=", true));
+        wnd.ok(!comparer.compute(null, "a", ">", true));
+        wnd.ok(!comparer.compute(null, "a", ">=", true));
+
+        wnd.ok(!comparer.compute("a", "A", "<", true));
+        wnd.ok(!comparer.compute("a", "A", "<=", true));
+        wnd.ok(!comparer.compute("abcd", "ABCD", "<", true));
+        wnd.ok(!comparer.compute("abcd", "ABCD", "<=", true));
+        wnd.ok(!comparer.compute(1, 0, "<", true));
         wnd.ok(!comparer.compute(1, 0, "<="));
-        wnd.ok(!comparer.compute(0, -1, "<"));
-        wnd.ok(!comparer.compute(0, -1, "<="));
-        wnd.ok(!comparer.compute(1.1, 1.01, "<"));
-        wnd.ok(!comparer.compute(1.1, 1.01, "<="));
-        wnd.ok(!comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), "<"));
-        wnd.ok(!comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), "<="));
+        wnd.ok(!comparer.compute(0, -1, "<", true));
+        wnd.ok(!comparer.compute(0, -1, "<=", true));
+        wnd.ok(!comparer.compute(1.1, 1.01, "<", true));
+        wnd.ok(!comparer.compute(1.1, 1.01, "<=", true));
+        wnd.ok(!comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), "<", true));
+        wnd.ok(!comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), "<=", true));
 
-        wnd.ok(!comparer.compute("a", null, "<"));
-        wnd.ok(!comparer.compute("a", null, "<="));
-        wnd.ok(!comparer.compute(null, "a", "<"));
-        wnd.ok(!comparer.compute(null, "a", "<="));
-        
+        wnd.ok(!comparer.compute("a", null, "<", true));
+        wnd.ok(!comparer.compute("a", null, "<=", true));
+        wnd.ok(!comparer.compute(null, "a", "<", true));
+        wnd.ok(!comparer.compute(null, "a", "<=", true));
 
-        wnd.raises(function () {
-            comparer.compute({}, {}, ">");
-        }, function (err) {
+
+        wnd.raises(function() {
+            comparer.compute({}, {}, ">", true);
+        }, function(err) {
             return err === "Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.";
         });
     });

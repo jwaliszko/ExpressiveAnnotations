@@ -14,6 +14,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         public object[] TargetValues { get; private set; }
         public string[] Types { get; private set; }
         public string Expression { get; private set; }
+        public bool SensitiveComparisons { get; set; }
 
         public void Prepare(ModelMetadata metadata, IExpressionAttribute attribute)
         {
@@ -54,6 +55,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             Expression = attribute.Expression;
             ErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(),
                 MiscHelper.ComposeExpression(Expression, DependentProperties, TargetValues, RelationalOperators));
+
+            SensitiveComparisons = attribute.SensitiveComparisons;
         }
     }
 }

@@ -13,6 +13,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         public string[] DependentProperties { get; set; }
         public object[] TargetValues { get; set; }
         public string[] RelationalOperators { get; set; }
+        public bool SensitiveComparisons { get; set; }
 
         public bool Validate(object value, ValidationContext validationContext)
         {
@@ -44,7 +45,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                 else
                     Assert.ConsistentTypes(dependentProperty, targetValue, validationContext.DisplayName, relationalOperator);
 
-                var result = Comparer.Compute(dependentValue, targetValue, relationalOperator); // compare dependent value against target value
+                var result = Comparer.Compute(dependentValue, targetValue, relationalOperator, SensitiveComparisons); // compare dependent value against target value
                 tokens.Add(result.ToString().ToLowerInvariant());
             }
 

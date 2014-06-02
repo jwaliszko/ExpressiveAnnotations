@@ -15,24 +15,25 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis
         /// <param name="dependentValue">The dependent value.</param>
         /// <param name="targetValue">The target value.</param>
         /// <param name="relationalOperator">The relational operator.</param>
+        /// <param name="sensitiveComparisons">Case sensitivity of string comparisons.</param>
         /// <returns></returns>
         /// <exception cref="System.ArgumentException"></exception>
-        public static bool Compute(object dependentValue, object targetValue, string relationalOperator)
+        public static bool Compute(object dependentValue, object targetValue, string relationalOperator, bool sensitiveComparisons)
         {
             switch (relationalOperator)
             {
                 case "==":
-                    return Equal(dependentValue, targetValue);
+                    return Equal(dependentValue, targetValue, sensitiveComparisons);
                 case "!=":
-                    return !Equal(dependentValue, targetValue);
+                    return !Equal(dependentValue, targetValue, sensitiveComparisons);
                 case ">":
                     return Greater(dependentValue, targetValue);
                 case ">=":
-                    return Greater(dependentValue, targetValue) || Equal(dependentValue, targetValue);
+                    return Greater(dependentValue, targetValue) || Equal(dependentValue, targetValue, sensitiveComparisons);
                 case "<":
                     return Less(dependentValue, targetValue);
                 case "<=":
-                    return Less(dependentValue, targetValue) || Equal(dependentValue, targetValue);
+                    return Less(dependentValue, targetValue) || Equal(dependentValue, targetValue, sensitiveComparisons);
             }
 
             throw new ArgumentException(string.Format("Relational operator \"{0}\" is invalid. Available operators: ==, !=, >, >=, <, <=.", relationalOperator));
@@ -43,14 +44,19 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis
         /// </summary>
         /// <param name="dependentValue">The dependent value.</param>
         /// <param name="targetValue">The target value.</param>
+        /// <param name="sensitiveComparisons">Case sensitivity of string comparisons.</param>
         /// <returns></returns>
-        public static bool Equal(object dependentValue, object targetValue)
+        public static bool Equal(object dependentValue, object targetValue, bool sensitiveComparisons)
         {
             if (dependentValue.IsEmpty() && targetValue.IsEmpty())
                 return true;
             if(!dependentValue.IsEmpty() && string.Equals(targetValue as string, "*"))
                 return true;
-            return JsonConvert.SerializeObject(dependentValue) == JsonConvert.SerializeObject(targetValue);
+            return
+                string.Compare(
+                    JsonConvert.SerializeObject(dependentValue),
+                    JsonConvert.SerializeObject(targetValue),
+                    sensitiveComparisons ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase) == 0;
         }
 
         /// <summary>

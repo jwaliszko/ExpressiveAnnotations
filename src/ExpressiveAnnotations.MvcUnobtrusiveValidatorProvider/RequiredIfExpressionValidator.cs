@@ -10,7 +10,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
     /// </summary>
     public class RequiredIfExpressionValidator : DataAnnotationsModelValidator<RequiredIfExpressionAttribute>
     {
-        private readonly ExpressionValidatorInternals m_internals = new ExpressionValidatorInternals();
+        private readonly ExpressionValidatorInternals _internals = new ExpressionValidatorInternals();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequiredIfExpressionValidator"/> class.
@@ -26,7 +26,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         public RequiredIfExpressionValidator(ModelMetadata metadata, ControllerContext context, RequiredIfExpressionAttribute attribute)
             : base(metadata, context, attribute)
         {
-            m_internals.Prepare(metadata, attribute);
+            _internals.Prepare(metadata, attribute);
         }
 
         /// <summary>
@@ -36,14 +36,15 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         {
             var rule = new ModelClientValidationRule
             {
-                ErrorMessage = m_internals.ErrorMessage,
+                ErrorMessage = _internals.ErrorMessage,
                 ValidationType = "requiredifexpression",
             };
-            rule.ValidationParameters.Add("dependentproperties", JsonConvert.SerializeObject(m_internals.DependentProperties));
-            rule.ValidationParameters.Add("relationaloperators", JsonConvert.SerializeObject(m_internals.RelationalOperators));
-            rule.ValidationParameters.Add("targetvalues", JsonConvert.SerializeObject(m_internals.TargetValues));
-            rule.ValidationParameters.Add("types", JsonConvert.SerializeObject(m_internals.Types)); 
-            rule.ValidationParameters.Add("expression", m_internals.Expression);
+            rule.ValidationParameters.Add("dependentproperties", JsonConvert.SerializeObject(_internals.DependentProperties));
+            rule.ValidationParameters.Add("relationaloperators", JsonConvert.SerializeObject(_internals.RelationalOperators));
+            rule.ValidationParameters.Add("targetvalues", JsonConvert.SerializeObject(_internals.TargetValues));
+            rule.ValidationParameters.Add("types", JsonConvert.SerializeObject(_internals.Types)); 
+            rule.ValidationParameters.Add("expression", _internals.Expression);
+            rule.ValidationParameters.Add("sensitivecomparisons", JsonConvert.SerializeObject(_internals.SensitiveComparisons));
             yield return rule;
         }
     }
