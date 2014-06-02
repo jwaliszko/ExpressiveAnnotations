@@ -87,19 +87,19 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [AssertThat(
             DependentProperty = "ReturnDate",
             RelationalOperator = ">=",
-            TargetValue = "2014-07-02T00:00:00",
+            TargetValue = "[Today]", // hardcoded RFC 2822 or ISO 8601 formatted string is also allowed
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "FutureDateRequired")]
         [Display(ResourceType = typeof(Resources), Name = "ReturnDate")]
         public DateTime? ReturnDate { get; set; }
 
-        //[RequiredIfExpression( /* interpretation => GoAbroad == true 
-        //                        *                   && ReturnDate > value_from_latest_suggested_return_date (stored in RFC 2822 or ISO 8601 format)
-        //                        */
-        //    Expression = "{0} && {1}",
-        //    DependentProperties = new[] {"GoAbroad", "ReturnDate"},
-        //    RelationalOperators = new[] {"==",       ">"},
-        //    TargetValues = new object[] {true,       "[LatestSuggestedReturnDate]"},
-        //    ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ReasonForLongTravelRequired")]
+        [RequiredIfExpression( /* interpretation => GoAbroad == true 
+                                *                   && ReturnDate > value_from_latest_suggested_return_date (stored in RFC 2822 or ISO 8601 format)
+                                */
+            Expression = "{0} && {1}",
+            DependentProperties = new[] { "GoAbroad", "ReturnDate" },
+            RelationalOperators = new[] { "==", ">" },
+            TargetValues = new object[] { true, "[LatestSuggestedReturnDate]" },
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "ReasonForLongTravelRequired")]
         [Display(ResourceType = typeof (Resources), Name = "ReasonForLongTravel")]
         public string ReasonForLongTravel { get; set; }
 
