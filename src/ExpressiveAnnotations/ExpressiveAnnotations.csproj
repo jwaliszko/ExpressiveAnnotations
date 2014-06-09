@@ -47,12 +47,7 @@
     <Compile Include="ConditionalAttributes\IAttribute.cs" />
     <Compile Include="ConditionalAttributes\IExpressionAttribute.cs" />
     <Compile Include="LogicalExpressionsAnalysis\Evaluator.cs" />
-    <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\InfixLexer.cs" />
-    <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\Token.cs" />
-    <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\Lexer.cs" />
-    <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\RegexMatcher.cs" />
-    <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\PostfixLexer.cs" />
-    <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\TokenDefinition.cs" />
+    <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\Tokenizer.cs" />
     <Compile Include="LogicalExpressionsAnalysis\SyntacticAnalysis\InfixToPostfixConverter.cs" />
     <Compile Include="LogicalExpressionsAnalysis\SyntacticAnalysis\PostfixParser.cs" />
     <Compile Include="Misc\Assert.cs" />

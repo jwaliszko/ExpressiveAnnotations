@@ -11,7 +11,7 @@ var LogicalExpressionsAnalyser = (function() {
 
     var TypeHelper = {
         Array: {
-            contains: function (arr, item) {
+            contains: function(arr, item) {
                 var i = arr.length;
                 while (i--) {
                     if (arr[i] === item)
@@ -19,7 +19,7 @@ var LogicalExpressionsAnalyser = (function() {
                 }
                 return false;
             },
-            sanatize: function (arr, item) {
+            sanatize: function(arr, item) {
                 for (var i = arr.length; i--;) {
                     if (arr[i] === item)
                         arr.splice(i, 1);
@@ -27,7 +27,7 @@ var LogicalExpressionsAnalyser = (function() {
             }
         },
         String: {
-            format: function (text, params) {
+            format: function(text, params) {
                 var i;
                 if (params instanceof Array) {
                     for (i = 0; i < params.length; i++) {
@@ -45,7 +45,7 @@ var LogicalExpressionsAnalyser = (function() {
             }
         },
         Bool: {
-            tryParse: function (value) {
+            tryParse: function(value) {
                 if (TypeHelper.isBool(value))
                     return value;
                 if (TypeHelper.isString(value)) {
@@ -57,8 +57,8 @@ var LogicalExpressionsAnalyser = (function() {
             }
         },
         Float: {
-            tryParse: function (value) {
-                function isNumber (n) {
+            tryParse: function(value) {
+                function isNumber(n) {
                     return !isNaN(parseFloat(n)) && isFinite(n);
                 };
 
@@ -68,7 +68,7 @@ var LogicalExpressionsAnalyser = (function() {
             }
         },
         Date: {
-            tryParse: function (value) {
+            tryParse: function(value) {
                 if (TypeHelper.isDate(value))
                     return value;
                 if (TypeHelper.isString(value)) {
@@ -79,20 +79,20 @@ var LogicalExpressionsAnalyser = (function() {
                 return { error: true, msg: 'Parsing error. Given value is not a string representing an RFC 2822 or ISO 8601 date.' }
             }
         },
-        
-        isEmpty: function (value) {
+
+        isEmpty: function(value) {
             return value === null || value === '' || typeof value === 'undefined' || !/\S/.test(value);
         },
-        isNumeric: function (value) {
+        isNumeric: function(value) {
             return typeof value === 'number' && !isNaN(value);
         },
-        isDate: function (value) {
+        isDate: function(value) {
             return value instanceof Date;
         },
-        isString: function (value) {
+        isString: function(value) {
             return typeof value === 'string' || value instanceof String;
         },
-        isBool: function (value) {
+        isBool: function(value) {
             return typeof value === 'boolean' || value instanceof Boolean;
         },
         tryParse: function(value, type) {
@@ -118,7 +118,7 @@ var LogicalExpressionsAnalyser = (function() {
     };
 
     function Comparer() {
-        this.compute = function (dependentValue, targetValue, relationalOperator, sensitiveComparisons) {
+        this.compute = function(dependentValue, targetValue, relationalOperator, sensitiveComparisons) {
             switch (relationalOperator) {
                 case '==':
                     return equal(dependentValue, targetValue, sensitiveComparisons);
@@ -137,19 +137,19 @@ var LogicalExpressionsAnalyser = (function() {
             throw TypeHelper.String.format('Relational operator {0} is invalid. Available operators: ==, !=, >, >=, <, <=.', relationalOperator);
         };
 
-        var equal = function (dependentValue, targetValue, sensitiveComparisons) {
+        var equal = function(dependentValue, targetValue, sensitiveComparisons) {
             if (TypeHelper.isEmpty(dependentValue) && TypeHelper.isEmpty(targetValue))
                 return true;
             if (!TypeHelper.isEmpty(dependentValue) && targetValue === '*')
                 return true;
             var date = TypeHelper.Date.tryParse(targetValue); // parsing here? - it is an exception when incompatible types are allowed, because date targets can be provided as strings
             if (TypeHelper.isDate(dependentValue) && !date.error)
-                return dependentValue == date;
+                return dependentValue.getTime() == date.getTime();
             return sensitiveComparisons
                 ? JSON.stringify(dependentValue) === JSON.stringify(targetValue)
                 : JSON.stringify(dependentValue).toLowerCase() === JSON.stringify(targetValue).toLowerCase();
         };
-        var greater = function (dependentValue, targetValue) {
+        var greater = function(dependentValue, targetValue) {
             if (TypeHelper.isNumeric(dependentValue) && TypeHelper.isNumeric(targetValue))
                 return dependentValue > targetValue;
             if (TypeHelper.isDate(dependentValue) && TypeHelper.isDate(targetValue))
@@ -164,7 +164,7 @@ var LogicalExpressionsAnalyser = (function() {
 
             throw 'Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.';
         };
-        var less = function (dependentValue, targetValue) {
+        var less = function(dependentValue, targetValue) {
             if (TypeHelper.isNumeric(dependentValue) && TypeHelper.isNumeric(targetValue))
                 return dependentValue < targetValue;
             if (TypeHelper.isDate(dependentValue) && TypeHelper.isDate(targetValue))
@@ -179,131 +179,67 @@ var LogicalExpressionsAnalyser = (function() {
 
             throw 'Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.';
         }
-    };
+    }
 
-    var Token = {
-        TRUE: 'true',
-        FALSE: 'false',
-        AND: '&&',
-        OR: '||',
-        NOT: '!',
-        LEFT: '(',
-        RIGHT: ')',
-        SPACE: ' '
-    };
-
-    function RegexMatcher(regex) {
-        var _regex = new RegExp(TypeHelper.String.format('^{0}', regex));
-
-        this.match = function(text) {
-            var success = _regex.test(text);
-            if (success) {
-                var str = _regex.exec(text).toString();
-                return str.length;
-            }
-            return 0;
-        };
-    };
-
-    function TokenDefinition(regex, token) {
-        this.matcher = new RegexMatcher(regex);
-        this.token = token;
-    };
-
-    function Lexer(tokenDefinitions) {
-        var _tokenDefinitions = tokenDefinitions;
-        var _token;
+    function Tokenizer(patterns) {
+        var _patterns = patterns;
         var _expression;
+        var _token;
 
-        this.analyze = function(expression, removeEmptyTokens) {
-            _expression = expression;
+        this.analyze = function(expression) {
             var tokens = new Array();
-            while (next()) {
+            if (expression === null || expression === '')
+                return tokens;
+
+            _expression = expression;
+            while (next())
                 tokens.push(_token);
-            }
-            if (removeEmptyTokens)
-                TypeHelper.Array.sanatize(tokens, Token.SPACE);
             return tokens;
         };
 
         var next = function() {
-            if (_expression === '' || _expression === null)
+            _expression = _expression.trim();
+            if (_expression === null || _expression === '')
                 return false;
 
-            var length = _tokenDefinitions.length;
-            for (var i = 0; i < length; i++) {
-                var def = _tokenDefinitions[i];
-                var matched = def.matcher.match(_expression);
-                if (matched > 0) {
-                    _token = def.token;
-                    _expression = _expression.substr(matched);
+            for (var i = 0; i < _patterns.length; i++) {
+                var regex = new RegExp(TypeHelper.String.format('^{0}', _patterns[i]));
+                var value = regex.exec(_expression);
+                if (value != null) {
+                    _token = value.toString();
+                    _expression = _expression.substr(_token.length);
                     return true;
                 }
             }
 
-            throw TypeHelper.String.format('Lexer error. Unexpected token started at "{0}".', _expression);
-        };
-    }
-
-    function InfixLexer() {
-        var _lexer = new Lexer([
-            new TokenDefinition('true', Token.TRUE),
-            new TokenDefinition('false', Token.FALSE),
-            new TokenDefinition('&&', Token.AND),
-            new TokenDefinition('\\|\\|', Token.OR),
-            new TokenDefinition('\\!', Token.NOT),
-            new TokenDefinition('\\(', Token.LEFT),
-            new TokenDefinition('\\)', Token.RIGHT),
-            new TokenDefinition('\\s', Token.SPACE)
-        ]);
-
-        this.analyze = function(expression, removeEmptyTokens) {
-            return _lexer.analyze(expression, removeEmptyTokens);
-        };
-    }
-
-    function PostfixLexer() {
-        var _lexer = new Lexer([
-            new TokenDefinition('true', Token.TRUE),
-            new TokenDefinition('false', Token.FALSE),
-            new TokenDefinition('&&', Token.AND),
-            new TokenDefinition('\\|\\|', Token.OR),
-            new TokenDefinition('\\!', Token.NOT),
-            new TokenDefinition('\\s', Token.SPACE)
-        ]);
-
-        this.analyze = function(expression, removeEmptyTokens) {
-            return _lexer.analyze(expression, removeEmptyTokens);
+            throw TypeHelper.String.format('Lexer error. Unexpected token started at {0}.', _expression);
         };
     }
 
     function InfixToPostfixConverter() {
-        var _infixLexer = new InfixLexer();
+        var _infixTokenizer = new Tokenizer(['true', 'false', '&&', '\\|\\|', '\\!', '\\(', '\\)']);
 
         var isInfixOperator = function(token) {
-            var op = [Token.AND, Token.OR, Token.NOT, Token.LEFT, Token.RIGHT];
-            return TypeHelper.Array.contains(op, token);
+            return TypeHelper.Array.contains(['&&', '||', '!', '(', ')'], token);
         };
         var isPostfixOperator = function(token) {
-            var op = [Token.AND, Token.OR, Token.NOT];
-            return TypeHelper.Array.contains(op, token);
+            return TypeHelper.Array.contains(['&&', '||', '!'], token);
         };
         var isUnaryOperator = function(token) {
-            var op = [Token.NOT];
-            return TypeHelper.Array.contains(op, token);
+            return '!' === token;
         };
         var isLeftBracket = function(token) {
-            return Token.LEFT === token;
+            return '(' === token;
         };
         var isRightBracket = function(token) {
-            return Token.RIGHT === token;
+            return ')' === token;
         };
         var containsLeftBracket = function(st) {
-            return TypeHelper.Array.contains(st, Token.LEFT);
+            return TypeHelper.Array.contains(st, '(');
         };
 
         this.convert = function(expression) {
-            var tokens = _infixLexer.analyze(expression, true);
+            var tokens = _infixTokenizer.analyze(expression);
             var operators = new Array();
             var output = new Array();
 
@@ -364,17 +300,17 @@ var LogicalExpressionsAnalyser = (function() {
     }
 
     function PostfixParser() {
-        var _postfixLexer = new PostfixLexer();
+        var _postfixTokenizer = new Tokenizer(['true', 'false', '&&', '\\|\\|', '\\!']);
 
         this.evaluate = function(expression) {
-            var st = _postfixLexer.analyze(expression, true);
+            var st = _postfixTokenizer.analyze(expression, true);
             var result = evaluate(st);
             if (st.length != 0)
                 throw 'RPN expression parsing error. Incorrect nesting.';
             return result;
         };
 
-        var evaluate = function (st) {
+        var evaluate = function(st) {
             if (st.length === 0)
                 throw 'Stack empty.';
             var top = st.pop();
@@ -383,21 +319,21 @@ var LogicalExpressionsAnalyser = (function() {
                 return top === 'true';
 
             var y = evaluate(st);
-            if (top === Token.NOT)
+            if (top === '!')
                 return !y;
 
             var x = evaluate(st);
 
             switch (top) {
-                case Token.AND:
+                case '&&':
                     x &= y;
                     break;
-                case Token.OR:
+                case '||':
                     x |= y;
                     break;
                 default:
-                    throw TypeHelper.String.format('RPN expression parsing error. Token "{0}" not expected.', top);
-                }
+                    throw TypeHelper.String.format('RPN expression parsing error. Token {0} not expected.', top);
+            }
             return x;
         };
     }
@@ -410,20 +346,18 @@ var LogicalExpressionsAnalyser = (function() {
             try {
                 return _parser.evaluate(_converter.convert(expression));
             } catch (e) {
-                console.error(e);
                 throw 'Logical expression computation failed. Expression is broken.';
             }
         };
     }
 
     return {
-        InfixLexer: InfixLexer,
-        PostfixLexer: PostfixLexer,
+        Tokenizer: Tokenizer,
         InfixToPostfixConverter: InfixToPostfixConverter,
         PostfixParser: PostfixParser,
         Evaluator: Evaluator,
-        TypeHelper: TypeHelper,
-        Comparer: Comparer
+        Comparer: Comparer,
+        TypeHelper: TypeHelper        
     };
 
 })();

@@ -12,30 +12,12 @@ namespace ExpressiveAnnotations.Tests
     public class LogicalExpressionsAnalyserTest
     {
         [TestMethod]
-        public void Verify_infix_lexer_logic()
+        public void Verify_tokenizer_logic()
         {
             const string expression = "( true && (true) ) || false";
-            var lexer = new InfixLexer();
+            var tokenizer = new Tokenizer(new[] { @"true", @"false", @"&&", @"\|\|", @"\!", @"\(", @"\)" });
 
-            var tokens = lexer.Analyze(expression, false);
-            Assert.AreEqual(tokens.Length, 15);
-            Assert.AreEqual(tokens[0], "(");
-            Assert.AreEqual(tokens[1], " ");
-            Assert.AreEqual(tokens[2], "true");
-            Assert.AreEqual(tokens[3], " ");
-            Assert.AreEqual(tokens[4], "&&");
-            Assert.AreEqual(tokens[5], " ");
-            Assert.AreEqual(tokens[6], "(");
-            Assert.AreEqual(tokens[7], "true");
-            Assert.AreEqual(tokens[8], ")");
-            Assert.AreEqual(tokens[9], " ");
-            Assert.AreEqual(tokens[10], ")");
-            Assert.AreEqual(tokens[11], " ");
-            Assert.AreEqual(tokens[12], "||");
-            Assert.AreEqual(tokens[13], " ");
-            Assert.AreEqual(tokens[14], "false");
-
-            tokens = lexer.Analyze(expression, true);
+            var tokens = tokenizer.Analyze(expression);
             Assert.AreEqual(tokens.Length, 9);
             Assert.AreEqual(tokens[0], "(");
             Assert.AreEqual(tokens[1], "true");
@@ -45,77 +27,28 @@ namespace ExpressiveAnnotations.Tests
             Assert.AreEqual(tokens[5], ")");
             Assert.AreEqual(tokens[6], ")");
             Assert.AreEqual(tokens[7], "||");
-            Assert.AreEqual(tokens[8], "false");            
+            Assert.AreEqual(tokens[8], "false");
 
             try
             {
-                lexer.Analyze("true + false", false);
+                tokenizer.Analyze("true + false");
                 Assert.Fail();
             }
             catch (Exception e)
             {
                 Assert.IsTrue(e is ArgumentException);
-                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at \"+ false\".");
+                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at + false.");
             }
 
             try
             {
-                lexer.Analyze("true && 7", false);
+                tokenizer.Analyze("true && 7");
                 Assert.Fail();
             }
             catch (Exception e)
             {
                 Assert.IsTrue(e is ArgumentException);
-                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at \"7\".");
-            }
-        }
-
-        [TestMethod]
-        public void Verify_postfix_lexer_logic()
-        {
-            const string expression = "true true && false ||";
-            var lexer = new PostfixLexer();
-
-            var tokens = lexer.Analyze(expression, false);
-            Assert.AreEqual(tokens.Length, 9);
-            Assert.AreEqual(tokens[0], "true");
-            Assert.AreEqual(tokens[1], " ");
-            Assert.AreEqual(tokens[2], "true");
-            Assert.AreEqual(tokens[3], " ");
-            Assert.AreEqual(tokens[4], "&&");
-            Assert.AreEqual(tokens[5], " ");
-            Assert.AreEqual(tokens[6], "false");
-            Assert.AreEqual(tokens[7], " ");
-            Assert.AreEqual(tokens[8], "||");
-
-            tokens = lexer.Analyze(expression, true);
-            Assert.AreEqual(tokens.Length, 5);
-            Assert.AreEqual(tokens[0], "true");
-            Assert.AreEqual(tokens[1], "true");
-            Assert.AreEqual(tokens[2], "&&");
-            Assert.AreEqual(tokens[3], "false");
-            Assert.AreEqual(tokens[4], "||");
-
-            try
-            {
-                lexer.Analyze("true && (false)", false);
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(e is ArgumentException);
-                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at \"(false)\".");
-            }
-
-            try
-            {
-                lexer.Analyze("true + 7", false);
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(e is ArgumentException);
-                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at \"+ 7\".");
+                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at 7.");
             }
         }
 
@@ -203,7 +136,40 @@ namespace ExpressiveAnnotations.Tests
             catch (Exception e)
             {
                 Assert.IsTrue(e is ArgumentException);
-                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at \"(true)\".");
+                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at (true).");
+            }
+
+            try
+            {
+                parser.Evaluate(" ");
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.IsTrue(e.Message == "Stack empty.");
+            }
+
+            try
+            {
+                parser.Evaluate("");
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.IsTrue(e.Message == "Stack empty.");
+            }
+
+            try
+            {
+                parser.Evaluate(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.IsTrue(e.Message == "Stack empty.");
             }
         }
 
@@ -216,6 +182,17 @@ namespace ExpressiveAnnotations.Tests
 
             try
             {
+                evaluator.Compute(" ");
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.IsTrue(e.Message == "Logical expression computation failed. Expression is broken.");
+            }
+
+            try
+            {
                 evaluator.Compute("");
                 Assert.Fail();
             }
@@ -224,6 +201,7 @@ namespace ExpressiveAnnotations.Tests
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.IsTrue(e.Message == "Logical expression computation failed. Expression is broken.");
             }
+
             try
             {
                 evaluator.Compute(null);
@@ -340,7 +318,7 @@ namespace ExpressiveAnnotations.Tests
         public void Verify_composed_error_message()
         {
             const string expression = "{0} && ( (!{1} && {2}) || ({3} && {4}) ) && {5} && {6} && {7} || {1}";
-var dependentProperties = new[] {"aaa", "bbb",  "ccc",  "ddd",  "ddd",  "eee",  "fff",  "ggg"};
+            var dependentProperties = new[] {"aaa", "bbb",  "ccc",  "ddd",  "ddd",  "eee",  "fff",  "ggg"};
             var relationalOperators = new[] {"==",  "==",   "==",   ">",    "<=",   "!=",   "!=",   "=="};
             var targetValues = new object[] {true,  "xXx",  "[yYy]",-1,     1.2,    null,   "*",    ""};
 

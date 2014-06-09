@@ -3,31 +3,13 @@
 (function(wnd, analyser) { //scoping function (top-level, usually anonymous, function that prevents global namespace pollution)
 
     wnd.module("logical expressions analysis");
-    //debugger; //enable firebug for all web pages
+    debugger; //enable firebug for all web pages
 
-    test("Verify_infix_lexer_logic", function() {
+    test("Verify_tokenizer_logic", function() {
         var expression = "( true && (true) ) || false";
-        var lexer = new analyser.InfixLexer();
+        var tokenizer = new analyser.Tokenizer(['true', 'false', '&&', '\\|\\|', '\\!', '\\(', '\\)']);
 
-        var tokens = lexer.analyze(expression, false);
-        wnd.equal(tokens.length, 15);
-        wnd.equal(tokens[0], "(");
-        wnd.equal(tokens[1], " ");
-        wnd.equal(tokens[2], "true");
-        wnd.equal(tokens[3], " ");
-        wnd.equal(tokens[4], "&&");
-        wnd.equal(tokens[5], " ");
-        wnd.equal(tokens[6], "(");
-        wnd.equal(tokens[7], "true");
-        wnd.equal(tokens[8], ")");
-        wnd.equal(tokens[9], " ");
-        wnd.equal(tokens[10], ")");
-        wnd.equal(tokens[11], " ");
-        wnd.equal(tokens[12], "||");
-        wnd.equal(tokens[13], " ");
-        wnd.equal(tokens[14], "false");
-
-        tokens = lexer.analyze(expression, true);
+        var tokens = tokenizer.analyze(expression);
         wnd.equal(tokens.length, 9);
         wnd.equal(tokens[0], "(");
         wnd.equal(tokens[1], "true");
@@ -40,50 +22,14 @@
         wnd.equal(tokens[8], "false");
 
         wnd.raises(function() {
-            lexer.analyze("true + false", false);
+            tokenizer.analyze("true + false");
         }, function(err) {
-            return err === "Lexer error. Unexpected token started at \"+ false\".";
+            return err === "Lexer error. Unexpected token started at + false.";
         });
         wnd.raises(function() {
-            lexer.analyze("true && 7", false);
+            tokenizer.analyze("true && 7");
         }, function(err) {
-            return err === "Lexer error. Unexpected token started at \"7\".";
-        });
-    });
-
-    test("Verify_postfix_lexer_logic", function() {
-        var expression = "true true && false ||";
-        var lexer = new analyser.PostfixLexer();
-
-        var tokens = lexer.analyze(expression, false);
-        wnd.equal(tokens.length, 9);
-        wnd.equal(tokens[0], "true");
-        wnd.equal(tokens[1], " ");
-        wnd.equal(tokens[2], "true");
-        wnd.equal(tokens[3], " ");
-        wnd.equal(tokens[4], "&&");
-        wnd.equal(tokens[5], " ");
-        wnd.equal(tokens[6], "false");
-        wnd.equal(tokens[7], " ");
-        wnd.equal(tokens[8], "||");
-
-        tokens = lexer.analyze(expression, true);
-        wnd.equal(tokens.length, 5);
-        wnd.equal(tokens[0], "true");
-        wnd.equal(tokens[1], "true");
-        wnd.equal(tokens[2], "&&");
-        wnd.equal(tokens[3], "false");
-        wnd.equal(tokens[4], "||");
-
-        wnd.raises(function() {
-            lexer.analyze("true && (false)", false);
-        }, function(err) {
-            return err === "Lexer error. Unexpected token started at \"(false)\".";
-        });
-        wnd.raises(function() {
-            lexer.analyze("true + 7", false);
-        }, function(err) {
-            return err === "Lexer error. Unexpected token started at \"+ 7\".";
+            return err === "Lexer error. Unexpected token started at 7.";
         });
     });
 
@@ -140,7 +86,12 @@
         wnd.raises(function() {
             parser.evaluate("(true)");
         }, function(err) {
-            return err === "Lexer error. Unexpected token started at \"(true)\".";
+            return err === "Lexer error. Unexpected token started at (true).";
+        });
+        wnd.raises(function () {
+            parser.evaluate(" ");
+        }, function (err) {
+            return err === "Stack empty.";
         });
         wnd.raises(function () {
             parser.evaluate("");
@@ -160,6 +111,11 @@
         wnd.ok(evaluator.compute("(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false"));
         wnd.ok(evaluator.compute("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))"));
 
+        wnd.raises(function () {
+            evaluator.compute(" ");
+        }, function (err) {
+            return err === "Logical expression computation failed. Expression is broken.";
+        });
         wnd.raises(function () {
             evaluator.compute("");
         }, function (err) {

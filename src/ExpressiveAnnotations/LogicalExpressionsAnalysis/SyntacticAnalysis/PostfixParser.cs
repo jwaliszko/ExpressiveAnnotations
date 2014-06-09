@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ExpressiveAnnotations.LogicalExpressionsAnalysis.LexicalAnalysis;
 
 namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis
 {
     internal class PostfixParser
     {
-        private readonly PostfixLexer _postfixLexer;
+        private Tokenizer PostfixTokenizer { get; set; }
 
         public PostfixParser()
         {
-            _postfixLexer = new PostfixLexer();
+            PostfixTokenizer = new Tokenizer(new[] {@"true", @"false", @"&&", @"\|\|", @"\!"});
         }
 
         public bool Evaluate(string expression)
         {
-            var st = new Stack<string>(_postfixLexer.Analyze(expression, true));
+            var st = new Stack<string>(PostfixTokenizer.Analyze(expression));
             var result = Evaluate(st);
-            if (st.Count != 0)
+            if (st.Any())
                 throw new ArgumentException("RPN expression parsing error. Incorrect nesting.");
             return result;
         }
@@ -26,27 +27,26 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis
         {
             var top = st.Pop();
 
-            bool x;
-            if (bool.TryParse(top, out x)) 
-                return x;
+            if (new[] {"true", "false"}.Contains(top))
+                return bool.Parse(top);
 
             var y = Evaluate(st);
-            if (top == Token.NOT)
+            if (top == "!")
                 return !y;
 
-            x = Evaluate(st);
+            var x = Evaluate(st);
 
             switch (top)
             {
-                case Token.AND:
+                case "&&":
                     x &= y;
                     break;
-                case Token.OR:
+                case "||":
                     x |= y;
                     break;
                 default:
                     throw new ArgumentException(
-                        string.Format("RPN expression parsing error. Token \"{0}\" not expected.", top));
+                        string.Format("RPN expression parsing error. Token {0} not expected.", top));
             }
             return x;
         }

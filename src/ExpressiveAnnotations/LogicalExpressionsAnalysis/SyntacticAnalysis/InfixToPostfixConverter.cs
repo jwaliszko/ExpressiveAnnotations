@@ -7,49 +7,46 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis
 {
     internal class InfixToPostfixConverter
     {
-        private readonly InfixLexer _infixLexer;
+        private Tokenizer InfixTokenizer { get; set; }
 
         public InfixToPostfixConverter()
         {
-            _infixLexer = new InfixLexer();
+            InfixTokenizer = new Tokenizer(new[] {@"true", @"false", @"&&", @"\|\|", @"\!", @"\(", @"\)"});
         }
 
         private bool IsInfixOperator(string token)
         {
-            var op = new[] {Token.AND, Token.OR, Token.NOT, Token.LEFT, Token.RIGHT};
-            return op.Contains(token);
+            return new[] {"&&", "||", "!", "(", ")"}.Contains(token);
         }
 
         private bool IsPostfixOperator(string token)
         {
-            var op = new[] {Token.AND, Token.OR, Token.NOT};
-            return op.Contains(token);
+            return new[] {"&&", "||", "!"}.Contains(token);
         }
 
         private bool IsUnaryOperator(string token)
         {
-            var op = new[] {Token.NOT};
-            return op.Contains(token);
+            return "!".Equals(token);
         }
 
         private bool IsLeftBracket(string token)
         {
-            return Token.LEFT.Equals(token);
+            return "(".Equals(token);
         }
 
         private bool IsRightBracket(string token)
         {
-            return Token.RIGHT.Equals(token);
+            return ")".Equals(token);
         }
 
         private bool ContainsLeftBracket(Stack<string> st)
         {
-            return st.Contains(Token.LEFT);
+            return st.Contains("(");
         }
 
         public string Convert(string expression)
         {
-            var tokens = _infixLexer.Analyze(expression, true);
+            var tokens = InfixTokenizer.Analyze(expression);
             var operators = new Stack<string>();
             var output = new Stack<string>();
 
