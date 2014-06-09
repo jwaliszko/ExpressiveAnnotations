@@ -1,44 +1,50 @@
-﻿using System.Web.Mvc;
-using ExpressiveAnnotations.ConditionalAttributes;
+﻿using System.Linq;
+using System.Text.RegularExpressions;
+using System.Web.Mvc;
 using System.Collections.Generic;
+using ExpressiveAnnotations.ConditionalAttributes;
 using Newtonsoft.Json;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 {
-    /// <summary>
-    /// Model validator for <see cref="RequiredIfAttribute"/>.
-    /// </summary>
     public class RequiredIfValidator : DataAnnotationsModelValidator<RequiredIfAttribute>
     {
-        private readonly ValidatorInternals _internals = new ValidatorInternals();
+        private readonly string _expression;
+        private readonly string _errorMessage;
+        private readonly IDictionary<string, string> _types;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RequiredIfValidator"/> class.
-        /// </summary>
-        /// <param name="metadata">The metadata.</param>
-        /// <param name="context">The context.</param>
-        /// <param name="attribute">The attribute.</param>
         public RequiredIfValidator(ModelMetadata metadata, ControllerContext context, RequiredIfAttribute attribute)
             : base(metadata, context, attribute)
         {
-            _internals.Prepare(metadata, attribute);
+            _expression = attribute.Expression;
+            _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);
+
+            var regex = new Regex("[a-zA-Z0-9.]+");
+            var matches = regex.Matches(attribute.Expression);
+            _types = new Dictionary<string, string>();
+            foreach (Match match in matches)
+            {
+                if (!_types.Keys.Contains(match.Value))
+                {
+                    if (!new[] { "true", "false", "null" }.Contains(match.Value))
+                    {
+                        var pi = Helper.ExtractProperty(metadata.ContainerType, match.Value);
+                        if (pi != null)
+                            _types.Add(match.Value, Helper.GetCoarseType(pi.PropertyType));
+                    }
+                }
+            }
         }
 
-        /// <summary>
-        /// Retrieves a collection of client validation rules (rules sent to browsers).
-        /// </summary>
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()
         {
             var rule = new ModelClientValidationRule
             {
-                ErrorMessage = _internals.ErrorMessage,
+                ErrorMessage = _errorMessage,
                 ValidationType = "requiredif",
             };
-            rule.ValidationParameters.Add("dependentproperty", JsonConvert.SerializeObject(_internals.DependentProperty));
-            rule.ValidationParameters.Add("relationaloperator", JsonConvert.SerializeObject(_internals.RelationalOperator));
-            rule.ValidationParameters.Add("targetvalue", JsonConvert.SerializeObject(_internals.TargetValue));
-            rule.ValidationParameters.Add("type", JsonConvert.SerializeObject(_internals.Type));
-            rule.ValidationParameters.Add("sensitivecomparisons", JsonConvert.SerializeObject(_internals.SensitiveComparisons));
+            rule.ValidationParameters.Add("expression", JsonConvert.SerializeObject(_expression));
+            rule.ValidationParameters.Add("types", JsonConvert.SerializeObject(_types));
             yield return rule;
         }
     }
