@@ -223,11 +223,11 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(!Comparer.Compute("aAa", "aAa", "!=", true));
             Assert.IsTrue(Comparer.Compute("aAa", "aaa", "!=", true));
 
-            Assert.IsTrue(Comparer.Compute("aAa", "aAa", "==", sensitiveComparisons: false));
-            Assert.IsTrue(Comparer.Compute("aAa", "aaa", "==", sensitiveComparisons: false));
+            Assert.IsTrue(Comparer.Compute("aAa", "aAa", "==", false));
+            Assert.IsTrue(Comparer.Compute("aAa", "aaa", "==", false));
 
-            Assert.IsTrue(!Comparer.Compute("aAa", "aAa", "!=", sensitiveComparisons: false));
-            Assert.IsTrue(!Comparer.Compute("aAa", "aaa", "!=", sensitiveComparisons: false));
+            Assert.IsTrue(!Comparer.Compute("aAa", "aAa", "!=", false));
+            Assert.IsTrue(!Comparer.Compute("aAa", "aaa", "!=", false));
         }
 
         [TestMethod]

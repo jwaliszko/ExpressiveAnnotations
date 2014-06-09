@@ -96,7 +96,7 @@ namespace ExpressiveAnnotations.Misc
                     return type.IsNumeric() || type.IsDateTime() || type.IsString();
             }
 
-            throw new ArgumentException(string.Format("Relational operator \"{0}\" is invalid. Available operators: ==, !=, >, >=, <, <=.", relationalOperator));
+            throw new ArgumentException(string.Format("Relational operator {0} is invalid. Available operators: ==, !=, >, >=, <, <=.", relationalOperator));
         }
     }
 }

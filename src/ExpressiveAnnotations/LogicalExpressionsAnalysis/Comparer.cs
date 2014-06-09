@@ -36,7 +36,7 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis
                     return Less(dependentValue, targetValue) || Equal(dependentValue, targetValue, sensitiveComparisons);
             }
 
-            throw new ArgumentException(string.Format("Relational operator \"{0}\" is invalid. Available operators: ==, !=, >, >=, <, <=.", relationalOperator));
+            throw new ArgumentException(string.Format("Relational operator {0} is invalid. Available operators: ==, !=, >, >=, <, <=.", relationalOperator));
         }
 
         /// <summary>

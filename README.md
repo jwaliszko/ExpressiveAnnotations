@@ -1,6 +1,8 @@
 ﻿#ExpressiveAnnotations - annotation-based conditional validation
 
-[**ExpressiveAnnotations**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations) is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given implementations of RequiredIf, RequiredIfExpression, AssertThat and AssertThatExpression attributes allows to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more compacted, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
+<sub>**Notice: This document describes version &lt; 2.0 (EA1 branch). [Latest implementation](https://github.com/JaroslawWaliszko/ExpressiveAnnotations) is based on improved concept (incompatible api).**</sub>
+
+ExpressiveAnnotations is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given implementations of RequiredIf, RequiredIfExpression, AssertThat and AssertThatExpression attributes allows to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more compacted, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
 
 ###RequiredIf/Expression vs AssertThat/Expression attributes?
 
@@ -8,7 +10,7 @@ RequiredIf family indicates that annotated field is required, when given conditi
 
 ###What are brief examples of usage?
 
-For sample usages go to [**demo project**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations.MvcWebSample).
+For sample usages go to [**demo project**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/EA1/src/ExpressiveAnnotations.MvcWebSample).
 
 * Simplest (without logical expressions):
  
@@ -27,7 +29,7 @@ public string PassportNumber { get; set; }
 public bool AgreeToContact { get; set; }
 ```
 
- This one means, that if email is non-empty, boolean value indicating contact permission has to be true. What is more, we can see here that nested properties are supported by the mechanism. The last thing shown is wildcard character `*` used as target value. It is special character which stands for any value.
+ This one means, that if email is non-empty, boolean value indicating contact permission has to be true. What is more, we can see here that nested properties are supported by the mechanism. The last thing shown is wildcard character `*` used as target value. It is special character which stands for any non-empty value.
 
  ```
 [AssertThat(
@@ -103,9 +105,9 @@ AssertThatAttribute([string DependentProperty],
   DependentProperty    - Gets or sets the name of dependent field, from which runtime value is 
 						 extracted.
   TargetValue          - Gets or sets the expected value for dependent field (wildcard character * 
-						 stands for any value). Instead of hardcoding there is also possibility of 
-						 value runtime extraction from backing field, by providing its name 
-						 [inside square brackets].
+						 stands for any non-empty value). Instead of hardcoding there is also 
+						 possibility of value runtime extraction from backing field, by providing 
+						 its name [inside square brackets].
   RelationalOperator   - Gets or sets the relational operator indicating relation between dependent 
 						 field and target value. Available operators: ==, !=, >, >=, <, <=. If this 
 						 property is not provided, equality operator == is used by default.
@@ -137,9 +139,9 @@ AssertThatExpressionAttribute([string Expression],
   DependentProperties  - Gets or sets the names of dependent fields from which runtime values are 
 						 extracted.
   TargetValues         - Gets or sets the expected values for corresponding dependent fields 
-					 	 (wildcard character * stands for any value). There is also possibility of 
-						 values runtime extraction from backing fields, by providing their names 
-						 [inside square brackets].
+					 	 (wildcard character * stands for any non-empty value). There is also 
+						 possibility of values runtime extraction from backing fields, by providing 
+						 their names [inside square brackets].
   RelationalOperators  - Gets or sets the relational operators indicating relations between 
 						 dependent fields and corresponding target values. Available operators: 
 						 ==, !=, >, >=, <, <=. If this property is not provided, equality operator 
@@ -188,7 +190,7 @@ Logical expression is an expression in which relationship between operands is sp
 
  Here the computed result is true, which means that condition is fulfilled, so: 
   * when RequiredIfExpression used - error message is risen if annotated field value is not provided (i.e. is empty or has false boolean meaning),
-  * when AssertThatExpression used - no error.
+  * when AssertThatExpression used - no error (successful validation).
 
 ###What is the context behind this implementation? 
 
@@ -236,7 +238,7 @@ If we choose this way instead of model fields decoration, it has negative impact
 
 Client side validation is **fully supported**. Enable it for your web project within the next few steps:
 
-1. Add [**ExpressiveAnnotations.dll**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations) and [**ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider) reference libraries to your projest,
+1. Add [**ExpressiveAnnotations.dll**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/EA1/src/ExpressiveAnnotations) and [**ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/EA1/src/ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider) reference libraries to your projest,
 2. In `Global.asax` register required validators (`IClientValidatable` interface is not directly implemented by the attribute, to avoid coupling of `ExpressionAnnotations` assembly with `System.Web.Mvc` dependency):
 
  ```    
@@ -251,7 +253,7 @@ Client side validation is **fully supported**. Enable it for your web project wi
         DataAnnotationsModelValidatorProvider.RegisterAdapter(
             typeof(AssertThatExpressionAttribute), typeof(AssertThatExpressionValidator));
 ```			
-3. Include [**expressive.annotations.analysis.js**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/blob/master/src/expressive.annotations.analysis.js) and [**expressive.annotations.validate.js**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/blob/master/src/expressive.annotations.validate.js) scripts in your page (do not forget standard jQuery validation scripts):
+3. Include [**expressive.annotations.analysis.js**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/blob/EA1/src/expressive.annotations.analysis.js) and [**expressive.annotations.validate.js**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/blob/EA1/src/expressive.annotations.validate.js) scripts in your page (do not forget standard jQuery validation scripts):
 
  ```
     <script src="/Scripts/jquery.validate.js"></script>

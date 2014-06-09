@@ -18,7 +18,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         public string DependentProperty { get; set; }
 
         /// <summary>
-        /// Gets or sets the expected value for dependent field (wildcard character * stands for any value). There is also possibility 
+        /// Gets or sets the expected value for dependent field (wildcard character * stands for any non-empty value). There is also possibility 
         /// of value runtime extraction from backing field, by providing its name [inside square brackets].
         /// </summary>
         public object TargetValue { get; set; }
@@ -47,7 +47,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         /// Initializes a new instance of the <see cref="AssertThatAttribute"/> class.
         /// </summary>
         /// <param name="dependentProperty">The name of dependent field from which runtime value is extracted.</param>
-        /// <param name="targetValue">The expected value for dependent field (wildcard character * stands for any value). There is also possibility of value runtime extraction from backing field, by providing its name [inside square brackets].</param>
+        /// <param name="targetValue">The expected value for dependent field (wildcard character * stands for any non-empty value). There is also possibility of value runtime extraction from backing field, by providing its name [inside square brackets].</param>
         /// <param name="relationalOperator">The relational operator describing relation between dependent field and target value. Available operators: ==, !=, &gt;, &gt;=, &lt;, &lt;=. If this property is not provided, equality operator == is used by default.</param>
         /// <param name="sensitiveComparisons">Case sensitivity of string comparisons.</param>
         public AssertThatAttribute(string dependentProperty, object targetValue, string relationalOperator = null,

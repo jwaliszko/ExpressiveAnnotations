@@ -25,7 +25,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         public string[] DependentProperties { get; set; }
 
         /// <summary>
-        /// Gets or sets the expected values for corresponding dependent fields (wildcard character * stands for any value). There is also 
+        /// Gets or sets the expected values for corresponding dependent fields (wildcard character * stands for any non-empty value). There is also 
         /// possibility of values runtime extraction from backing fields, by providing their names [inside square brackets].
         /// </summary>
         public object[] TargetValues { get; set; }
@@ -58,7 +58,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         /// </summary>
         /// <param name="expression">The logical expression based on which requirement condition is computed. Available expression tokens: &amp;&amp;, ||, !, {, }, numbers and whitespaces.</param>
         /// <param name="dependentProperties">The names of dependent fields from which runtime values are extracted.</param>
-        /// <param name="targetValues">The expected values for corresponding dependent fields (wildcard character * stands for any value). There is also possibility of values runtime extraction from backing fields, by providing their names [inside square brackets].</param>
+        /// <param name="targetValues">The expected values for corresponding dependent fields (wildcard character * stands for any non-empty value). There is also possibility of values runtime extraction from backing fields, by providing their names [inside square brackets].</param>
         /// <param name="relationalOperators">The relational operators describing relations between dependent fields and corresponding target values. Available operators: ==, !=, &gt;, &gt;=, &lt;, &lt;=. If this property is not provided, equality operator == is used by default.</param>
         /// <param name="sensitiveComparisons">Case sensitivity of string comparisons.</param>
         public RequiredIfExpressionAttribute(string expression, string[] dependentProperties, object[] targetValues, string[] relationalOperators = null, bool sensitiveComparisons = true)
