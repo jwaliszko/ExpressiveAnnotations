@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30219.0
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations", "ExpressiveAnnotations\ExpressiveAnnotations.csproj", "{70DD327B-F37C-4291-9388-212AA541E970}"
 EndProject
@@ -13,13 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvcUn
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExpressiveAnnotations.Scripts", "ExpressiveAnnotations.Scripts", "{56496E2F-18D3-4633-90A5-082C83132B83}"
 	ProjectSection(SolutionItems) = preProject
-		expressive.annotations.analysis.js = expressive.annotations.analysis.js
 		expressive.annotations.validate.js = expressive.annotations.validate.js
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExpressiveAnnotations.Scripts.Tests", "ExpressiveAnnotations.Scripts.Tests", "{E294CF4D-9878-42D0-A825-2F54FA52B77E}"
-	ProjectSection(SolutionItems) = preProject
-		expressive.annotations.analysis.test.js = expressive.annotations.analysis.test.js
 	EndProjectSection
 EndProject
 Global

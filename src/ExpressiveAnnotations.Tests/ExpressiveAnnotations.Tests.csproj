@@ -51,10 +51,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Misc\ModelHelper.cs" />
-    <Compile Include="RequiredIfAttributeTest.cs" />
-    <Compile Include="RequiredIfExpressionAttributeTest.cs" />
-    <Compile Include="LogicalExpressionsAnalyserTest.cs" />
+    <Compile Include="LexerTest.cs" />
+    <Compile Include="ParserTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
