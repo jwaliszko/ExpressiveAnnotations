@@ -37,7 +37,7 @@ namespace ExpressiveAnnotations.Tests
             catch (Exception e)
             {
                 Assert.IsTrue(e is ArgumentException);
-                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at + false.");
+                Assert.IsTrue(e.Message == "Tokenizer error. Unexpected token started at + false.");
             }
 
             try
@@ -48,7 +48,7 @@ namespace ExpressiveAnnotations.Tests
             catch (Exception e)
             {
                 Assert.IsTrue(e is ArgumentException);
-                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at 7.");
+                Assert.IsTrue(e.Message == "Tokenizer error. Unexpected token started at 7.");
             }
         }
 
@@ -136,7 +136,7 @@ namespace ExpressiveAnnotations.Tests
             catch (Exception e)
             {
                 Assert.IsTrue(e is ArgumentException);
-                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at (true).");
+                Assert.IsTrue(e.Message == "Tokenizer error. Unexpected token started at (true).");
             }
 
             try

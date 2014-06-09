@@ -47,7 +47,7 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.LexicalAnalysis
                 }
             }
 
-            throw new ArgumentException(string.Format("Lexer error. Unexpected token started at {0}.", Expression));
+            throw new ArgumentException(string.Format("Tokenizer error. Unexpected token started at {0}.", Expression));
         }
     }
 }

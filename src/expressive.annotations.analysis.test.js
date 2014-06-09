@@ -3,7 +3,7 @@
 (function(wnd, analyser) { //scoping function (top-level, usually anonymous, function that prevents global namespace pollution)
 
     wnd.module("logical expressions analysis");
-    debugger; //enable firebug for all web pages
+    //debugger; //enable firebug for all web pages
 
     test("Verify_tokenizer_logic", function() {
         var expression = "( true && (true) ) || false";
@@ -24,12 +24,12 @@
         wnd.raises(function() {
             tokenizer.analyze("true + false");
         }, function(err) {
-            return err === "Lexer error. Unexpected token started at + false.";
+            return err === "Tokenizer error. Unexpected token started at + false.";
         });
         wnd.raises(function() {
             tokenizer.analyze("true && 7");
         }, function(err) {
-            return err === "Lexer error. Unexpected token started at 7.";
+            return err === "Tokenizer error. Unexpected token started at 7.";
         });
     });
 
@@ -86,7 +86,7 @@
         wnd.raises(function() {
             parser.evaluate("(true)");
         }, function(err) {
-            return err === "Lexer error. Unexpected token started at (true).";
+            return err === "Tokenizer error. Unexpected token started at (true).";
         });
         wnd.raises(function () {
             parser.evaluate(" ");

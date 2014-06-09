@@ -212,7 +212,7 @@ var LogicalExpressionsAnalyser = (function() {
                 }
             }
 
-            throw TypeHelper.String.format('Lexer error. Unexpected token started at {0}.', _expression);
+            throw TypeHelper.String.format('Tokenizer error. Unexpected token started at {0}.', _expression);
         };
     }
 
