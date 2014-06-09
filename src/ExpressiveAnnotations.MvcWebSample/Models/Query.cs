@@ -38,41 +38,32 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 
         public IEnumerable<int?> Years
         {
-            get { return new int?[] {null}.Concat(Enumerable.Range(18, 73).Select(x => (int?) x)); }
+            get { return new int?[] { null }.Concat(Enumerable.Range(18, 73).Select(x => (int?)x)); }
         }
 
-        [Display(ResourceType = typeof (Resources), Name = "GoAbroad")]
+        [Display(ResourceType = typeof(Resources), Name = "GoAbroad")]
         public bool GoAbroad { get; set; }
 
-        [Required(ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldRequired")]
-        [Display(ResourceType = typeof (Resources), Name = "Age")]
+        [Required(ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "FieldRequired")]
+        [Display(ResourceType = typeof(Resources), Name = "Age")]
         public int? Age { get; set; }
 
-        [RequiredIf(
-            DependentProperty = "GoAbroad",
-            TargetValue = true,
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]
-        [Display(ResourceType = typeof (Resources), Name = "PassportNumber")]
+        [RequiredIf("GoAbroad == true")]
+        [Display(ResourceType = typeof(Resources), Name = "PassportNumber")]
         public string PassportNumber { get; set; }
 
-        [Display(ResourceType = typeof (Resources), Name = "Country")]
+        [Display(ResourceType = typeof(Resources), Name = "Country")]
         public string Country { get; set; }
 
-        [Display(ResourceType = typeof (Resources), Name = "NextCountry")]
+        [Display(ResourceType = typeof(Resources), Name = "NextCountry")]
         public string NextCountry { get; set; }
 
-        [RequiredIfExpression( /* interpretation => GoAbroad == true 
-                                *                   && ( 
-                                *                        (NextCountry != "Other" && NextCountry == value_from_country) 
-                                *                        || Age ∈ (24, 55> 
-                                *                      )
-                                */
-            Expression = "{0} && ( (!{1} && {2}) || ({3} && {4}) )",
-            DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry", "Age", "Age"},
-            RelationalOperators = new[] {"==",       "==",          "==",          ">",   "<="},
-            TargetValues = new object[] {true,       "Other",       "[Country]",   24,    55},
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ReasonForTravelRequired")]
-        [Display(ResourceType = typeof (Resources), Name = "ReasonForTravel")]
+        [RequiredIf("GoAbroad == true " +
+                    "&& (" +
+                        "(NextCountry != 'Other' && NextCountry == Country) " +
+                        "|| (Age > 24 && Age <= 55)" +
+                    ")")]
+        [Display(ResourceType = typeof(Resources), Name = "ReasonForTravel")]
         public string ReasonForTravel { get; set; }
 
         [UIHint("ISO8601Date")]
@@ -80,61 +71,32 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [UIHint("ISO8601Date")]
         public DateTime Today { get; set; }
 
-        [RequiredIf(
-            DependentProperty = "GoAbroad",
-            TargetValue = true,
-            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]
-        [AssertThat(
-            DependentProperty = "ReturnDate",
-            RelationalOperator = ">=",
-            TargetValue = "[Today]", // hardcoded RFC 2822 or ISO 8601 formatted string is also allowed
-            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "FutureDateRequired")]
+        [RequiredIf("GoAbroad == true")]
+        [AssertThat("ReturnDate >= Today")]
         [Display(ResourceType = typeof(Resources), Name = "ReturnDate")]
         public DateTime? ReturnDate { get; set; }
 
-        [RequiredIfExpression( /* interpretation => GoAbroad == true 
-                                *                   && ReturnDate > value_from_latest_suggested_return_date (stored in RFC 2822 or ISO 8601 format)
-                                */
-            Expression = "{0} && {1}",
-            DependentProperties = new[] { "GoAbroad", "ReturnDate" },
-            RelationalOperators = new[] { "==", ">" },
-            TargetValues = new object[] { true, "[LatestSuggestedReturnDate]" },
-            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "ReasonForLongTravelRequired")]
-        [Display(ResourceType = typeof (Resources), Name = "ReasonForLongTravel")]
+        [RequiredIf("GoAbroad == true && ReturnDate > LatestSuggestedReturnDate")]
+        [Display(ResourceType = typeof(Resources), Name = "ReasonForLongTravel")]
         public string ReasonForLongTravel { get; set; }
 
-        [RequiredIf(
-            DependentProperty = "GoAbroad",
-            TargetValue = true,
-            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]
+        [RequiredIf("GoAbroad == true")]
         [Display(ResourceType = typeof(Resources), Name = "PoliticalStability")]
         public Stability? PoliticalStability { get; set; }
 
-        [RequiredIfExpression( /* interpretation => PoliticalStability != null && PoliticalStability != Stability.High */
-            Expression = "!{0} && !{1}",
-            DependentProperties = new[] {"PoliticalStability", "PoliticalStability"},
-            TargetValues = new object[] {null,                 Stability.High},
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "AwareOfTheRisksRequired")]
-        [Display(ResourceType = typeof (Resources), Name = "AwareOfTheRisks")]
+        [RequiredIf("PoliticalStability != null && PoliticalStability != 0")]
+        [Display(ResourceType = typeof(Resources), Name = "AwareOfTheRisks")]
         public bool AwareOfTheRisks { get; set; }
 
-        [Display(ResourceType = typeof (Resources), Name = "SportType")]
+        [Display(ResourceType = typeof(Resources), Name = "SportType")]
         public string SportType { get; set; }
 
-        [RequiredIfExpression( /* interpretation => SportType == "Extreme" || (SportType != "None" && GoAbroad == true) */
-            Expression = "{0} || (!{1} && {2})",
-            DependentProperties = new[] {"SportType", "SportType", "GoAbroad"},
-            TargetValues = new object[] {"Extreme",    "None",     true},
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "BloodTypeRequired")]
-        [Display(ResourceType = typeof (Resources), Name = "BloodType")]
+        [RequiredIf("SportType == 'Extreme' || (SportType != 'None' && GoAbroad == true)")]
+        [Display(ResourceType = typeof(Resources), Name = "BloodType")]
         public string BloodType { get; set; }
 
-        [RequiredIfExpression( /* interpretation => ContactDetails.Email == "*" || ContactDetails.Phone == "*" */
-            Expression = "{0} || {1}",
-            DependentProperties = new[] {"ContactDetails.Email", "ContactDetails.Phone"}, /* nested properties are supported */
-            TargetValues = new object[] {"*",                    "*"}, /* any values */
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "AgreeForContactRequired")]
-        [Display(ResourceType = typeof (Resources), Name = "AgreeForContact")]
+        [RequiredIf("ContactDetails.Email != null || ContactDetails.Phone != null")]
+        [Display(ResourceType = typeof(Resources), Name = "AgreeForContact")]
         public bool AgreeForContact { get; set; }
 
         public Contact ContactDetails { get; set; }

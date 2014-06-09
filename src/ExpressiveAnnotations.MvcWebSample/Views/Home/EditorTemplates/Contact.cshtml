@@ -5,26 +5,18 @@
     <ol>
         <li>
             <pre class="code">
-[RequiredIfExpression( /* interpretation => Email == null && Phone == null */
-    Expression = "{0} && {1}",
-    DependentProperties = new[] {"Email", "Phone"},
-    TargetValues = new object[] {null,    null},
-    ErrorMessage = "You do not enter any contact information. At least email or phone should be provided.")]
+[RequiredIf("Email == null && Phone == null")]
 </pre>
-        <pre class="action">[show attribute]</pre>                
+            <pre class="action">[show attribute]</pre>
             @Html.LabelFor(model => model.Email, new { @class = "inline prefix" })
             @Html.EditorFor(model => model.Email)
             @Html.ValidationMessageFor(model => model.Email)
         </li>
         <li>
             <pre class="code">
-[RequiredIfExpression( /* interpretation => Email == null && Phone == null */
-    Expression = "{0} && {1}",
-    DependentProperties = new[] {"Email", "Phone"},
-    TargetValues = new object[] {null,    null},
-    ErrorMessage = "You do not enter any contact information. At least email or phone should be provided.")]
+[RequiredIf("Email == null && Phone == null")]
 </pre>
-        <pre class="action">[show attribute]</pre>
+            <pre class="action">[show attribute]</pre>
             @Html.LabelFor(model => model.Phone, new { @class = "inline prefix" })
             @Html.EditorFor(model => model.Phone)
             @Html.ValidationMessageFor(model => model.Phone)

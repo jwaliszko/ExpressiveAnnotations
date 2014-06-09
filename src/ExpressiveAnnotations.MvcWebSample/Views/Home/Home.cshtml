@@ -9,7 +9,7 @@
         <h1>ExpressiveAnnotations - annotation-based conditional validation</h1>
     </div>
     <div class="right-corner">
-        <a href="https://github.com/JaroslawWaliszko/ExpressiveAnnotations">[more on github]</a>    
+        <a href="https://github.com/JaroslawWaliszko/ExpressiveAnnotations">[more on github]</a>
     </div>
 </div>
 
@@ -31,7 +31,7 @@
         <ol>
             <li>
                 @Html.EditorFor(model => model.GoAbroad)
-                @Html.LabelFor(model => model.GoAbroad, new {@class = "inline"})
+                @Html.LabelFor(model => model.GoAbroad, new { @class = "inline" })
                 @Html.ValidationMessageFor(model => model.GoAbroad)
             </li>
             <li>
@@ -45,9 +45,7 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIf(
-    DependentProperty = "GoAbroad", 
-    TargetValue = true)]
+[RequiredIf("GoAbroad == true")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.PassportNumber, new { @class = "inline prefix" })
@@ -55,29 +53,22 @@
                 @Html.ValidationMessageFor(model => model.PassportNumber)
             </li>
             <li>
-                @Html.LabelFor(model => model.Country, new {@class = "inline prefix"})
+                @Html.LabelFor(model => model.Country, new { @class = "inline prefix" })
                 @Html.DropDownListFor(x => x.Country, new SelectList(Model.Countries, "Value", "Text"))
                 @Html.ValidationMessageFor(model => model.Country)
             </li>
             <li>
-                @Html.LabelFor(model => model.NextCountry, new {@class = "inline prefix"})
+                @Html.LabelFor(model => model.NextCountry, new { @class = "inline prefix" })
                 @Html.DropDownListFor(x => x.NextCountry, new SelectList(Model.Countries, "Value", "Text"))
                 @Html.ValidationMessageFor(model => model.NextCountry)
             </li>
             <li>
                 <pre class="code">
-[RequiredIfExpression( /* interpretation => GoAbroad == true 
-                        *                   && ( 
-                        *                        (NextCountry != "Other" && NextCountry == value_from_country) 
-                        *                        || Age ∈ (24, 55> 
-                        *                      )
-                        */
-    Expression = "{0} && ( (!{1} && {2}) || ({3} && {4}) )",
-    DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry", "Age", "Age"},
-    RelationalOperators = new[] {"==",       "==",          "==",          "&gt;",   "&le;"},
-    TargetValues = new object[] {true,       "Other",       "[Country]",   24,    55},
-    ErrorMessage = "If you plan to go abroad and you are between 25 and 55 or plan 
-                    to visit the same foreign country twice, write down your reasons.")]
+[RequiredIf("GoAbroad == true " +
+            "&& (" +
+                "(NextCountry != 'Other' && NextCountry == Country) " +
+                "|| (Age > 24 && Age &le; 55)" +
+            ")")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.ReasonForTravel, new { @class = "inline prefix" })
@@ -88,13 +79,8 @@
                 @Html.EditorFor(x => x.LatestSuggestedReturnDate)   @*hidden backing field storing date in RFC 2822 or ISO 8601 format*@
                 @Html.EditorFor(x => x.Today)
                 <pre class="code">
-[RequiredIf(
-    DependentProperty = "GoAbroad", 
-    TargetValue = true)]
-[AssertThat(
-    DependentProperty = "ReturnDate",
-    RelationalOperator = ">=" ,
-    TargetValue = "[Today]")]
+[RequiredIf("GoAbroad == true")]
+[AssertThat("ReturnDate >= Today")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.ReturnDate, new { @class = "inline prefix" })
@@ -103,14 +89,7 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIfExpression( /* interpretation => GoAbroad == true 
-                        *                   && ReturnDate > value_from_latest_suggested_return_date (stored in RFC 2822 or ISO 8601 format)
-                        */
-            Expression = "{0} && {1}",
-            DependentProperties = new[] {"GoAbroad", "ReturnDate"},
-            RelationalOperators = new[] {"==",       ">"},
-            TargetValues = new object[] {true,       "[LatestSuggestedReturnDate]"},
-            ErrorMessage = "If you plan to stay abroad longer than one month from now, write down your reasons.")]
+[RequiredIf("GoAbroad == true && ReturnDate > LatestSuggestedReturnDate")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.ReasonForLongTravel, new { @class = "inline prefix" })
@@ -119,9 +98,7 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIf(
-    DependentProperty = "GoAbroad", 
-    TargetValue = true)]
+[RequiredIf("GoAbroad == true")]  
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.PoliticalStability, new { @class = "inline prefix" })
@@ -130,11 +107,7 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIfExpression( /* interpretation => PoliticalStability != null && PoliticalStability != Stability.High */
-    Expression = "!{0} && !{1}",
-    DependentProperties = new[] {"PoliticalStability", "PoliticalStability"},
-    TargetValues = new object[] {null,                 Stability.High},
-    ErrorMessage = "You are required to agree that you are aware of the risks of travel.")]
+[RequiredIf("PoliticalStability != null && PoliticalStability != Stability.High")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.EditorFor(model => model.AwareOfTheRisks)
@@ -147,16 +120,11 @@
                 {
                     @Html.RadioButtonFor(m => m.SportType, item.Value) <label class="inline">@item.Text</label>
                 }
-                @Html.ValidationMessageFor(model => model.SportType)                
+                @Html.ValidationMessageFor(model => model.SportType)
             </li>
             <li>
                 <pre class="code">
-[RequiredIfExpression( /* interpretation => SportType == "Extreme" || (SportType != "None" && GoAbroad) */
-    Expression = "{0} || (!{1} && {2})",
-    DependentProperties = new[] {"SportType", "SportType", "GoAbroad"},
-    TargetValues = new object[] {"Extreme",   "None",      true},
-    ErrorMessage = "Blood type is required if you do extreme sports, 
-                    or if you do any type of sport and plan to go abroad.")]
+[RequiredIf("SportType == 'Extreme' || (SportType != 'None' && GoAbroad == true)")]  
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.BloodType, new { @class = "inline prefix" })
@@ -168,19 +136,7 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIfExpression( /* interpretation => ContactDetails.Email == "*" || ContactDetails.Phone == "*" */
-    Expression = "{0} || {1}",
-    DependentProperties = new[] {"ContactDetails.Email", "ContactDetails.Phone"}, /* nested properties are supported */
-    TargetValues = new object[] {"*",                    "*"}, /* any values */
-    ErrorMessage = "You have to authorize us to contact you.")]
-
-one of possible equivalents is:
-
-[RequiredIfExpression( /* interpretation => ContactDetails.Email != null || ContactDetails.Phone != null */
-    Expression = "!{0} || !{1}",
-    DependentProperties = new[] {"ContactDetails.Email", "ContactDetails.Phone"},
-    TargetValues = new object[] {null,                   null}, /* no values */
-    ErrorMessage = "You have to authorize us to contact you.")]
+[RequiredIf("ContactDetails.Email != null || ContactDetails.Phone != null")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.RadioButtonFor(model => model.AgreeForContact, true) <label class="inline">@Resources.SpamAllowed</label>
@@ -198,7 +154,7 @@ one of possible equivalents is:
         @Scripts.Render("~/bundles/jqueryval")
         @Scripts.Render("~/bundles/expressive")
     }
-    
+
     <script>
         $(document).ready(function () {
             $('.action').click(function () {
