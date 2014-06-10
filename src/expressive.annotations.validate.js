@@ -162,20 +162,32 @@
         return true;
     }, '');
 
-    $.validator.addMethod('requiredif', function(value, element, params) {
-        var boolValue = analyser.TypeHelper.Bool.tryParse(value);
-        if (analyser.TypeHelper.isEmpty(value) || (!boolValue.error && !boolValue)) // check if the field is empty or false (continue if so, otherwise skip condition verification)
-            if (AttributeInternals.verify(element, params)) // check if the requirement condition is satisfied 
-                return false; // requirement confirmed => notify
-        return true;
+    $.validator.addMethod('requiredif', function (value, element, params) {
+        var valid = !analyser.TypeHelper.isEmpty(value);
+
+        if (valid && element.type == 'radio') { // validate for the true value of a radio element
+            valid = analyser.TypeHelper.Bool.tryParse(value) === true;
+        }
+
+        if (!valid && !AttributeInternals.verify(element, params)) { // return valid if the requirement condition not satisfied
+            valid = true;
+        }
+
+        return valid;
     }, '');
 
-    $.validator.addMethod('requiredifexpression', function(value, element, params) {
-        var boolValue = analyser.TypeHelper.Bool.tryParse(value);
-        if (analyser.TypeHelper.isEmpty(value) || (!boolValue.error && !boolValue))
-            if (ExpressionAttributeInternals.verify(element, params))
-                return false;
-        return true;
+    $.validator.addMethod('requiredifexpression', function (value, element, params) {
+        var valid = !analyser.TypeHelper.isEmpty(value);
+
+        if (valid && element.type == 'radio') { // validate for the true value of a radio element
+            valid = analyser.TypeHelper.Bool.tryParse(value) === true;
+        }
+
+        if (!valid && !ExpressionAttributeInternals.verify(element, params)) { // return valid if the requirement condition not satisfied
+            valid = true;
+        }
+
+        return valid;
     }, '');
 
 })(jQuery, LogicalExpressionsAnalyser);
