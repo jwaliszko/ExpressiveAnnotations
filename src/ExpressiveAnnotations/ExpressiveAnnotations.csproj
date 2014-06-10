@@ -40,14 +40,14 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConditionalAttributes\AssertThatAttribute.cs" />
-    <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\Token.cs" />
-    <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\Lexer.cs" />
-    <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\TokenInput.cs" />
-    <Compile Include="LogicalExpressionsAnalysis\LexicalAnalysis\TokenOutput.cs" />
-    <Compile Include="LogicalExpressionsAnalysis\SyntacticAnalysis\Parser.cs" />
-    <Compile Include="Misc\Helper.cs" />
-    <Compile Include="ConditionalAttributes\RequiredIfAttribute.cs" />
+    <Compile Include="Attributes\AssertThatAttribute.cs" />
+    <Compile Include="Analysis\Token.cs" />
+    <Compile Include="Analysis\Lexer.cs" />
+    <Compile Include="Analysis\TokenInput.cs" />
+    <Compile Include="Analysis\TokenOutput.cs" />
+    <Compile Include="Analysis\Parser.cs" />
+    <Compile Include="Helper.cs" />
+    <Compile Include="Attributes\RequiredIfAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
