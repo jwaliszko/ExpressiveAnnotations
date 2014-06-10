@@ -3,8 +3,8 @@ using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
-using ExpressiveAnnotations.ConditionalAttributes;
-using ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider;
+using ExpressiveAnnotations.Attributes;
+using ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators;
 
 namespace ExpressiveAnnotations.MvcWebSample
 {
