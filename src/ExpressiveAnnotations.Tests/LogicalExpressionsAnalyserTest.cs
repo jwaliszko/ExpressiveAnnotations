@@ -342,8 +342,12 @@ namespace ExpressiveAnnotations.Tests
         [TestMethod]
         public void Verify_typehelper_is_numeric()
         {
+            Assert.IsTrue(1.1f.IsNumeric());
             Assert.IsTrue(1.IsNumeric());
             Assert.IsTrue(!"1".IsNumeric());
+
+            Assert.IsTrue(typeof(int).IsNumeric());
+            Assert.IsTrue(typeof(int?).IsNumeric());
         }
 
         [TestMethod]
@@ -352,6 +356,9 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT").IsDateTime());
             Assert.IsTrue(!"Wed, 09 Aug 1995 00:00:00 GMT".IsDateTime());
             Assert.IsTrue(!807926400000.IsDateTime());
+
+            Assert.IsTrue(typeof(DateTime).IsDateTime());
+            Assert.IsTrue(typeof(DateTime?).IsDateTime());
         }
 
         [TestMethod]
@@ -371,6 +378,9 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(true.IsBool());
             Assert.IsTrue(!"true".IsBool());
             Assert.IsTrue(!0.IsBool());
+
+            Assert.IsTrue(typeof(bool).IsBool());
+            Assert.IsTrue(typeof(bool?).IsBool());
         }
     }
 }

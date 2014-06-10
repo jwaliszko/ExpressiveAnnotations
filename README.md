@@ -1,6 +1,6 @@
 ﻿#ExpressiveAnnotations - annotation-based conditional validation
 
-<sub>**Notice: This document describes version &lt; 2.0 (EA1 branch). [Latest implementation](https://github.com/JaroslawWaliszko/ExpressiveAnnotations) is based on improved concept (incompatible api).**</sub>
+<sub>**Notice: This document describes version &lt; 2.0 (EA1 branch). [Latest implementation](https://github.com/JaroslawWaliszko/ExpressiveAnnotations) is based on changed concept (incompatible api).**</sub>
 
 ExpressiveAnnotations is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given implementations of RequiredIf, RequiredIfExpression, AssertThat and AssertThatExpression attributes allows to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more compacted, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
 

@@ -20,8 +20,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         {
             if (attribute.DependentProperties.Length != attribute.TargetValues.Length)
                 throw new ArgumentException("Number of elements in DependentProperties and TargetValues must match.");
-            if (attribute.RelationalOperators.Any() &&
-                attribute.RelationalOperators.Length != attribute.DependentProperties.Length)
+            if (attribute.RelationalOperators.Any() && attribute.RelationalOperators.Length != attribute.DependentProperties.Length)
                 throw new ArgumentException("Number of explicitly provided relational operators is incorrect.");
 
             var count = attribute.DependentProperties.Count();
@@ -42,8 +41,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
                     Assert.ConsistentTypes(dependentProperty, targetProperty, metadata.PropertyName, relationalOperator);
                 }
                 else
-                    Assert.ConsistentTypes(dependentProperty, attribute.TargetValues[i], metadata.PropertyName,
-                        relationalOperator);
+                    Assert.ConsistentTypes(dependentProperty, attribute.TargetValues[i], metadata.PropertyName, relationalOperator);
 
                 DependentProperties[i] = attribute.DependentProperties[i];
                 RelationalOperators[i] = relationalOperator;
