@@ -3,28 +3,28 @@
  * copyright (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
  * licensed MIT: http://www.opensource.org/licenses/mit-license.php */
 
-(function($, analyser) {
+(function ($, analyser) {
 
     var ModelPrefix = {
-        append: function(value, prefix) {
+        append: function (value, prefix) {
             return prefix + value;
         },
-        get: function(fieldName) {
+        get: function (fieldName) {
             return fieldName.substr(0, fieldName.lastIndexOf('.') + 1);
         }
     };
 
     var MiscHelper = {
-        extractValue: function(form, name, prefix, type) {
+        extractValue: function (form, name, prefix, type) {
             function getFieldValue(element) {
                 var elementType = $(element).attr('type');
                 switch (elementType) {
-                case 'checkbox':
-                    return $(element).is(':checked');
-                case 'radio':
-                    return $(element).filter(':checked').val();
-                default:
-                    return $(element).val();
+                    case 'checkbox':
+                        return $(element).is(':checked');
+                    case 'radio':
+                        return $(element).filter(':checked').val();
+                    default:
+                        return $(element).val();
                 }
             }
 
@@ -42,7 +42,7 @@
                 throw 'Data extraction fatal error. DOM value conversion to reflect required type failed.';
             return value;
         },
-        tryExtractName: function(targetValue) {
+        tryExtractName: function (targetValue) {
             if (analyser.TypeHelper.isString(targetValue)) {
                 var patt = new RegExp('\\[(.+)\\]');
                 if (patt.test(targetValue)) {
@@ -55,7 +55,7 @@
     }
 
     var AttributeInternals = {
-        verify: function(element, params) {
+        verify: function (element, params) {
             var dependentValue = MiscHelper.extractValue(params.form, params.dependentproperty, params.prefix, params.type);
             var targetValue = params.targetvalue;
 
@@ -98,7 +98,7 @@
             relationaloperator: $.parseJSON(options.params.relationaloperator),
             targetvalue: $.parseJSON(options.params.targetvalue),
             type: $.parseJSON(options.params.type),
-            sensitivecomparisons : $.parseJSON(options.params.sensitivecomparisons)
+            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons)
         };
         if (options.message)
             options.messages['assertthat'] = options.message;
@@ -113,13 +113,13 @@
             targetvalues: $.parseJSON(options.params.targetvalues),
             types: $.parseJSON(options.params.types),
             expression: options.params.expression,
-            sensitivecomparisons : $.parseJSON(options.params.sensitivecomparisons)
+            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons)
         };
         if (options.message)
             options.messages['assertthatexpression'] = options.message;
     });
 
-    $.validator.unobtrusive.adapters.add('requiredif', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type', 'sensitivecomparisons'], function(options) {
+    $.validator.unobtrusive.adapters.add('requiredif', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type', 'sensitivecomparisons'], function (options) {
         options.rules['requiredif'] = {
             prefix: ModelPrefix.get(options.element.name),
             form: options.form,
@@ -148,34 +148,46 @@
             options.messages['requiredifexpression'] = options.message;
     });
 
-    $.validator.addMethod('assertthat', function(value, element, params) {
+    $.validator.addMethod('assertthat', function (value, element, params) {
         if (!analyser.TypeHelper.isEmpty(value)) // check if the field is non-empty (continue if so, otherwise skip condition verification)
             if (!AttributeInternals.verify(element, params)) // check if the assertion condition is not satisfied
                 return false; // assertion not satisfied => notify
         return true;
     }, '');
 
-    $.validator.addMethod('assertthatexpression', function(value, element, params) {
+    $.validator.addMethod('assertthatexpression', function (value, element, params) {
         if (!analyser.TypeHelper.isEmpty(value))
             if (!ExpressionAttributeInternals.verify(element, params))
                 return false;
         return true;
     }, '');
 
-    $.validator.addMethod('requiredif', function(value, element, params) {
-        var boolValue = analyser.TypeHelper.Bool.tryParse(value);
-        if (analyser.TypeHelper.isEmpty(value) || (!boolValue.error && !boolValue)) // check if the field is empty or false (continue if so, otherwise skip condition verification)
-            if (AttributeInternals.verify(element, params)) // check if the requirement condition is satisfied 
-                return false; // requirement confirmed => notify
-        return true;
+    $.validator.addMethod('requiredif', function (value, element, params) {
+        var valid = !analyser.TypeHelper.isEmpty(value);
+
+        if (valid && element.type == 'radio') { // validate for the true value of a radio element
+            valid = analyser.TypeHelper.Bool.tryParse(value) === true;
+        }
+
+        if (!valid && !AttributeInternals.verify(element, params)) { // return valid if the requirement condition not satisfied
+            valid = true;
+        }
+
+        return valid;
     }, '');
 
-    $.validator.addMethod('requiredifexpression', function(value, element, params) {
-        var boolValue = analyser.TypeHelper.Bool.tryParse(value);
-        if (analyser.TypeHelper.isEmpty(value) || (!boolValue.error && !boolValue))
-            if (ExpressionAttributeInternals.verify(element, params))
-                return false;
-        return true;
+    $.validator.addMethod('requiredifexpression', function (value, element, params) {
+        var valid = !analyser.TypeHelper.isEmpty(value);
+
+        if (valid && element.type == 'radio') { // validate for the true value of a radio element
+            valid = analyser.TypeHelper.Bool.tryParse(value) === true;
+        }
+
+        if (!valid && !ExpressionAttributeInternals.verify(element, params)) { // return valid if the requirement condition not satisfied
+            valid = true;
+        }
+
+        return valid;
     }, '');
 
 })(jQuery, LogicalExpressionsAnalyser);

@@ -128,7 +128,10 @@ namespace ExpressiveAnnotations.Misc
         public static bool IsBool(this Type type)
         {
             if (type == null) return false;
-            return Type.GetTypeCode(type) == TypeCode.Boolean;
+
+            var unwrappedType = type.IsGenericType ? Nullable.GetUnderlyingType(type) : type;
+
+            return Type.GetTypeCode(unwrappedType) == TypeCode.Boolean;
         }
 
         /// <summary>

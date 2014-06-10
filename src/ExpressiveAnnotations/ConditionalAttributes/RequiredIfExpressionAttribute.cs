@@ -42,6 +42,13 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         public bool SensitiveComparisons { get; set; }
 
         /// <summary>
+        /// Gets or set bool and bool? value types validation mode.
+        /// Set to true to require true value and fail validation on false value.
+        /// Set to false to require true and false and fail validation on null value.
+        /// </summary>
+        public bool InvalidOnFalse { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="RequiredIfExpressionAttribute"/> class.
         /// </summary>
         public RequiredIfExpressionAttribute()
@@ -51,6 +58,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             TargetValues = new object[0];
             RelationalOperators = new string[0];
             SensitiveComparisons = true;
+            InvalidOnFalse = true;
         }
 
         /// <summary>
@@ -61,7 +69,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         /// <param name="targetValues">The expected values for corresponding dependent fields (wildcard character * stands for any value). There is also possibility of values runtime extraction from backing fields, by providing their names [inside square brackets].</param>
         /// <param name="relationalOperators">The relational operators describing relations between dependent fields and corresponding target values. Available operators: ==, !=, &gt;, &gt;=, &lt;, &lt;=. If this property is not provided, equality operator == is used by default.</param>
         /// <param name="sensitiveComparisons">Case sensitivity of string comparisons.</param>
-        public RequiredIfExpressionAttribute(string expression, string[] dependentProperties, object[] targetValues, string[] relationalOperators = null, bool sensitiveComparisons = true)
+        public RequiredIfExpressionAttribute(string expression, string[] dependentProperties, object[] targetValues, string[] relationalOperators = null, bool sensitiveComparisons = true, bool invalidOnFalse = true)
             : base(_defaultErrorMessage)
         {
             Expression = expression;
@@ -69,6 +77,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
             TargetValues = targetValues ?? new object[0];
             RelationalOperators = relationalOperators ?? new string[0];
             SensitiveComparisons = sensitiveComparisons;
+            InvalidOnFalse = invalidOnFalse;
         }
 
         /// <summary>
@@ -107,13 +116,27 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                 SensitiveComparisons = SensitiveComparisons
             };
 
-            if (!_requiredAttribute.IsValid(value) || (value is bool && !(bool)value))
-                if (internals.Verify(validationContext))
-                    return new ValidationResult(
-                        FormatErrorMessage(validationContext.DisplayName,
-                            MiscHelper.ComposeExpression(Expression, DependentProperties, TargetValues, RelationalOperators)));
+            var valid = _requiredAttribute.IsValid(value);
+            
+            if (valid && value is bool && InvalidOnFalse)
+            { // validate for the true value of a radio element
+                valid = (bool)value;
+            }
 
-            return ValidationResult.Success;
+            if (!valid && !internals.Verify(validationContext))
+            { // return valid if the requirement condition not satisfied
+                valid = true;
+            }
+
+            return valid ? ValidationResult.Success : new ValidationResult(GetValidationErrorMessage(validationContext.DisplayName));
+        }
+
+        private string GetValidationErrorMessage(string displayName)
+        {
+            var expression = MiscHelper.ComposeExpression(Expression, DependentProperties, TargetValues, RelationalOperators);
+            var message = FormatErrorMessage(displayName, expression);
+
+            return message;
         }
     }
 }
