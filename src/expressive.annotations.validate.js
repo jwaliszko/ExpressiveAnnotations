@@ -203,7 +203,7 @@
 
     $.validator.addMethod('requiredif', function (value, element, params) {
         var boolValue = TypeHelper.Bool.tryParse(value); // check if the field is empty or false (continue if so, otherwise skip condition verification)
-        if (TypeHelper.isEmpty(value) || (!boolValue.error && !boolValue)) {
+        if (TypeHelper.isEmpty(value) || (element.type === 'radio' && (!boolValue.error && !boolValue))) {
             var model = ModelHelper.deserializeObject(params.form, params.types, params.prefix);
             with (model) {
                 if (eval(params.expression)) // check if the requirement condition is satisfied

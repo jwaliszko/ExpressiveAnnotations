@@ -82,7 +82,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 
         public static bool IsDateTime(this Type type)
         {
-            if (type == null) return false;
+            if (type == null)
+                return false;
             switch (Type.GetTypeCode(type))
             {
                 case TypeCode.DateTime:
@@ -117,7 +118,17 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         {
             if (type == null)
                 return false;
-            return Type.GetTypeCode(type) == TypeCode.Boolean;
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Boolean:
+                    return true;
+                case TypeCode.Object:
+                    if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Nullable<>))
+                        return Nullable.GetUnderlyingType(type).IsBool();
+                    return false;
+                default:
+                    return false;
+            }
         }
 
         public static string GetCoarseType(Type type)
