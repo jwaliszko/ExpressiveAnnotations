@@ -48,9 +48,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssertThatValidator.cs" />
+    <Compile Include="Validators\AssertThatValidator.cs" />
     <Compile Include="Helper.cs" />
-    <Compile Include="RequiredIfValidator.cs" />
+    <Compile Include="Validators\RequiredIfValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

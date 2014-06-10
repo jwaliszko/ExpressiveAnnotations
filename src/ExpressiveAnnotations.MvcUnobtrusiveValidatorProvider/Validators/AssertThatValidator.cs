@@ -1,11 +1,9 @@
-﻿using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Collections.Generic;
 using System.Web.Mvc;
-using System.Collections.Generic;
-using ExpressiveAnnotations.ConditionalAttributes;
+using ExpressiveAnnotations.Attributes;
 using Newtonsoft.Json;
 
-namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
+namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
 {
     public class AssertThatValidator : DataAnnotationsModelValidator<AssertThatAttribute>
     {
@@ -17,24 +15,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             : base(metadata, context, attribute)
         {
             _expression = attribute.Expression;
-            _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);
-
-            var regex = new Regex("[a-zA-Z0-9.]+");
-            var matches = regex.Matches(attribute.Expression);
-            _types = new Dictionary<string, string>();
-            foreach (Match match in matches)
-            {
-                if (!_types.Keys.Contains(match.Value))
-                {
-                    if (!new[] { "true", "false", "null" }.Contains(match.Value))
-                    {
-                        var pi = Helper.ExtractProperty(metadata.ContainerType, match.Value);
-                        if (pi != null)
-                            _types.Add(match.Value, Helper.GetCoarseType(pi.PropertyType));
-                    }
-                }
-            }
-        }
+            _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);            
+            _types = Helper.GetTypesMap(metadata, attribute.Expression);
+        }        
 
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()
         {
