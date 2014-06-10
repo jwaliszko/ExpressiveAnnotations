@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.validate.js - v1.3.0
+﻿/* expressive.annotations.validate.js - v1.3.1
  * this script is a part of client side component of ExpresiveAnnotations - annotation-based conditional validation library
  * copyright (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
  * licensed MIT: http://www.opensource.org/licenses/mit-license.php */
@@ -19,12 +19,12 @@
             function getFieldValue(element) {
                 var elementType = $(element).attr('type');
                 switch (elementType) {
-                case 'checkbox':
-                    return $(element).is(':checked');
-                case 'radio':
-                    return $(element).filter(':checked').val();
-                default:
-                    return $(element).val();
+                    case 'checkbox':
+                        return $(element).is(':checked');
+                    case 'radio':
+                        return $(element).filter(':checked').val();
+                    default:
+                        return $(element).val();
                 }
             }
 
@@ -164,7 +164,7 @@
 
     $.validator.addMethod('requiredif', function(value, element, params) {
         var boolValue = analyser.TypeHelper.Bool.tryParse(value);
-        if (analyser.TypeHelper.isEmpty(value) || (!boolValue.error && !boolValue)) // check if the field is empty or false (continue if so, otherwise skip condition verification)
+        if (analyser.TypeHelper.isEmpty(value) || (element.type === 'radio' && (!boolValue.error && !boolValue))) // check if the field is empty or false (continue if so, otherwise skip condition verification)
             if (AttributeInternals.verify(element, params)) // check if the requirement condition is satisfied 
                 return false; // requirement confirmed => notify
         return true;
@@ -172,7 +172,7 @@
 
     $.validator.addMethod('requiredifexpression', function(value, element, params) {
         var boolValue = analyser.TypeHelper.Bool.tryParse(value);
-        if (analyser.TypeHelper.isEmpty(value) || (!boolValue.error && !boolValue))
+        if (analyser.TypeHelper.isEmpty(value) || (element.type === 'radio' && (!boolValue.error && !boolValue)))
             if (ExpressionAttributeInternals.verify(element, params))
                 return false;
         return true;

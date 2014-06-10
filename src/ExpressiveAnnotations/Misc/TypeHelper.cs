@@ -128,7 +128,17 @@ namespace ExpressiveAnnotations.Misc
         public static bool IsBool(this Type type)
         {
             if (type == null) return false;
-            return Type.GetTypeCode(type) == TypeCode.Boolean;
+            switch (Type.GetTypeCode(type))
+            {
+                case TypeCode.Boolean:
+                    return true;
+                case TypeCode.Object:
+                    if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+                        return Nullable.GetUnderlyingType(type).IsBool();
+                    return false;
+                default:
+                    return false;
+            }
         }
 
         /// <summary>
