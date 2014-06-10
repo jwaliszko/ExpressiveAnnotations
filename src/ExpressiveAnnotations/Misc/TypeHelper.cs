@@ -34,7 +34,8 @@ namespace ExpressiveAnnotations.Misc
         /// <returns>True if type is numeric, false otherwise.</returns>
         public static bool IsNumeric(this Type type)
         {
-            if (type == null) return false;
+            if (type == null)
+                return false;
             switch (Type.GetTypeCode(type))
             {
                 case TypeCode.SByte:
@@ -75,7 +76,8 @@ namespace ExpressiveAnnotations.Misc
         /// <returns>True if type is date time, false otherwise.</returns>
         public static bool IsDateTime(this Type type)
         {
-            if (type == null) return false;
+            if (type == null)
+                return false;
             switch (Type.GetTypeCode(type))
             {
                 case TypeCode.DateTime:
@@ -106,7 +108,8 @@ namespace ExpressiveAnnotations.Misc
         /// <returns>True if type is string, false otherwise.</returns>
         public static bool IsString(this Type type)
         {
-            if (type == null) return false;
+            if (type == null)
+                return false;
             return Type.GetTypeCode(type) == TypeCode.String;
         }
 
@@ -127,7 +130,8 @@ namespace ExpressiveAnnotations.Misc
         /// <returns>True if type is bool, false otherwise.</returns>
         public static bool IsBool(this Type type)
         {
-            if (type == null) return false;
+            if (type == null)
+                return false;
             switch (Type.GetTypeCode(type))
             {
                 case TypeCode.Boolean:

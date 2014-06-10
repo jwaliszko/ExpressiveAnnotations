@@ -44,22 +44,6 @@ namespace ExpressiveAnnotations.ConditionalAttributes
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RequiredIfAttribute"/> class.
-        /// </summary>
-        /// <param name="dependentProperty">The name of dependent field from which runtime value is extracted.</param>
-        /// <param name="targetValue">The expected value for dependent field (wildcard character * stands for any non-empty value). There is also possibility of value runtime extraction from backing field, by providing its name [inside square brackets].</param>
-        /// <param name="relationalOperator">The relational operator describing relation between dependent field and target value. Available operators: ==, !=, &gt;, &gt;=, &lt;, &lt;=. If this property is not provided, equality operator == is used by default.</param>
-        /// <param name="sensitiveComparisons">Case sensitivity of string comparisons.</param>
-        public RequiredIfAttribute(string dependentProperty, object targetValue, string relationalOperator = null, bool sensitiveComparisons = true)
-            : base(_defaultErrorMessage)
-        {
-            DependentProperty = dependentProperty;
-            TargetValue = targetValue;
-            RelationalOperator = relationalOperator;
-            SensitiveComparisons = sensitiveComparisons;
-        }
-
-        /// <summary>
         /// Formats the error message.
         /// </summary>
         /// <param name="displayName">The user-visible name of the required field to include in the formatted message.</param>
