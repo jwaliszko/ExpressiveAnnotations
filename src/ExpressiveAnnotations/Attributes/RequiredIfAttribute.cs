@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis;
+using ExpressiveAnnotations.Analysis;
 
-namespace ExpressiveAnnotations.ConditionalAttributes
+namespace ExpressiveAnnotations.Attributes
 {
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public sealed class RequiredIfAttribute : ValidationAttribute

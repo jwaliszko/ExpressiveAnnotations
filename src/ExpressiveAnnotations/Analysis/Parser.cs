@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using ExpressiveAnnotations.LogicalExpressionsAnalysis.LexicalAnalysis;
-using ExpressiveAnnotations.Misc;
 
-namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis
+namespace ExpressiveAnnotations.Analysis
 {
     /* EBNF GRAMMAR:
      * 
@@ -18,9 +16,9 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis
      * val        => "null" | int | float | bool | string | prop | "(" or-exp ")"
      */
 
-    internal sealed class Parser
+    public sealed class Parser
     {
-        private Stack<TokenOutput> Tokens { get; set; }
+        private Stack<Token> Tokens { get; set; }
         private Type ModelType { get; set; }
         private Expression ModelExpression { get; set; }
 
@@ -49,14 +47,13 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis
         private void InitTokenizer(string expression)
         {
             var lexer = new Lexer();
-            Tokens = new Stack<TokenOutput>(lexer.Analyze(expression).Reverse());
+            Tokens = new Stack<Token>(lexer.Analyze(expression).Reverse());
         }
 
-        private TokenOutput PeekToken()
+        private bool PeekToken(out Token token)
         {
-            if (Tokens.Any())
-                return Tokens.Peek();
-            return null;
+            token = Tokens.Any() ? Tokens.Peek() : null;
+            return token != null;
         }
 
         private void CrushToken()
@@ -72,7 +69,8 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis
         private Expression ParseOrExp()
         {
             var arg1 = ParseAndExp();
-            if (PeekToken().Token != Token.OR)
+            Token token;
+            if (!PeekToken(out token) || token.Id != TokenId.OR)
                 return arg1;
             CrushToken();
             var arg2 = ParseOrExp();
@@ -82,7 +80,8 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis
         private Expression ParseAndExp()
         {
             var arg1 = ParseNotExp();
-            if (PeekToken().Token != Token.AND)
+            Token token;
+            if (!PeekToken(out token) || token.Id != TokenId.AND)
                 return arg1;
             CrushToken();
             var arg2 = ParseAndExp();
@@ -91,39 +90,36 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis
 
         private Expression ParseNotExp()
         {
-            var isNot = PeekToken().Token == Token.NOT;
-            if (isNot)
-                CrushToken();
-            var arg = ParseRelExp();
-
-            if (isNot)
-                return Expression.Not(arg);
-            return arg;
+            Token token;
+            if (!PeekToken(out token) || token.Id != TokenId.NOT)
+                return ParseRelExp();
+            CrushToken();
+            return Expression.Not(ParseRelExp());
         }
 
         private Expression ParseRelExp()
         {
             var arg1 = ParseVal();
-            var token = PeekToken();
-            if (!new[] { Token.LT, Token.LE, Token.GT, Token.GE, Token.EQ, Token.NEQ }.Contains(token.Token))
+            Token token;
+            if (!PeekToken(out token) || !new[] { TokenId.LT, TokenId.LE, TokenId.GT, TokenId.GE, TokenId.EQ, TokenId.NEQ }.Contains(token.Id))
                 return arg1;
             CrushToken();
             var arg2 = ParseVal();
 
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
-            switch (token.Token)
+            switch (token.Id)
             {
-                case Token.LT:
+                case TokenId.LT:
                     return Expression.LessThan(arg1, arg2);
-                case Token.LE:
+                case TokenId.LE:
                     return Expression.LessThanOrEqual(arg1, arg2);
-                case Token.GT:
+                case TokenId.GT:
                     return Expression.GreaterThan(arg1, arg2);
-                case Token.GE:
+                case TokenId.GE:
                     return Expression.GreaterThanOrEqual(arg1, arg2);
-                case Token.EQ:
+                case TokenId.EQ:
                     return Expression.Equal(arg1, arg2);
-                case Token.NEQ:
+                case TokenId.NEQ:
                     return Expression.NotEqual(arg1, arg2);
                 default:
                     throw new InvalidOperationException();
@@ -132,94 +128,54 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis
 
         private Expression ParseVal()
         {
-            if (PeekToken().Token == Token.LEFT_BRACKET)
+            Token token;
+            if (!PeekToken(out token))
+                throw new InvalidOperationException();
+
+            if (token.Id == TokenId.LEFT_BRACKET)
             {
                 CrushToken();
                 var arg = ParseOrExp();
-                if (PeekToken().Token != Token.RIGHT_BRACKET)
+                if (!PeekToken(out token) || token.Id != TokenId.RIGHT_BRACKET)
                     throw new InvalidOperationException();
                 CrushToken();
                 return arg;
             }
 
-            if (PeekToken().Token == Token.NULL)
+            CrushToken();
+            switch (token.Id)
             {
-                CrushToken();
-                return Expression.Constant(null);
+                case TokenId.NULL:
+                    return Expression.Constant(null);
+                case TokenId.INT:
+                    return Expression.Constant(token.Value, typeof(int));
+                case TokenId.FLOAT:
+                    return Expression.Constant(token.Value, typeof(float));
+                case TokenId.BOOL:
+                    return Expression.Constant(token.Value, typeof(bool));
+                case TokenId.STRING:
+                    return Expression.Constant(token.Value, typeof(string));
+                case TokenId.PROPERTY:
+                    return ExtractProp(token.Value.ToString());
+                default:
+                    throw new InvalidOperationException();
             }
-
-            var value = ParseIntLiteral() ?? ParseFloatLiteral() ?? ParseBoolLiteral() ?? ParseStringLiteral() ?? ParseProp();
-            if (value == null)
-                throw new InvalidOperationException();
-            return value;
         }
 
-        private Expression ParseIntLiteral()
+        private Expression ExtractProp(string name)
         {
-            var token = PeekToken();
-            if (PeekToken().Token == Token.INT)
+            var props = name.Split('.');
+            var type = ModelType;
+            var expr = ModelExpression;
+            foreach (var prop in props)
             {
-                CrushToken();
-                return Expression.Constant(token.Value, typeof(int));
+                var pi = type.GetProperty(prop);
+                if (pi == null)
+                    throw new ArgumentException(string.Format("Dynamic extraction interrupted. Field {0} not found.", prop), name);
+                expr = Expression.Property(expr, pi);
+                type = pi.PropertyType;
             }
-            return null;
-        }
-
-        private Expression ParseFloatLiteral()
-        {
-            var token = PeekToken();
-            if (PeekToken().Token == Token.FLOAT)
-            {
-                CrushToken();
-                return Expression.Constant(token.Value, typeof(float));
-            }
-            return null;
-        }
-
-        private Expression ParseBoolLiteral()
-        {
-            var token = PeekToken();
-            if (PeekToken().Token == Token.BOOL)
-            {
-                CrushToken();
-                return Expression.Constant(token.Value, typeof(bool));
-            }
-            return null;
-        }
-
-        private Expression ParseStringLiteral()
-        {
-            var token = PeekToken();
-            if (PeekToken().Token == Token.INT)
-            {
-                CrushToken();
-                return Expression.Constant(token.Value, typeof(string));
-            }
-            return null;
-        }
-
-        private Expression ParseProp()
-        {
-            var token = PeekToken();
-            if (PeekToken().Token == Token.PROPERTY)
-            {
-                CrushToken();
-                var propName = token.Value.ToString();
-                var props = propName.Split('.');
-                var type = ModelType;
-                var expr = ModelExpression;
-                foreach (var prop in props)
-                {
-                    var pi = type.GetProperty(prop);
-                    if (pi == null)
-                        throw new ArgumentException(string.Format("Dynamic extraction interrupted. Field {0} not found.", prop), propName);
-                    expr = Expression.Property(expr, pi);
-                    type = pi.PropertyType;
-                }
-                return expr;
-            }
-            return null;
+            return expr;
         }
     }
 }
-

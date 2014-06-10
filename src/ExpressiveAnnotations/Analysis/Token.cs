@@ -1,23 +1,14 @@
-﻿namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.LexicalAnalysis
+﻿namespace ExpressiveAnnotations.Analysis
 {
-    internal enum Token
+    public sealed class Token
     {
-        AND,
-        OR,
-        NOT,
-        LEFT_BRACKET,
-        RIGHT_BRACKET,
-        GE,
-        LE,
-        GT,
-        LT,
-        EQ,
-        NEQ,
-        INT,
-        BOOL,
-        FLOAT,
-        PROPERTY,
-        STRING,
-        NULL
+        public TokenId Id { get; private set; }
+        public object Value { get; private set; }
+
+        public Token(TokenId token, object value)
+        {
+            Id = token;
+            Value = value;
+        }
     }
 }

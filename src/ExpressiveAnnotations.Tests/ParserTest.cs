@@ -1,5 +1,5 @@
 ﻿using System;
-using ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis;
+using ExpressiveAnnotations.Analysis;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ExpressiveAnnotations.Tests
@@ -82,7 +82,7 @@ namespace ExpressiveAnnotations.Tests
                 "Flag == true " +
                     "&& (" +
                             "(Text != \"hello parser\" && Date < SubModel.Date) " +
-                            "|| (Number >= 0  && Number < 1)" +
+                            "|| (Number >= 0 && Number < 1)" +
                         ")";
 
             Assert.IsTrue(parser.Parse(model.GetType(), expression).Invoke(model));

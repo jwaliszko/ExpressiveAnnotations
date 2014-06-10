@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 
-namespace ExpressiveAnnotations.Misc
+namespace ExpressiveAnnotations
 {
     internal class Helper
     {

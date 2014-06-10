@@ -1,5 +1,5 @@
 ﻿using System;
-using ExpressiveAnnotations.LogicalExpressionsAnalysis.LexicalAnalysis;
+using ExpressiveAnnotations.Analysis;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ExpressiveAnnotations.Tests

@@ -40,11 +40,10 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analysis\TokenId.cs" />
     <Compile Include="Attributes\AssertThatAttribute.cs" />
     <Compile Include="Analysis\Token.cs" />
     <Compile Include="Analysis\Lexer.cs" />
-    <Compile Include="Analysis\TokenInput.cs" />
-    <Compile Include="Analysis\TokenOutput.cs" />
     <Compile Include="Analysis\Parser.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Attributes\RequiredIfAttribute.cs" />

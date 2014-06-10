@@ -3,47 +3,47 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.LexicalAnalysis
+namespace ExpressiveAnnotations.Analysis
 {
-    internal sealed class Lexer
+    public sealed class Lexer
     {
-        private TokenInput[] InputTable { get; set; }
-        private TokenOutput Output { get; set; }
+        private Token Token { get; set; }
         private string Expression { get; set; }
+        private IDictionary<TokenId, string> RegexMap { get; set; }
 
         public Lexer()
         {
-            InputTable = new[]
+            RegexMap = new Dictionary<TokenId, string>
             {
-                new TokenInput(@"&&", Token.AND),
-                new TokenInput(@"\|\|", Token.OR),
-                new TokenInput(@"\(", Token.LEFT_BRACKET),
-                new TokenInput(@"\)", Token.RIGHT_BRACKET),
-                new TokenInput(@">=", Token.GE),
-                new TokenInput(@"<=", Token.LE),
-                new TokenInput(@">", Token.GT),
-                new TokenInput(@"<", Token.LT),
-                new TokenInput(@"==", Token.EQ),
-                new TokenInput(@"!=", Token.NEQ),
-                new TokenInput(@"\!", Token.NOT),
-                new TokenInput(@"null", Token.NULL),
-                new TokenInput(@"[0-9]+\.[0-9]+", Token.FLOAT),
-                new TokenInput(@"[0-9]+", Token.INT),                
-                new TokenInput(@"(true|false)", Token.BOOL),
-                new TokenInput("\"[^\"]*\"|'[^']*'", Token.STRING),
-                new TokenInput(@"[a-zA-Z]+([\.]*[a-zA-Z0-9]*)*", Token.PROPERTY)
+                {TokenId.AND, @"&&"},
+                {TokenId.OR, @"\|\|"},
+                {TokenId.LEFT_BRACKET, @"\("},
+                {TokenId.RIGHT_BRACKET, @"\)"},
+                {TokenId.GE, @">="},
+                {TokenId.LE, @"<="},
+                {TokenId.GT, @">"},
+                {TokenId.LT, @"<"},
+                {TokenId.EQ, @"=="},
+                {TokenId.NEQ, @"!="},
+                {TokenId.NOT, @"\!"},
+                {TokenId.NULL, @"null"},
+                {TokenId.FLOAT, @"[-+]?\d*\.\d+([eE][-+]?\d+)?"},
+                {TokenId.INT, @"[-+]?\d+"},
+                {TokenId.BOOL, @"(true|false)"},
+                {TokenId.STRING, @"([""'])(?:\\\1|.)*?\1"},
+                {TokenId.PROPERTY, @"[a-zA-Z]+([\.]*[a-zA-Z0-9]*)*"}
             };
         }
 
-        public TokenOutput[] Analyze(string expression)
+        public Token[] Analyze(string expression)
         {
-            var tokens = new List<TokenOutput>();
+            var tokens = new List<Token>();
             if (string.IsNullOrEmpty(expression))
                 return tokens.ToArray();
 
             Expression = expression;
             while (Next())
-                tokens.Add(Output);
+                tokens.Add(Token);
             return tokens.ToArray();
         }
 
@@ -53,14 +53,14 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.LexicalAnalysis
             if (string.IsNullOrEmpty(Expression))
                 return false;
 
-            foreach (var input in InputTable)
+            foreach (var kvp in RegexMap)
             {
-                var regex = new Regex(string.Format("^{0}", input.Pattern));
+                var regex = new Regex(string.Format("^{0}", kvp.Value));
                 var match = regex.Match(Expression);
                 var value = match.Value;
                 if (value.Any())
                 {
-                    Output = new TokenOutput(ConvertTokenValue(input.Token, value), input.Token);
+                    Token = new Token(kvp.Key, ConvertTokenValue(kvp.Key, value));
                     Expression = Expression.Substring(value.Length);
                     return true;
                 }
@@ -68,19 +68,19 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.LexicalAnalysis
             throw new ArgumentException(string.Format("Lexer error. Unexpected token started at {0}.", Expression));
         }
 
-        private object ConvertTokenValue(Token token, string value)
+        private object ConvertTokenValue(TokenId token, string value)
         {
             switch (token)
             {
-                case Token.NULL:
+                case TokenId.NULL:
                     return null;
-                case Token.INT:
+                case TokenId.INT:
                     return int.Parse(value);
-                case Token.FLOAT:
+                case TokenId.FLOAT:
                     return float.Parse(value);
-                case Token.BOOL:
+                case TokenId.BOOL:
                     return bool.Parse(value);
-                case Token.STRING:
+                case TokenId.STRING:
                     return value.Substring(1, value.Length - 2);
                 default:
                     return value;
