@@ -11,11 +11,6 @@ namespace ExpressiveAnnotations.Attributes
 
         public string Expression { get; set; }
 
-        public RequiredIfAttribute()
-            : base(_defaultErrorMessage)
-        {
-        }
-
         public RequiredIfAttribute(string expression)
             : base(_defaultErrorMessage)
         {

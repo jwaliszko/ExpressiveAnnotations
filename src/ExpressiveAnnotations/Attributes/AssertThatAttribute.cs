@@ -11,11 +11,6 @@ namespace ExpressiveAnnotations.Attributes
 
         public string Expression { get; set; }
 
-        public AssertThatAttribute()
-            : base(_defaultErrorMessage)
-        {
-        }
-
         public AssertThatAttribute(string expression)
             : base(_defaultErrorMessage)
         {
