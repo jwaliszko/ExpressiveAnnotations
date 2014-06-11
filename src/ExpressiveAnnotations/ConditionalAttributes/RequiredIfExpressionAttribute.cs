@@ -11,7 +11,6 @@ namespace ExpressiveAnnotations.ConditionalAttributes
     public sealed class RequiredIfExpressionAttribute : ValidationAttribute, IExpressionAttribute
     {
         private const string _defaultErrorMessage = "The {0} field is required by the following logic: {1}.";
-        private readonly RequiredAttribute _requiredAttribute = new RequiredAttribute();
 
         /// <summary>
         /// Gets or sets the logical expression based on which requirement condition is computed. 
@@ -89,7 +88,7 @@ namespace ExpressiveAnnotations.ConditionalAttributes
                 SensitiveComparisons = SensitiveComparisons
             };
 
-            if (!_requiredAttribute.IsValid(value) || (value is bool && !(bool)value))
+            if (value.IsEmpty() || (value is bool && !(bool)value))
                 if (internals.Verify(validationContext))
                     return new ValidationResult(
                         FormatErrorMessage(validationContext.DisplayName,
