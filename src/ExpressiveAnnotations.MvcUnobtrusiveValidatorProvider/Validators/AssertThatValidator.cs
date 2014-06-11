@@ -42,7 +42,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
                 ValidationType = "assertthat",
             };
             rule.ValidationParameters.Add("expression", JsonConvert.SerializeObject(_expression));
-            rule.ValidationParameters.Add("types", JsonConvert.SerializeObject(_typesMap));
+            rule.ValidationParameters.Add("typesmap", JsonConvert.SerializeObject(_typesMap));
             yield return rule;
         }
     }
