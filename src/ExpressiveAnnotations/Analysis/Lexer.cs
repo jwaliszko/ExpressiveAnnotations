@@ -5,12 +5,18 @@ using System.Text.RegularExpressions;
 
 namespace ExpressiveAnnotations.Analysis
 {
+    /// <summary>
+    /// Performs lexical analysis of provided logical expression.
+    /// </summary>
     public sealed class Lexer
     {
         private Token Token { get; set; }
         private string Expression { get; set; }
         private IDictionary<TokenId, string> RegexMap { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Lexer"/> class.
+        /// </summary>
         public Lexer()
         {
             RegexMap = new Dictionary<TokenId, string>
@@ -35,6 +41,11 @@ namespace ExpressiveAnnotations.Analysis
             };
         }
 
+        /// <summary>
+        /// Analyzes the specified logical expression and extracts the array of tokens.
+        /// </summary>
+        /// <param name="expression">The logical expression.</param>
+        /// <returns>Array of extracted tokens.</returns>
         public Token[] Analyze(string expression)
         {
             var tokens = new List<Token>();

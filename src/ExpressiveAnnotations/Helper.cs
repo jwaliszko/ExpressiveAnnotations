@@ -10,10 +10,11 @@ namespace ExpressiveAnnotations
             oute1 = e1;
             oute2 = e2;
 
+            // non-nullable operand is converted to nullable if necessary, and the lifted-to-nullable form of the comparison is used (c# rule which is currently not followed by expression trees)
             if (IsNullableType(e1.Type) && !IsNullableType(e2.Type))
-                oute2 = Expression.Convert(e2, e1.Type); // non-nullable operand is converted to nullable... 
+                oute2 = Expression.Convert(e2, e1.Type);
             else if (!IsNullableType(e1.Type) && IsNullableType(e2.Type))
-                oute1 = Expression.Convert(e1, e2.Type); // ...and the lifted-to-nullable form of the comparison is used (c# rule which is not followed by expression trees)
+                oute1 = Expression.Convert(e1, e2.Type);
         }
 
         public static bool IsNullableType(Type t)

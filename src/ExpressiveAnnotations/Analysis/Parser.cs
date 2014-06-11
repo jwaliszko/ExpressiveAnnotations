@@ -16,28 +16,43 @@ namespace ExpressiveAnnotations.Analysis
      * val        => "null" | int | float | bool | string | prop | "(" or-exp ")"
      */
 
+    /// <summary>
+    /// Performs syntactic analysis of provided logical expression within given context.
+    /// </summary>
     public sealed class Parser
     {
         private Stack<Token> Tokens { get; set; }
-        private Type ModelType { get; set; }
-        private Expression ModelExpression { get; set; }
+        private Type ContextType { get; set; }
+        private Expression ContextExpression { get; set; }
 
-        public Func<ObjectType, bool> Parse<ObjectType>(string expression)
+        /// <summary>
+        /// Parses the specified logical expression into expression tree within given object context.
+        /// </summary>
+        /// <typeparam name="Context">The type identifier of the context within which the expression is interpreted.</typeparam>
+        /// <param name="expression">The logical expression.</param>
+        /// <returns>A delegate containing the compiled version of the lambda expression described by created expression tree.</returns>
+        public Func<Context, bool> Parse<Context>(string expression)
         {
-            ModelType = typeof(ObjectType);
-            var param = Expression.Parameter(typeof(ObjectType));
-            ModelExpression = param;
+            ContextType = typeof(Context);
+            var param = Expression.Parameter(typeof(Context));
+            ContextExpression = param;
             InitTokenizer(expression);
             var expressionTree = ParseExpression();
-            var lambda = Expression.Lambda<Func<ObjectType, bool>>(expressionTree, param);
+            var lambda = Expression.Lambda<Func<Context, bool>>(expressionTree, param);
             return lambda.Compile();
         }
 
-        public Func<object, bool> Parse(Type objectType, string expression)
+        /// <summary>
+        /// Parses the specified logical expression and builds expression tree.
+        /// </summary>
+        /// <param name="context">The type instance of the context within which the expression is interpreted.</param>
+        /// <param name="expression">The logical expression.</param>
+        /// <returns>A delegate containing the compiled version of the lambda expression described by produced expression tree.</returns>
+        public Func<object, bool> Parse(Type context, string expression)
         {
-            ModelType = objectType;
+            ContextType = context;
             var param = Expression.Parameter(typeof(object));
-            ModelExpression = Expression.Convert(param, objectType);
+            ContextExpression = Expression.Convert(param, context);
             InitTokenizer(expression);
             var expressionTree = ParseExpression();
             var lambda = Expression.Lambda<Func<object, bool>>(expressionTree, param);
@@ -156,17 +171,17 @@ namespace ExpressiveAnnotations.Analysis
                 case TokenId.STRING:
                     return Expression.Constant(token.Value, typeof(string));
                 case TokenId.PROPERTY:
-                    return ExtractProp(token.Value.ToString());
+                    return ExtractProperty(token.Value.ToString());
                 default:
                     throw new InvalidOperationException();
             }
         }
 
-        private Expression ExtractProp(string name)
+        private Expression ExtractProperty(string name)
         {
             var props = name.Split('.');
-            var type = ModelType;
-            var expr = ModelExpression;
+            var type = ContextType;
+            var expr = ContextExpression;
             foreach (var prop in props)
             {
                 var pi = type.GetProperty(prop);
