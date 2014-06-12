@@ -1,11 +1,15 @@
-﻿/* expressive.annotations.validate.js - v1.3.1
+﻿/* expressive.annotations.validate.js - v1.3.2
  * this script is a part of client side component of ExpresiveAnnotations - annotation-based conditional validation library
  * copyright (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
  * licensed MIT: http://www.opensource.org/licenses/mit-license.php */
 
 (function($, analyser) {
 
-    var ModelPrefix = {
+    'use strict';
+
+    var modelPrefix, miscHelper, attributeInternals, expressionAttributeInternals;
+
+    modelPrefix = {
         append: function(value, prefix) {
             return prefix + value;
         },
@@ -14,7 +18,7 @@
         }
     };
 
-    var MiscHelper = {
+    miscHelper = {
         extractValue: function(form, name, prefix, type) {
             function getFieldValue(element) {
                 var elementType = $(element).attr('type');
@@ -28,100 +32,115 @@
                 }
             }
 
-            name = ModelPrefix.append(name, prefix);
-            var field = $(form).find(':input[name="' + name + '"]');
-            if (field.length == 0)
-                throw analyser.TypeHelper.String.format('DOM field {0} not found.', name);
+            var field, value;
 
-            var value = getFieldValue(field);
-            if (analyser.TypeHelper.isEmpty(value))
+            name = modelPrefix.append(name, prefix);            
+            field = $(form).find(':input[name="' + name + '"]');
+            if (field.length === 0) {
+                throw analyser.typeHelper.String.format('DOM field {0} not found.', name);
+            }
+
+            value = getFieldValue(field);
+            if (analyser.typeHelper.isEmpty(value)) {
                 return null;
+            }
 
-            value = analyser.TypeHelper.tryParse(value, type); // convert to required type
-            if (value.error)
+            value = analyser.typeHelper.tryParse(value, type); // convert to required type
+            if (value.error) {
                 throw 'Data extraction fatal error. DOM value conversion to reflect required type failed.';
+            }
+
             return value;
         },
         tryExtractName: function(targetValue) {
-            if (analyser.TypeHelper.isString(targetValue)) {
+            if (analyser.typeHelper.isString(targetValue)) {
                 var patt = new RegExp('\\[(.+)\\]');
                 if (patt.test(targetValue)) {
-                    var targetProperty = targetValue.substring(1, targetValue.length - 1);
-                    return targetProperty;
+                    return targetValue.substring(1, targetValue.length - 1);
                 }
             }
-            return { error: true }
+            return { error: true };
         }
-    }
+    };
 
-    var AttributeInternals = {
-        verify: function(element, params) {
-            var dependentValue = MiscHelper.extractValue(params.form, params.dependentproperty, params.prefix, params.type);
-            var targetValue = params.targetvalue;
+    attributeInternals = {
+        verify: function(params) {
+            var dependentValue, targetValue, targetPropertyName, comparer;
 
-            var targetPropertyName = MiscHelper.tryExtractName(targetValue);
-            if (!targetPropertyName.error)
-                targetValue = MiscHelper.extractValue(params.form, targetPropertyName, params.prefix, params.type);
+            dependentValue = miscHelper.extractValue(params.form, params.dependentproperty, params.prefix, params.type);
+            targetValue = params.targetvalue;
 
-            var comparer = new analyser.Comparer();
+            targetPropertyName = miscHelper.tryExtractName(targetValue);
+            if (!targetPropertyName.error) {
+                targetValue = miscHelper.extractValue(params.form, targetPropertyName, params.prefix, params.type);
+            }
+
+            comparer = new analyser.Comparer();
             return comparer.compute(dependentValue, targetValue, params.relationaloperator, params.sensitivecomparisons);
         }
-    }
-    var ExpressionAttributeInternals = {
-        verify: function (element, params) {
-            var tokens = new Array();
-            var length = params.dependentproperties.length;
-            for (var i = 0; i < length; i++) {
-                var dependentValue = MiscHelper.extractValue(params.form, params.dependentproperties[i], params.prefix, params.types[i]);
-                var targetValue = params.targetvalues[i];
+    };
 
-                var targetPropertyName = MiscHelper.tryExtractName(targetValue);
-                if (!targetPropertyName.error)
-                    targetValue = MiscHelper.extractValue(params.form, targetPropertyName, params.prefix, params.types[i]);
+    expressionAttributeInternals = {
+        verify: function(params) {
+            var tokens, comparer, length, i, dependentValue, targetValue, targetPropertyName, result, composedExpression, evaluator;
 
-                var comparer = new analyser.Comparer();
-                var result = comparer.compute(dependentValue, targetValue, params.relationaloperators[i], params.sensitivecomparisons);
+            tokens = [];
+            comparer = new analyser.Comparer();
+            length = params.dependentproperties.length;
+
+            for (i = 0; i < length; i++) {
+                dependentValue = miscHelper.extractValue(params.form, params.dependentproperties[i], params.prefix, params.types[i]);
+                targetValue = params.targetvalues[i];
+
+                targetPropertyName = miscHelper.tryExtractName(targetValue);
+                if (!targetPropertyName.error) {
+                    targetValue = miscHelper.extractValue(params.form, targetPropertyName, params.prefix, params.types[i]);
+                }
+
+                result = comparer.compute(dependentValue, targetValue, params.relationaloperators[i], params.sensitivecomparisons);
                 tokens.push(result.toString());
             }
 
-            var composedExpression = analyser.TypeHelper.String.format(params.expression, tokens);
-            var evaluator = new analyser.Evaluator();
+            composedExpression = analyser.typeHelper.String.format(params.expression, tokens);
+            evaluator = new analyser.Evaluator();
             return evaluator.compute(composedExpression);
         }
-    }
+    };
 
-    $.validator.unobtrusive.adapters.add('assertthat', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type', 'sensitivecomparisons'], function (options) {
-        options.rules['assertthat'] = {
-            prefix: ModelPrefix.get(options.element.name),
+    $.validator.unobtrusive.adapters.add('assertthat', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type', 'sensitivecomparisons'], function(options) {
+        options.rules.assertthat = {
+            prefix: modelPrefix.get(options.element.name),
             form: options.form,
             dependentproperty: $.parseJSON(options.params.dependentproperty),
             relationaloperator: $.parseJSON(options.params.relationaloperator),
             targetvalue: $.parseJSON(options.params.targetvalue),
             type: $.parseJSON(options.params.type),
-            sensitivecomparisons : $.parseJSON(options.params.sensitivecomparisons)
+            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons)
         };
-        if (options.message)
-            options.messages['assertthat'] = options.message;
+        if (options.message) {
+            options.messages.assertthat = options.message;
+        }
     });
 
-    $.validator.unobtrusive.adapters.add('assertthatexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression', 'sensitivecomparisons'], function (options) {
-        options.rules['assertthatexpression'] = {
-            prefix: ModelPrefix.get(options.element.name),
+    $.validator.unobtrusive.adapters.add('assertthatexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression', 'sensitivecomparisons'], function(options) {
+        options.rules.assertthatexpression = {
+            prefix: modelPrefix.get(options.element.name),
             form: options.form,
             dependentproperties: $.parseJSON(options.params.dependentproperties),
             relationaloperators: $.parseJSON(options.params.relationaloperators),
             targetvalues: $.parseJSON(options.params.targetvalues),
             types: $.parseJSON(options.params.types),
             expression: options.params.expression,
-            sensitivecomparisons : $.parseJSON(options.params.sensitivecomparisons)
+            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons)
         };
-        if (options.message)
-            options.messages['assertthatexpression'] = options.message;
+        if (options.message) {
+            options.messages.assertthatexpression = options.message;
+        }
     });
 
     $.validator.unobtrusive.adapters.add('requiredif', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type', 'sensitivecomparisons'], function(options) {
-        options.rules['requiredif'] = {
-            prefix: ModelPrefix.get(options.element.name),
+        options.rules.requiredif = {
+            prefix: modelPrefix.get(options.element.name),
             form: options.form,
             dependentproperty: $.parseJSON(options.params.dependentproperty),
             relationaloperator: $.parseJSON(options.params.relationaloperator),
@@ -129,13 +148,14 @@
             type: $.parseJSON(options.params.type),
             sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons)
         };
-        if (options.message)
-            options.messages['requiredif'] = options.message;
+        if (options.message) {
+            options.messages.requiredif = options.message;
+        }
     });
 
-    $.validator.unobtrusive.adapters.add('requiredifexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression', 'sensitivecomparisons'], function (options) {
-        options.rules['requiredifexpression'] = {
-            prefix: ModelPrefix.get(options.element.name),
+    $.validator.unobtrusive.adapters.add('requiredifexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression', 'sensitivecomparisons'], function(options) {
+        options.rules.requiredifexpression = {
+            prefix: modelPrefix.get(options.element.name),
             form: options.form,
             dependentproperties: $.parseJSON(options.params.dependentproperties),
             relationaloperators: $.parseJSON(options.params.relationaloperators),
@@ -144,38 +164,47 @@
             expression: options.params.expression,
             sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons)
         };
-        if (options.message)
-            options.messages['requiredifexpression'] = options.message;
+        if (options.message) {
+            options.messages.requiredifexpression = options.message;
+        }
     });
 
     $.validator.addMethod('assertthat', function(value, element, params) {
-        if (!analyser.TypeHelper.isEmpty(value)) // check if the field is non-empty (continue if so, otherwise skip condition verification)
-            if (!AttributeInternals.verify(element, params)) // check if the assertion condition is not satisfied
+        if (!analyser.typeHelper.isEmpty(value)) { // check if the field is non-empty (continue if so, otherwise skip condition verification)
+            if (!attributeInternals.verify(element, params)) { // check if the assertion condition is not satisfied                
                 return false; // assertion not satisfied => notify
+            }
+        }
         return true;
     }, '');
 
     $.validator.addMethod('assertthatexpression', function(value, element, params) {
-        if (!analyser.TypeHelper.isEmpty(value))
-            if (!ExpressionAttributeInternals.verify(element, params))
+        if (!analyser.typeHelper.isEmpty(value)) {
+            if (!expressionAttributeInternals.verify(element, params)) {
                 return false;
+            }
+        }
         return true;
     }, '');
 
     $.validator.addMethod('requiredif', function(value, element, params) {
-        var boolValue = analyser.TypeHelper.Bool.tryParse(value);
-        if (analyser.TypeHelper.isEmpty(value) || (element.type === 'radio' && (!boolValue.error && !boolValue))) // check if the field is empty or false (continue if so, otherwise skip condition verification)
-            if (AttributeInternals.verify(element, params)) // check if the requirement condition is satisfied 
+        var boolValue = analyser.typeHelper.Bool.tryParse(value);
+        if (analyser.typeHelper.isEmpty(value) || (element.type === 'radio' && (!boolValue.error && !boolValue))) { // check if the field is empty or false (continue if so, otherwise skip condition verification)
+            if (attributeInternals.verify(element, params)) { // check if the requirement condition is satisfied 
                 return false; // requirement confirmed => notify
+            }
+        }
         return true;
     }, '');
 
     $.validator.addMethod('requiredifexpression', function(value, element, params) {
-        var boolValue = analyser.TypeHelper.Bool.tryParse(value);
-        if (analyser.TypeHelper.isEmpty(value) || (element.type === 'radio' && (!boolValue.error && !boolValue)))
-            if (ExpressionAttributeInternals.verify(element, params))
+        var boolValue = analyser.typeHelper.Bool.tryParse(value);
+        if (analyser.typeHelper.isEmpty(value) || (element.type === 'radio' && (!boolValue.error && !boolValue))) {
+            if (expressionAttributeInternals.verify(element, params)) {
                 return false;
+            }
+        }
         return true;
     }, '');
 
-})(jQuery, LogicalExpressionsAnalyser);
+}(jQuery, logicalExpressionsAnalyser));
