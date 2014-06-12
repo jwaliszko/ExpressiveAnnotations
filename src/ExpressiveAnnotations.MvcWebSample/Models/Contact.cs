@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using ExpressiveAnnotations.ConditionalAttributes;
+using ExpressiveAnnotations.Attributes;
 
 namespace ExpressiveAnnotations.MvcWebSample.Models
 {

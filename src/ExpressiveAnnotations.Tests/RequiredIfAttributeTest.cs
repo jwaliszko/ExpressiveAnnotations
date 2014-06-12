@@ -1,5 +1,5 @@
 ﻿using System;
-using ExpressiveAnnotations.ConditionalAttributes;
+using ExpressiveAnnotations.Attributes;
 using ExpressiveAnnotations.Tests.Misc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;

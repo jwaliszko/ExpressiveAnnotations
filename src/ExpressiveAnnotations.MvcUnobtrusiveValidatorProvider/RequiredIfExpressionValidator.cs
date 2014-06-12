@@ -1,6 +1,6 @@
 ﻿using System.Web.Mvc;
-using ExpressiveAnnotations.ConditionalAttributes;
 using System.Collections.Generic;
+using ExpressiveAnnotations.Attributes;
 using Newtonsoft.Json;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider

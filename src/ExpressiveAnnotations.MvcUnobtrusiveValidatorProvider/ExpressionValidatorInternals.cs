@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Web.Mvc;
-using ExpressiveAnnotations.ConditionalAttributes;
+using ExpressiveAnnotations.Attributes;
 using ExpressiveAnnotations.Misc;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider

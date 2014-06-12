@@ -1,7 +1,7 @@
 ﻿using System;
-using ExpressiveAnnotations.LogicalExpressionsAnalysis;
-using ExpressiveAnnotations.LogicalExpressionsAnalysis.LexicalAnalysis;
-using ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis;
+using ExpressiveAnnotations.Analysis;
+using ExpressiveAnnotations.Analysis.LexicalAnalysis;
+using ExpressiveAnnotations.Analysis.SyntacticAnalysis;
 using ExpressiveAnnotations.Misc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
@@ -55,7 +55,7 @@ namespace ExpressiveAnnotations.Tests
         [TestMethod]
         public void Verify_infix_to_postfix_conversion()
         {
-            var converter = new InfixToPostfixConverter();
+            var converter = new InfixParser();
             Assert.AreEqual(converter.Convert("()"), "");
             Assert.AreEqual(converter.Convert("( true && (true) ) || false"), "true true && false ||");
             Assert.AreEqual(converter.Convert(
