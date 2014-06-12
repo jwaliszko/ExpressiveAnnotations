@@ -3,19 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.LexicalAnalysis
+namespace ExpressiveAnnotations.Analysis.LexicalAnalysis
 {
+    /// <summary>
+    /// Performs basic lexical analysis of provided expression based on given token patterns.
+    /// </summary>
     internal sealed class Tokenizer
     {
         private string[] Patterns { get; set; }
         private string Expression { get; set; }
         private string Token { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Tokenizer" /> class.
+        /// </summary>
+        /// <param name="patterns">The token patterns.</param>
         public Tokenizer(string[] patterns)
         {
             Patterns = patterns;
         }
 
+        /// <summary>
+        /// Analyzes the specified expression and extracts the array of tokens.
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns>Array of extracted tokens.</returns>
         public string[] Analyze(string expression)
         {
             var tokens = new List<string>();

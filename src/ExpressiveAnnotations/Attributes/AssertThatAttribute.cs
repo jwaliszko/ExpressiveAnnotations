@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using ExpressiveAnnotations.Misc;
 
-namespace ExpressiveAnnotations.ConditionalAttributes
+namespace ExpressiveAnnotations.Attributes
 {
     /// <summary>
     /// Validation attribute, executed for non-empty annotated field, which indicates that given assertion has to be satisfied, for such field to be considered as valid.

@@ -2,7 +2,7 @@
 using ExpressiveAnnotations.Misc;
 using Newtonsoft.Json;
 
-namespace ExpressiveAnnotations.LogicalExpressionsAnalysis
+namespace ExpressiveAnnotations.Analysis
 {
     /// <summary>
     /// Type which computes relational operations results.

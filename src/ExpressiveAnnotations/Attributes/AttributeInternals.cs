@@ -1,9 +1,9 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using ExpressiveAnnotations.LogicalExpressionsAnalysis;
+using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Misc;
 
-namespace ExpressiveAnnotations.ConditionalAttributes
+namespace ExpressiveAnnotations.Attributes
 {
     internal class AttributeInternals
     {

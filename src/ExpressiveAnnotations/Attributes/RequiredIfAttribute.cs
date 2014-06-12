@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using ExpressiveAnnotations.Misc;
 
-namespace ExpressiveAnnotations.ConditionalAttributes
+namespace ExpressiveAnnotations.Attributes
 {
     /// <summary>
     /// Validation attribute which indicates that annotated field is required when dependent field has appropriate value.

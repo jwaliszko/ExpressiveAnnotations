@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using ExpressiveAnnotations.LogicalExpressionsAnalysis;
+using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Misc;
 
-namespace ExpressiveAnnotations.ConditionalAttributes
+namespace ExpressiveAnnotations.Attributes
 {
     internal class ExpressionAttributeInternals
     {

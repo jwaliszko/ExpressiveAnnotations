@@ -1,15 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ExpressiveAnnotations.LogicalExpressionsAnalysis.LexicalAnalysis;
+using ExpressiveAnnotations.Analysis.LexicalAnalysis;
 
-namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis
+namespace ExpressiveAnnotations.Analysis.SyntacticAnalysis
 {
-    internal class InfixToPostfixConverter
+    /// <summary>
+    /// Performs syntactic analysis of provided boolean expression given in infix notation.
+    /// </summary>
+    internal class InfixParser
     {
         private Tokenizer InfixTokenizer { get; set; }
 
-        public InfixToPostfixConverter()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InfixParser" /> class.
+        /// </summary>
+        public InfixParser()
         {
             InfixTokenizer = new Tokenizer(new[] {@"true", @"false", @"&&", @"\|\|", @"\!", @"\(", @"\)"});
         }
@@ -44,6 +50,14 @@ namespace ExpressiveAnnotations.LogicalExpressionsAnalysis.SyntacticAnalysis
             return st.Contains("(");
         }
 
+        /// <summary>
+        /// Converts the specified boolean expression given in infix form into postfix one.
+        /// </summary>
+        /// <param name="expression">The boolean expression.</param>
+        /// <returns></returns>
+        /// <exception cref="System.ArgumentException">
+        /// Infix expression parsing error. Incorrect nesting.
+        /// </exception>
         public string Convert(string expression)
         {
             var tokens = InfixTokenizer.Analyze(expression);

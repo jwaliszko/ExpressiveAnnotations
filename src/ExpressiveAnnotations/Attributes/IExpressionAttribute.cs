@@ -1,4 +1,4 @@
-﻿namespace ExpressiveAnnotations.ConditionalAttributes
+﻿namespace ExpressiveAnnotations.Attributes
 {
     /// <summary>
     /// Defines contract for complex conditional attributes.
