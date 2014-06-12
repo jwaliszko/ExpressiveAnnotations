@@ -171,7 +171,7 @@
 
     $.validator.addMethod('assertthat', function(value, element, params) {
         if (!analyser.typeHelper.isEmpty(value)) { // check if the field is non-empty (continue if so, otherwise skip condition verification)
-            if (!attributeInternals.verify(element, params)) { // check if the assertion condition is not satisfied                
+            if (!attributeInternals.verify(params)) { // check if the assertion condition is not satisfied                
                 return false; // assertion not satisfied => notify
             }
         }
@@ -180,7 +180,7 @@
 
     $.validator.addMethod('assertthatexpression', function(value, element, params) {
         if (!analyser.typeHelper.isEmpty(value)) {
-            if (!expressionAttributeInternals.verify(element, params)) {
+            if (!expressionAttributeInternals.verify(params)) {
                 return false;
             }
         }
@@ -190,7 +190,7 @@
     $.validator.addMethod('requiredif', function(value, element, params) {
         var boolValue = analyser.typeHelper.Bool.tryParse(value);
         if (analyser.typeHelper.isEmpty(value) || (element.type === 'radio' && (!boolValue.error && !boolValue))) { // check if the field is empty or false (continue if so, otherwise skip condition verification)
-            if (attributeInternals.verify(element, params)) { // check if the requirement condition is satisfied 
+            if (attributeInternals.verify(params)) { // check if the requirement condition is satisfied 
                 return false; // requirement confirmed => notify
             }
         }
@@ -200,7 +200,7 @@
     $.validator.addMethod('requiredifexpression', function(value, element, params) {
         var boolValue = analyser.typeHelper.Bool.tryParse(value);
         if (analyser.typeHelper.isEmpty(value) || (element.type === 'radio' && (!boolValue.error && !boolValue))) {
-            if (expressionAttributeInternals.verify(element, params)) {
+            if (expressionAttributeInternals.verify(params)) {
                 return false;
             }
         }
