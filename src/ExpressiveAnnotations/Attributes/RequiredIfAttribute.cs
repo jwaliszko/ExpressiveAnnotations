@@ -35,12 +35,24 @@ namespace ExpressiveAnnotations.Attributes
         public bool SensitiveComparisons { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RequiredIfAttribute"/> class.
+        /// Gets or sets a flag indicating whether the attribute should allow nulls or empty strings.
+        /// </summary>
+        public bool AllowEmpty { get; set; }
+
+        /// <summary>
+        /// Gets or sets a flag indicating whether the attribute should allow false boolean values.
+        /// </summary>
+        public bool AllowFalse { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RequiredIfAttribute" /> class.
         /// </summary>
         public RequiredIfAttribute()
             : base(_defaultErrorMessage)
         {
             SensitiveComparisons = true;
+            AllowEmpty = false;
+            AllowFalse = false;
         }
 
         /// <summary>
@@ -62,7 +74,6 @@ namespace ExpressiveAnnotations.Attributes
         /// <returns>
         /// An instance of the <see cref="T:System.ComponentModel.DataAnnotations.ValidationResult" /> class.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">validationContext;ValidationContext not provided.</exception>
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             var internals = new AttributeInternals
@@ -73,7 +84,7 @@ namespace ExpressiveAnnotations.Attributes
                 SensitiveComparisons = SensitiveComparisons
             };
 
-            if (value.IsEmpty() || (value is bool && !(bool)value)) // check if the field is empty or false (continue if so, otherwise skip condition verification)
+            if ((value.IsEmpty() && !AllowEmpty) || (value is bool && !(bool)value && !AllowFalse)) // check if the field is empty or false (continue if so, otherwise skip condition verification)
                 if (internals.Verify(validationContext)) // check if the requirement condition is satisfied
                     return new ValidationResult( // requirement confirmed => notify
                         FormatErrorMessage(validationContext.DisplayName,

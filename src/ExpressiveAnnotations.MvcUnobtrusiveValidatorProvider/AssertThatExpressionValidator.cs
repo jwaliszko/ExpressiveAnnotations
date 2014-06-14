@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 {
     /// <summary>
-    /// Model validator for <see cref="AssertThatExpressionAttribute"/>.
+    /// Model validator for <see cref="AssertThatExpressionAttribute" />.
     /// </summary>
     public class AssertThatExpressionValidator : DataAnnotationsModelValidator<AssertThatExpressionAttribute>
     {
@@ -18,11 +18,6 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         /// <param name="metadata">The metadata.</param>
         /// <param name="context">The context.</param>
         /// <param name="attribute">The attribute.</param>
-        /// <exception cref="System.ArgumentException">
-        /// Number of elements in DependentProperties and TargetValues must match.
-        /// or
-        /// Number of explicitly provided relational operators is incorrect.
-        /// </exception>
         public AssertThatExpressionValidator(ModelMetadata metadata, ControllerContext context, AssertThatExpressionAttribute attribute)
             : base(metadata, context, attribute)
         {

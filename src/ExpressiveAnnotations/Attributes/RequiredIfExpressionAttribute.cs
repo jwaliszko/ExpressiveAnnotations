@@ -41,7 +41,17 @@ namespace ExpressiveAnnotations.Attributes
         public bool SensitiveComparisons { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RequiredIfExpressionAttribute"/> class.
+        /// Gets or sets a flag indicating whether the attribute should allow nulls or empty strings.
+        /// </summary>
+        public bool AllowEmpty { get; set; }
+
+        /// <summary>
+        /// Gets or sets a flag indicating whether the attribute should allow false boolean values.
+        /// </summary>
+        public bool AllowFalse { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RequiredIfExpressionAttribute" /> class.
         /// </summary>
         public RequiredIfExpressionAttribute()
             : base(_defaultErrorMessage)
@@ -50,6 +60,8 @@ namespace ExpressiveAnnotations.Attributes
             TargetValues = new object[0];
             RelationalOperators = new string[0];
             SensitiveComparisons = true;
+            AllowEmpty = false;
+            AllowFalse = false;
         }
 
         /// <summary>
@@ -71,12 +83,6 @@ namespace ExpressiveAnnotations.Attributes
         /// <returns>
         /// An instance of the <see cref="T:System.ComponentModel.DataAnnotations.ValidationResult" /> class.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">validationContext;ValidationContext not provided.</exception>
-        /// <exception cref="System.ArgumentException">
-        /// Number of elements in DependentProperties and TargetValues must match.
-        /// or
-        /// Number of explicitly provided relational operators is incorrect.
-        /// </exception>
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             var internals = new ExpressionAttributeInternals
@@ -88,7 +94,7 @@ namespace ExpressiveAnnotations.Attributes
                 SensitiveComparisons = SensitiveComparisons
             };
 
-            if (value.IsEmpty() || (value is bool && !(bool)value))
+            if ((value.IsEmpty() && !AllowEmpty) || (value is bool && !(bool)value && !AllowFalse))
                 if (internals.Verify(validationContext))
                     return new ValidationResult(
                         FormatErrorMessage(validationContext.DisplayName,

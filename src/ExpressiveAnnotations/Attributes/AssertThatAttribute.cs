@@ -62,7 +62,6 @@ namespace ExpressiveAnnotations.Attributes
         /// <returns>
         /// An instance of the <see cref="T:System.ComponentModel.DataAnnotations.ValidationResult" /> class.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">validationContext;ValidationContext not provided.</exception>
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             var internals = new AttributeInternals

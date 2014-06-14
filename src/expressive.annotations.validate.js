@@ -131,14 +131,14 @@
             targetvalues: $.parseJSON(options.params.targetvalues),
             types: $.parseJSON(options.params.types),
             expression: options.params.expression,
-            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons)
+            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons)            
         };
         if (options.message) {
             options.messages.assertthatexpression = options.message;
         }
     });
 
-    $.validator.unobtrusive.adapters.add('requiredif', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type', 'sensitivecomparisons'], function(options) {
+    $.validator.unobtrusive.adapters.add('requiredif', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type', 'sensitivecomparisons', 'allowempty', 'allowfalse', 'modeltype'], function (options) {
         options.rules.requiredif = {
             prefix: modelPrefix.get(options.element.name),
             form: options.form,
@@ -146,14 +146,18 @@
             relationaloperator: $.parseJSON(options.params.relationaloperator),
             targetvalue: $.parseJSON(options.params.targetvalue),
             type: $.parseJSON(options.params.type),
-            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons)
+            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons),
+            allowempty: $.parseJSON(options.params.allowempty),
+            allowfalse: $.parseJSON(options.params.allowfalse),
+            modeltype: $.parseJSON(options.params.modeltype)
+
         };
         if (options.message) {
             options.messages.requiredif = options.message;
         }
     });
 
-    $.validator.unobtrusive.adapters.add('requiredifexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression', 'sensitivecomparisons'], function(options) {
+    $.validator.unobtrusive.adapters.add('requiredifexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression', 'sensitivecomparisons', 'allowempty', 'allowfalse', 'modeltype'], function (options) {
         options.rules.requiredifexpression = {
             prefix: modelPrefix.get(options.element.name),
             form: options.form,
@@ -162,7 +166,10 @@
             targetvalues: $.parseJSON(options.params.targetvalues),
             types: $.parseJSON(options.params.types),
             expression: options.params.expression,
-            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons)
+            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons),
+            allowempty: $.parseJSON(options.params.allowempty),
+            allowfalse: $.parseJSON(options.params.allowfalse),
+            modeltype: $.parseJSON(options.params.modeltype)
         };
         if (options.message) {
             options.messages.requiredifexpression = options.message;
@@ -189,7 +196,7 @@
 
     $.validator.addMethod('requiredif', function(value, element, params) {
         var boolValue = analyser.typeHelper.Bool.tryParse(value);
-        if (analyser.typeHelper.isEmpty(value) || (element.type === 'radio' && (!boolValue.error && !boolValue))) { // check if the field is empty or false (continue if so, otherwise skip condition verification)
+        if ((analyser.typeHelper.isEmpty(value) && !params.allowempty) || (params.modeltype === 'bool' && !boolValue.error && !boolValue && !params.allowfalse)) { // check if the field is empty or false (continue if so, otherwise skip condition verification)
             if (attributeInternals.verify(params)) { // check if the requirement condition is satisfied 
                 return false; // requirement confirmed => notify
             }
@@ -199,7 +206,7 @@
 
     $.validator.addMethod('requiredifexpression', function(value, element, params) {
         var boolValue = analyser.typeHelper.Bool.tryParse(value);
-        if (analyser.typeHelper.isEmpty(value) || (element.type === 'radio' && (!boolValue.error && !boolValue))) {
+        if ((analyser.typeHelper.isEmpty(value) && !params.allowempty) || (params.modeltype === 'bool' && !boolValue.error && !boolValue && !params.allowfalse)) {
             if (expressionAttributeInternals.verify(params)) {
                 return false;
             }

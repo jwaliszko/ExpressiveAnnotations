@@ -6,14 +6,14 @@ using Newtonsoft.Json;
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 {
     /// <summary>
-    /// Model validator for <see cref="AssertThatAttribute"/>.
+    /// Model validator for <see cref="AssertThatAttribute" />.
     /// </summary>
     public class AssertThatValidator : DataAnnotationsModelValidator<AssertThatAttribute>
     {
         private readonly ValidatorInternals _internals = new ValidatorInternals();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AssertThatValidator"/> class.
+        /// Initializes a new instance of the <see cref="AssertThatValidator" /> class.
         /// </summary>
         /// <param name="metadata">The metadata.</param>
         /// <param name="context">The context.</param>
