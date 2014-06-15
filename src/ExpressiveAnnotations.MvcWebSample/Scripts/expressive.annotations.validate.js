@@ -131,14 +131,14 @@
             targetvalues: $.parseJSON(options.params.targetvalues),
             types: $.parseJSON(options.params.types),
             expression: options.params.expression,
-            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons)
+            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons)            
         };
         if (options.message) {
             options.messages.assertthatexpression = options.message;
         }
     });
 
-    $.validator.unobtrusive.adapters.add('requiredif', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type', 'sensitivecomparisons'], function(options) {
+    $.validator.unobtrusive.adapters.add('requiredif', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type', 'sensitivecomparisons', 'allowemptyorfalse', 'modeltype'], function (options) {
         options.rules.requiredif = {
             prefix: modelPrefix.get(options.element.name),
             form: options.form,
@@ -146,14 +146,17 @@
             relationaloperator: $.parseJSON(options.params.relationaloperator),
             targetvalue: $.parseJSON(options.params.targetvalue),
             type: $.parseJSON(options.params.type),
-            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons)
+            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons),
+            allowemptyorfalse: $.parseJSON(options.params.allowemptyorfalse),
+            modeltype: $.parseJSON(options.params.modeltype)
+
         };
         if (options.message) {
             options.messages.requiredif = options.message;
         }
     });
 
-    $.validator.unobtrusive.adapters.add('requiredifexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression', 'sensitivecomparisons'], function(options) {
+    $.validator.unobtrusive.adapters.add('requiredifexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression', 'sensitivecomparisons', 'allowemptyorfalse', 'modeltype'], function (options) {
         options.rules.requiredifexpression = {
             prefix: modelPrefix.get(options.element.name),
             form: options.form,
@@ -162,7 +165,9 @@
             targetvalues: $.parseJSON(options.params.targetvalues),
             types: $.parseJSON(options.params.types),
             expression: options.params.expression,
-            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons)
+            sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons),
+            allowemptyorfalse: $.parseJSON(options.params.allowemptyorfalse),
+            modeltype: $.parseJSON(options.params.modeltype)
         };
         if (options.message) {
             options.messages.requiredifexpression = options.message;
@@ -171,7 +176,7 @@
 
     $.validator.addMethod('assertthat', function(value, element, params) {
         if (!analyser.typeHelper.isEmpty(value)) { // check if the field is non-empty (continue if so, otherwise skip condition verification)
-            if (!attributeInternals.verify(params)) { // check if the assertion condition is not satisfied                
+            if (!attributeInternals.verify(params)) { // check if the assertion condition is not satisfied
                 return false; // assertion not satisfied => notify
             }
         }
@@ -187,19 +192,33 @@
         return true;
     }, '');
 
-    $.validator.addMethod('requiredif', function(value, element, params) {
-        var boolValue = analyser.typeHelper.Bool.tryParse(value);
-        if (analyser.typeHelper.isEmpty(value) || (element.type === 'radio' && (!boolValue.error && !boolValue))) { // check if the field is empty or false (continue if so, otherwise skip condition verification)
-            if (attributeInternals.verify(params)) { // check if the requirement condition is satisfied 
-                return false; // requirement confirmed => notify
+    $.validator.addMethod('requiredif', function (value, element, params) {
+        if (params.modeltype === 'bool') {
+            var boolValue = analyser.typeHelper.Bool.tryParse(value);
+            if (boolValue.error /* non-set bool indicates null, and null is always required */ || (!boolValue.error && !boolValue && !params.allowemptyorfalse)) {
+                if (attributeInternals.verify(params)) { // check if the requirement condition is satisfied
+                    return false; // requirement confirmed => notify
+                }
+            }
+        }
+        if (analyser.typeHelper.isEmpty(value)) { // check if the field is empty (empty or whitespace field at client side is perceived the same way, as null is perceived at server side - always required)
+            if (attributeInternals.verify(params)) {
+                return false;
             }
         }
         return true;
     }, '');
 
-    $.validator.addMethod('requiredifexpression', function(value, element, params) {
-        var boolValue = analyser.typeHelper.Bool.tryParse(value);
-        if (analyser.typeHelper.isEmpty(value) || (element.type === 'radio' && (!boolValue.error && !boolValue))) {
+    $.validator.addMethod('requiredifexpression', function (value, element, params) {
+        if (params.modeltype === 'bool') {
+            var boolValue = analyser.typeHelper.Bool.tryParse(value);
+            if (boolValue.error || (!boolValue.error && !boolValue && !params.allowemptyorfalse)) {
+                if (expressionAttributeInternals.verify(params)) {
+                    return false;
+                }
+            }
+        }
+        if (analyser.typeHelper.isEmpty(value)) {
             if (expressionAttributeInternals.verify(params)) {
                 return false;
             }

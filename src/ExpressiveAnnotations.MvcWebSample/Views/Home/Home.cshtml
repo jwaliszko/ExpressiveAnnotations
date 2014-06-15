@@ -40,7 +40,7 @@
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.Age, new { @class = "inline prefix" })
-                @Html.DropDownListFor(x => x.Age, new SelectList(Model.Years, null))
+                @Html.DropDownListFor(model => model.Age, new SelectList(Model.Years, null))
                 @Html.ValidationMessageFor(model => model.Age)
             </li>
             <li>
@@ -56,12 +56,12 @@
             </li>
             <li>
                 @Html.LabelFor(model => model.Country, new {@class = "inline prefix"})
-                @Html.DropDownListFor(x => x.Country, new SelectList(Model.Countries, "Value", "Text"))
+                @Html.DropDownListFor(model => model.Country, new SelectList(Model.Countries, "Value", "Text"))
                 @Html.ValidationMessageFor(model => model.Country)
             </li>
             <li>
                 @Html.LabelFor(model => model.NextCountry, new {@class = "inline prefix"})
-                @Html.DropDownListFor(x => x.NextCountry, new SelectList(Model.Countries, "Value", "Text"))
+                @Html.DropDownListFor(model => model.NextCountry, new SelectList(Model.Countries, "Value", "Text"))
                 @Html.ValidationMessageFor(model => model.NextCountry)
             </li>
             <li>
@@ -85,8 +85,8 @@
                 @Html.ValidationMessageFor(model => model.ReasonForTravel)
             </li>
             <li>
-                @Html.EditorFor(x => x.LatestSuggestedReturnDate)   @*hidden backing field storing date in RFC 2822 or ISO 8601 format*@
-                @Html.EditorFor(x => x.Today)
+                @Html.EditorFor(model => model.LatestSuggestedReturnDate)   @*hidden backing field storing date in RFC 2822 or ISO 8601 format*@
+                @Html.EditorFor(model => model.Today)
                 <pre class="code">
 [RequiredIf(
     DependentProperty = "GoAbroad", 
@@ -98,7 +98,7 @@
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.ReturnDate, new { @class = "inline prefix" })
-                @Html.EditorFor(x => x.ReturnDate) @Resources.LatestSuggestedReturnDate: @Model.LatestSuggestedReturnDate.ToString(lang == "pl" ? "yyyy-MM-dd" : "MM/dd/yyyy")
+                @Html.EditorFor(model => model.ReturnDate) @Resources.LatestSuggestedReturnDate: @Model.LatestSuggestedReturnDate.ToString(lang == "pl" ? "yyyy-MM-dd" : "MM/dd/yyyy")
                 @Html.ValidationMessageFor(model => model.ReturnDate)
             </li>
             <li>
@@ -114,7 +114,7 @@
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.ReasonForLongTravel, new { @class = "inline prefix" })
-                @Html.TextAreaFor(x => x.ReasonForLongTravel)
+                @Html.TextAreaFor(model => model.ReasonForLongTravel)
                 @Html.ValidationMessageFor(model => model.ReasonForLongTravel)
             </li>
             <li>
@@ -125,7 +125,7 @@
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.PoliticalStability, new { @class = "inline prefix" })
-                @Html.EnumDropDownListFor(x => x.PoliticalStability)
+                @Html.EnumDropDownListFor(model => model.PoliticalStability)
                 @Html.ValidationMessageFor(model => model.PoliticalStability)
             </li>
             <li>
@@ -145,7 +145,7 @@
                 @Html.LabelFor(model => model.SportType, new { @class = "inline prefix" })
                 @foreach (var item in Model.Sports)
                 {
-                    @Html.RadioButtonFor(m => m.SportType, item.Value) <label class="inline">@item.Text</label>
+                    @Html.RadioButtonFor(model => model.SportType, item.Value) <label class="inline">@item.Text</label>
                 }
                 @Html.ValidationMessageFor(model => model.SportType)                
             </li>
@@ -186,6 +186,19 @@ one of possible equivalents is:
                 @Html.RadioButtonFor(model => model.AgreeForContact, true) <label class="inline">@Resources.SpamAllowed</label>
                 @Html.RadioButtonFor(model => model.AgreeForContact, false) <label class="inline">@Resources.SpamForbidden</label>
                 @Html.ValidationMessageFor(model => model.AgreeForContact)
+            </li>
+            
+            <li>
+                <pre class="code">
+[RequiredIf(
+    DependentProperty = "AgreeForContact", 
+    TargetValue = true,
+    AllowEmptyOrFalse = true)]
+</pre>
+                <pre class="action">[show attribute]</pre>
+                @Html.LabelFor(model => model.ImmediateContact, new { @class = "inline prefix" })
+                @Html.DropDownListFor(model => model.ImmediateContact, new SelectList(Model.Answers, "Value", "Text"))
+                @Html.ValidationMessageFor(model => model.ImmediateContact)
             </li>
         </ol>
         <input type="submit" />
