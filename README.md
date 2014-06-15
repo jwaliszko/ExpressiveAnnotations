@@ -91,13 +91,10 @@ public string ReasonForTravel { get; set; }
 RequiredIfAttribute([string DependentProperty],
                     [object TargetValue],
 					[string RelationalOperator],
-					[bool SensitiveComparisons] ...) - Validation attribute which indicates that 
+					[bool SensitiveComparisons],
+					[bool AllowEmptyOrFalse] ...)    - Validation attribute which indicates that 
 													   annotated field is required when dependent 
 													   field has appropriate value.
-
-  AllowEmptyOrFalse    - Gets or sets a flag indicating whether the attribute should allow empty or
-                         whitespace strings or false boolean values (null never allowed).
-
 AssertThatAttribute([string DependentProperty],
                     [object TargetValue],
 					[string RelationalOperator],
@@ -115,21 +112,20 @@ AssertThatAttribute([string DependentProperty],
   RelationalOperator   - Gets or sets the relational operator indicating relation between dependent 
 						 field and target value. Available operators: ==, !=, >, >=, <, <=. If this 
 						 property is not provided, equality operator == is used by default.
-  SensitiveComparisons - Gets or sets whether the string comparisons are case sensitive or not.    
+  SensitiveComparisons - Gets or sets whether the string comparisons are case sensitive or not.
+  AllowEmptyOrFalse    - Gets or sets a flag indicating whether the attribute should allow empty or
+                         whitespace strings or false boolean values (null never allowed).
 ```
 ```
 RequiredIfExpressionAttribute([string Expression],
                               [string[] DependentProperties],
                               [object[] TargetValues],
 							  [string[] RelationalOperators],
-							  [bool SensitiveComparisons] ...) - Validation attribute which 
+							  [bool SensitiveComparisons],
+							  [bool AllowEmptyOrFalse] ...)    - Validation attribute which 
 							                                     indicates that annotated field is 
 																 required when computed result of 
 																 given logical expression is true.
-
-  AllowEmptyOrFalse    - Gets or sets a flag indicating whether the attribute should allow empty or
-                         whitespace strings or false boolean values (null never allowed).
-
 AssertThatExpressionAttribute([string Expression],
                               [string[] DependentProperties],
                               [object[] TargetValues],
@@ -155,6 +151,8 @@ AssertThatExpressionAttribute([string Expression],
 						 ==, !=, >, >=, <, <=. If this property is not provided, equality operator 
 						 == is used by default.
   SensitiveComparisons - Gets or sets whether the string comparisons are case sensitive or not.
+  AllowEmptyOrFalse    - Gets or sets a flag indicating whether the attribute should allow empty or
+                         whitespace strings or false boolean values (null never allowed).
 ```
 
 #####Theoretical background:
