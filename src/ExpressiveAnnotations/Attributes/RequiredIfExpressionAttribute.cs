@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using ExpressiveAnnotations.Misc;
 
 namespace ExpressiveAnnotations.Attributes
@@ -41,14 +42,9 @@ namespace ExpressiveAnnotations.Attributes
         public bool SensitiveComparisons { get; set; }
 
         /// <summary>
-        /// Gets or sets a flag indicating whether the attribute should allow nulls or empty strings.
+        /// Gets or sets a flag indicating whether the attribute should allow empty strings or false boolean values (null never allowed).
         /// </summary>
-        public bool AllowEmpty { get; set; }
-
-        /// <summary>
-        /// Gets or sets a flag indicating whether the attribute should allow false boolean values.
-        /// </summary>
-        public bool AllowFalse { get; set; }
+        public bool AllowEmptyOrFalse { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequiredIfExpressionAttribute" /> class.
@@ -60,8 +56,7 @@ namespace ExpressiveAnnotations.Attributes
             TargetValues = new object[0];
             RelationalOperators = new string[0];
             SensitiveComparisons = true;
-            AllowEmpty = false;
-            AllowFalse = false;
+            AllowEmptyOrFalse = false;
         }
 
         /// <summary>
@@ -94,7 +89,8 @@ namespace ExpressiveAnnotations.Attributes
                 SensitiveComparisons = SensitiveComparisons
             };
 
-            if ((value.IsEmpty() && !AllowEmpty) || (value is bool && !(bool)value && !AllowFalse))
+            var emptyOrFalse = (value is string && string.IsNullOrWhiteSpace((string)value)) || (value is bool && !(bool)value);
+            if (value == null || (emptyOrFalse && !AllowEmptyOrFalse))
                 if (internals.Verify(validationContext))
                     return new ValidationResult(
                         FormatErrorMessage(validationContext.DisplayName,

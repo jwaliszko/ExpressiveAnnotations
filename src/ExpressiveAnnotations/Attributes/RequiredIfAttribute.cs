@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using ExpressiveAnnotations.Misc;
 
 namespace ExpressiveAnnotations.Attributes
@@ -35,14 +36,10 @@ namespace ExpressiveAnnotations.Attributes
         public bool SensitiveComparisons { get; set; }
 
         /// <summary>
-        /// Gets or sets a flag indicating whether the attribute should allow nulls or empty strings.
+        /// Gets or sets a flag indicating whether the attribute should allow empty strings or false boolean values (null never allowed).
         /// </summary>
-        public bool AllowEmpty { get; set; }
-
-        /// <summary>
-        /// Gets or sets a flag indicating whether the attribute should allow false boolean values.
-        /// </summary>
-        public bool AllowFalse { get; set; }
+        [Required]
+        public bool AllowEmptyOrFalse { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequiredIfAttribute" /> class.
@@ -51,8 +48,7 @@ namespace ExpressiveAnnotations.Attributes
             : base(_defaultErrorMessage)
         {
             SensitiveComparisons = true;
-            AllowEmpty = false;
-            AllowFalse = false;
+            AllowEmptyOrFalse = false;
         }
 
         /// <summary>
@@ -84,7 +80,8 @@ namespace ExpressiveAnnotations.Attributes
                 SensitiveComparisons = SensitiveComparisons
             };
 
-            if ((value.IsEmpty() && !AllowEmpty) || (value is bool && !(bool)value && !AllowFalse)) // check if the field is empty or false (continue if so, otherwise skip condition verification)
+            var emptyOrFalse = (value is string && string.IsNullOrWhiteSpace((string)value)) || (value is bool && !(bool) value);
+            if (value == null || (emptyOrFalse && !AllowEmptyOrFalse)) // check if the field is empty or false (continue if so, otherwise skip condition verification)
                 if (internals.Verify(validationContext)) // check if the requirement condition is satisfied
                     return new ValidationResult( // requirement confirmed => notify
                         FormatErrorMessage(validationContext.DisplayName,
