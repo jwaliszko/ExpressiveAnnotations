@@ -119,12 +119,7 @@ namespace ExpressiveAnnotations.Misc
             var operands = new object[count];
             for (var i = 0; i < count; i++)
             {
-                string name;
-                var target = targetValues[i];
-                if (!TryExtractName(target, out name)) // if target value does not containan encapsulated property name, beautify it
-                    target = (target is string && (string)target != "*") ? string.Format("\"{0}\"", target) : target ?? "null";
-                target = (target is bool) ? target.ToString().ToLowerInvariant() : target;
-                operands[i] = string.Format("({0})", ComposeRelationalExpression(dependentProperties[i], target, relationalOperators.Any() ? relationalOperators[i] : "=="));
+                operands[i] = string.Format("({0})", ComposeRelationalExpression(dependentProperties[i], targetValues[i], relationalOperators.Any() ? relationalOperators[i] : "=="));
             }
             return string.Format(expression, operands);
         }
@@ -138,7 +133,12 @@ namespace ExpressiveAnnotations.Misc
         /// <returns></returns>
         public static string ComposeRelationalExpression(string dependentProperty, object targetValue, string relationalOperator)
         {
-            return string.Format("{0} {1} {2}", dependentProperty, relationalOperator ?? "==", targetValue);
+            string name;
+            var target = targetValue;
+            if (!TryExtractName(target, out name)) // if target value does not containan encapsulated property name, beautify it
+                target = (target is string && (string)target != "*") ? string.Format("\"{0}\"", target) : target ?? "null";
+            target = (target is bool) ? target.ToString().ToLowerInvariant() : target;
+            return string.Format("{0} {1} {2}", dependentProperty, relationalOperator ?? "==", target);
         }
     }
 }
