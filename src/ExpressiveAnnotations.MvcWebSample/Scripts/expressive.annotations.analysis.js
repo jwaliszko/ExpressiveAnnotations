@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.analysis.js - v1.3.2
+﻿/* expressive.annotations.analysis.js - v1.4.0
  * script responsible for logical expressions parsing and computation 
  * e.g. suppose there is "true && !false" expression given, and we need to know its final logical value:
  *     var evaluator = new Evaluator();
@@ -47,6 +47,12 @@ var logicalExpressionsAnalyser = (function() {
             },
             compareOrdinal: function(strA, strB) {
                 return strA === strB ? 0 : strA > strB ? 1 : -1;
+            },
+            tryParse: function(value) {
+                if (typeHelper.isString(value)) {
+                    return value;
+                }
+                return { error: true, msg: 'Parsing error. Given value has no boolean meaning.' };
             }
         },
         Bool: {
@@ -89,9 +95,6 @@ var logicalExpressionsAnalyser = (function() {
             }
         },
 
-        isEmpty: function(value) {
-            return value === null || value === '' || value === undefined || !/\S/.test(value);
-        },
         isNumeric: function(value) {
             return typeof value === 'number' && !isNaN(value);
         },
@@ -114,7 +117,7 @@ var logicalExpressionsAnalyser = (function() {
                     result = typeHelper.Float.tryParse(value);
                     break;
                 case 'string':
-                    result = (value || '').toString();
+                    result = typeHelper.String.tryParse(value);
                     break;
                 case 'bool':
                     result = typeHelper.Bool.tryParse(value);
@@ -128,10 +131,7 @@ var logicalExpressionsAnalyser = (function() {
 
     function Comparer() {
         function equal(dependentValue, targetValue, sensitiveComparisons) {
-            if (typeHelper.isEmpty(dependentValue) && typeHelper.isEmpty(targetValue)) {
-                return true;
-            }
-            if (!typeHelper.isEmpty(dependentValue) && targetValue === '*') {
+            if (!(dependentValue === undefined || dependentValue === null || dependentValue === '' || !/\S/.test(dependentValue)) && targetValue === '*') { // wildcard target doesn't allow null, empty or whitespace strings
                 return true;
             }
             var date = typeHelper.Date.tryParse(targetValue); // parsing here? - it is an exception when incompatible types are allowed, because date targets can be provided as strings
@@ -156,7 +156,7 @@ var logicalExpressionsAnalyser = (function() {
             if (typeHelper.isDate(dependentValue) && !date.error) {
                 return dependentValue > date;
             }
-            if (typeHelper.isEmpty(dependentValue) || typeHelper.isEmpty(targetValue)) {
+            if (dependentValue === undefined || dependentValue === null || dependentValue === '' || targetValue === undefined || targetValue === null || targetValue === '') {
                 return false;
             }
 
@@ -176,7 +176,7 @@ var logicalExpressionsAnalyser = (function() {
             if (typeHelper.isDate(dependentValue) && !date.error) {
                 return dependentValue < date;
             }
-            if (typeHelper.isEmpty(dependentValue) || typeHelper.isEmpty(targetValue)) {
+            if (dependentValue === undefined || dependentValue === null || dependentValue === '' || targetValue === undefined || targetValue === null || targetValue === '') {
                 return false;
             }
 

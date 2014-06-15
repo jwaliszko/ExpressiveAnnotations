@@ -5,10 +5,9 @@
     <ol>
         <li>
             <pre class="code">
-[RequiredIfExpression( /* interpretation => Email == null && Phone == null */
-    Expression = "{0} && {1}",
-    DependentProperties = new[] {"Email", "Phone"},
-    TargetValues = new object[] {null,    null},
+[RequiredIf(
+    DependentProperty = "Phone",
+    TargetValue = null,
     ErrorMessage = "You do not enter any contact information. At least email or phone should be provided.")]
 </pre>
         <pre class="action">[show attribute]</pre>                
@@ -18,10 +17,9 @@
         </li>
         <li>
             <pre class="code">
-[RequiredIfExpression( /* interpretation => Email == null && Phone == null */
-    Expression = "{0} && {1}",
-    DependentProperties = new[] {"Email", "Phone"},
-    TargetValues = new object[] {null,    null},
+[RequiredIf(
+    DependentProperty = "Email",
+    TargetValue = null,
     ErrorMessage = "You do not enter any contact information. At least email or phone should be provided.")]
 </pre>
         <pre class="action">[show attribute]</pre>

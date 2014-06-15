@@ -8,16 +8,6 @@ namespace ExpressiveAnnotations.Misc
     public static class TypeHelper
     {
         /// <summary>
-        /// Determines whether the specified value is empty - null or whitespace string.
-        /// </summary>
-        /// <param name="value">The value.</param>
-        /// <returns>True if value is empty, false otherwise.</returns>
-        public static bool IsEmpty(this object value)
-        {
-            return value == null || (value is string && string.IsNullOrWhiteSpace((string)value));
-        }
-
-        /// <summary>
         /// Determines whether the specified value is type of numeric (string representing a number does not count).
         /// </summary>
         /// <param name="value">The value.</param>

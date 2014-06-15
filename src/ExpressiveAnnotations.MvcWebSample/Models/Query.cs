@@ -143,10 +143,10 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "BloodType")]
         public string BloodType { get; set; }
 
-        [RequiredIfExpression( /* interpretation => ContactDetails.Email == "*" || ContactDetails.Phone == "*" */
+        [RequiredIfExpression( /* interpretation => ContactDetails.Email == non-empty || ContactDetails.Phone == non-empty */
             Expression = "{0} || {1}",
             DependentProperties = new[] {"ContactDetails.Email", "ContactDetails.Phone"}, /* nested properties are supported */
-            TargetValues = new object[] {"*",                    "*"}, /* any values */
+            TargetValues = new object[] { "*",                   "*" }, /* any non-empty values (other than null, empty or whitespace strings) */
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "AgreeForContactRequired")]
         [Display(ResourceType = typeof (Resources), Name = "AgreeForContact")]
         public bool AgreeForContact { get; set; }

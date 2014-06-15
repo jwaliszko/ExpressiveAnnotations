@@ -168,18 +168,10 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIfExpression( /* interpretation => ContactDetails.Email == "*" || ContactDetails.Phone == "*" */
+[RequiredIfExpression( /* interpretation => ContactDetails.Email == non-empty || ContactDetails.Phone == non-empty */
     Expression = "{0} || {1}",
     DependentProperties = new[] {"ContactDetails.Email", "ContactDetails.Phone"}, /* nested properties are supported */
-    TargetValues = new object[] {"*",                    "*"}, /* any values */
-    ErrorMessage = "You have to authorize us to contact you.")]
-
-one of possible equivalents is:
-
-[RequiredIfExpression( /* interpretation => ContactDetails.Email != null || ContactDetails.Phone != null */
-    Expression = "!{0} || !{1}",
-    DependentProperties = new[] {"ContactDetails.Email", "ContactDetails.Phone"},
-    TargetValues = new object[] {null,                   null}, /* no values */
+    TargetValues = new object[] {"*",                    "*"}, /* any non-empty values (other than null, empty or whitespace strings) */
     ErrorMessage = "You have to authorize us to contact you.")]
 </pre>
                 <pre class="action">[show attribute]</pre>

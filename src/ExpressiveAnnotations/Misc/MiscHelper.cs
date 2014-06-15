@@ -111,7 +111,7 @@ namespace ExpressiveAnnotations.Misc
         /// <param name="targetValues">The target values.</param>
         /// <param name="relationalOperators">The relational operators.</param>
         /// <returns>
-        /// Expression processed to user-friendly form.
+        /// Expression formatted in user-friendly form.
         /// </returns>
         public static string ComposeExpression(string expression, string[] dependentProperties, object[] targetValues, string[] relationalOperators)
         {
@@ -130,7 +130,9 @@ namespace ExpressiveAnnotations.Misc
         /// <param name="dependentProperty">The dependent property.</param>
         /// <param name="targetValue">The target value.</param>
         /// <param name="relationalOperator">The relational operator.</param>
-        /// <returns></returns>
+        /// <returns>
+        /// Expression formatted in user-friendly form.
+        /// </returns>
         public static string ComposeRelationalExpression(string dependentProperty, object targetValue, string relationalOperator)
         {
             string name;

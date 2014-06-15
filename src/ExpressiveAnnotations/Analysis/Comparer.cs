@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 namespace ExpressiveAnnotations.Analysis
 {
     /// <summary>
-    /// Type which computes relational operations results.
+    /// Type which computes relational operations.
     /// </summary>
     public static class Comparer
     {
@@ -16,7 +16,7 @@ namespace ExpressiveAnnotations.Analysis
         /// <param name="targetValue">The target value.</param>
         /// <param name="relationalOperator">The relational operator.</param>
         /// <param name="sensitiveComparisons">Case sensitivity of string comparisons.</param>
-        /// <returns></returns>
+        /// <returns>The boolean result of computation.</returns>
         /// <exception cref="System.ArgumentException"></exception>
         public static bool Compute(object dependentValue, object targetValue, string relationalOperator, bool sensitiveComparisons)
         {
@@ -43,14 +43,14 @@ namespace ExpressiveAnnotations.Analysis
         /// Computes equality comparison.
         /// </summary>
         /// <param name="dependentValue">The dependent value.</param>
-        /// <param name="targetValue">The target value.</param>
+        /// <param name="targetValue">The target value (wildcard stands for any value other than null, empty or whitespace strings).</param>
         /// <param name="sensitiveComparisons">Case sensitivity of string comparisons.</param>
-        /// <returns></returns>
+        /// <returns>The boolean result of comparison.</returns>
         public static bool Equal(object dependentValue, object targetValue, bool sensitiveComparisons)
         {
-            if (dependentValue.IsEmpty() && targetValue.IsEmpty())
-                return true;
-            if(!dependentValue.IsEmpty() && string.Equals(targetValue as string, "*"))
+            if (!(dependentValue == null 
+                || (dependentValue is string && string.IsNullOrWhiteSpace((string)dependentValue))) 
+                && string.Equals(targetValue as string, "*"))
                 return true;
             DateTime date;
             if (dependentValue.IsDateTime() && DateTime.TryParse(targetValue as string, out date)) // parsing here? - it is an exception when incompatible types are allowed, because date targets can be provided as strings
@@ -67,7 +67,7 @@ namespace ExpressiveAnnotations.Analysis
         /// </summary>
         /// <param name="dependentValue">The dependent value.</param>
         /// <param name="targetValue">The target value.</param>
-        /// <returns></returns>
+        /// <returns>The boolean result of comparison.</returns>
         /// <exception cref="System.InvalidOperationException">Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.</exception>
         public static bool Greater(object dependentValue, object targetValue)
         {
@@ -91,7 +91,7 @@ namespace ExpressiveAnnotations.Analysis
         /// </summary>
         /// <param name="dependentValue">The dependent value.</param>
         /// <param name="targetValue">The target value.</param>
-        /// <returns></returns>
+        /// <returns>The boolean result of comparison.</returns>
         /// <exception cref="System.InvalidOperationException">Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.</exception>
         public static bool Less(object dependentValue, object targetValue)
         {

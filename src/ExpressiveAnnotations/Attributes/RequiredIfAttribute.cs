@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using ExpressiveAnnotations.Misc;
 
 namespace ExpressiveAnnotations.Attributes
@@ -36,7 +35,7 @@ namespace ExpressiveAnnotations.Attributes
         public bool SensitiveComparisons { get; set; }
 
         /// <summary>
-        /// Gets or sets a flag indicating whether the attribute should allow empty strings or false boolean values (null never allowed).
+        /// Gets or sets a flag indicating whether the attribute should allow empty or whitespace strings or false boolean values (null never allowed).
         /// </summary>
         [Required]
         public bool AllowEmptyOrFalse { get; set; }

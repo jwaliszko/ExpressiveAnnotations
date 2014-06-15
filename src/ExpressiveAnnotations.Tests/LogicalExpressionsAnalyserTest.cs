@@ -253,11 +253,16 @@ namespace ExpressiveAnnotations.Tests
         public void Verify_comparison_equals_empty()
         {
             Assert.IsTrue(Comparer.Compute("", "", "==", true));
-            Assert.IsTrue(Comparer.Compute(" ", " ", "==", true));
-            Assert.IsTrue(Comparer.Compute("\t", "\n", "==", true));
+            Assert.IsTrue(Comparer.Compute(" ", " ", "==", true));            
             Assert.IsTrue(Comparer.Compute(null, null, "==", true));
-            Assert.IsTrue(Comparer.Compute("", " ", "==", true));
-            Assert.IsTrue(Comparer.Compute("\n\t ", null, "==", true));
+
+            Assert.IsTrue(!Comparer.Compute("", "*", "==", true));
+            Assert.IsTrue(!Comparer.Compute(" ", "*", "==", true));
+            Assert.IsTrue(!Comparer.Compute(null, "*", "==", true));
+
+            Assert.IsTrue(!Comparer.Compute("\t", "\n", "==", true));
+            Assert.IsTrue(!Comparer.Compute("", " ", "==", true));
+            Assert.IsTrue(!Comparer.Compute("", null, "==", true));
         }
 
         [TestMethod]
@@ -325,18 +330,6 @@ namespace ExpressiveAnnotations.Tests
             Assert.AreEqual(
                 MiscHelper.ComposeExpression(expression, dependentProperties, targetValues, relationalOperators),
                 "(aaa == true) && ( (!(bbb == \"xXx\") && (ccc == [yYy])) || ((ddd > -1) && (ddd <= 1.2)) ) && (eee != null) && (fff != *) && (ggg == \"\") || (bbb == \"xXx\")");
-        }
-
-        [TestMethod]
-        public void Verify_typehelper_is_empty()
-        {
-            object nullo = null;
-            Assert.IsTrue(nullo.IsEmpty());
-            Assert.IsTrue("".IsEmpty());
-            Assert.IsTrue(" ".IsEmpty());
-            Assert.IsTrue("\t".IsEmpty());
-            Assert.IsTrue("\n".IsEmpty());
-            Assert.IsTrue("\n\t ".IsEmpty());
         }
 
         [TestMethod]

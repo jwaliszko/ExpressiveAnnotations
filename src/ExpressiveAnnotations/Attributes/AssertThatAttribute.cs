@@ -5,7 +5,7 @@ using ExpressiveAnnotations.Misc;
 namespace ExpressiveAnnotations.Attributes
 {
     /// <summary>
-    /// Validation attribute, executed for non-empty annotated field, which indicates that given assertion has to be satisfied, for such field to be considered as valid.
+    /// Validation attribute, executed for non-null annotated field, which indicates that given assertion has to be satisfied, for such field to be considered as valid.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public sealed class AssertThatAttribute : ValidationAttribute, IAttribute
@@ -42,7 +42,7 @@ namespace ExpressiveAnnotations.Attributes
         {
             SensitiveComparisons = true;
         }
-
+        
         /// <summary>
         /// Formats the error message.
         /// </summary>
@@ -72,7 +72,7 @@ namespace ExpressiveAnnotations.Attributes
                 SensitiveComparisons = SensitiveComparisons
             };
 
-            if (!value.IsEmpty()) // check if the field is non-empty (continue if so, otherwise skip condition verification)
+            if (value != null) // check if the field is non-empty (continue if so, otherwise skip condition verification)
                 if (!internals.Verify(validationContext)) // check if the assertion condition is not satisfied
                     return new ValidationResult( // assertion not satisfied => notify
                         FormatErrorMessage(validationContext.DisplayName,

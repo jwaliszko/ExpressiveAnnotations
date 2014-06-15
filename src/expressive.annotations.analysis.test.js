@@ -168,11 +168,16 @@
 
         wnd.ok(comparer.compute("", "", "==", true));
         wnd.ok(comparer.compute(" ", " ", "==", true));
-        wnd.ok(comparer.compute("\t", "\n", "==", true));
         wnd.ok(comparer.compute(null, null, "==", true));
-        wnd.ok(comparer.compute("", " ", "==", true));
-        wnd.ok(comparer.compute("\n\t ", null, "==", true));
-        wnd.ok(comparer.compute(null, undefined, "==", true));
+
+        wnd.ok(!comparer.compute("", "*", "==", true));
+        wnd.ok(!comparer.compute(" ", "*", "==", true));
+        wnd.ok(!comparer.compute(null, "*", "==", true));
+
+        wnd.ok(!comparer.compute("\t", "\n", "==", true));        
+        wnd.ok(!comparer.compute("", " ", "==", true));
+        wnd.ok(!comparer.compute("", null, "==", true));
+        wnd.ok(!comparer.compute(null, undefined, "==", true));
     });
 
     test("Verify_comparison_greater_and_less", function() {
@@ -326,16 +331,6 @@
         var result = analyser.typeHelper.Date.tryParse("");
         wnd.equal(result.error, true);
         wnd.equal(result.msg, "Parsing error. Given value is not a string representing an RFC 2822 or ISO 8601 date.");
-    });
-
-    test("Verify_typehelper_is_empty", function () {
-        wnd.ok(analyser.typeHelper.isEmpty(null));
-        wnd.ok(analyser.typeHelper.isEmpty(undefined));
-        wnd.ok(analyser.typeHelper.isEmpty(""));
-        wnd.ok(analyser.typeHelper.isEmpty(" "));
-        wnd.ok(analyser.typeHelper.isEmpty("\t"));
-        wnd.ok(analyser.typeHelper.isEmpty("\n"));
-        wnd.ok(analyser.typeHelper.isEmpty("\n\t "));
     });
 
     test("Verify_typehelper_is_numeric", function () {

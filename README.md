@@ -6,7 +6,7 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
 
 ###RequiredIf/Expression vs AssertThat/Expression attributes?
 
-RequiredIf family indicates that annotated field is required, when given condition is fulfilled. AssertThat family on the other hand indicates, that non-empty annotated field is considered as valid, when given condition is fulfilled.
+RequiredIf family indicates that annotated field is required, when given condition is fulfilled. AssertThat family on the other hand indicates, that non-null annotated field is considered as valid, when given condition is fulfilled.
 
 ###What are brief examples of usage?
 
@@ -29,7 +29,7 @@ public string PassportNumber { get; set; }
 public bool AgreeToContact { get; set; }
 ```
 
- This one means, that if email is non-empty, boolean value indicating contact permission has to be true. What is more, we can see here that nested properties are supported by the mechanism. The last thing shown is wildcard character `*` used as target value. It is special character which stands for any non-empty value.
+ This one means, that if email is non-empty, boolean value indicating contact permission has to be true. What is more, we can see here that nested properties are supported by the mechanism. The last thing shown is wildcard character `*` used as target value. It is special character which stands for any non-empty value (other than null, empty or whitespace strings).
 
  ```
 [AssertThat(
@@ -39,7 +39,7 @@ public bool AgreeToContact { get; set; }
 public DateTime? ReturnDate { get; set; }
 ```
 
- Here return date needs to be greater than or equal to the date given in target value. This time we are not validating field requirement as before. Now attribute puts restriction on field, which needs to be satisfied for such field to be considered as valid (restriction verification is executed for non-empty field). 
+ Here return date needs to be greater than or equal to the date given in target value. This time we are not validating field requirement as before. Now attribute puts restriction on field, which needs to be satisfied for such field to be considered as valid (restriction verification is executed for non-null field). 
  
  The second thing shown here is the possibility of dynamic extraction of target values from backing fields, by providing their names inside square brackets `[]` (here today field value is extracted). Therefore not only hardcoded values are accepted as target values (nevertheless date can be hardcoded as RFC 2822 or ISO 8601 formatted string). 
  
@@ -94,10 +94,14 @@ RequiredIfAttribute([string DependentProperty],
 					[bool SensitiveComparisons] ...) - Validation attribute which indicates that 
 													   annotated field is required when dependent 
 													   field has appropriate value.
+
+  AllowEmptyOrFalse    - Gets or sets a flag indicating whether the attribute should allow empty or
+                         whitespace strings or false boolean values (null never allowed).
+
 AssertThatAttribute([string DependentProperty],
                     [object TargetValue],
 					[string RelationalOperator],
-					[bool SensitiveComparisons] ...) - Validation attribute, executed for non-empty 
+					[bool SensitiveComparisons] ...) - Validation attribute, executed for non-null 
 													   annotated field, which indicates that given 
 													   assertion has to be satisfied, for such 
 													   field to be considered as valid.
@@ -111,7 +115,7 @@ AssertThatAttribute([string DependentProperty],
   RelationalOperator   - Gets or sets the relational operator indicating relation between dependent 
 						 field and target value. Available operators: ==, !=, >, >=, <, <=. If this 
 						 property is not provided, equality operator == is used by default.
-  SensitiveComparisons - Gets or sets whether the string comparisons are case sensitive or not.
+  SensitiveComparisons - Gets or sets whether the string comparisons are case sensitive or not.    
 ```
 ```
 RequiredIfExpressionAttribute([string Expression],
@@ -122,12 +126,16 @@ RequiredIfExpressionAttribute([string Expression],
 							                                     indicates that annotated field is 
 																 required when computed result of 
 																 given logical expression is true.
+
+  AllowEmptyOrFalse    - Gets or sets a flag indicating whether the attribute should allow empty or
+                         whitespace strings or false boolean values (null never allowed).
+
 AssertThatExpressionAttribute([string Expression],
                               [string[] DependentProperties],
                               [object[] TargetValues],
 							  [string[] RelationalOperators],
 							  [bool SensitiveComparisons] ...) - Validation attribute, executed for 
-							                                     non-empty annotated field, which 
+							                                     non-null annotated field, which 
 																 indicates that assertion given in 
 																 logical expression has to be 
 																 satisfied, for such field to be 
@@ -189,7 +197,7 @@ Logical expression is an expression in which relationship between operands is sp
  ```true false ! &&      =>      true true &&      =>      true```
 
  Here the computed result is true, which means that condition is fulfilled, so: 
-  * when RequiredIfExpression used - error message is risen if annotated field value is not provided (i.e. is empty or has false boolean meaning),
+  * when RequiredIfExpression used - error message is risen if annotated field value is not provided (i.e. is null, empty or whitespace string or has false boolean meaning),
   * when AssertThatExpression used - no error (successful validation).
 
 ###What is the context behind this implementation? 

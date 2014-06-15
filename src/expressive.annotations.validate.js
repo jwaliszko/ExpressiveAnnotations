@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.validate.js - v1.3.2
+﻿/* expressive.annotations.validate.js - v1.4.0
  * this script is a part of client side component of ExpresiveAnnotations - annotation-based conditional validation library
  * copyright (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
  * licensed MIT: http://www.opensource.org/licenses/mit-license.php */
@@ -32,7 +32,7 @@
                 }
             }
 
-            var field, value;
+            var field, fieldValue, parsedValue;
 
             name = modelPrefix.append(name, prefix);            
             field = $(form).find(':input[name="' + name + '"]');
@@ -40,17 +40,17 @@
                 throw analyser.typeHelper.String.format('DOM field {0} not found.', name);
             }
 
-            value = getFieldValue(field);
-            if (analyser.typeHelper.isEmpty(value)) {
+            fieldValue = getFieldValue(field);
+            if (fieldValue === undefined || fieldValue === null || fieldValue === '') { // field value not set
                 return null;
             }
 
-            value = analyser.typeHelper.tryParse(value, type); // convert to required type
-            if (value.error) {
+            parsedValue = analyser.typeHelper.tryParse(fieldValue, type); // convert to required type
+            if (parsedValue.error) {
                 throw 'Data extraction fatal error. DOM value conversion to reflect required type failed.';
             }
 
-            return value;
+            return parsedValue;
         },
         tryExtractName: function(targetValue) {
             if (analyser.typeHelper.isString(targetValue)) {
@@ -175,7 +175,7 @@
     });
 
     $.validator.addMethod('assertthat', function(value, element, params) {
-        if (!analyser.typeHelper.isEmpty(value)) { // check if the field is non-empty (continue if so, otherwise skip condition verification)
+        if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
             if (!attributeInternals.verify(params)) { // check if the assertion condition is not satisfied
                 return false; // assertion not satisfied => notify
             }
@@ -184,7 +184,7 @@
     }, '');
 
     $.validator.addMethod('assertthatexpression', function(value, element, params) {
-        if (!analyser.typeHelper.isEmpty(value)) {
+        if (!(value === undefined || value === null || value === '')) {
             if (!expressionAttributeInternals.verify(params)) {
                 return false;
             }
@@ -195,13 +195,14 @@
     $.validator.addMethod('requiredif', function (value, element, params) {
         if (params.modeltype === 'bool') {
             var boolValue = analyser.typeHelper.Bool.tryParse(value);
-            if (boolValue.error /* non-set bool indicates null, and null is always required */ || (!boolValue.error && !boolValue && !params.allowemptyorfalse)) {
+            if (boolValue.error /* conversion fail indicates that field value is not set - required */ || (!boolValue.error && !boolValue && !params.allowemptyorfalse)) {
                 if (attributeInternals.verify(params)) { // check if the requirement condition is satisfied
                     return false; // requirement confirmed => notify
                 }
             }
         }
-        if (analyser.typeHelper.isEmpty(value)) { // check if the field is empty (empty or whitespace field at client side is perceived the same way, as null is perceived at server side - always required)
+        if (value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
+            || (!/\S/.test(value) && !params.allowemptyorfalse)) {
             if (attributeInternals.verify(params)) {
                 return false;
             }
@@ -218,7 +219,8 @@
                 }
             }
         }
-        if (analyser.typeHelper.isEmpty(value)) {
+        if (value === undefined || value === null || value === ''
+            || (!/\S/.test(value) && !params.allowemptyorfalse)) {
             if (expressionAttributeInternals.verify(params)) {
                 return false;
             }

@@ -5,7 +5,7 @@ using ExpressiveAnnotations.Misc;
 namespace ExpressiveAnnotations.Attributes
 {
     /// <summary>
-    /// Validation attribute, executed for non-empty annotated field, which indicates that assertion given in logical expression has to be satisfied, for such field to be considered as valid.
+    /// Validation attribute, executed for non-null annotated field, which indicates that assertion given in logical expression has to be satisfied, for such field to be considered as valid.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public sealed class AssertThatExpressionAttribute : ValidationAttribute, IExpressionAttribute
@@ -82,7 +82,7 @@ namespace ExpressiveAnnotations.Attributes
                 SensitiveComparisons = SensitiveComparisons
             };
 
-            if (!value.IsEmpty())
+            if (value != null)
                 if (!internals.Verify(validationContext))
                     return new ValidationResult(
                         FormatErrorMessage(validationContext.DisplayName,
