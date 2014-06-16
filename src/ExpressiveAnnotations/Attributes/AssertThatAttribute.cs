@@ -5,7 +5,7 @@ using ExpressiveAnnotations.Analysis;
 namespace ExpressiveAnnotations.Attributes
 {
     /// <summary>
-    /// Validation attribute, executed for non-empty annotated field, which indicates that assertion given in logical expression has to be satisfied, for such field to be considered as valid.
+    /// Validation attribute, executed for non-null annotated field, which indicates that assertion given in logical expression has to be satisfied, for such field to be considered as valid.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public sealed class AssertThatAttribute : ValidationAttribute
@@ -30,9 +30,9 @@ namespace ExpressiveAnnotations.Attributes
         /// <summary>
         /// Formats the error message.
         /// </summary>
-        /// <param name="displayName">The user-visible name of the required field to include in the message.</param>
-        /// <param name="expression">The user-visible expression to include in the message.</param>
-        /// <returns>Error message.</returns>
+        /// <param name="displayName">The user-visible name of the required field to include in the formatted message.</param>
+        /// <param name="expression">The user-visible expression to include in the formatted message.</param>
+        /// <returns>The localized message to present to the user.</returns>
         public string FormatErrorMessage(string displayName, string expression)
         {
             return string.Format(ErrorMessageString, displayName, expression);
@@ -52,7 +52,7 @@ namespace ExpressiveAnnotations.Attributes
             if (validationContext == null)
                 throw new ArgumentNullException("validationContext", "ValidationContext not provided.");
 
-            if (!IsEmpty(value)) // check if the field is non-empty (continue if so, otherwise skip condition verification)
+            if (value != null)
             {
                 var parser = new Parser();
                 var validator = parser.Parse(validationContext.ObjectInstance.GetType(), Expression);
@@ -62,11 +62,6 @@ namespace ExpressiveAnnotations.Attributes
             }
 
             return ValidationResult.Success;
-        }
-
-        private static bool IsEmpty(object value)
-        {
-            return value == null || (value is string && string.IsNullOrWhiteSpace((string)value));
         }
     }
 }

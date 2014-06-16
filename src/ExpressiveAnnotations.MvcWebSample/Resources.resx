@@ -174,6 +174,12 @@
   <data name="High" xml:space="preserve">
     <value>High</value>
   </data>
+  <data name="ImmediateContact" xml:space="preserve">
+    <value>Immediate contact</value>
+  </data>
+  <data name="ImmediateContactRequired" xml:space="preserve">
+    <value>Shall we contact immidiately?</value>
+  </data>
   <data name="LatestSuggestedReturnDate" xml:space="preserve">
     <value>Latest suggested return</value>
   </data>
@@ -182,6 +188,9 @@
   </data>
   <data name="NextCountry" xml:space="preserve">
     <value>Next country</value>
+  </data>
+  <data name="No" xml:space="preserve">
+    <value>Nie</value>
   </data>
   <data name="None" xml:space="preserve">
     <value>None</value>
@@ -230,5 +239,8 @@
   </data>
   <data name="Uncertain" xml:space="preserve">
     <value>Uncertain</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>Tak</value>
   </data>
 </root>

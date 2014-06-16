@@ -232,6 +232,24 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Immediate contact.
+        /// </summary>
+        public static string ImmediateContact {
+            get {
+                return ResourceManager.GetString("ImmediateContact", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Shall we contact immidiately?.
+        /// </summary>
+        public static string ImmediateContactRequired {
+            get {
+                return ResourceManager.GetString("ImmediateContactRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Latest suggested return.
         /// </summary>
         public static string LatestSuggestedReturnDate {
@@ -255,6 +273,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         public static string NextCountry {
             get {
                 return ResourceManager.GetString("NextCountry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nie.
+        /// </summary>
+        public static string No {
+            get {
+                return ResourceManager.GetString("No", resourceCulture);
             }
         }
         
@@ -399,6 +426,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         public static string Uncertain {
             get {
                 return ResourceManager.GetString("Uncertain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tak.
+        /// </summary>
+        public static string Yes {
+            get {
+                return ResourceManager.GetString("Yes", resourceCulture);
             }
         }
     }

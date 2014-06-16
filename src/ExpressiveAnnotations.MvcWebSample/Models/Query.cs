@@ -36,6 +36,19 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             }
         }
 
+        public IEnumerable<SelectListItem> Answers
+        {
+            get
+            {
+                return new[]
+                {
+                    new SelectListItem {Text = string.Empty, Value = null},
+                    new SelectListItem {Text = Resources.Yes, Value = true.ToString()},
+                    new SelectListItem {Text = Resources.No, Value = false.ToString()}
+                };
+            }
+        }
+
         public IEnumerable<int?> Years
         {
             get { return new int?[] {null}.Concat(Enumerable.Range(18, 73).Select(x => (int?) x)); }
@@ -61,9 +74,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 
         [RequiredIf("GoAbroad == true " +
                     "&& (" +
-                    "(NextCountry != 'Other' && NextCountry == Country) " +
-                    "|| (Age > 24 && Age <= 55)" +
-                    ")",
+                            "(NextCountry != 'Other' && NextCountry == Country) " +
+                            "|| (Age > 24 && Age <= 55)" +
+                        ")",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ReasonForTravelRequired")]
         [Display(ResourceType = typeof (Resources), Name = "ReasonForTravel")]
         public string ReasonForTravel { get; set; }
@@ -108,6 +121,12 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "AgreeForContactRequired")]
         [Display(ResourceType = typeof (Resources), Name = "AgreeForContact")]
         public bool AgreeForContact { get; set; }
+
+        [RequiredIf("AgreeForContact == true",
+            AllowEmptyOrFalse = true,
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "ImmediateContactRequired")]
+        [Display(ResourceType = typeof(Resources), Name = "ImmediateContact")]
+        public bool? ImmediateContact { get; set; }
 
         public Contact ContactDetails { get; set; }
     }

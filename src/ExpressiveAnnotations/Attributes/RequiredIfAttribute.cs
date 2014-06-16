@@ -18,6 +18,11 @@ namespace ExpressiveAnnotations.Attributes
         public string Expression { get; set; }
 
         /// <summary>
+        /// Gets or sets a flag indicating whether the attribute should allow empty or whitespace strings or false boolean values (null never allowed).
+        /// </summary>
+        public bool AllowEmptyOrFalse { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="RequiredIfAttribute" /> class.
         /// </summary>
         /// <param name="expression">The logical expression based on which requirement condition is computed.</param>
@@ -25,14 +30,15 @@ namespace ExpressiveAnnotations.Attributes
             : base(_defaultErrorMessage)
         {
             Expression = expression;
+            AllowEmptyOrFalse = false;
         }
 
         /// <summary>
         /// Formats the error message.
         /// </summary>
-        /// <param name="displayName">The user-visible name of the required field to include in the message.</param>
-        /// <param name="expression">The user-visible expression to include in the message.</param>
-        /// <returns>Error message.</returns>
+        /// <param name="displayName">The user-visible name of the required field to include in the formatted message.</param>
+        /// <param name="expression">The user-visible expression to include in the formatted message.</param>
+        /// <returns>The localized message to present to the user.</returns>
         public string FormatErrorMessage(string displayName, string expression)
         {
             return string.Format(ErrorMessageString, displayName, expression);
@@ -52,7 +58,8 @@ namespace ExpressiveAnnotations.Attributes
             if (validationContext == null)
                 throw new ArgumentNullException("validationContext", "ValidationContext not provided.");
 
-            if (IsEmpty(value) || (value is bool && !(bool)value)) // check if the field is empty or false (continue if so, otherwise skip condition verification)
+            var emptyOrFalse = (value is string && string.IsNullOrWhiteSpace((string)value)) || (value is bool && !(bool)value);
+            if (value == null || (emptyOrFalse && !AllowEmptyOrFalse))
             {
                 var parser = new Parser();
                 var validator = parser.Parse(validationContext.ObjectInstance.GetType(), Expression);
@@ -62,11 +69,6 @@ namespace ExpressiveAnnotations.Attributes
             }
 
             return ValidationResult.Success;
-        }
-
-        private static bool IsEmpty(object value)
-        {
-            return value == null || (value is string && string.IsNullOrWhiteSpace((string)value));
         }
     }
 }

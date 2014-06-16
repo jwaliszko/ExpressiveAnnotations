@@ -6,13 +6,13 @@ using Newtonsoft.Json;
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
 {
     /// <summary>
-    /// Model validator for <see cref="AssertThatAttribute"/>.
+    /// Model validator for <see cref="AssertThatAttribute" />.
     /// </summary>
     public class AssertThatValidator : DataAnnotationsModelValidator<AssertThatAttribute>
     {
-        private readonly string _expression;
-        private readonly string _errorMessage;
-        private readonly IDictionary<string, string> _typesMap;
+        private string Expression { get; set; }
+        private string FormattedErrorMessage { get; set; }
+        private IDictionary<string, string> TypesMap { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AssertThatValidator" /> class.
@@ -23,9 +23,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         public AssertThatValidator(ModelMetadata metadata, ControllerContext context, AssertThatAttribute attribute)
             : base(metadata, context, attribute)
         {
-            _expression = attribute.Expression;
-            _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);            
-            _typesMap = Helper.GetTypesMap(metadata, attribute.Expression);
+            Expression = attribute.Expression;
+            FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);
+            TypesMap = Helper.GetTypesMap(metadata, attribute.Expression);
         }
 
         /// <summary>
@@ -38,11 +38,11 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         {
             var rule = new ModelClientValidationRule
             {
-                ErrorMessage = _errorMessage,
+                ErrorMessage = FormattedErrorMessage,
                 ValidationType = "assertthat",
             };
-            rule.ValidationParameters.Add("expression", JsonConvert.SerializeObject(_expression));
-            rule.ValidationParameters.Add("typesmap", JsonConvert.SerializeObject(_typesMap));
+            rule.ValidationParameters.Add("expression", JsonConvert.SerializeObject(Expression));
+            rule.ValidationParameters.Add("typesmap", JsonConvert.SerializeObject(TypesMap));
             yield return rule;
         }
     }

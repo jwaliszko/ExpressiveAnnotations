@@ -5,7 +5,7 @@
     <ol>
         <li>
             <pre class="code">
-[RequiredIf("Email == null && Phone == null")]
+[RequiredIf("Phone == null")]
 </pre>
             <pre class="action">[show attribute]</pre>
             @Html.LabelFor(model => model.Email, new { @class = "inline prefix" })
@@ -14,7 +14,7 @@
         </li>
         <li>
             <pre class="code">
-[RequiredIf("Email == null && Phone == null")]
+[RequiredIf("Email == null")]
 </pre>
             <pre class="action">[show attribute]</pre>
             @Html.LabelFor(model => model.Phone, new { @class = "inline prefix" })

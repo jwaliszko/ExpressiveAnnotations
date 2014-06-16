@@ -66,8 +66,8 @@
                 <pre class="code">
 [RequiredIf("GoAbroad == true " +
             "&& (" +
-                "(NextCountry != 'Other' && NextCountry == Country) " +
-                "|| (Age > 24 && Age &le; 55)" +
+                    "(NextCountry != 'Other' && NextCountry == Country) " +
+                    "|| (Age > 24 && Age &le; 55)" +
             ")")]
 </pre>
                 <pre class="action">[show attribute]</pre>
@@ -107,7 +107,7 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIf("PoliticalStability != null && PoliticalStability != Stability.High")]
+[RequiredIf("PoliticalStability != null && PoliticalStability != 0")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.EditorFor(model => model.AwareOfTheRisks)
@@ -142,6 +142,16 @@
                 @Html.RadioButtonFor(model => model.AgreeForContact, true) <label class="inline">@Resources.SpamAllowed</label>
                 @Html.RadioButtonFor(model => model.AgreeForContact, false) <label class="inline">@Resources.SpamForbidden</label>
                 @Html.ValidationMessageFor(model => model.AgreeForContact)
+            </li>
+            <li>
+                <pre class="code">
+[RequiredIf("AgreeForContact == true", 
+    AllowEmptyOrFalse = true)]
+</pre>
+                <pre class="action">[show attribute]</pre>
+                @Html.LabelFor(model => model.ImmediateContact, new { @class = "inline prefix" })
+                @Html.DropDownListFor(model => model.ImmediateContact, new SelectList(Model.Answers, "Value", "Text"))
+                @Html.ValidationMessageFor(model => model.ImmediateContact)
             </li>
         </ol>
         <input type="submit" />

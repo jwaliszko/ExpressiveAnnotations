@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Attributes;
 using Newtonsoft.Json;
@@ -6,13 +7,15 @@ using Newtonsoft.Json;
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
 {
     /// <summary>
-    /// Model validator for <see cref="RequiredIfAttribute"/>.
+    /// Model validator for <see cref="RequiredIfAttribute" />.
     /// </summary>
     public class RequiredIfValidator : DataAnnotationsModelValidator<RequiredIfAttribute>
     {
-        private readonly string _expression;
-        private readonly string _errorMessage;
-        private readonly IDictionary<string, string> _typesMap;
+        private string Expression { get; set; }
+        private string FormattedErrorMessage { get; set; }        
+        private bool AllowEmptyOrFalse { get; set; }
+        private Type ModelType { get; set; }
+        private IDictionary<string, string> TypesMap { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequiredIfValidator" /> class.
@@ -23,9 +26,11 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         public RequiredIfValidator(ModelMetadata metadata, ControllerContext context, RequiredIfAttribute attribute)
             : base(metadata, context, attribute)
         {
-            _expression = attribute.Expression;
-            _errorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);
-            _typesMap = Helper.GetTypesMap(metadata, attribute.Expression);
+            Expression = attribute.Expression;
+            FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);
+            TypesMap = Helper.GetTypesMap(metadata, attribute.Expression);
+            AllowEmptyOrFalse = attribute.AllowEmptyOrFalse;
+            ModelType = metadata.ModelType;
         }
 
         /// <summary>
@@ -38,11 +43,13 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         {
             var rule = new ModelClientValidationRule
             {
-                ErrorMessage = _errorMessage,
+                ErrorMessage = FormattedErrorMessage,
                 ValidationType = "requiredif",
             };
-            rule.ValidationParameters.Add("expression", JsonConvert.SerializeObject(_expression));
-            rule.ValidationParameters.Add("typesmap", JsonConvert.SerializeObject(_typesMap));
+            rule.ValidationParameters.Add("expression", JsonConvert.SerializeObject(Expression));
+            rule.ValidationParameters.Add("typesmap", JsonConvert.SerializeObject(TypesMap));
+            rule.ValidationParameters.Add("allowemptyorfalse", JsonConvert.SerializeObject(AllowEmptyOrFalse));
+            rule.ValidationParameters.Add("modeltype", JsonConvert.SerializeObject(Helper.GetCoarseType(ModelType)));
             yield return rule;
         }
     }

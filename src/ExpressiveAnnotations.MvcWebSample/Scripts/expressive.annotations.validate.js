@@ -24,6 +24,12 @@
             },
             compareOrdinal: function(strA, strB) {
                 return strA === strB ? 0 : strA > strB ? 1 : -1;
+            },
+            tryParse: function(value) {
+                if (typeHelper.isString(value)) {
+                    return value;
+                }
+                return { error: true, msg: 'Parsing error. Given value has no boolean meaning.' };
             }
         },
         Bool: {
@@ -67,9 +73,6 @@
             }
         },
 
-        isEmpty: function(value) {
-            return value === null || value === '' || value === undefined || !/\S/.test(value);
-        },
         isNumeric: function(value) {
             return typeof value === 'number' && !isNaN(value);
         },
@@ -92,7 +95,7 @@
                     result = typeHelper.Float.tryParse(value);
                     break;
                 case 'string':
-                    result = (value || '').toString();
+                    result = typeHelper.String.tryParse(value);
                     break;
                 case 'bool':
                     result = typeHelper.Bool.tryParse(value);
@@ -124,24 +127,25 @@
                 }
             }
 
-            name = modelHelper.appendPrefix(name, prefix);
-            var field, value;
+            var field, fieldValue, parsedValue;
 
-            field = $(form).find(':input[name="' + name + '"]');
+            name = modelHelper.appendPrefix(name, prefix);
+            field = $(form).find(':input[name="' +name + '"]');
             if (field.length === 0) {
                 throw typeHelper.String.format('DOM field {0} not found.', name);
             }
 
-            value = getFieldValue(field);
-            if (typeHelper.isEmpty(value)) {
+            fieldValue = getFieldValue(field);
+            if (fieldValue === undefined || fieldValue === null || fieldValue === '') { // field value not set
                 return null;
             }
 
-            value = typeHelper.tryParse(value, type); // convert to required type
-            if (value.error) {
+            parsedValue = typeHelper.tryParse(fieldValue, type); // convert to required type
+            if(parsedValue.error) {
                 throw 'Data extraction fatal error. DOM value conversion to reflect required type failed.';
             }
-            return value;
+
+            return parsedValue;
         },
         deserializeObject: function(form, typesMap, prefix) {
             var o = {}, name, type, value, props, parent, i;
@@ -178,36 +182,52 @@
         }
     });
 
-    $.validator.unobtrusive.adapters.add('requiredif', ['expression', 'typesmap'], function (options) {
+    $.validator.unobtrusive.adapters.add('requiredif', ['expression', 'typesmap', 'allowemptyorfalse', 'modeltype'], function (options) {
         options.rules.requiredif = {
             prefix: modelHelper.getPrefix(options.element.name),
             form: options.form,
             expression: $.parseJSON(options.params.expression),
-            typesmap: $.parseJSON(options.params.typesmap)
+            typesmap: $.parseJSON(options.params.typesmap),
+            allowemptyorfalse: $.parseJSON(options.params.allowemptyorfalse),
+            modeltype: $.parseJSON(options.params.modeltype)
         };
         if (options.message) {
             options.messages.requiredif = options.message;
         }
     });
 
-    $.validator.addMethod('assertthat', function(value, element, params) {
-        if (!typeHelper.isEmpty(value)) { // check if the field is non-empty (continue if so, otherwise skip condition verification)
+    $.validator.addMethod('assertthat', function (value, element, params) {
+        if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
             var model = modelHelper.deserializeObject(params.form, params.typesmap, params.prefix);
             with (model) {
-                if (!eval(params.expression)) // check if the assertion condition is not satisfied
+                if (!eval(params.expression)) { // check if the assertion condition is not satisfied
                     return false; // assertion not satisfied => notify
+                }
             }
         }
         return true;
     }, '');
 
-    $.validator.addMethod('requiredif', function(value, element, params) {
-        var boolValue = typeHelper.Bool.tryParse(value); // check if the field is empty or false (continue if so, otherwise skip condition verification)
-        if (typeHelper.isEmpty(value) || (element.type === 'radio' && (!boolValue.error && !boolValue))) {
-            var model = modelHelper.deserializeObject(params.form, params.typesmap, params.prefix);
+    $.validator.addMethod('requiredif', function (value, element, params) {
+        var model, boolValue;
+        if (params.modeltype === 'bool') {
+            boolValue = typeHelper.Bool.tryParse(value);
+            if (boolValue.error /* conversion fail indicates that field value is not set - required */ || (!boolValue.error && !boolValue && !params.allowemptyorfalse)) {
+                model = modelHelper.deserializeObject(params.form, params.typesmap, params.prefix);
+                with (model) {
+                    if (eval(params.expression)) { // check if the requirement condition is satisfied
+                        return false; // requirement confirmed => notify
+                    }
+                }
+            }
+        }
+        if (value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
+            || (!/\S/.test(value) && !params.allowemptyorfalse)) {
+            model = modelHelper.deserializeObject(params.form, params.typesmap, params.prefix);
             with (model) {
-                if (eval(params.expression)) // check if the requirement condition is satisfied
-                    return false; // requirement confirmed => notify
+                if (eval(params.expression)) {
+                    return false;
+                }
             }
         }
         return true;
