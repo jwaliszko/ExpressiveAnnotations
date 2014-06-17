@@ -27,6 +27,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         /// <summary>
         /// Retrieves a collection of client validation rules (rules sent to browsers).
         /// </summary>
+        /// <returns>
+        /// A collection of client validation rules.
+        /// </returns>
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()
         {
             var rule = new ModelClientValidationRule

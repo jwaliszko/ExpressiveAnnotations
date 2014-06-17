@@ -195,7 +195,7 @@
     $.validator.addMethod('requiredif', function (value, element, params) {
         if (params.modeltype === 'bool') {
             var boolValue = analyser.typeHelper.Bool.tryParse(value);
-            if (boolValue.error /* conversion fail indicates that field value is not set - required */ || (!boolValue.error && !boolValue && !params.allowemptyorfalse)) {
+            if (boolValue.error /* conversion fail indicates that field value is not set - required */ || (!boolValue && !params.allowemptyorfalse)) {
                 if (attributeInternals.verify(params)) { // check if the requirement condition is satisfied
                     return false; // requirement confirmed => notify
                 }
@@ -213,7 +213,7 @@
     $.validator.addMethod('requiredifexpression', function (value, element, params) {
         if (params.modeltype === 'bool') {
             var boolValue = analyser.typeHelper.Bool.tryParse(value);
-            if (boolValue.error || (!boolValue.error && !boolValue && !params.allowemptyorfalse)) {
+            if (boolValue.error || (!boolValue && !params.allowemptyorfalse)) {
                 if (expressionAttributeInternals.verify(params)) {
                     return false;
                 }

@@ -37,7 +37,6 @@ namespace ExpressiveAnnotations.Attributes
         /// <summary>
         /// Gets or sets a flag indicating whether the attribute should allow empty or whitespace strings or false boolean values (null never allowed).
         /// </summary>
-        [Required]
         public bool AllowEmptyOrFalse { get; set; }
 
         /// <summary>
@@ -80,7 +79,7 @@ namespace ExpressiveAnnotations.Attributes
             };
 
             var emptyOrFalse = (value is string && string.IsNullOrWhiteSpace((string)value)) || (value is bool && !(bool) value);
-            if (value == null || (emptyOrFalse && !AllowEmptyOrFalse)) // check if the field is empty or false (continue if so, otherwise skip condition verification)
+            if (value == null || (emptyOrFalse && !AllowEmptyOrFalse))
                 if (internals.Verify(validationContext)) // check if the requirement condition is satisfied
                     return new ValidationResult( // requirement confirmed => notify
                         FormatErrorMessage(validationContext.DisplayName,

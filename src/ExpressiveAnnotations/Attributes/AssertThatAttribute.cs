@@ -72,7 +72,7 @@ namespace ExpressiveAnnotations.Attributes
                 SensitiveComparisons = SensitiveComparisons
             };
 
-            if (value != null) // check if the field is non-empty (continue if so, otherwise skip condition verification)
+            if (value != null)
                 if (!internals.Verify(validationContext)) // check if the assertion condition is not satisfied
                     return new ValidationResult( // assertion not satisfied => notify
                         FormatErrorMessage(validationContext.DisplayName,
