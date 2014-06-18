@@ -11,6 +11,8 @@ namespace ExpressiveAnnotations.Attributes
     public sealed class AssertThatAttribute : ValidationAttribute
     {
         private const string _defaultErrorMessage = "Assertion for {0} field is not satisfied by the following logic: {1}.";
+        private Func<object, bool> CachedFunc { get; set; }
+        private Parser Parser { get; set; }
 
         /// <summary>
         /// Gets or sets the logical expression based on which requirement condition is computed. 
@@ -24,6 +26,7 @@ namespace ExpressiveAnnotations.Attributes
         public AssertThatAttribute(string expression)
             : base(_defaultErrorMessage)
         {
+            Parser = new Parser();
             Expression = expression;
         }
 
@@ -54,10 +57,8 @@ namespace ExpressiveAnnotations.Attributes
 
             if (value != null)
             {
-                var parser = new Parser();
-                var validator = parser.Parse(validationContext.ObjectInstance.GetType(), Expression);
-
-                if (!validator.Invoke(validationContext.ObjectInstance)) // check if the assertion condition is not satisfied
+                var validator = CachedFunc ?? (CachedFunc = Parser.Parse(validationContext.ObjectInstance.GetType(), Expression));
+                if (!validator(validationContext.ObjectInstance)) // check if the assertion condition is not satisfied
                     return new ValidationResult(FormatErrorMessage(validationContext.DisplayName, Expression)); // assertion not satisfied => notify
             }
 

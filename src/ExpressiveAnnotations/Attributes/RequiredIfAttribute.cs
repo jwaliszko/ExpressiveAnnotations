@@ -11,6 +11,8 @@ namespace ExpressiveAnnotations.Attributes
     public sealed class RequiredIfAttribute : ValidationAttribute
     {
         private const string _defaultErrorMessage = "The {0} field is required by the following logic: {1}.";
+        private Func<object, bool> CachedFunc { get; set; }
+        private Parser Parser { get; set; }
 
         /// <summary>
         /// Gets or sets the logical expression based on which requirement condition is computed. 
@@ -29,6 +31,7 @@ namespace ExpressiveAnnotations.Attributes
         public RequiredIfAttribute(string expression)
             : base(_defaultErrorMessage)
         {
+            Parser = new Parser();
             Expression = expression;
             AllowEmptyOrFalse = false;
         }
@@ -61,10 +64,8 @@ namespace ExpressiveAnnotations.Attributes
             var emptyOrFalse = (value is string && string.IsNullOrWhiteSpace((string)value)) || (value is bool && !(bool)value);
             if (value == null || (emptyOrFalse && !AllowEmptyOrFalse))
             {
-                var parser = new Parser();
-                var validator = parser.Parse(validationContext.ObjectInstance.GetType(), Expression);
-
-                if (validator.Invoke(validationContext.ObjectInstance)) // check if the requirement condition is satisfied
+                var validator = CachedFunc ?? (CachedFunc = Parser.Parse(validationContext.ObjectInstance.GetType(), Expression));
+                if (validator(validationContext.ObjectInstance)) // check if the requirement condition is satisfied
                     return new ValidationResult(FormatErrorMessage(validationContext.DisplayName, Expression)); // requirement confirmed => notify
             }
 
