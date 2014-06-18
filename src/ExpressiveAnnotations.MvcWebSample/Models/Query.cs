@@ -120,7 +120,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "AgreeForContact")]
         public bool AgreeForContact { get; set; }
 
-        [RequiredIf("AgreeForContact == true && CompareOrdinal(ContactDetails.Email, ContactDetails.Phone) >= 0)",
+        [RequiredIf("AgreeForContact == true && CompareOrdinal(ContactDetails.Email, ContactDetails.Phone) >= 0",
             AllowEmptyOrFalse = true,
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "ImmediateContactRequired")]
         [Display(ResourceType = typeof(Resources), Name = "ImmediateContact")]
