@@ -127,7 +127,10 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseExpression()
         {
-            return ParseOrExp();
+            var expr = ParseOrExp();
+            if (PeekType() != TokenId.NONE)
+                throw new InvalidOperationException();
+            return expr;
         }
 
         private Expression ParseOrExp()
@@ -253,7 +256,7 @@ namespace ExpressiveAnnotations.Analysis
         }
 
         private Expression ParseFunc()
-        {            
+        {
             var propertyName = PeekValue().ToString();
             ReadToken(); // read name
             
@@ -266,7 +269,7 @@ namespace ExpressiveAnnotations.Analysis
             var args = new List<Expression>();
             while (PeekType() != TokenId.RIGHT_BRACKET)
             {
-                var arg = ParseExpression();
+                var arg = ParseOrExp();
                 if (PeekType() == TokenId.COMMA)
                     ReadToken();
                 args.Add(arg);
