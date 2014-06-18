@@ -201,8 +201,8 @@ namespace ExpressiveAnnotations.Analysis
             
             switch (PeekType())
             {
-                case TokenId.NULL:                    
-                    return Expression.Constant(null);
+                case TokenId.NULL:
+                    return ParseNull();
                 case TokenId.INT:
                     return ParseInt();
                 case TokenId.FLOAT:
@@ -216,6 +216,12 @@ namespace ExpressiveAnnotations.Analysis
                 default:
                     throw new InvalidOperationException();
             }
+        }
+
+        private Expression ParseNull()
+        {
+            ReadToken();
+            return Expression.Constant(null);
         }
 
         private Expression ParseInt()
