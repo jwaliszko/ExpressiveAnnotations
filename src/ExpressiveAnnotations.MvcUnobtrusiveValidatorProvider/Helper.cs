@@ -13,7 +13,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         {
             var lexer = new Lexer();
             var properties =
-                lexer.Analyze(expression).Where(x => x.Id == TokenId.PROPERTY).Select(x => x.Value.ToString());
+                lexer.Analyze(expression).Where(x => x.Id == TokenId.FUNC).Select(x => x.Value.ToString());
             var typesMap = new Dictionary<string, string>();
             foreach (var prop in properties)
             {

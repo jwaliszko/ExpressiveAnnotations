@@ -15,7 +15,7 @@ namespace ExpressiveAnnotations.Analysis
         private IDictionary<TokenId, string> RegexMap { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Lexer"/> class.
+        /// Initializes a new instance of the <see cref="Lexer" /> class.
         /// </summary>
         public Lexer()
         {
@@ -33,11 +33,12 @@ namespace ExpressiveAnnotations.Analysis
                 {TokenId.NEQ, @"!="},
                 {TokenId.NOT, @"\!"},
                 {TokenId.NULL, @"null"},
+                {TokenId.COMMA, @","},
                 {TokenId.FLOAT, @"[-+]?\d*\.\d+([eE][-+]?\d+)?"},
                 {TokenId.INT, @"[-+]?\d+"},
                 {TokenId.BOOL, @"(true|false)"},
                 {TokenId.STRING, @"([""'])(?:\\\1|.)*?\1"},
-                {TokenId.PROPERTY, @"[a-zA-Z]+([\.]*[a-zA-Z0-9]*)*"}
+                {TokenId.FUNC, @"[a-zA-Z]+([\.]*[a-zA-Z0-9]*)*"}
             };
         }
 

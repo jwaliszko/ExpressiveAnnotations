@@ -61,6 +61,16 @@
         RIGHT_BRACKET,
 
         /// <summary>
+        /// Comma.
+        /// </summary>
+        COMMA,
+
+        /// <summary>
+        /// NULL.
+        /// </summary>
+        NULL,
+
+        /// <summary>
         /// Integer value.
         /// </summary>
         INT,
@@ -76,18 +86,18 @@
         FLOAT,
 
         /// <summary>
-        /// Property.
-        /// </summary>
-        PROPERTY,
-
-        /// <summary>
         /// String.
         /// </summary>
         STRING,
 
         /// <summary>
-        /// NULL.
+        /// Function.
         /// </summary>
-        NULL
+        FUNC,
+        
+        /// <summary>
+        /// Invalid token.
+        /// </summary>
+        NONE
     }
 }
