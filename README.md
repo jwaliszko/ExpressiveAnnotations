@@ -1,79 +1,86 @@
 ﻿#ExpressiveAnnotations - annotation-based conditional validation
 
-<sub>**Notice: This document describes latest implementation. For previous version &lt; 2.0 take a look at [EA1 branch](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/EA1).**</sub>
+<sub>**Notice: This document describes latest implementation. For previous version (concept) &lt; 2.0 take a look at [EA1 branch](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/EA1).**</sub>
 
 ExpressiveAnnotations is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given implementations of RequiredIf and AssertThat attributes allows to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more compacted, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
 
 ###RequiredIf vs AssertThat attributes?
 
-RequiredIf indicates that annotated field is required, when given condition is fulfilled. AssertThat on the other hand indicates, that non-empty annotated field is considered as valid, when given condition is fulfilled.
+RequiredIf indicates that annotated field is required, when given condition is fulfilled. AssertThat on the other hand indicates, that non-null annotated field is considered as valid, when given condition is fulfilled.
 
 ###What are brief examples of usage?
 
 For sample usages go to [**demo project**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations.MvcWebSample).
 
-* Simplest:
- 
- ```
+```
 [RequiredIf("GoAbroad == true")]
 public string PassportNumber { get; set; }
 ```
 
- Here we are saying that annotated field is required when dependent field has appropriate value (passport number is required, if go abroad option is selected). Simple enough, let's move to another variation:
+Here we are saying that annotated field is required when dependent field has appropriate value (passport number is required, if go abroad option is selected). Simple enough, let's move to another variation:
 
- ```
+```
 [RequiredIf("ContactDetails.Email != null")]
 public bool AgreeToContact { get; set; }
 ```
 
- This one means, that if email is non-empty, boolean value indicating contact permission has to be true. What is more, we can see here that nested properties are supported by the mechanism. 
+This one means, that if email is non-empty, boolean value indicating contact permission has to be true. What is more, we can see here that nested properties are supported by the mechanism. 
 
- ```
+```
 [AssertThat("ReturnDate >= Today")]
 public DateTime? ReturnDate { get; set; }
 ```
 
- Here return date needs to be greater than or equal to the date given in target value. This time we are not validating field requirement as before. Now attribute puts restriction on field, which needs to be satisfied for such field to be considered as valid (restriction verification is executed for non-empty field).
-
-* More complex:
+Here return date needs to be greater than or equal to the date given in target value. This time we are not validating field requirement as before. Now attribute puts restriction on field, which needs to be satisfied for such field to be considered as valid (restriction verification is executed for non-empty field).
  
- ```
+```
 [RequiredIf("GoAbroad == true " +
-				"&& (" +
+			"&& (" +
 					"(NextCountry != 'Other' && NextCountry == Country) " +
 					"|| (Age > 24 && Age <= 55)" +
 				")")]
 public string ReasonForTravel { get; set; }
 ```
 
- Here we are saying that annotated field is required when computed result of given logical expression is true. How such an expression should be understood?
+<sub>Notice: Expression is splitted into multiple lines because is more meaningful and easier to understand.</sub>
+
+This time, the expression above is much more complex that its predecessors, but still can be easily understand. Isn't it?
 
 ###How to construct conditional validation attributes?
 #####Signatures:
 
 ```
-RequiredIfAttribute([string Expression], ...) - Validation attribute which indicates that annotated field is 
-												required when computed result of given logical expression is 
-												true.
-AssertThatAttribute([string Expression], ...) - Validation attribute, executed for non-empty annotated field, 
-												which indicates that assertion given in logical expression 
-												has to be satisfied, for such field to be considered as valid.
+RequiredIfAttribute([string Expression],
+                    [bool AllowEmptyOrFalse] ...) - Validation attribute which indicates that 
+					                                annotated field is required when computed 
+													result of given logical expression is true.
+AssertThatAttribute([string Expression], ...)     - Validation attribute, executed for non-null 
+                                                    annotated field, which indicates that 
+													assertion given in logical expression has 
+													to be satisfied, for such field to be 
+													considered as valid.
 
-	Expression - Gets or sets the logical expression based on which requirement condition is computed.
+  Expression        - Gets or sets the logical expression based on which requirement condition 
+	                  is computed.
+  AllowEmptyOrFalse - Gets or sets a flag indicating whether the attribute should allow empty or
+	                  whitespace strings or false boolean values (null never allowed).
 ```
 
 #####Implementation:
 
-    /* EBNF GRAMMAR:
-     * 
-     * expression => or-exp
-     * or-exp     => and-exp [ "||" or-exp ]
-     * and-exp    => not-exp [ "&&" and-exp ]
-     * not-exp    => [ "!" ] rel-exp
-     * rel-exp    => val [ rel-op val ]
-     * rel-op     => "==" | "!=" | ">" | ">=" | "<" | "<="
-     * val        => "null" | int | float | bool | string | prop | "(" or-exp ")"
-     */
+Implementation core is based on logical expressions parser, which is based on the following grammar:
+
+```
+expression => or-exp
+or-exp     => and-exp [ "||" or-exp ]
+and-exp    => not-exp [ "&&" and-exp ]
+not-exp    => [ "!" ] rel-exp
+rel-exp    => val [ rel-op val ]
+rel-op     => "==" | "!=" | ">" | ">=" | "<" | "<="
+val        => "null" | int | float | bool | string | func | "(" or-exp ")"
+```
+
+At server side, expression string is parsed and converted into [expression trees](http://msdn.microsoft.com/en-us/library/bb397951.aspx). At client side, pure expression string is evaluated within the context of created model object.
 
 ###What is the context behind this implementation? 
 
@@ -87,7 +94,7 @@ In our example it is more about metadata, e.g.
 
 ```
 [RequiredIf("GoAbroad == true " +
-				"&& (" +
+			"&& (" +
 					"(NextCountry != 'Other' && NextCountry == Country) " +
 					"|| (Age > 24 && Age <= 55)" +
 				")")]

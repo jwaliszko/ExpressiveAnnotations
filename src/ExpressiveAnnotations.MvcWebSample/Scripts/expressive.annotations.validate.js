@@ -212,7 +212,7 @@
         var model, boolValue;
         if (params.modeltype === 'bool') {
             boolValue = typeHelper.Bool.tryParse(value);
-            if (boolValue.error /* conversion fail indicates that field value is not set - required */ || (!boolValue.error && !boolValue && !params.allowemptyorfalse)) {
+            if (boolValue.error /* conversion fail indicates that field value is not set - required */ || (!boolValue && !params.allowemptyorfalse)) {
                 model = modelHelper.deserializeObject(params.form, params.typesmap, params.prefix);
                 with (model) {
                     if (eval(params.expression)) { // check if the requirement condition is satisfied
