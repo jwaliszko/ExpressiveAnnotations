@@ -35,7 +35,7 @@ namespace ExpressiveAnnotations.Attributes
             Toolchain.Supplement(Parser);
 
             Expression = expression;
-            AllowEmptyOrFalse = false;            
+            AllowEmptyOrFalse = false;
         }
 
         /// <summary>
