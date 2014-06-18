@@ -24,14 +24,14 @@ Here we are saying that annotated field is required when dependent field has app
 public bool AgreeToContact { get; set; }
 ```
 
-This one means, that if email is non-empty, boolean value indicating contact permission has to be true. What is more, we can see here that nested properties are supported by the mechanism. 
+This one means, that if email is non-null, boolean value indicating contact permission has to be true. What is more, we can see here that nested properties are supported by the mechanism. 
 
 ```
-[AssertThat("ReturnDate >= Today")]
+[AssertThat("ReturnDate >= Today()")]
 public DateTime? ReturnDate { get; set; }
 ```
 
-Here return date needs to be greater than or equal to the date given in target value. This time we are not validating field requirement as before. Now attribute puts restriction on field, which needs to be satisfied for such field to be considered as valid (restriction verification is executed for non-empty field).
+Here return date needs to be greater than or equal to the date given in utility function returning current day. This time we are not validating field requirement as before. Now attribute puts restriction on field, which needs to be satisfied for such field to be considered as valid (restriction verification is executed for non-empty field).
  
 ```
 [RequiredIf("GoAbroad == true " +

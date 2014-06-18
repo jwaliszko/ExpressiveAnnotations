@@ -77,10 +77,9 @@
             </li>
             <li>
                 @Html.EditorFor(x => x.LatestSuggestedReturnDate)   @*hidden backing field storing date in RFC 2822 or ISO 8601 format*@
-                @Html.EditorFor(x => x.Today)
                 <pre class="code">
 [RequiredIf("GoAbroad == true")]
-[AssertThat("ReturnDate >= Today")]
+[AssertThat("ReturnDate >= Today()")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.ReturnDate, new { @class = "inline prefix" })

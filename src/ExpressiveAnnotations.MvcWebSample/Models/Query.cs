@@ -84,12 +84,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [UIHint("ISO8601Date")]
         public DateTime LatestSuggestedReturnDate { get; set; }
 
-        [UIHint("ISO8601Date")]
-        public DateTime Today { get; set; }
-
         [RequiredIf("GoAbroad == true",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]
-        [AssertThat("ReturnDate >= Today",
+        [AssertThat("ReturnDate >= Today()",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FutureDateRequired")]
         [Display(ResourceType = typeof (Resources), Name = "ReturnDate")]
         public DateTime? ReturnDate { get; set; }
@@ -104,9 +101,10 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "PoliticalStability")]
         public Stability? PoliticalStability { get; set; }
 
-        [RequiredIf("PoliticalStability != null && PoliticalStability != 0",
+        [RequiredIf("PoliticalStability != null && PoliticalStability != 0",                
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "AwareOfTheRisksRequired")]
         [Display(ResourceType = typeof (Resources), Name = "AwareOfTheRisks")]
+        //[KnownEnum(typeof(Stability))] ToDo: implement this to give parser information about other types used by expression, like enums e.g. Stability.High (instead of 0 like above).
         public bool AwareOfTheRisks { get; set; }
 
         [Display(ResourceType = typeof (Resources), Name = "SportType")]
@@ -122,7 +120,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "AgreeForContact")]
         public bool AgreeForContact { get; set; }
 
-        [RequiredIf("AgreeForContact == true",
+        [RequiredIf("AgreeForContact == true && CompareOrdinal(ContactDetails.Email, ContactDetails.Phone) >= 0)",
             AllowEmptyOrFalse = true,
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "ImmediateContactRequired")]
         [Display(ResourceType = typeof(Resources), Name = "ImmediateContact")]
