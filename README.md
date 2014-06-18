@@ -31,7 +31,7 @@ This one means, that if email is non-null, boolean value indicating contact perm
 public DateTime? ReturnDate { get; set; }
 ```
 
-Here return date needs to be greater than or equal to the date given in utility function returning current day. This time we are not validating field requirement as before. Now attribute puts restriction on field, which needs to be satisfied for such field to be considered as valid (restriction verification is executed for non-empty field).
+Here return date needs to be greater than or equal to the date given in utility function returning current day. This time we are not validating field requirement as before. Now attribute puts restriction on field, which needs to be satisfied for such field to be considered as valid (restriction verification is executed for non-null field).
  
 ```
 [RequiredIf("GoAbroad == true " +
@@ -93,11 +93,8 @@ With **declarative** programming, you write logic that expresses what you want, 
 In our example it is more about metadata, e.g.
 
 ```
-[RequiredIf("GoAbroad == true " +
-			"&& (" +
-					"(NextCountry != 'Other' && NextCountry == Country) " +
-					"|| (Age > 24 && Age <= 55)" +
-				")")]
+[RequiredIf("GoAbroad == true && NextCountry != 'Other' && NextCountry == Country",
+	ErrorMessage = "If you plan to go abroad, why do you want to visit the same country twice?")]
 public string ReasonForTravel { get; set; }
 ```
 
