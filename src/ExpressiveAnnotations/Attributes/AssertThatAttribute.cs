@@ -27,6 +27,8 @@ namespace ExpressiveAnnotations.Attributes
             : base(_defaultErrorMessage)
         {
             Parser = new Parser();
+            Toolchain.Supplement(Parser);
+
             Expression = expression;
         }
 
