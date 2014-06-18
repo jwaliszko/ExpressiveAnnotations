@@ -5,7 +5,7 @@
 
 (function($) {
 
-    var typeHelper, modelHelper;
+    var typeHelper, modelHelper, toolchain;
 
     typeHelper = {
         String: {
@@ -166,7 +166,24 @@
                     parent[name] = value;
                 }
             }
+            toolchain.supplement(o);
             return o;
+        }        
+    };
+
+    toolchain = {
+        supplement: function(o) {
+            o.Today = function() {
+                var today = new Date(Date.now());
+                today.setHours(0, 0, 0, 0);
+                return today;
+            };
+            o.Trim = function(text) {
+                 return (text !== undefined && text !== null) ? text.trim() : null;
+            };
+            o.CompareOrdinal = function(strA, strB) {
+                return typeHelper.String.compareOrdinal(strA, strB);
+            };
         }
     };
 
