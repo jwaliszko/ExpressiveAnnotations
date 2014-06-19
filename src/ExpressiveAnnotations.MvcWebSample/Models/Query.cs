@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Attributes;
 
@@ -9,6 +10,11 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 {
     public class Query
     {
+        public bool IsBloodType(string group)
+        {
+            return Regex.IsMatch(group, "(A|B|AB|0)[+-]");
+        }
+
         public IEnumerable<SelectListItem> Sports
         {
             get
@@ -62,7 +68,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public int? Age { get; set; }
 
         [RequiredIf("GoAbroad == true",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]        
         [Display(ResourceType = typeof (Resources), Name = "PassportNumber")]
         public string PassportNumber { get; set; }
 
@@ -112,6 +118,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 
         [RequiredIf("SportType == 'Extreme' || (SportType != 'None' && GoAbroad == true)",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "BloodTypeRequired")]
+        [AssertThat("IsBloodType(BloodType)")]
         [Display(ResourceType = typeof (Resources), Name = "BloodType")]
         public string BloodType { get; set; }
 

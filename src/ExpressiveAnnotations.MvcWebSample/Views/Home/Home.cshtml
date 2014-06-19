@@ -165,8 +165,8 @@
     }
 
     <script>
-        $(document).ready(function () {
-            $('.action').click(function () {
+        $(document).ready(function() {
+            $('.action').click(function() {
                 $(this).hide();
                 $(this).parent().find('.code').toggle('slow');
             });
@@ -178,10 +178,8 @@
             prevText: '&#x3C;Poprzedni',
             nextText: 'Następny&#x3E;',
             currentText: 'Dziś',
-            monthNames: ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec',
-            'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'],
-            monthNamesShort: ['Sty', 'Lu', 'Mar', 'Kw', 'Maj', 'Cze',
-            'Lip', 'Sie', 'Wrz', 'Pa', 'Lis', 'Gru'],
+            monthNames: ['Styczeń', 'Luty', 'Marzec', 'Kwiecień', 'Maj', 'Czerwiec', 'Lipiec', 'Sierpień', 'Wrzesień', 'Październik', 'Listopad', 'Grudzień'],
+            monthNamesShort: ['Sty', 'Lu', 'Mar', 'Kw', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Pa', 'Lis', 'Gru'],
             dayNames: ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'],
             dayNamesShort: ['Nie', 'Pn', 'Wt', 'Śr', 'Czw', 'Pt', 'So'],
             dayNamesMin: ['N', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So'],
@@ -192,5 +190,7 @@
             showMonthAfterYear: false,
             yearSuffix: ''
         };
+
+        ea.addMethod('IsBloodType', function(group) { return /(A|B|AB|0)[+-]/.exec(group); });
     </script>
 }

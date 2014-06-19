@@ -89,16 +89,16 @@
             var result;
             switch (type) {
                 case 'datetime':
-                    result = typeHelper.Date.tryParse(value);
+                    result = this.Date.tryParse(value);
                     break;
                 case 'numeric':
-                    result = typeHelper.Float.tryParse(value);
+                    result = this.Float.tryParse(value);
                     break;
                 case 'string':
-                    result = typeHelper.String.tryParse(value);
+                    result = this.String.tryParse(value);
                     break;
                 case 'bool':
-                    result = typeHelper.Bool.tryParse(value);
+                    result = this.Bool.tryParse(value);
                     break;
                 default:
                     result = { error: true };
@@ -129,8 +129,8 @@
 
             var field, fieldValue, parsedValue;
 
-            name = modelHelper.appendPrefix(name, prefix);
-            field = $(form).find(':input[name="' +name + '"]');
+            name = this.appendPrefix(name, prefix);
+            field = $(form).find(':input[name="' + name + '"]');
             if (field.length === 0) {
                 throw typeHelper.String.format('DOM field {0} not found.', name);
             }
@@ -141,7 +141,7 @@
             }
 
             parsedValue = typeHelper.tryParse(fieldValue, type); // convert to required type
-            if(parsedValue.error) {
+            if (parsedValue.error) {
                 throw 'Data extraction fatal error. DOM value conversion to reflect required type failed.';
             }
 
@@ -152,7 +152,7 @@
             for (name in typesMap) {
                 if (typesMap.hasOwnProperty(name)) {
                     type = typesMap[name];
-                    value = modelHelper.extractValue(form, name, prefix, type);
+                    value = this.extractValue(form, name, prefix, type);
                     props = name.split('.');
                     parent = o;
                     for (i = 0; i < props.length - 1; i++) {
@@ -166,22 +166,38 @@
                     parent[name] = value;
                 }
             }
-            toolchain.supplement(o);
+            toolchain.registerMethods(o);
             return o;
-        }        
+        }
     };
 
     toolchain = {
-        supplement: function(o) {
-            o.Today = function() {
+        methods: {},
+        addMethod: function(name, body) {
+            if (!this.methods.hasOwnProperty(name)) {
+                this.methods[name] = body;
+            }
+        },
+        registerMethods: function(o) {
+            var name, body;
+            this.initialize();
+            for (name in this.methods) {
+                if (this.methods.hasOwnProperty(name)) {
+                    body = this.methods[name];
+                    o[name] = body;
+                }
+            }
+        },
+        initialize: function() {
+            this.methods.Today = function() {
                 var today = new Date(Date.now());
                 today.setHours(0, 0, 0, 0);
                 return today;
             };
-            o.Trim = function(text) {
-                 return (text !== undefined && text !== null) ? text.trim() : null;
+            this.methods.Trim = function(text) {
+                return (text !== undefined && text !== null) ? text.trim() : null;
             };
-            o.CompareOrdinal = function(strA, strB) {
+            this.methods.CompareOrdinal = function(strA, strB) {
                 return typeHelper.String.compareOrdinal(strA, strB);
             };
         }
@@ -249,5 +265,8 @@
         }
         return true;
     }, '');
+
+    // expose toolchain to the global object
+    window.ea = toolchain;
 
 }(jQuery));

@@ -4,15 +4,15 @@ using ExpressiveAnnotations.Analysis;
 namespace ExpressiveAnnotations.Attributes
 {
     /// <summary>
-    /// Contains a set of useful tool methods.
+    /// Contains a set of predefined methods.
     /// </summary>
     internal static class Toolchain
     {        
         /// <summary>
-        /// Registers utility methods for parser, to be later used inside expressions.
+        /// Registers methods for expressions.
         /// </summary>
         /// <param name="parser">Parser.</param>
-        public static void Supplement(Parser parser)
+        public static void RegisterMethods(this Parser parser)
         {
             parser.AddFunction("Today", () => DateTime.Today);
             parser.AddFunction<string, string>("Trim", text => text != null ? text.Trim() : null);
