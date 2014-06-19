@@ -42,7 +42,7 @@ Here return date needs to be greater than or equal to the date given in utility 
 public string ReasonForTravel { get; set; }
 ```
 
-<sub>Notice: Expression is splitted into multiple lines because is more meaningful and easier to understand.</sub>
+<sub>Notice: Expression is splitted into multiple lines because such form is more meaningful and easier to understand.</sub>
 
 This time, the expression above is much more complex that its predecessors, but still can be easily understand. Isn't it?
 
@@ -50,18 +50,17 @@ This time, the expression above is much more complex that its predecessors, but 
 #####Signatures:
 
 ```
-RequiredIfAttribute([string Expression],
+RequiredIfAttribute(string expression,
                     [bool AllowEmptyOrFalse] ...) - Validation attribute which indicates that 
 					                                annotated field is required when computed 
 													result of given logical expression is true.
-AssertThatAttribute([string Expression], ...)     - Validation attribute, executed for non-null 
+AssertThatAttribute(string expression)            - Validation attribute, executed for non-null 
                                                     annotated field, which indicates that 
 													assertion given in logical expression has 
 													to be satisfied, for such field to be 
 													considered as valid.
 
-  Expression        - Gets or sets the logical expression based on which requirement condition 
-	                  is computed.
+  expression        - The logical expression based on which requirement condition is computed.
   AllowEmptyOrFalse - Gets or sets a flag indicating whether the attribute should allow empty or
 	                  whitespace strings or false boolean values (null never allowed).
 ```

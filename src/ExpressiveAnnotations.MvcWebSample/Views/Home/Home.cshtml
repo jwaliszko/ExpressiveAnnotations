@@ -123,7 +123,8 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIf("SportType == 'Extreme' || (SportType != 'None' && GoAbroad == true)")]  
+[RequiredIf("SportType == 'Extreme' || (SportType != 'None' && GoAbroad == true)")]
+[AssertThat("IsBloodType(Trim(BloodType))"]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.BloodType, new { @class = "inline prefix" })
@@ -135,7 +136,7 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIf("ContactDetails.Email != null || ContactDetails.Phone != null")]
+[RequiredIf("!IsNullOrWhiteSpace(ContactDetails.Email) || !IsNullOrWhiteSpace(ContactDetails.Phone)")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.RadioButtonFor(model => model.AgreeForContact, true) <label class="inline">@Resources.SpamAllowed</label>
@@ -191,6 +192,6 @@
             yearSuffix: ''
         };
 
-        ea.addMethod('IsBloodType', function(group) { return /(A|B|AB|0)[+-]/.exec(group); });
+        ea.addMethod('IsBloodType', function(group) { return /^(A|B|AB|0)[+-]$/.test(group); });
     </script>
 }

@@ -138,6 +138,9 @@
   <data name="BloodType" xml:space="preserve">
     <value>Blood type</value>
   </data>
+  <data name="BloodTypeInvalid" xml:space="preserve">
+    <value>Unknown blood type...</value>
+  </data>
   <data name="BloodTypeRequired" xml:space="preserve">
     <value>Blood type is required if you do extreme sports, or if you do any type of sport and plan to go abroad.</value>
   </data>
@@ -190,7 +193,7 @@
     <value>Next country</value>
   </data>
   <data name="No" xml:space="preserve">
-    <value>Nie</value>
+    <value>No</value>
   </data>
   <data name="None" xml:space="preserve">
     <value>None</value>
@@ -241,6 +244,6 @@
     <value>Uncertain</value>
   </data>
   <data name="Yes" xml:space="preserve">
-    <value>Tak</value>
+    <value>Yes</value>
   </data>
 </root>

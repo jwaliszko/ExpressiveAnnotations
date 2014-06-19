@@ -25,6 +25,14 @@
             compareOrdinal: function(strA, strB) {
                 return strA === strB ? 0 : strA > strB ? 1 : -1;
             },
+            compareOrdinalIgnoreCase: function (strA, strB) {
+                strA = strA !== null && strA !== undefined ? strA.toLowerCase() : null;
+                strB = strB !== null && strB !== undefined ? strB.toLowerCase() : null;
+                return strA === strB ? 0 : strA > strB ? 1 : -1;
+            },
+            isNullOrWhiteSpace: function (str) {
+                return str === null || !/\S/.test(str);
+            },
             tryParse: function(value) {
                 if (typeHelper.isString(value)) {
                     return value;
@@ -199,6 +207,12 @@
             };
             this.methods.CompareOrdinal = function(strA, strB) {
                 return typeHelper.String.compareOrdinal(strA, strB);
+            };
+            this.methods.CompareOrdinalIgnoreCase = function(strA, strB) {
+                return typeHelper.String.compareOrdinalIgnoreCase(strA, strB);
+            };
+            this.methods.IsNullOrWhiteSpace = function(str) {
+                return typeHelper.String.isNullOrWhiteSpace(str);
             };
         }
     };

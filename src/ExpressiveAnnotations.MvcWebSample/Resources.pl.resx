@@ -138,6 +138,9 @@
   <data name="BloodType" xml:space="preserve">
     <value>Typ krwi</value>
   </data>
+  <data name="BloodTypeInvalid" xml:space="preserve">
+    <value>Nieznany typ krwi...</value>
+  </data>
   <data name="BloodTypeRequired" xml:space="preserve">
     <value>Typ krwi jest wymagany jeśli uprawiasz sporty ekstremalne, lub planujesz wyjechać za granicę i uprawiasz jakikolwiek sport.</value>
   </data>

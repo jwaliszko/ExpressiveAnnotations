@@ -10,11 +10,6 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 {
     public class Query
     {
-        public bool IsBloodType(string group)
-        {
-            return Regex.IsMatch(group, "(A|B|AB|0)[+-]");
-        }
-
         public IEnumerable<SelectListItem> Sports
         {
             get
@@ -107,7 +102,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "PoliticalStability")]
         public Stability? PoliticalStability { get; set; }
 
-        [RequiredIf("PoliticalStability != null && PoliticalStability != 0",                
+        [RequiredIf("PoliticalStability != null && PoliticalStability != 0",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "AwareOfTheRisksRequired")]
         [Display(ResourceType = typeof (Resources), Name = "AwareOfTheRisks")]
         //[KnownEnum(typeof(Stability))] ToDo: implement this to give parser information about other types used by expression, like enums e.g. Stability.High (instead of 0 like above).
@@ -118,21 +113,27 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 
         [RequiredIf("SportType == 'Extreme' || (SportType != 'None' && GoAbroad == true)",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "BloodTypeRequired")]
-        [AssertThat("IsBloodType(BloodType)")]
+        [AssertThat("IsBloodType(Trim(BloodType))",
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "BloodTypeInvalid")]
         [Display(ResourceType = typeof (Resources), Name = "BloodType")]
         public string BloodType { get; set; }
 
-        [RequiredIf("ContactDetails.Email != null || ContactDetails.Phone != null",
+        [RequiredIf("!IsNullOrWhiteSpace(ContactDetails.Email) || !IsNullOrWhiteSpace(ContactDetails.Phone)",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "AgreeForContactRequired")]
         [Display(ResourceType = typeof (Resources), Name = "AgreeForContact")]
         public bool AgreeForContact { get; set; }
 
-        [RequiredIf("AgreeForContact == true && CompareOrdinal(ContactDetails.Email, ContactDetails.Phone) >= 0",
+        [RequiredIf("AgreeForContact == true",
             AllowEmptyOrFalse = true,
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "ImmediateContactRequired")]
         [Display(ResourceType = typeof(Resources), Name = "ImmediateContact")]
         public bool? ImmediateContact { get; set; }
 
         public Contact ContactDetails { get; set; }
+
+        public bool IsBloodType(string group)
+        {
+            return Regex.IsMatch(group, "^(A|B|AB|0)[+-]$");
+        }
     }
 }

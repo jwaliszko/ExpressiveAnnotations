@@ -124,6 +124,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unknown blood type....
+        /// </summary>
+        public static string BloodTypeInvalid {
+            get {
+                return ResourceManager.GetString("BloodTypeInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Blood type is required if you do extreme sports, or if you do any type of sport and plan to go abroad..
         /// </summary>
         public static string BloodTypeRequired {
@@ -277,7 +286,7 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Nie.
+        ///   Looks up a localized string similar to No.
         /// </summary>
         public static string No {
             get {
@@ -430,7 +439,7 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tak.
+        ///   Looks up a localized string similar to Yes.
         /// </summary>
         public static string Yes {
             get {
