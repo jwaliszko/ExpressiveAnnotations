@@ -22,6 +22,7 @@ namespace ExpressiveAnnotations.Analysis
     public sealed class Parser
     {
         private Stack<Token> Tokens { get; set; }
+        private IList<Type> KnownEnums { get; set; }
         private Type ContextType { get; set; }
         private Expression ContextExpression { get; set; }
         private IDictionary<string, LambdaExpression> Functions { get; set; }
@@ -31,7 +32,8 @@ namespace ExpressiveAnnotations.Analysis
         /// </summary>
         public Parser()
         {
-            Functions = new Dictionary<string, LambdaExpression>();
+            KnownEnums = new List<Type>();
+            Functions = new Dictionary<string, LambdaExpression>();            
         }
 
         /// <summary>
@@ -102,6 +104,18 @@ namespace ExpressiveAnnotations.Analysis
         public void AddFunction<Arg1, Arg2, Result>(string name, Expression<Func<Arg1, Arg2, Result>> func)
         {
             Functions.Add(name, func);
+        }
+
+        /// <summary>
+        /// Adds the type of the enum.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <exception cref="System.NotSupportedException"></exception>
+        public void AddEnumType<T>() where T : struct, IComparable, IFormattable, IConvertible
+        {
+            if (!typeof(T).IsEnum)
+                throw new NotSupportedException("T must be an enumerated type");
+            KnownEnums.Add(typeof(T));
         }
 
         private void InitTokenizer(string expression)
@@ -257,11 +271,11 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseFunc()
         {
-            var propertyName = PeekValue().ToString();
+            var name = PeekValue().ToString();
             ReadToken(); // read name
-            
+
             if (PeekType() != TokenId.LEFT_BRACKET)
-                return ExtractProperty(propertyName);
+                return ExtractElement(name);
 
             ReadToken(); // read "("
 
@@ -279,26 +293,50 @@ namespace ExpressiveAnnotations.Analysis
                 throw new InvalidOperationException();
             ReadToken();
             
-            var mi = ContextType.GetMethod(propertyName); // check if custom func is defined for model
+            var mi = ContextType.GetMethod(name); // check if custom func is defined for model
             if (mi != null)
                 return Expression.Call(ContextExpression, mi, args);
 
-            if(!Functions.ContainsKey(propertyName))
+            if(!Functions.ContainsKey(name))
                 throw new InvalidOperationException();
 
-            return CreateLambdaCallExpression(Functions[propertyName], args, propertyName);
+            return CreateLambdaCallExpression(Functions[name], args, name);
         }
 
-        private Expression ExtractProperty(string name)
+        private Expression ExtractElement(string name)
         {
-            var props = name.Split('.');
-            var type = ContextType;
-            var expr = ContextExpression;
-            foreach (var prop in props)
+            var expr = ExtractElement(name, ContextType, ContextExpression);
+            if (expr != null)
+                return expr;
+
+            var enumType = KnownEnums.SingleOrDefault(x => name.StartsWith(x.Name));
+            if (enumType != null)
             {
-                var pi = type.GetProperty(prop);
+                name = name.Remove(0, enumType.Name.Length + 1);
+                expr = ExtractElement(name, enumType, Expression.Parameter(enumType));
+                if (expr != null)
+                    return expr;
+            }
+
+            throw new ArgumentException(string.Format("Dynamic extraction failed. Element {0} not found.", name), name);
+        }
+
+        private Expression ExtractElement(string name, Type type, Expression expr)
+        {            
+            var parts = name.Split('.');
+            foreach (var part in parts)
+            {
+                var pi = type.GetProperty(part);
                 if (pi == null)
-                    throw new ArgumentException(string.Format("Dynamic extraction interrupted. Field {0} not found.", prop), name);
+                {
+                    var fi = type.GetField(part);
+                    if (fi == null)                    
+                        return null;
+                   
+                    expr = fi.IsStatic ? Expression.Field(null, fi) : Expression.Field(expr, fi);
+                    type = fi.FieldType;
+                    continue;
+                }
                 expr = Expression.Property(expr, pi);
                 type = pi.PropertyType;
             }

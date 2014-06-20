@@ -1,13 +1,29 @@
 ﻿using System;
-using System.Linq.Expressions;
 using ExpressiveAnnotations.Analysis;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ExpressiveAnnotations.Tests
 {
+    public class Utility
+    {
+        public enum Stability
+        {
+            High,
+            Low,
+            Uncertain,
+        }
+    }
+
     [TestClass]
     public class ParserTest
     {
+        private enum YesNo
+        {
+            Yes,
+            No,
+            Uncertain,
+        }
+
         private class Model
         {
             public Model SubModel { get; set; }
@@ -16,6 +32,7 @@ namespace ExpressiveAnnotations.Tests
             public int Number { get; set; }
             public bool Flag { get; set; }
             public string Text { get; set; }
+            public Utility.Stability? PoliticalStability { get; set; }
 
             public DateTime NextWeek()
             {
@@ -80,16 +97,23 @@ namespace ExpressiveAnnotations.Tests
                 Number = 0,
                 Flag = true,
                 Text = "hello world",
+                PoliticalStability = Utility.Stability.High,
                 SubModel = new Model
                 {
                     Date = DateTime.Now.AddDays(1),
                     Number = 1,
                     Flag = false,
-                    Text = " hello world "
+                    Text = " hello world ",
+                    PoliticalStability = null,
                 }
             };
 
             var parser = new Parser();
+            parser.AddEnumType<YesNo>();
+            parser.AddEnumType<Utility.Stability>();
+            Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability == 0").Invoke(model));
+            Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability == Stability.High").Invoke(model));
+
             Assert.IsTrue(parser.Parse(model.GetType(), "Flag").Invoke(model));
             Assert.IsFalse(parser.Parse(model.GetType(), "!Flag").Invoke(model));
             Assert.IsTrue(parser.Parse(model.GetType(), "Flag && true").Invoke(model));
