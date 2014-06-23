@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Web;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
 using Newtonsoft.Json;
 using System.Linq;
-using System.Reflection;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
 {
@@ -30,14 +30,25 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         public RequiredIfValidator(ModelMetadata metadata, ControllerContext context, RequiredIfAttribute attribute)
             : base(metadata, context, attribute)
         {
-            var parser = new Parser();
-            parser.RegisterMethods();
-            parser.Parse(metadata.ContainerType, attribute.Expression);
+            var typesId = ("RequiredIfAttribute_types_" + metadata.ContainerType.FullName + "." + metadata.PropertyName).ToLowerInvariant();
+            var enumsId = ("RequiredIfAttribute_enums_" + metadata.ContainerType.FullName + "." + metadata.PropertyName).ToLowerInvariant();
+            TypesMap = HttpRuntime.Cache.Get(typesId) as IDictionary<string, string>;
+            EnumsMap = HttpRuntime.Cache.Get(enumsId) as IDictionary<string, Dictionary<string, int>>;
 
-            TypesMap = parser.GetMembers()
-                .ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value));
-            EnumsMap = parser.GetEnums()
-                .ToDictionary(x => x.Key, x => Enum.GetValues(x.Value).Cast<object>().ToDictionary(v => v.ToString(), v => (int)v));
+            if(TypesMap == null && TypesMap == null)
+            {
+                var parser = new Parser();
+                parser.RegisterMethods();
+                parser.Parse(metadata.ContainerType, attribute.Expression);
+
+                TypesMap = parser.GetMembers()
+                    .ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value));
+                EnumsMap = parser.GetEnums()
+                    .ToDictionary(x => x.Key, x => Enum.GetValues(x.Value).Cast<object>().ToDictionary(v => v.ToString(), v => (int)v));
+                
+                HttpContext.Current.Cache.Insert(typesId, TypesMap);
+                HttpContext.Current.Cache.Insert(enumsId, EnumsMap);
+            }
 
             Expression = attribute.Expression;
             FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);

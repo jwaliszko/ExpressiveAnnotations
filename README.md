@@ -20,18 +20,19 @@ public string PassportNumber { get; set; }
 Here we are saying that annotated field is required when dependent field has appropriate value (passport number is required, if go abroad option is selected). Simple enough, let's move to another variation:
 
 ```
-[RequiredIf("ContactDetails.Email != null")]
-public bool AgreeToContact { get; set; }
-```
-
-This one means, that if email is non-null, boolean value indicating contact permission has to be true. What is more, we can see here that nested properties are supported by the mechanism. 
-
-```
 [AssertThat("ReturnDate >= Today()")]
 public DateTime? ReturnDate { get; set; }
 ```
 
 Here return date needs to be greater than or equal to the date given in utility function returning current day. This time we are not validating field requirement as before. Now attribute puts restriction on field, which needs to be satisfied for such field to be considered as valid (restriction verification is executed for non-null field).
+
+```
+[RequiredIf("ContactDetails.Email != null")]
+[AssertThat("AgreeToContact == true")]
+public bool? AgreeToContact { get; set; }
+```
+
+This one means, that if email is provided (non-null), we are forced to authorize someone to contact us (boolean value indicating contact permission has to be true). What is more, we can see here that nested properties are supported by the mechanism. 
  
 ```
 [RequiredIf("GoAbroad == true " +
@@ -51,18 +52,18 @@ This time, the expression above is much more complex that its predecessors, but 
 
 ```
 RequiredIfAttribute(string expression,
-                    [bool AllowEmptyOrFalse] ...) - Validation attribute which indicates that 
+                    [bool AllowEmptyStrings] ...) - Validation attribute which indicates that 
 					                                annotated field is required when computed 
 													result of given logical expression is true.
-AssertThatAttribute(string expression)            - Validation attribute, executed for non-null 
+AssertThatAttribute(string expression, ...)       - Validation attribute, executed for non-null 
                                                     annotated field, which indicates that 
 													assertion given in logical expression has 
 													to be satisfied, for such field to be 
 													considered as valid.
 
   expression        - The logical expression based on which requirement condition is computed.
-  AllowEmptyOrFalse - Gets or sets a flag indicating whether the attribute should allow empty or
-	                  whitespace strings or false boolean values (null never allowed).
+  AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should allow empty or
+	                  whitespace strings.
 ```
 
 #####Implementation:
