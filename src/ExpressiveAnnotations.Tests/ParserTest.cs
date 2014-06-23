@@ -109,8 +109,6 @@ namespace ExpressiveAnnotations.Tests
             };
 
             var parser = new Parser();
-            parser.AddEnumType<YesNo>();
-            parser.AddEnumType<Utility.Stability>();
             Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability == 0").Invoke(model));
             Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability == Stability.High").Invoke(model));
 

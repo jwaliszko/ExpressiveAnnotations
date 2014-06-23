@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Web.Mvc;
+using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
 using Newtonsoft.Json;
 
@@ -13,6 +16,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         private string Expression { get; set; }
         private string FormattedErrorMessage { get; set; }
         private IDictionary<string, string> TypesMap { get; set; }
+        private IDictionary<string, Dictionary<string, int>> EnumsMap { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AssertThatValidator" /> class.
@@ -23,9 +27,17 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         public AssertThatValidator(ModelMetadata metadata, ControllerContext context, AssertThatAttribute attribute)
             : base(metadata, context, attribute)
         {
+            var parser = new Parser();
+            parser.RegisterMethods();
+            parser.Parse(metadata.ContainerType, attribute.Expression);
+
+            TypesMap = parser.GetMembers()
+                .ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value));
+            EnumsMap = parser.GetEnums()
+                .ToDictionary(x => x.Key, x => Enum.GetValues(x.Value).Cast<object>().ToDictionary(v => v.ToString(), v => (int)v));
+
             Expression = attribute.Expression;
-            FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);
-            TypesMap = Helper.GetTypesMap(metadata, attribute.Expression);
+            FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);            
         }
 
         /// <summary>
@@ -43,6 +55,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
             };
             rule.ValidationParameters.Add("expression", JsonConvert.SerializeObject(Expression));
             rule.ValidationParameters.Add("typesmap", JsonConvert.SerializeObject(TypesMap));
+            rule.ValidationParameters.Add("enumsmap", JsonConvert.SerializeObject(EnumsMap));
             yield return rule;
         }
     }

@@ -155,26 +155,37 @@
 
             return parsedValue;
         },
-        deserializeObject: function(form, typesMap, prefix) {
-            var o = {}, name, type, value, props, parent, i;
+        deserializeObject: function(form, typesMap, enumsMap, prefix) {
+            var o = {}, name, type, value;
             for (name in typesMap) {
                 if (typesMap.hasOwnProperty(name)) {
                     type = typesMap[name];
                     value = this.extractValue(form, name, prefix, type);
-                    props = name.split('.');
-                    parent = o;
-                    for (i = 0; i < props.length - 1; i++) {
-                        name = props[i];
-                        if (!parent[name]) {
-                            parent[name] = {};
-                        }
-                        parent = parent[name];
-                    }
-                    name = props[props.length - 1];
-                    parent[name] = value;
+                    this.buildFieldInternal(name, value, o);
+                }
+            }
+            for (name in enumsMap) {
+                if (enumsMap.hasOwnProperty(name)) {
+                    value = enumsMap[name];
+                    this.buildFieldInternal(name, value, o);
                 }
             }
             toolchain.registerMethods(o);
+            return o;
+        },
+        buildFieldInternal: function (name, value, o) {
+            var props, parent, i;
+            props = name.split('.');
+            parent = o;
+            for (i = 0; i < props.length - 1; i++) {
+                name = props[i];
+                if (!parent[name]) {
+                    parent[name] = {};
+                }
+                parent = parent[name];
+            }
+            name = props[props.length - 1];
+            parent[name] = value;
             return o;
         }
     };
@@ -217,26 +228,28 @@
         }
     };
 
-    $.validator.unobtrusive.adapters.add('assertthat', ['expression', 'typesmap'], function(options) {
+    $.validator.unobtrusive.adapters.add('assertthat', ['expression', 'typesmap', 'enumsmap'], function (options) {
         options.rules.assertthat = {
             prefix: modelHelper.getPrefix(options.element.name),
             form: options.form,
             expression: $.parseJSON(options.params.expression),
-            typesmap: $.parseJSON(options.params.typesmap)
+            typesmap: $.parseJSON(options.params.typesmap),
+            enumsmap: $.parseJSON(options.params.enumsmap)
         };
         if (options.message) {
             options.messages.assertthat = options.message;
         }
     });
 
-    $.validator.unobtrusive.adapters.add('requiredif', ['expression', 'typesmap', 'allowemptyorfalse', 'modeltype'], function (options) {
+    $.validator.unobtrusive.adapters.add('requiredif', ['expression', 'typesmap', 'enumsmap', 'allowempty', 'callertype'], function (options) {
         options.rules.requiredif = {
             prefix: modelHelper.getPrefix(options.element.name),
             form: options.form,
             expression: $.parseJSON(options.params.expression),
             typesmap: $.parseJSON(options.params.typesmap),
-            allowemptyorfalse: $.parseJSON(options.params.allowemptyorfalse),
-            modeltype: $.parseJSON(options.params.modeltype)
+            enumsmap: $.parseJSON(options.params.enumsmap),
+            allowempty: $.parseJSON(options.params.allowempty),
+            callertype: $.parseJSON(options.params.callertype)            
         };
         if (options.message) {
             options.messages.requiredif = options.message;
@@ -245,7 +258,7 @@
 
     $.validator.addMethod('assertthat', function (value, element, params) {
         if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
-            var model = modelHelper.deserializeObject(params.form, params.typesmap, params.prefix);
+            var model = modelHelper.deserializeObject(params.form, params.typesmap, params.enumsmap, params.prefix);
             with (model) {
                 if (!eval(params.expression)) { // check if the assertion condition is not satisfied
                     return false; // assertion not satisfied => notify
@@ -257,10 +270,10 @@
 
     $.validator.addMethod('requiredif', function (value, element, params) {
         var model, boolValue;
-        if (params.modeltype === 'bool') {
+        if (params.callertype === 'bool') {
             boolValue = typeHelper.Bool.tryParse(value);
-            if (boolValue.error /* conversion fail indicates that field value is not set - required */ || (!boolValue && !params.allowemptyorfalse)) {
-                model = modelHelper.deserializeObject(params.form, params.typesmap, params.prefix);
+            if (boolValue.error /* conversion fail indicates that field value is not set - required */) {
+                model = modelHelper.deserializeObject(params.form, params.typesmap, params.enumsmap, params.prefix);
                 with (model) {
                     if (eval(params.expression)) { // check if the requirement condition is satisfied
                         return false; // requirement confirmed => notify
@@ -269,8 +282,8 @@
             }
         }
         if (value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
-            || (!/\S/.test(value) && !params.allowemptyorfalse)) {
-            model = modelHelper.deserializeObject(params.form, params.typesmap, params.prefix);
+            || (!/\S/.test(value) && !params.allowempty)) {
+            model = modelHelper.deserializeObject(params.form, params.typesmap, params.enumsmap, params.prefix);
             with (model) {
                 if (eval(params.expression)) {
                     return false;

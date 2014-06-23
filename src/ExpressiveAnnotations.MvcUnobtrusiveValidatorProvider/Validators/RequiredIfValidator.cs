@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
+using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
 using Newtonsoft.Json;
+using System.Linq;
+using System.Reflection;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
 {
@@ -13,9 +16,10 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
     {
         private string Expression { get; set; }
         private string FormattedErrorMessage { get; set; }        
-        private bool AllowEmptyOrFalse { get; set; }
-        private Type ModelType { get; set; }
+        private bool AllowEmpty { get; set; }
+        private Type CallerType { get; set; }
         private IDictionary<string, string> TypesMap { get; set; }
+        private IDictionary<string, Dictionary<string, int>> EnumsMap { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequiredIfValidator" /> class.
@@ -26,11 +30,19 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         public RequiredIfValidator(ModelMetadata metadata, ControllerContext context, RequiredIfAttribute attribute)
             : base(metadata, context, attribute)
         {
+            var parser = new Parser();
+            parser.RegisterMethods();
+            parser.Parse(metadata.ContainerType, attribute.Expression);
+
+            TypesMap = parser.GetMembers()
+                .ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value));
+            EnumsMap = parser.GetEnums()
+                .ToDictionary(x => x.Key, x => Enum.GetValues(x.Value).Cast<object>().ToDictionary(v => v.ToString(), v => (int)v));
+
             Expression = attribute.Expression;
             FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);
-            TypesMap = Helper.GetTypesMap(metadata, attribute.Expression);
-            AllowEmptyOrFalse = attribute.AllowEmptyOrFalse;
-            ModelType = metadata.ModelType;
+            AllowEmpty = attribute.AllowEmptyStrings;
+            CallerType = metadata.ModelType;
         }
 
         /// <summary>
@@ -48,8 +60,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
             };
             rule.ValidationParameters.Add("expression", JsonConvert.SerializeObject(Expression));
             rule.ValidationParameters.Add("typesmap", JsonConvert.SerializeObject(TypesMap));
-            rule.ValidationParameters.Add("allowemptyorfalse", JsonConvert.SerializeObject(AllowEmptyOrFalse));
-            rule.ValidationParameters.Add("modeltype", JsonConvert.SerializeObject(Helper.GetCoarseType(ModelType)));
+            rule.ValidationParameters.Add("enumsmap", JsonConvert.SerializeObject(EnumsMap));
+            rule.ValidationParameters.Add("allowempty", JsonConvert.SerializeObject(AllowEmpty));
+            rule.ValidationParameters.Add("callertype", JsonConvert.SerializeObject(Helper.GetCoarseType(CallerType)));            
             yield return rule;
         }
     }

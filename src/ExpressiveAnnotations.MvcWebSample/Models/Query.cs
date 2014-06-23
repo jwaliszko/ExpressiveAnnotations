@@ -102,10 +102,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "PoliticalStability")]
         public Stability? PoliticalStability { get; set; }
 
-        [RequiredIf("PoliticalStability != null && PoliticalStability != 0",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "AwareOfTheRisksRequired")]
-        [Display(ResourceType = typeof (Resources), Name = "AwareOfTheRisks")]
-        //[KnownEnum(typeof(Stability))] ToDo: implement this to give parser information about other types used by expression, like enums e.g. Stability.High (instead of 0 like above).
+        [RequiredIf("PoliticalStability != null && PoliticalStability != Stability.High",
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "AwareOfTheRisksRequired")]                
+        [Display(ResourceType = typeof(Resources), Name = "AwareOfTheRisks")]        
         public bool AwareOfTheRisks { get; set; }
 
         [Display(ResourceType = typeof (Resources), Name = "SportType")]
@@ -118,14 +117,13 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "BloodType")]
         public string BloodType { get; set; }
 
-        [RequiredIf("!IsNullOrWhiteSpace(ContactDetails.Email) || !IsNullOrWhiteSpace(ContactDetails.Phone)",
+        [AssertThat("AgreeForContact == true",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "AgreeForContactRequired")]
         [Display(ResourceType = typeof (Resources), Name = "AgreeForContact")]
         public bool AgreeForContact { get; set; }
 
-        [RequiredIf("AgreeForContact == true",
-            AllowEmptyOrFalse = true,
-            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "ImmediateContactRequired")]
+        [RequiredIf("AgreeForContact == true",            
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "ImmediateContactRequired")]        
         [Display(ResourceType = typeof(Resources), Name = "ImmediateContact")]
         public bool? ImmediateContact { get; set; }
 

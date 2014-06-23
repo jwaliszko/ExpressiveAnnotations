@@ -106,7 +106,7 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIf("PoliticalStability != null && PoliticalStability != 0")]
+[RequiredIf("PoliticalStability != null && PoliticalStability != Stability.High")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.EditorFor(model => model.AwareOfTheRisks)
@@ -136,7 +136,7 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIf("!IsNullOrWhiteSpace(ContactDetails.Email) || !IsNullOrWhiteSpace(ContactDetails.Phone)")]
+[AssertThat("AgreeForContact == true")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.RadioButtonFor(model => model.AgreeForContact, true) <label class="inline">@Resources.SpamAllowed</label>
@@ -145,8 +145,7 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIf("AgreeForContact == true", 
-    AllowEmptyOrFalse = true)]
+[RequiredIf("AgreeForContact == true")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.ImmediateContact, new { @class = "inline prefix" })

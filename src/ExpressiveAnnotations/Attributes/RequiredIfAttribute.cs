@@ -10,8 +10,8 @@ namespace ExpressiveAnnotations.Attributes
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public sealed class RequiredIfAttribute : ValidationAttribute
     {
-        private const string _defaultErrorMessage = "The {0} field is required by the following logic: {1}.";
-        private Func<object, bool> CachedFunc { get; set; }
+        private const string _defaultErrorMessage = "The {0} field is required by the following logic: {1}.";        
+        private Func<object, bool> CachedValidationFunc { get; set; }
         private Parser Parser { get; set; }
 
         /// <summary>
@@ -20,9 +20,9 @@ namespace ExpressiveAnnotations.Attributes
         public string Expression { get; set; }
 
         /// <summary>
-        /// Gets or sets a flag indicating whether the attribute should allow empty or whitespace strings or false boolean values (null never allowed).
+        /// Gets or sets a flag indicating whether the attribute should allow empty or whitespace strings.
         /// </summary>
-        public bool AllowEmptyOrFalse { get; set; }
+        public bool AllowEmptyStrings { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequiredIfAttribute" /> class.
@@ -35,7 +35,7 @@ namespace ExpressiveAnnotations.Attributes
             Parser.RegisterMethods();
 
             Expression = expression;
-            AllowEmptyOrFalse = false;
+            AllowEmptyStrings = false;
         }
 
         /// <summary>
@@ -63,11 +63,12 @@ namespace ExpressiveAnnotations.Attributes
             if (validationContext == null)
                 throw new ArgumentNullException("validationContext", "ValidationContext not provided.");
 
-            var emptyOrFalse = (value is string && string.IsNullOrWhiteSpace((string)value)) || (value is bool && !(bool)value);
-            if (value == null || (emptyOrFalse && !AllowEmptyOrFalse))
+            var isEmpty = value is string && string.IsNullOrWhiteSpace((string) value);
+            if (value == null || (isEmpty && !AllowEmptyStrings))
             {
-                var validator = CachedFunc ?? (CachedFunc = Parser.Parse(validationContext.ObjectInstance.GetType(), Expression));
-                if (validator(validationContext.ObjectInstance)) // check if the requirement condition is satisfied
+                if (CachedValidationFunc == null)
+                    CachedValidationFunc = Parser.Parse(validationContext.ObjectType, Expression);
+                if (CachedValidationFunc(validationContext.ObjectInstance)) // check if the requirement condition is satisfied
                     return new ValidationResult(FormatErrorMessage(validationContext.DisplayName, Expression)); // requirement confirmed => notify
             }
 

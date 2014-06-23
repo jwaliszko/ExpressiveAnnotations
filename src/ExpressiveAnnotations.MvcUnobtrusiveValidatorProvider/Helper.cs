@@ -1,48 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Web.Mvc;
-using ExpressiveAnnotations.Analysis;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 {
     internal static class Helper
     {
-        public static IDictionary<string, string> GetTypesMap(ModelMetadata metadata, string expression)
-        {
-            var lexer = new Lexer();
-            var properties =
-                lexer.Analyze(expression).Where(x => x.Id == TokenId.FUNC).Select(x => x.Value.ToString());
-            var typesMap = new Dictionary<string, string>();
-            foreach (var prop in properties)
-            {
-                var pi = ExtractProperty(metadata.ContainerType, prop);
-                if (pi != null && !typesMap.ContainsKey(prop))
-                    typesMap.Add(prop, GetCoarseType(pi.PropertyType));
-            }
-            return typesMap;
-        }
-
-        public static PropertyInfo ExtractProperty(Type type, string property)
-        {
-            if (type == null)
-                throw new ArgumentNullException("type");
-            if (property == null)
-                throw new ArgumentNullException("property");
-
-            var props = property.Split('.');
-            PropertyInfo pi = null;
-            foreach (var prop in props)
-            {
-                pi = type.GetProperty(prop);
-                if (pi == null)
-                    return null;
-                type = pi.PropertyType;
-            }
-            return pi;
-        }
-
         public static bool IsNumeric(this object value)
         {
             return value != null && value.GetType().IsNumeric();

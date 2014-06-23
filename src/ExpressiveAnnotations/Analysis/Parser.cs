@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.Serialization.Formatters;
+using System.Security.Cryptography.X509Certificates;
 
 namespace ExpressiveAnnotations.Analysis
 {
@@ -22,17 +24,19 @@ namespace ExpressiveAnnotations.Analysis
     public sealed class Parser
     {
         private Stack<Token> Tokens { get; set; }
-        private IList<Type> KnownEnums { get; set; }
+        private IDictionary<string, Type> Enums { get; set; }
+        private IDictionary<string, Type> Members { get; set; }
         private Type ContextType { get; set; }
         private Expression ContextExpression { get; set; }
         private IDictionary<string, LambdaExpression> Functions { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Parser"/> class.
+        /// Initializes a new instance of the <see cref="Parser" /> class.
         /// </summary>
         public Parser()
         {
-            KnownEnums = new List<Type>();
+            Enums = new Dictionary<string, Type>();
+            Members = new Dictionary<string, Type>();
             Functions = new Dictionary<string, LambdaExpression>();            
         }
 
@@ -107,15 +111,21 @@ namespace ExpressiveAnnotations.Analysis
         }
 
         /// <summary>
-        /// Adds the type of the enum.
+        /// Gets the parsed fields and properties.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <exception cref="System.NotSupportedException"></exception>
-        public void AddEnumType<T>() where T : struct, IComparable, IFormattable, IConvertible
+        /// <returns>Fields and properties.</returns>
+        public IDictionary<string, Type> GetMembers()
         {
-            if (!typeof(T).IsEnum)
-                throw new NotSupportedException("T must be an enumerated type");
-            KnownEnums.Add(typeof(T));
+            return Members;
+        }
+
+        /// <summary>
+        /// Gets the parsed enums.
+        /// </summary>
+        /// <returns>Enums.</returns>
+        public IDictionary<string, Type> GetEnums()
+        {
+            return Enums;
         }
 
         private void InitTokenizer(string expression)
@@ -275,7 +285,7 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken(); // read name
 
             if (PeekType() != TokenId.LEFT_BRACKET)
-                return ExtractElement(name);
+                return ExtractMemberExpression(name);
 
             ReadToken(); // read "("
 
@@ -303,25 +313,39 @@ namespace ExpressiveAnnotations.Analysis
             return CreateLambdaCallExpression(Functions[name], args, name);
         }
 
-        private Expression ExtractElement(string name)
+        private Expression ExtractMemberExpression(string name)
         {
-            var expr = ExtractElement(name, ContextType, ContextExpression);
+            var expr = ExtractMemberExpression(name, ContextType, ContextExpression);
             if (expr != null)
-                return expr;
-
-            var enumType = KnownEnums.SingleOrDefault(x => name.StartsWith(x.Name));
-            if (enumType != null)
             {
-                name = name.Remove(0, enumType.Name.Length + 1);
-                expr = ExtractElement(name, enumType, Expression.Parameter(enumType));
-                if (expr != null)
-                    return expr;
+                if(!Members.ContainsKey(name))
+                    Members.Add(name, expr.Type);
+                return expr;
             }
 
-            throw new ArgumentException(string.Format("Dynamic extraction failed. Element {0} not found.", name), name);
+            var parts = name.Split('.');
+            if (parts.Count() > 1)
+            {
+                name = string.Join(".", parts.Take(parts.Count() - 1).ToArray());
+                var enumTypes = AppDomain.CurrentDomain.GetAssemblies()
+                    .SelectMany(a => a.GetTypes()).Where(t => t.IsEnum && t.FullName.EndsWith(name)).ToList();
+
+                if (enumTypes.Count() > 1)
+                    throw new ArgumentException(string.Format("Dynamic extraction failed. {0} enum identifier is ambigous. Narrow its namespace.", name), name);
+
+                var type = enumTypes.SingleOrDefault();
+                if (type != null)
+                {
+                    if (!Enums.ContainsKey(name))
+                        Enums.Add(name, type);
+                    return ExtractMemberExpression(parts.Last(), type, Expression.Parameter(type));
+                }
+            }
+
+            throw new ArgumentException(string.Format("Dynamic extraction failed. Member {0} not found.", name), name);
         }
 
-        private Expression ExtractElement(string name, Type type, Expression expr)
+        private Expression ExtractMemberExpression(string name, Type type, Expression expr)
         {            
             var parts = name.Split('.');
             foreach (var part in parts)
@@ -360,8 +384,7 @@ namespace ExpressiveAnnotations.Analysis
                 {
                     try
                     {
-                        var conv = Expression.Convert(arg, param.Type);
-                        convertedArgs.Add(conv);
+                        convertedArgs.Add(Expression.Convert(arg, param.Type));
                     }
                     catch
                     {
