@@ -151,7 +151,7 @@ namespace ExpressiveAnnotations.Analysis
         {
             var expr = ParseOrExp();
             if (PeekType() != TokenId.NONE)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException(string.Format("Unexpected token {0}.", PeekValue()));
             return expr;
         }
 
@@ -186,7 +186,7 @@ namespace ExpressiveAnnotations.Analysis
         private Expression ParseRelExp()
         {
             var arg1 = ParseVal();
-            if (!new[] { TokenId.LT, TokenId.LE, TokenId.GT, TokenId.GE, TokenId.EQ, TokenId.NEQ }.Contains(PeekType()))
+            if (!new[] {TokenId.LT, TokenId.LE, TokenId.GT, TokenId.GE, TokenId.EQ, TokenId.NEQ}.Contains(PeekType()))
                 return arg1;
             var oper = PeekType();
             ReadToken();
@@ -208,7 +208,7 @@ namespace ExpressiveAnnotations.Analysis
                 case TokenId.NEQ:
                     return Expression.NotEqual(arg1, arg2);
                 default:
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException("Unexpected operator.");
             }
         }
 
@@ -219,7 +219,7 @@ namespace ExpressiveAnnotations.Analysis
                 ReadToken();
                 var arg = ParseOrExp();
                 if (PeekType() != TokenId.RIGHT_BRACKET)
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException(string.Format("Unexpected token {0}. Closing bracket missing.", PeekValue()));
                 ReadToken();
                 return arg;
             }
@@ -239,7 +239,7 @@ namespace ExpressiveAnnotations.Analysis
                 case TokenId.FUNC:
                     return ParseFunc();
                 default:
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException(string.Format("Unexpected token {0}. Available values: null, int, float, bool, string or func.", PeekValue()));
             }
         }
 
@@ -298,7 +298,7 @@ namespace ExpressiveAnnotations.Analysis
             }
 
             if (PeekType() != TokenId.RIGHT_BRACKET)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException(string.Format("Unexpected token {0}. Function invocation does not contain closing bracket.", PeekValue()));
             ReadToken();
             
             var mi = ContextType.GetMethod(name); // check if custom func is defined for model
@@ -306,7 +306,7 @@ namespace ExpressiveAnnotations.Analysis
                 return Expression.Call(ContextExpression, mi, args);
 
             if(!Functions.ContainsKey(name))
-                throw new InvalidOperationException();
+                throw new InvalidOperationException(string.Format("Function {0} not found.", name));
 
             return CreateLambdaCallExpression(Functions[name], args, name);
         }
@@ -329,7 +329,7 @@ namespace ExpressiveAnnotations.Analysis
                     .SelectMany(a => a.GetTypes()).Where(t => t.IsEnum && t.FullName.EndsWith(name)).ToList();
 
                 if (enumTypes.Count() > 1)
-                    throw new ArgumentException(string.Format("Dynamic extraction failed. {0} enum identifier is ambigous. Narrow its namespace.", name), name);
+                    throw new ArgumentException(string.Format("Dynamic extraction failed. {0} enum identifier is ambigous. Provide detailed namespace.", name), name);
 
                 var type = enumTypes.SingleOrDefault();
                 if (type != null)
@@ -368,8 +368,7 @@ namespace ExpressiveAnnotations.Analysis
         private static InvocationExpression CreateLambdaCallExpression(LambdaExpression funcExpr, IList<Expression> parsedArgs, string funcName)
         {
             if (funcExpr.Parameters.Count != parsedArgs.Count)
-                throw new InvalidOperationException(
-                    string.Format("Funtion {0} expects {1} parameters. You provided {2}.", funcName, funcExpr.Parameters.Count, parsedArgs.Count));
+                throw new InvalidOperationException(string.Format("Incorrect number of parameters provided. Function {0} expects {1}, not {2}.", funcName, funcExpr.Parameters.Count, parsedArgs.Count));
 
             var convertedArgs = new List<Expression>();
             for (var i = 0; i < parsedArgs.Count; i++)
@@ -386,8 +385,7 @@ namespace ExpressiveAnnotations.Analysis
                     }
                     catch
                     {
-                        throw new InvalidOperationException(
-                            string.Format("Cannot convert {0} argument type from {1} to needed {2}.", i, arg.Type.Name, param.Type.Name));
+                        throw new InvalidOperationException(string.Format("Argument {0} type conversion from {1} to needed {2} failed.", i, arg.Type.Name, param.Type.Name));
                     }
                 }
             }
