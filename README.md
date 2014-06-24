@@ -2,9 +2,9 @@
 
 <sub>**Notice: This document describes latest implementation. For previous version (concept) &lt; 2.0 take a look at [EA1 branch](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/EA1).**</sub>
 
-ExpressiveAnnotations is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given implementations of RequiredIf and AssertThat attributes allows to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more compacted, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
+ExpressiveAnnotations is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given RequiredIf and AssertThat attributes allows to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more condensed, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
 
-###RequiredIf vs AssertThat attributes?
+###RequiredIf vs AssertThat attribute?
 
 RequiredIf indicates that annotated field is required, when given condition is fulfilled. AssertThat on the other hand indicates, that non-null annotated field is considered as valid, when given condition is fulfilled.
 
@@ -68,7 +68,7 @@ AssertThatAttribute(string expression, ...)       - Validation attribute, execut
 
 #####Implementation:
 
-Implementation core is based on logical expressions parser, which is based on the following grammar:
+Implementation core is based on logical expressions parser, which runs on the following grammar:
 
 ```
 expression => or-exp
@@ -80,7 +80,41 @@ rel-op     => "==" | "!=" | ">" | ">=" | "<" | "<="
 val        => "null" | int | float | bool | string | func | "(" or-exp ")"
 ```
 
-At server side, expression string is parsed and converted into [expression trees](http://msdn.microsoft.com/en-us/library/bb397951.aspx). At client side, pure expression string is evaluated within the context of created model object.
+func can be an enum value as well as property, field or function name.
+
+Expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx). A delegate containing the compiled version of the lambda expression described by produced expression tree is then executed for given model object. As a result of expression evaluation, boolean flag is returned. Client side on the other hand receives unchanged expression string from server. Such an expression is then evaluated using build-in [eval](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) within the context of model object. Such a model, analogical to server side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
+
+#####Built-in functions:
+
+Toolchain functions available out of the box at server and client side: 
+
+```
+DateTime Today()
+string Trim(string str)
+int CompareOrdinal(string strA, string strB)
+int CompareOrdinalIgnoreCase(string strA, string strB)
+bool IsNullOrWhiteSpace(string str)
+```
+
+Any custom function within the model object scope at server side is automatically recognized and can be used inside expression, e.g:
+
+```
+class Model
+{
+    public bool IsBloodType(string group) { return Regex.IsMatch(group, "^(A|B|AB|0)[+-]$"); }
+
+	[AssertThat("IsBloodType(BloodType)")] // <- function known here
+    public string BloodType { get; set; }
+```
+
+For such function to be available at client also, its body needs to be defined and registered by the following instruction:
+
+```
+<script>
+    // expressive.annotations.validate.js already loaded
+    ea.addMethod('IsBloodType', function(group) { return /^(A|B|AB|0)[+-]$/.test(group); });
+</script>
+```
 
 ###What is the context behind this implementation? 
 
