@@ -77,13 +77,14 @@ namespace ExpressiveAnnotations.Attributes
                 RelationalOperator = RelationalOperator,
                 SensitiveComparisons = SensitiveComparisons
             };
-
+            
             var emptyOrFalse = (value is string && string.IsNullOrWhiteSpace((string)value)) || (value is bool && !(bool) value);
             if (value == null || (emptyOrFalse && !AllowEmptyOrFalse))
                 if (internals.Verify(validationContext)) // check if the requirement condition is satisfied
                     return new ValidationResult( // requirement confirmed => notify
                         FormatErrorMessage(validationContext.DisplayName,
-                            MiscHelper.ComposeRelationalExpression(DependentProperty, TargetValue, RelationalOperator)));
+                            MiscHelper.ComposeRelationalExpression(DependentProperty, TargetValue, RelationalOperator)),
+                        new[] {validationContext.MemberName});
 
             return ValidationResult.Success;
         }

@@ -76,7 +76,8 @@ namespace ExpressiveAnnotations.Attributes
                 if (!internals.Verify(validationContext)) // check if the assertion condition is not satisfied
                     return new ValidationResult( // assertion not satisfied => notify
                         FormatErrorMessage(validationContext.DisplayName,
-                            MiscHelper.ComposeRelationalExpression(DependentProperty, TargetValue, RelationalOperator)));
+                            MiscHelper.ComposeRelationalExpression(DependentProperty, TargetValue, RelationalOperator)),
+                        new[] {validationContext.MemberName});
 
             return ValidationResult.Success;
         }

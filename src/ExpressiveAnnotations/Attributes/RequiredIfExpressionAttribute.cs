@@ -93,7 +93,8 @@ namespace ExpressiveAnnotations.Attributes
                 if (internals.Verify(validationContext))
                     return new ValidationResult(
                         FormatErrorMessage(validationContext.DisplayName,
-                            MiscHelper.ComposeExpression(Expression, DependentProperties, TargetValues, RelationalOperators)));
+                            MiscHelper.ComposeExpression(Expression, DependentProperties, TargetValues, RelationalOperators)),
+                        new[] {validationContext.MemberName});
 
             return ValidationResult.Success;
         }
