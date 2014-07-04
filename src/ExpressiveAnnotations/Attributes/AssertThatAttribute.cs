@@ -62,7 +62,7 @@ namespace ExpressiveAnnotations.Attributes
                 if (CachedValidationFunc == null)
                     CachedValidationFunc = Parser.Parse(validationContext.ObjectType, Expression);
                 if (!CachedValidationFunc(validationContext.ObjectInstance)) // check if the assertion condition is not satisfied
-                    return new ValidationResult(FormatErrorMessage(validationContext.DisplayName, Expression)); // assertion not satisfied => notify
+                    return new ValidationResult(FormatErrorMessage(validationContext.DisplayName, Expression), new[] {validationContext.MemberName}); // assertion not satisfied => notify
             }
 
             return ValidationResult.Success;
