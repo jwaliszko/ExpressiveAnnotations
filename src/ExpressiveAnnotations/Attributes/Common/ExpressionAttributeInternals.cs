@@ -5,7 +5,7 @@ using System.Linq;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Misc;
 
-namespace ExpressiveAnnotations.Attributes
+namespace ExpressiveAnnotations.Attributes.Common
 {
     internal class ExpressionAttributeInternals
     {

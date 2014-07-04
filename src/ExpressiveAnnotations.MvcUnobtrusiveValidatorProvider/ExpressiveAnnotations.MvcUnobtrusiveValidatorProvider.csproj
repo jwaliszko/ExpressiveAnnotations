@@ -49,12 +49,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssertThatExpressionValidator.cs" />
-    <Compile Include="ValidatorInternals.cs" />
+    <Compile Include="Common\ValidatorInternals.cs" />
     <Compile Include="RequiredIfExpressionValidator.cs" />
     <Compile Include="AssertThatValidator.cs" />
     <Compile Include="RequiredIfValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ExpressionValidatorInternals.cs" />
+    <Compile Include="Common\ExpressionValidatorInternals.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ExpressiveAnnotations\ExpressiveAnnotations.csproj">

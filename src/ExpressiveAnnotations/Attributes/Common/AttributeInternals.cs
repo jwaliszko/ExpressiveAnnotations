@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Misc;
 
-namespace ExpressiveAnnotations.Attributes
+namespace ExpressiveAnnotations.Attributes.Common
 {
     internal class AttributeInternals
     {

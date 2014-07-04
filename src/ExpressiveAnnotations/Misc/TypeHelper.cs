@@ -5,7 +5,7 @@ namespace ExpressiveAnnotations.Misc
     /// <summary>
     /// Helper class containing methods related to types maintenance.
     /// </summary>
-    public static class TypeHelper
+    internal static class TypeHelper
     {
         /// <summary>
         /// Determines whether the specified value is type of numeric (string representing a number does not count).

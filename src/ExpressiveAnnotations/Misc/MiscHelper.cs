@@ -8,7 +8,7 @@ namespace ExpressiveAnnotations.Misc
     /// <summary>
     /// Helper class containing various utility methods.
     /// </summary>
-    public static class MiscHelper
+    internal static class MiscHelper
     {
         /// <summary>
         /// Tries to extract the name if given inside square brackets in string source.

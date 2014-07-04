@@ -6,7 +6,7 @@ namespace ExpressiveAnnotations.Misc
     /// <summary>
     /// Assertions class.
     /// </summary>
-    public static class Assert
+    internal static class Assert
     {
         /// <summary>
         /// Forces the dependent property and target object to represent exact types.

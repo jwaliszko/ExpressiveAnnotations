@@ -14,7 +14,7 @@ namespace ExpressiveAnnotations.Analysis
         /// </summary>
         /// <param name="dependentValue">The dependent value.</param>
         /// <param name="targetValue">The target value.</param>
-        /// <param name="relationalOperator">The relational operator.</param>
+        /// <param name="relationalOperator">The relational operator: ==, !=, &gt;, &gt;=, &lt;, &lt;=.</param>
         /// <param name="sensitiveComparisons">Case sensitivity of string comparisons.</param>
         /// <returns>The boolean result of computation.</returns>
         /// <exception cref="System.ArgumentException"></exception>

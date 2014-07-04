@@ -1,9 +1,9 @@
-﻿namespace ExpressiveAnnotations.Attributes
+﻿namespace ExpressiveAnnotations.Attributes.Common
 {
     /// <summary>
     /// Defines contract for complex conditional attributes.
     /// </summary>
-    public interface IExpressionAttribute
+    internal interface IExpressionAttribute
     {
         /// <summary>
         /// Gets or sets the logical expression based on which requirement condition is computed. 

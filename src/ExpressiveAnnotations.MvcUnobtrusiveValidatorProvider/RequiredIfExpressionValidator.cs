@@ -3,6 +3,7 @@ using System.Web.Mvc;
 using System.Collections.Generic;
 using ExpressiveAnnotations.Attributes;
 using ExpressiveAnnotations.Misc;
+using ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Common;
 using Newtonsoft.Json;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider

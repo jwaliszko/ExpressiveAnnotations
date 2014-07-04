@@ -1,8 +1,8 @@
 ﻿using System.Web.Mvc;
-using ExpressiveAnnotations.Attributes;
+using ExpressiveAnnotations.Attributes.Common;
 using ExpressiveAnnotations.Misc;
 
-namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
+namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Common
 {
     internal class ValidatorInternals
     {

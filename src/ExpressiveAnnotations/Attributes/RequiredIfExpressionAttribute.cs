@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using ExpressiveAnnotations.Attributes.Common;
 using ExpressiveAnnotations.Misc;
 
 namespace ExpressiveAnnotations.Attributes

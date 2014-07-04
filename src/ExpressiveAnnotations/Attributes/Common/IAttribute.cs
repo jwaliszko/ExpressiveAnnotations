@@ -1,9 +1,9 @@
-﻿namespace ExpressiveAnnotations.Attributes
+﻿namespace ExpressiveAnnotations.Attributes.Common
 {
     /// <summary>
     /// Defines contract for simple conditional attributes.
     /// </summary>
-    public interface IAttribute
+    internal interface IAttribute
     {
         /// <summary>
         /// Gets or sets the name of dependent field from which runtime value is extracted.

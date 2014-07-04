@@ -42,10 +42,10 @@
   <ItemGroup>
     <Compile Include="Attributes\AssertThatAttribute.cs" />
     <Compile Include="Attributes\AssertThatExpressionAttribute.cs" />
-    <Compile Include="Attributes\ExpressionAttributeInternals.cs" />
-    <Compile Include="Attributes\AttributeInternals.cs" />
-    <Compile Include="Attributes\IAttribute.cs" />
-    <Compile Include="Attributes\IExpressionAttribute.cs" />
+    <Compile Include="Attributes\Common\ExpressionAttributeInternals.cs" />
+    <Compile Include="Attributes\Common\AttributeInternals.cs" />
+    <Compile Include="Attributes\Common\IAttribute.cs" />
+    <Compile Include="Attributes\Common\IExpressionAttribute.cs" />
     <Compile Include="Analysis\Evaluator.cs" />
     <Compile Include="Analysis\LexicalAnalysis\Tokenizer.cs" />
     <Compile Include="Analysis\SyntacticAnalysis\InfixParser.cs" />

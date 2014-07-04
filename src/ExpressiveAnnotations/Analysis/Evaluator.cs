@@ -23,7 +23,7 @@ namespace ExpressiveAnnotations.Analysis
         /// <summary>
         /// Computes the specified boolean expression provided in infix notation.
         /// </summary>
-        /// <param name="expression">The boolean expression.</param>
+        /// <param name="expression">The boolean expression, e.g. "true &amp;&amp; !false"</param>
         /// <returns>Computated result.</returns>
         /// <exception cref="System.InvalidOperationException">Logical expression computation failed. Expression is broken.</exception>
         public bool Compute(string expression)
