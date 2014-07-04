@@ -26,9 +26,9 @@
                 return strA === strB ? 0 : strA > strB ? 1 : -1;
             },
             compareOrdinalIgnoreCase: function (strA, strB) {
-                strA = strA !== null && strA !== undefined ? strA.toLowerCase() : null;
-                strB = strB !== null && strB !== undefined ? strB.toLowerCase() : null;
-                return strA === strB ? 0 : strA > strB ? 1 : -1;
+                strA = (strA !== null && strA !== undefined) ? strA.toLowerCase() : null;
+                strB = (strB !== null && strB !== undefined) ? strB.toLowerCase() : null;
+                return this.compareOrdinal(strA, strB);
             },
             isNullOrWhiteSpace: function (str) {
                 return str === null || !/\S/.test(str);
@@ -155,37 +155,37 @@
 
             return parsedValue;
         },
-        deserializeObject: function(form, typesMap, enumsMap, prefix) {
+        deserializeObject: function (form, typesMap, enumsMap, prefix) {
+            function buildFieldInternal(fieldName, fieldValue, object) {
+                var props, parent, i;
+                props = fieldName.split('.');
+                parent = object;
+                for (i = 0; i < props.length - 1; i++) {
+                    fieldName = props[i];
+                    if (!parent[fieldName]) {
+                        parent[fieldName] = {};
+                    }
+                    parent = parent[fieldName];
+                }
+                fieldName = props[props.length - 1];
+                parent[fieldName] = fieldValue;
+            }
+
             var o = {}, name, type, value;
             for (name in typesMap) {
                 if (typesMap.hasOwnProperty(name)) {
                     type = typesMap[name];
                     value = this.extractValue(form, name, prefix, type);
-                    this.buildFieldInternal(name, value, o);
+                    buildFieldInternal(name, value, o);
                 }
             }
             for (name in enumsMap) {
                 if (enumsMap.hasOwnProperty(name)) {
                     value = enumsMap[name];
-                    this.buildFieldInternal(name, value, o);
+                    buildFieldInternal(name, value, o);
                 }
             }
             toolchain.registerMethods(o);
-            return o;
-        },
-        buildFieldInternal: function (name, value, o) {
-            var props, parent, i;
-            props = name.split('.');
-            parent = o;
-            for (i = 0; i < props.length - 1; i++) {
-                name = props[i];
-                if (!parent[name]) {
-                    parent[name] = {};
-                }
-                parent = parent[name];
-            }
-            name = props[props.length - 1];
-            parent[name] = value;
             return o;
         }
     };

@@ -12,19 +12,21 @@ RequiredIf indicates that annotated field is required, when given condition is f
 
 For sample usages go to [**demo project**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations.MvcWebSample).
 
+Let's walk through some snippets below:
+
 ```
 [RequiredIf("GoAbroad == true")]
 public string PassportNumber { get; set; }
 ```
 
-Here we are saying that annotated field is required when dependent field has appropriate value (passport number is required, if go abroad option is selected). Simple enough, let's move to another variation:
+Here we are saying that annotated field is required when condition given in the logical expression is fulfilled (passport number is required, if go abroad field has true boolean value). Simple enough, let's move to another variation:
 
 ```
 [AssertThat("ReturnDate >= Today()")]
 public DateTime? ReturnDate { get; set; }
 ```
 
-Here return date needs to be greater than or equal to the date given in utility function returning current day. This time we are not validating field requirement as before. Now attribute puts restriction on field, which needs to be satisfied for such field to be considered as valid (restriction verification is executed for non-null field).
+This time another attribute is used. We are not validating field requirement as before. Field value is not required to be provided - it is allowed to be null now. Nevertheless, if some value is already given, it needs to be correct. In the other words, this attribute puts restriction on field, which needs to be satisfied for such field to be considered as valid (restriction verification is executed for non-null field). Here, the value of return date field needs to be greater than or equal to the date returned by `Today()` utility function (function which simply returns current day).
 
 ```
 [RequiredIf("ContactDetails.Email != null")]
@@ -32,7 +34,7 @@ Here return date needs to be greater than or equal to the date given in utility 
 public bool? AgreeToContact { get; set; }
 ```
 
-This one means, that if email is provided (non-null), we are forced to authorize someone to contact us (boolean value indicating contact permission has to be true). What is more, we can see here that nested properties are supported by the mechanism. 
+This one means, that if email is provided (non-null), we are forced to authorize someone to contact us (boolean value indicating contact permission has to be true). What is more, we can see here that nested properties (enums either) are supported by this mechanism. 
  
 ```
 [RequiredIf("GoAbroad == true " +
@@ -45,7 +47,7 @@ public string ReasonForTravel { get; set; }
 
 <sub>Notice: Expression is splitted into multiple lines because such form is more meaningful and easier to understand.</sub>
 
-This time, the expression above is much more complex that its predecessors, but still can be easily understand. Isn't it?
+This time, the presented expression is much more complex that its predecessors, but still can be intuitively understood when looking at it (reason for travel field has to be provided if you plan to go abroad, and want to visit the same foreign country twice or you are between 25 and 55).
 
 ###How to construct conditional validation attributes?
 #####Signatures:
@@ -82,7 +84,9 @@ val        => "null" | int | float | bool | string | func | "(" or-exp ")"
 
 func can be an enum value as well as property, field or function name.
 
-Expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx). A delegate containing the compiled version of the lambda expression described by produced expression tree is then executed for given model object. As a result of expression evaluation, boolean flag is returned. Client side on the other hand receives unchanged expression string from server. Such an expression is then evaluated using build-in [eval](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) within the context of model object. Such a model, analogical to server side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
+Provided expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx). A delegate containing the compiled version of the lambda expression described by produced expression tree is then executed for given model object. As a result of expression evaluation, boolean flag is returned. 
+
+When working with ASP.NET MVC stack, client side mechanism is additionally available. Client receives unchanged expression string from server. Such an expression is then evaluated using build-in [eval](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) within the context of model object. Such a model, analogously to the server side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
 
 #####Built-in functions:
 
@@ -178,6 +182,6 @@ Client side validation is **fully supported**. Enable it for your web project wi
     <script src="/Scripts/expressive.annotations.validate.js"></script>
 ```
 
-Alternatively, using the NuGet Package Manager Console (currently only [previous version](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/EA1) is published):
+Alternatively, using the [NuGet](https://www.nuget.org/packages/ExpressiveAnnotations/) Package Manager Console (currently only [previous version](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/EA1) is published):
 
 ###`PM> Install-Package ExpressiveAnnotations`

@@ -6,7 +6,7 @@ namespace ExpressiveAnnotations.Attributes
     /// <summary>
     /// Contains a set of predefined methods.
     /// </summary>
-    public static class Toolchain
+    internal static class Toolchain
     {        
         /// <summary>
         /// Registers methods for expressions.

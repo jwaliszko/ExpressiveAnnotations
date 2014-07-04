@@ -16,6 +16,7 @@ using System.Runtime.InteropServices;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("4b679902-67d7-4463-a0f0-c4e75cb39ba6")]
 [assembly: InternalsVisibleTo("ExpressiveAnnotations.Tests")]
+[assembly: InternalsVisibleTo("ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider")]
 
 // Version information for an assembly consists of the following four values:
 //
