@@ -30,7 +30,7 @@
         </div>
         <ol>
             <li>
-                @Html.EditorFor(model => model.GoAbroad)
+                @Html.CheckBoxFor(model => model.GoAbroad)
                 @Html.LabelFor(model => model.GoAbroad, new { @class = "inline" })
                 @Html.ValidationMessageFor(model => model.GoAbroad)
             </li>
@@ -49,7 +49,7 @@
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.PassportNumber, new { @class = "inline prefix" })
-                @Html.EditorFor(model => model.PassportNumber)
+                @Html.TextBoxFor(model => model.PassportNumber)
                 @Html.ValidationMessageFor(model => model.PassportNumber)
             </li>
             <li>
@@ -83,7 +83,7 @@
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.ReturnDate, new { @class = "inline prefix" })
-                @Html.EditorFor(x => x.ReturnDate) @Resources.LatestSuggestedReturnDate: @Model.LatestSuggestedReturnDate.ToString(lang == "pl" ? "yyyy-MM-dd" : "MM/dd/yyyy")
+                @Html.TextBoxFor(x => x.ReturnDate) @Resources.LatestSuggestedReturnDate: @Model.LatestSuggestedReturnDate.ToString(lang == "pl" ? "yyyy-MM-dd" : "MM/dd/yyyy")
                 @Html.ValidationMessageFor(model => model.ReturnDate)
             </li>
             <li>
@@ -106,10 +106,14 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIf("PoliticalStability != null && PoliticalStability != Stability.High")]
+[AssertThat("(" +
+            "    AwareOfTheRisks == true " +
+            "    && (PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain)" +
+            ") " +
+            "|| PoliticalStability == null || PoliticalStability == Stability.High")]
 </pre>
                 <pre class="action">[show attribute]</pre>
-                @Html.EditorFor(model => model.AwareOfTheRisks)
+                @Html.CheckBoxFor(model => model.AwareOfTheRisks)
                 @Html.LabelFor(model => model.AwareOfTheRisks, new { @class = "inline" })
                 @Html.ValidationMessageFor(model => model.AwareOfTheRisks)
             </li>
@@ -128,7 +132,7 @@
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.BloodType, new { @class = "inline prefix" })
-                @Html.EditorFor(model => model.BloodType)
+                @Html.TextBoxFor(model => model.BloodType)
                 @Html.ValidationMessageFor(model => model.BloodType)
             </li>
             <li>

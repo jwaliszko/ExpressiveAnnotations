@@ -260,6 +260,7 @@
     });
 
     $.validator.addMethod('assertthat', function (value, element, params) {
+        value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
         if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
             var model = modelHelper.deserializeObject(params.form, params.typesmap, params.enumsmap, params.prefix);
             with (model) {
@@ -272,6 +273,7 @@
     }, '');
 
     $.validator.addMethod('requiredif', function (value, element, params) {
+        value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
         var model, boolValue;
         if (params.callertype === 'bool') {
             boolValue = typeHelper.Bool.tryParse(value);

@@ -102,8 +102,12 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "PoliticalStability")]
         public Stability? PoliticalStability { get; set; }
 
-        [RequiredIf("PoliticalStability != null && PoliticalStability != Stability.High",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "AwareOfTheRisksRequired")]                
+        [AssertThat("(" +
+                    "    AwareOfTheRisks == true " +
+                    "    && (PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain)" +
+                    ") " +
+                    "|| PoliticalStability == null || PoliticalStability == Stability.High",
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "AwareOfTheRisksRequired")]
         [Display(ResourceType = typeof(Resources), Name = "AwareOfTheRisks")]        
         public bool AwareOfTheRisks { get; set; }
 
@@ -122,9 +126,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "AgreeForContact")]
         public bool AgreeForContact { get; set; }
 
-        [RequiredIf("AgreeForContact == true",            
-            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "ImmediateContactRequired")]        
-        [Display(ResourceType = typeof(Resources), Name = "ImmediateContact")]
+        [RequiredIf("AgreeForContact == true",
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ImmediateContactRequired")]
+        [Display(ResourceType = typeof (Resources), Name = "ImmediateContact")]
         public bool? ImmediateContact { get; set; }
 
         public Contact ContactDetails { get; set; }
