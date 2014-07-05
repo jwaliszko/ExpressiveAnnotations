@@ -94,10 +94,17 @@ Toolchain functions available out of the box at server and client side:
 
 ```
 DateTime Today()
-string Trim(string str)
-int CompareOrdinal(string strA, string strB)
-int CompareOrdinalIgnoreCase(string strA, string strB)
-bool IsNullOrWhiteSpace(string str)
+  Gets the current date, with the time component set to 00:00:00.
+string Trim(string str) 
+  Removes all leading and trailing white-space characters from the current string.
+int CompareOrdinal(string strA, string strB) 
+  Compares strings using ordinal sort rules.
+int CompareOrdinalIgnoreCase(string strA, string strB) 
+  Compares strings using ordinal sort rules and ignoring the case of the strings being compared.
+bool IsNullOrWhiteSpace(string str) 
+  Indicates whether a specified string is null, empty, or consists only of white-space characters.
+bool IsNumber(string str) 
+  Indicates whether a specified string represents integer or float number.
 ```
 
 Any custom function within the model object scope at server side is automatically recognized and can be used inside expression, e.g:
@@ -182,6 +189,6 @@ Client side validation is **fully supported**. Enable it for your web project wi
     <script src="/Scripts/expressive.annotations.validate.js"></script>
 ```
 
-Alternatively, using the [NuGet](https://www.nuget.org/packages/ExpressiveAnnotations/) Package Manager Console (currently only [previous version](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/EA1) is published):
+Alternatively, using the [NuGet](https://www.nuget.org/packages/ExpressiveAnnotations/) Package Manager Console:
 
 ###`PM> Install-Package ExpressiveAnnotations`

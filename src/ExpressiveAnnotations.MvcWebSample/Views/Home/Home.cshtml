@@ -162,6 +162,10 @@
     {
         @Scripts.Render("~/bundles/jqueryval")
         @Scripts.Render("~/bundles/expressive")
+        
+        <script>
+            ea.addMethod('IsBloodType', function (group) { return /^(A|B|AB|0)[+-]$/.test(group); });
+        </script>
     }
 
     <script>
@@ -189,8 +193,6 @@
             isRTL: false,
             showMonthAfterYear: false,
             yearSuffix: ''
-        };
-
-        ea.addMethod('IsBloodType', function(group) { return /^(A|B|AB|0)[+-]$/.test(group); });
+        };        
     </script>
 }

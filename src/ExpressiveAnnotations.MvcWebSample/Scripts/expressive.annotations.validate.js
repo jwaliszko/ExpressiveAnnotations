@@ -225,6 +225,9 @@
             this.methods.IsNullOrWhiteSpace = function(str) {
                 return typeHelper.String.isNullOrWhiteSpace(str);
             };
+            this.methods.IsNumber = function(str) {
+                return /^[-+]?\d+$/.test(str) || /^[-+]?\d*\.\d+([eE][-+]?\d+)?$/.test(str);
+            };
         }
     };
 
