@@ -124,11 +124,22 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "PoliticalStability")]
         public Stability? PoliticalStability { get; set; }
 
+        //requiredif attribute can be used to annotate non-nullable boolean fields, since requiredif attribute doesn't allow false boolean values by default:
         [RequiredIfExpression( /* interpretation => PoliticalStability != null && PoliticalStability != Stability.High */
             Expression = "!{0} && !{1}",
-            DependentProperties = new[] {"PoliticalStability", "PoliticalStability"},
-            TargetValues = new object[] {null,                 Stability.High},
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "AwareOfTheRisksRequired")]
+            DependentProperties = new[] { "PoliticalStability", "PoliticalStability" },
+            TargetValues = new object[] { null,                 Stability.High },
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "AwareOfTheRisksRequired")]
+        //alternatively, assertthat attribute can be used to explicitly express the same logic in the following manner:
+        //[AssertThatExpression( /* interpretation => (
+        //                                                AwareOfTheRisks == true
+        //                                                && (PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain)
+        //                                            )
+        //                                            || PoliticalStability == null || PoliticalStability == Stability.High */
+        //    Expression = "({0} && ({1} || {2})) || {3} || {4}",
+        //    DependentProperties = new[] { "AwareOfTheRisks", "PoliticalStability", "PoliticalStability", "PoliticalStability", "PoliticalStability" },
+        //    TargetValues = new object[] { true,              Stability.Low,        Stability.Uncertain,  null,                 Stability.High },
+        //    ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "AwareOfTheRisksRequired")]
         [Display(ResourceType = typeof (Resources), Name = "AwareOfTheRisks")]
         public bool AwareOfTheRisks { get; set; }
 

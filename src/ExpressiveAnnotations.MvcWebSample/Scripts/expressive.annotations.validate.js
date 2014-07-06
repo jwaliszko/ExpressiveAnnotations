@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.validate.js - v1.4.1
+﻿/* expressive.annotations.validate.js - v1.4.2
  * this script is a part of client side component of ExpresiveAnnotations - annotation-based conditional validation library
  * copyright (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
  * licensed MIT: http://www.opensource.org/licenses/mit-license.php */
@@ -138,7 +138,7 @@
         }
     });
 
-    $.validator.unobtrusive.adapters.add('requiredif', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type', 'sensitivecomparisons', 'allowemptyorfalse', 'modeltype'], function (options) {
+    $.validator.unobtrusive.adapters.add('requiredif', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type', 'sensitivecomparisons', 'allowemptyorfalse', 'callertype'], function (options) {
         options.rules.requiredif = {
             prefix: modelPrefix.get(options.element.name),
             form: options.form,
@@ -148,7 +148,7 @@
             type: $.parseJSON(options.params.type),
             sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons),
             allowemptyorfalse: $.parseJSON(options.params.allowemptyorfalse),
-            modeltype: $.parseJSON(options.params.modeltype)
+            callertype: $.parseJSON(options.params.callertype)
 
         };
         if (options.message) {
@@ -156,7 +156,7 @@
         }
     });
 
-    $.validator.unobtrusive.adapters.add('requiredifexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression', 'sensitivecomparisons', 'allowemptyorfalse', 'modeltype'], function (options) {
+    $.validator.unobtrusive.adapters.add('requiredifexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression', 'sensitivecomparisons', 'allowemptyorfalse', 'callertype'], function (options) {
         options.rules.requiredifexpression = {
             prefix: modelPrefix.get(options.element.name),
             form: options.form,
@@ -167,14 +167,15 @@
             expression: options.params.expression,
             sensitivecomparisons: $.parseJSON(options.params.sensitivecomparisons),
             allowemptyorfalse: $.parseJSON(options.params.allowemptyorfalse),
-            modeltype: $.parseJSON(options.params.modeltype)
+            callertype: $.parseJSON(options.params.callertype)
         };
         if (options.message) {
             options.messages.requiredifexpression = options.message;
         }
     });
 
-    $.validator.addMethod('assertthat', function(value, element, params) {
+    $.validator.addMethod('assertthat', function (value, element, params) {
+        value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
         if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
             if (!attributeInternals.verify(params)) { // check if the assertion condition is not satisfied
                 return false; // assertion not satisfied => notify
@@ -183,7 +184,8 @@
         return true;
     }, '');
 
-    $.validator.addMethod('assertthatexpression', function(value, element, params) {
+    $.validator.addMethod('assertthatexpression', function (value, element, params) {
+        value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value;
         if (!(value === undefined || value === null || value === '')) {
             if (!expressionAttributeInternals.verify(params)) {
                 return false;
@@ -193,7 +195,8 @@
     }, '');
 
     $.validator.addMethod('requiredif', function (value, element, params) {
-        if (params.modeltype === 'bool') {
+        value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value;
+        if (params.callertype === 'bool') {
             var boolValue = analyser.typeHelper.Bool.tryParse(value);
             if (boolValue.error /* conversion fail indicates that field value is not set - required */ || (!boolValue && !params.allowemptyorfalse)) {
                 if (attributeInternals.verify(params)) { // check if the requirement condition is satisfied
@@ -211,7 +214,8 @@
     }, '');
 
     $.validator.addMethod('requiredifexpression', function (value, element, params) {
-        if (params.modeltype === 'bool') {
+        value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value;
+        if (params.callertype === 'bool') {
             var boolValue = analyser.typeHelper.Bool.tryParse(value);
             if (boolValue.error || (!boolValue && !params.allowemptyorfalse)) {
                 if (expressionAttributeInternals.verify(params)) {

@@ -130,10 +130,22 @@
             </li>
             <li>
                 <pre class="code">
+requiredif attribute can be used to annotate non-nullable boolean fields, since requiredif attribute doesn't allow false boolean values by default:
 [RequiredIfExpression( /* interpretation => PoliticalStability != null && PoliticalStability != Stability.High */
     Expression = "!{0} && !{1}",
     DependentProperties = new[] {"PoliticalStability", "PoliticalStability"},
     TargetValues = new object[] {null,                 Stability.High},
+    ErrorMessage = "You are required to agree that you are aware of the risks of travel.")]
+
+alternatively, assertthat attribute can be used to explicitly express the same logic in the following manner:
+[AssertThatExpression( /* interpretation => (
+                                                AwareOfTheRisks == true
+                                                && (PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain)
+                                            )
+                                            || PoliticalStability == null || PoliticalStability == Stability.High */
+    Expression = "({0} && ({1} || {2})) || {3} || {4}",
+    DependentProperties = new[] { "AwareOfTheRisks", "PoliticalStability", "PoliticalStability", "PoliticalStability", "PoliticalStability" },
+    TargetValues = new object[] { true,              Stability.Low,        Stability.Uncertain,  null,                 Stability.High },
     ErrorMessage = "You are required to agree that you are aware of the risks of travel.")]
 </pre>
                 <pre class="action">[show attribute]</pre>

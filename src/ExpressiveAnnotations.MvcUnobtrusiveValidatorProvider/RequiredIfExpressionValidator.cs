@@ -15,7 +15,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
     {
         private ExpressionValidatorInternals Internals { get; set; }
         private bool AllowEmptyOrFalse { get; set; }
-        private Type ModelType { get; set; }
+        private Type CallerType { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequiredIfExpressionValidator" /> class.
@@ -29,7 +29,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             Internals = new ExpressionValidatorInternals();
             Internals.Prepare(metadata, attribute);
             AllowEmptyOrFalse = attribute.AllowEmptyOrFalse;
-            ModelType = metadata.ModelType;
+            CallerType = metadata.ModelType;
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             rule.ValidationParameters.Add("expression", Internals.Expression);
             rule.ValidationParameters.Add("sensitivecomparisons", JsonConvert.SerializeObject(Internals.SensitiveComparisons));
             rule.ValidationParameters.Add("allowemptyorfalse", JsonConvert.SerializeObject(AllowEmptyOrFalse));
-            rule.ValidationParameters.Add("modeltype", JsonConvert.SerializeObject(TypeHelper.GetCoarseType(ModelType)));
+            rule.ValidationParameters.Add("callertype", JsonConvert.SerializeObject(TypeHelper.GetCoarseType(CallerType)));
             yield return rule;
         }
     }
