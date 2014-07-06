@@ -226,7 +226,7 @@
                 return typeHelper.String.isNullOrWhiteSpace(str);
             };
             this.methods.IsNumber = function(str) {
-                return /^[-+]?\d+$/.test(str) || /^[-+]?\d*\.\d+([eE][-+]?\d+)?$/.test(str);
+                return (/^[\-+]?\d+$/).test(str) || (/^[\-+]?\d*\.\d+([eE][\-+]?\d+)?$/).test(str);
             };
         }
     };
@@ -244,15 +244,14 @@
         }
     });
 
-    $.validator.unobtrusive.adapters.add('requiredif', ['expression', 'typesmap', 'enumsmap', 'allowempty', 'callertype'], function (options) {
+    $.validator.unobtrusive.adapters.add('requiredif', ['expression', 'typesmap', 'enumsmap', 'allowempty'], function (options) {
         options.rules.requiredif = {
             prefix: modelHelper.getPrefix(options.element.name),
             form: options.form,
             expression: $.parseJSON(options.params.expression),
             typesmap: $.parseJSON(options.params.typesmap),
             enumsmap: $.parseJSON(options.params.enumsmap),
-            allowempty: $.parseJSON(options.params.allowempty),
-            callertype: $.parseJSON(options.params.callertype)            
+            allowempty: $.parseJSON(options.params.allowempty)      
         };
         if (options.message) {
             options.messages.requiredif = options.message;
@@ -273,22 +272,10 @@
     }, '');
 
     $.validator.addMethod('requiredif', function (value, element, params) {
-        value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
-        var model, boolValue;
-        if (params.callertype === 'bool') {
-            boolValue = typeHelper.Bool.tryParse(value);
-            if (boolValue.error /* conversion fail indicates that field value is not set - required */) {
-                model = modelHelper.deserializeObject(params.form, params.typesmap, params.enumsmap, params.prefix);
-                with (model) {
-                    if (eval(params.expression)) { // check if the requirement condition is satisfied
-                        return false; // requirement confirmed => notify
-                    }
-                }
-            }
-        }
+        value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value;
         if (value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
             || (!/\S/.test(value) && !params.allowempty)) {
-            model = modelHelper.deserializeObject(params.form, params.typesmap, params.enumsmap, params.prefix);
+            var model = modelHelper.deserializeObject(params.form, params.typesmap, params.enumsmap, params.prefix);
             with (model) {
                 if (eval(params.expression)) {
                     return false;

@@ -53,7 +53,6 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
             Expression = attribute.Expression;
             FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);
             AllowEmpty = attribute.AllowEmptyStrings;
-            CallerType = metadata.ModelType;
         }
 
         /// <summary>
@@ -73,7 +72,6 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
             rule.ValidationParameters.Add("typesmap", JsonConvert.SerializeObject(TypesMap));
             rule.ValidationParameters.Add("enumsmap", JsonConvert.SerializeObject(EnumsMap));
             rule.ValidationParameters.Add("allowempty", JsonConvert.SerializeObject(AllowEmpty));
-            rule.ValidationParameters.Add("callertype", JsonConvert.SerializeObject(Helper.GetCoarseType(CallerType)));            
             yield return rule;
         }
     }
