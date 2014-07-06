@@ -1,20 +1,12 @@
 ﻿using System.Reflection;
-using System.Resources;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ExpressiveAnnotations.WpfDesktopSample")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("ABB")]
-[assembly: AssemblyProduct("ExpressiveAnnotations.WpfDesktopSample")]
-[assembly: AssemblyCopyright("Copyright © ABB 2014")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+[assembly: AssemblyTitle("ExpressiveAnnotations.MvvmDesktopSample")]
+[assembly: AssemblyCopyright("Copyright © Jaroslaw Waliszko 2014")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 

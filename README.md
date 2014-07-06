@@ -10,7 +10,7 @@ RequiredIf indicates that annotated field is required, when given condition is f
 
 ###What are brief examples of usage?
 
-For sample usages go to [**demo project**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations.MvcWebSample).
+For sample usages go to demo projects: [**ASP.NET MVC web sample**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations.MvcWebSample) or [**WPF MVVM desktop sample**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations.MvvmDesktopSample).
 
 Let's walk through some snippets below:
 
