@@ -1,0 +1,22 @@
+﻿<Application x:Class="ExpressiveAnnotations.MvvmDesktopSample.Views.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <Style TargetType="{x:Type TextBlock}">
+            <Setter Property="Margin"
+                    Value="4" />
+        </Style>
+        <Style TargetType="{x:Type TextBox}">
+            <Setter Property="Margin"
+                    Value="4" />
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" 
+                         Value="true">
+                    <Setter Property="ToolTip"
+                            Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Application.Resources>
+</Application>
