@@ -3,12 +3,9 @@
  * copyright (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
  * licensed MIT: http://www.opensource.org/licenses/mit-license.php */
 
-(function($, analyser) {
-
+(function($, analyser, helper) {
     'use strict';
-
-    var modelPrefix, miscHelper, attributeInternals, expressionAttributeInternals;
-
+var
     modelPrefix = {
         append: function(value, prefix) {
             return prefix + value;
@@ -16,7 +13,7 @@
         get: function(fieldName) {
             return fieldName.substr(0, fieldName.lastIndexOf('.') + 1);
         }
-    };
+    },
 
     miscHelper = {
         extractValue: function(form, name, prefix, type) {
@@ -37,7 +34,7 @@
             name = modelPrefix.append(name, prefix);            
             field = $(form).find(':input[name="' + name + '"]');
             if (field.length === 0) {
-                throw analyser.typeHelper.String.format('DOM field {0} not found.', name);
+                throw helper.string.format('DOM field {0} not found.', name);
             }
 
             fieldValue = getFieldValue(field);
@@ -45,7 +42,7 @@
                 return null;
             }
 
-            parsedValue = analyser.typeHelper.tryParse(fieldValue, type); // convert to required type
+            parsedValue = helper.tryParse(fieldValue, type); // convert to required type
             if (parsedValue.error) {
                 throw 'Data extraction fatal error. DOM value conversion to reflect required type failed.';
             }
@@ -53,7 +50,7 @@
             return parsedValue;
         },
         tryExtractName: function(targetValue) {
-            if (analyser.typeHelper.isString(targetValue)) {
+            if (helper.isString(targetValue)) {
                 var patt = new RegExp('\\[(.+)\\]');
                 if (patt.test(targetValue)) {
                     return targetValue.substring(1, targetValue.length - 1);
@@ -61,7 +58,7 @@
             }
             return { error: true };
         }
-    };
+    },
 
     attributeInternals = {
         verify: function(params) {
@@ -78,7 +75,7 @@
             comparer = new analyser.Comparer();
             return comparer.compute(dependentValue, targetValue, params.relationaloperator, params.sensitivecomparisons);
         }
-    };
+    },
 
     expressionAttributeInternals = {
         verify: function(params) {
@@ -101,7 +98,7 @@
                 tokens.push(result.toString());
             }
 
-            composedExpression = analyser.typeHelper.String.format(params.expression, tokens);
+            composedExpression = helper.string.format(params.expression, tokens);
             evaluator = new analyser.Evaluator();
             return evaluator.compute(composedExpression);
         }
@@ -138,7 +135,7 @@
         }
     });
 
-    $.validator.unobtrusive.adapters.add('requiredif', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type', 'sensitivecomparisons', 'allowemptyorfalse', 'callertype'], function (options) {
+    $.validator.unobtrusive.adapters.add('requiredif', ['dependentproperty', 'relationaloperator', 'targetvalue', 'type', 'sensitivecomparisons', 'allowemptyorfalse', 'callertype'], function(options) {
         options.rules.requiredif = {
             prefix: modelPrefix.get(options.element.name),
             form: options.form,
@@ -156,7 +153,7 @@
         }
     });
 
-    $.validator.unobtrusive.adapters.add('requiredifexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression', 'sensitivecomparisons', 'allowemptyorfalse', 'callertype'], function (options) {
+    $.validator.unobtrusive.adapters.add('requiredifexpression', ['dependentproperties', 'relationaloperators', 'targetvalues', 'types', 'expression', 'sensitivecomparisons', 'allowemptyorfalse', 'callertype'], function(options) {
         options.rules.requiredifexpression = {
             prefix: modelPrefix.get(options.element.name),
             form: options.form,
@@ -174,7 +171,7 @@
         }
     });
 
-    $.validator.addMethod('assertthat', function (value, element, params) {
+    $.validator.addMethod('assertthat', function(value, element, params) {
         value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
         if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
             if (!attributeInternals.verify(params)) { // check if the assertion condition is not satisfied
@@ -184,7 +181,7 @@
         return true;
     }, '');
 
-    $.validator.addMethod('assertthatexpression', function (value, element, params) {
+    $.validator.addMethod('assertthatexpression', function(value, element, params) {
         value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value;
         if (!(value === undefined || value === null || value === '')) {
             if (!expressionAttributeInternals.verify(params)) {
@@ -194,10 +191,10 @@
         return true;
     }, '');
 
-    $.validator.addMethod('requiredif', function (value, element, params) {
+    $.validator.addMethod('requiredif', function(value, element, params) {
         value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value;
         if (params.callertype === 'bool') {
-            var boolValue = analyser.typeHelper.Bool.tryParse(value);
+            var boolValue = helper.bool.tryParse(value);
             if (boolValue.error /* conversion fail indicates that field value is not set - required */ || (!boolValue && !params.allowemptyorfalse)) {
                 if (attributeInternals.verify(params)) { // check if the requirement condition is satisfied
                     return false; // requirement confirmed => notify
@@ -213,10 +210,10 @@
         return true;
     }, '');
 
-    $.validator.addMethod('requiredifexpression', function (value, element, params) {
+    $.validator.addMethod('requiredifexpression', function(value, element, params) {
         value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value;
         if (params.callertype === 'bool') {
-            var boolValue = analyser.typeHelper.Bool.tryParse(value);
+            var boolValue = helper.bool.tryParse(value);
             if (boolValue.error || (!boolValue && !params.allowemptyorfalse)) {
                 if (expressionAttributeInternals.verify(params)) {
                     return false;
@@ -232,4 +229,4 @@
         return true;
     }, '');
 
-}(jQuery, logicalExpressionsAnalyser));
+}(jQuery, ea.analyser, ea.helper));

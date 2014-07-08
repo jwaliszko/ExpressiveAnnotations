@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider")]
 [assembly: AssemblyCopyright("Copyright © Jaroslaw Waliszko 2014")]
+[assembly: AssemblyProduct("ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
