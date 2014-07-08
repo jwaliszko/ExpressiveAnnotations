@@ -12,7 +12,7 @@ namespace ExpressiveAnnotations.Tests
     public class LogicalExpressionsAnalyserTest
     {
         [TestMethod]
-        public void Verify_tokenizer_logic()
+        public void verify_tokenization()
         {
             const string expression = "( true && (true) ) || false";
             var tokenizer = new Tokenizer(new[] { @"true", @"false", @"&&", @"\|\|", @"\!", @"\(", @"\)" });
@@ -53,7 +53,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_infix_to_postfix_conversion()
+        public void verify_infix_parsing()
         {
             var converter = new InfixParser();
             Assert.AreEqual(converter.Convert("()"), "");
@@ -109,7 +109,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_postfix_parser()
+        public void verify_postfix_parsing()
         {
             var parser = new PostfixParser();
 
@@ -174,7 +174,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_complex_expression_evaluation()
+        public void verify_complex_expressions_evaluation()
         {
             var evaluator = new Evaluator();
             Assert.IsTrue(evaluator.Compute("(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false"));
@@ -215,7 +215,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_comparison_options()
+        public void verify_comparison_options()
         {
             Assert.IsTrue(Comparer.Compute("aAa", "aAa", "==", true));
             Assert.IsTrue(!Comparer.Compute("aAa", "aaa", "==", true));
@@ -231,7 +231,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_comparison_equals_non_empty()
+        public void verify_equality_of_non_empty_elements()
         {
             Assert.IsTrue(Comparer.Compute("aAa", "aAa", "==", true));
             Assert.IsTrue(Comparer.Compute(0, 0, "==", true));
@@ -250,7 +250,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_comparison_equals_empty()
+        public void verify_equality_of_empty_elements()
         {
             Assert.IsTrue(Comparer.Compute("", "", "==", true));
             Assert.IsTrue(Comparer.Compute(" ", " ", "==", true));            
@@ -266,7 +266,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_comparison_greater_and_less()
+        public void verify_greater_and_less_comparisons()
         {
             // assumption - arguments provided have exact types
 
@@ -320,7 +320,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_composed_error_message()
+        public void verify_error_message_composition()
         {
             const string expression = "{0} && ( (!{1} && {2}) || ({3} && {4}) ) && {5} && {6} && {7} || {1}";
             var dependentProperties = new[] {"aaa", "bbb",  "ccc",  "ddd",  "ddd",  "eee",  "fff",  "ggg"};
@@ -333,7 +333,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_typehelper_is_numeric()
+        public void verify_numeric_recognition()
         {
             Assert.IsTrue(1.1f.IsNumeric());
             Assert.IsTrue(1.IsNumeric());
@@ -344,7 +344,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_typehelper_is_date()
+        public void verify_date_recognition()
         {
             Assert.IsTrue(DateTime.Parse("Wed, 09 Aug 1995 00:00:00 GMT").IsDateTime());
             Assert.IsTrue(!"Wed, 09 Aug 1995 00:00:00 GMT".IsDateTime());
@@ -355,7 +355,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_typehelper_is_string()
+        public void verify_string_recognition()
         {
             object nullo = null;
             Assert.IsTrue("".IsString());
@@ -366,7 +366,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_typehelper_is_bool()
+        public void verify_bool_recognition()
         {
             Assert.IsTrue(true.IsBool());
             Assert.IsTrue(!"true".IsBool());

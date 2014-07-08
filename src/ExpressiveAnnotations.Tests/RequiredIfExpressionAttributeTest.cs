@@ -42,7 +42,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_if_not_required()
+        public void verify_if_not_required()
         {
             var model = new Model {GoAbroad = true, Country = "Poland", NextCountry = "France"};
             Assert.IsTrue(model.IsValid(m => m.ReasonForTravel));
@@ -61,7 +61,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_if_required()
+        public void verify_if_required()
         {
             var model = new Model {GoAbroad = true, Country = "Poland", NextCountry = "Poland"};
             Assert.IsFalse(model.IsValid(m => m.ReasonForTravel));

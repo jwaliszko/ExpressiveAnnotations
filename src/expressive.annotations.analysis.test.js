@@ -1,363 +1,361 @@
 ﻿///<reference path="./expressive.annotations.analysis.js"/>
 
-(function(wnd, analyser) { //scoping function (top-level, usually anonymous, function that prevents global namespace pollution)
+//debugger; // enable firebug (preferably, check 'on for all web pages' option) for the debugger to aunch 
+(function(window, analyser, helper) { //scoping function (top-level, usually anonymous, prevents global namespace pollution)
 
-    wnd.module("logical expressions analysis");
-    //debugger; //enable firebug for all web pages
+window.module("expressions analysis");
 
-    test("Verify_tokenizer_logic", function() {
+    test("verify_tokenization", function() {
         var expression = "( true && (true) ) || false";
         var tokenizer = new analyser.Tokenizer(['true', 'false', '&&', '\\|\\|', '\\!', '\\(', '\\)']);
 
         var tokens = tokenizer.analyze(expression);
-        wnd.equal(tokens.length, 9);
-        wnd.equal(tokens[0], "(");
-        wnd.equal(tokens[1], "true");
-        wnd.equal(tokens[2], "&&");
-        wnd.equal(tokens[3], "(");
-        wnd.equal(tokens[4], "true");
-        wnd.equal(tokens[5], ")");
-        wnd.equal(tokens[6], ")");
-        wnd.equal(tokens[7], "||");
-        wnd.equal(tokens[8], "false");
+        window.equal(tokens.length, 9);
+        window.equal(tokens[0], "(");
+        window.equal(tokens[1], "true");
+        window.equal(tokens[2], "&&");
+        window.equal(tokens[3], "(");
+        window.equal(tokens[4], "true");
+        window.equal(tokens[5], ")");
+        window.equal(tokens[6], ")");
+        window.equal(tokens[7], "||");
+        window.equal(tokens[8], "false");
 
-        wnd.raises(function() {
+        window.raises(function() {
             tokenizer.analyze("true + false");
         }, function(err) {
             return err === "Tokenizer error. Unexpected token started at + false.";
         });
-        wnd.raises(function() {
+        window.raises(function() {
             tokenizer.analyze("true && 7");
         }, function(err) {
             return err === "Tokenizer error. Unexpected token started at 7.";
         });
     });
 
-    test("Verify_infix_to_postfix_conversion", function() {
+    test("verify_infix_parsing", function() {
         var converter = new analyser.InfixParser();
 
-        wnd.equal(converter.convert("()"), "");
-        wnd.equal(converter.convert("( true && (true) ) || false"), "true true && false ||");
-        wnd.equal(converter.convert(
+        window.equal(converter.convert("()"), "");
+        window.equal(converter.convert("( true && (true) ) || false"), "true true && false ||");
+        window.equal(converter.convert(
                 "(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false"),
                 "true true false true || || || true true false false true true true false || && && || || && && false && ||");
-        wnd.equal(converter.convert("!!((!(!!true))) && true"), "true ! ! ! ! ! true &&");
+        window.equal(converter.convert("!!((!(!!true))) && true"), "true ! ! ! ! ! true &&");
 
-        wnd.raises(function() {
+        window.raises(function() {
             converter.convert("(");
         }, function(err) {
             return err === "Infix expression parsing error. Incorrect nesting.";
         });
-        wnd.raises(function() {
+        window.raises(function() {
             converter.convert(")");
         }, function(err) {
             return err === "Infix expression parsing error. Incorrect nesting.";
         });
-        wnd.raises(function() {
+        window.raises(function() {
             converter.convert("(( true )");
         }, function(err) {
             return err === "Infix expression parsing error. Incorrect nesting.";
         });
-        wnd.raises(function() {
+        window.raises(function() {
             converter.convert("( true && false ))");
         }, function(err) {
             return err === "Infix expression parsing error. Incorrect nesting.";
         });
     });
 
-    test("Verify_postfix_parser", function() {
+    test("verify_postfix_parsing", function() {
         var parser = new analyser.PostfixParser();
 
-        wnd.ok(parser.evaluate("true"));
-        wnd.ok(!parser.evaluate("false"));
+        window.ok(parser.evaluate("true"));
+        window.ok(!parser.evaluate("false"));
 
-        wnd.ok(parser.evaluate("true true &&"));
-        wnd.ok(!parser.evaluate("true false &&"));
-        wnd.ok(!parser.evaluate("false true &&"));
-        wnd.ok(!parser.evaluate("false false &&"));
+        window.ok(parser.evaluate("true true &&"));
+        window.ok(!parser.evaluate("true false &&"));
+        window.ok(!parser.evaluate("false true &&"));
+        window.ok(!parser.evaluate("false false &&"));
 
-        wnd.ok(parser.evaluate("true true ||"));
-        wnd.ok(parser.evaluate("true false ||"));
-        wnd.ok(parser.evaluate("false true ||"));
-        wnd.ok(!parser.evaluate("false false ||"));
+        window.ok(parser.evaluate("true true ||"));
+        window.ok(parser.evaluate("true false ||"));
+        window.ok(parser.evaluate("false true ||"));
+        window.ok(!parser.evaluate("false false ||"));
 
-        wnd.ok(parser.evaluate("true true false true || || || true true false false true true true false || && && || || && && false && ||"));
+        window.ok(parser.evaluate("true true false true || || || true true false false true true true false || && && || || && && false && ||"));
 
-        wnd.raises(function() {
+        window.raises(function() {
             parser.evaluate("(true)");
         }, function(err) {
             return err === "Tokenizer error. Unexpected token started at (true).";
         });
-        wnd.raises(function () {
+        window.raises(function () {
             parser.evaluate(" ");
         }, function (err) {
             return err === "Stack empty.";
         });
-        wnd.raises(function () {
+        window.raises(function () {
             parser.evaluate("");
         }, function (err) {
             return err === "Stack empty.";
         });
-        wnd.raises(function () {
+        window.raises(function () {
             parser.evaluate(null);
         }, function (err) {
             return err === "Stack empty.";
         });
     });
 
-    test("Verify_complex_expression_evaluation", function() {
+    test("verify_complex_expressions_evaluation", function() {
         var evaluator = new analyser.Evaluator();
 
-        wnd.ok(evaluator.compute("(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false"));
-        wnd.ok(evaluator.compute("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))"));
+        window.ok(evaluator.compute("(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false"));
+        window.ok(evaluator.compute("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))"));
 
-        wnd.raises(function () {
+        window.raises(function () {
             evaluator.compute(" ");
         }, function (err) {
             return err === "Logical expression computation failed. Expression is broken.";
         });
-        wnd.raises(function () {
+        window.raises(function () {
             evaluator.compute("");
         }, function (err) {
             return err === "Logical expression computation failed. Expression is broken.";
         });
-        wnd.raises(function () {
+        window.raises(function () {
             evaluator.compute(null);
         }, function (err) {
             return err === "Logical expression computation failed. Expression is broken.";
         });
     });
 
-    test("Verify_comparison_options", function () {
+    test("verify_comparison_options", function () {
         var comparer = new analyser.Comparer();
 
-        wnd.ok(comparer.compute("aAa", "aAa", "==", true));
-        wnd.ok(!comparer.compute("aAa", "aaa", "==", true));
+        window.ok(comparer.compute("aAa", "aAa", "==", true));
+        window.ok(!comparer.compute("aAa", "aaa", "==", true));
 
-        wnd.ok(!comparer.compute("aAa", "aAa", "!=", true));
-        wnd.ok(comparer.compute("aAa", "aaa", "!=", true));
+        window.ok(!comparer.compute("aAa", "aAa", "!=", true));
+        window.ok(comparer.compute("aAa", "aaa", "!=", true));
 
-        wnd.ok(comparer.compute("aAa", "aAa", "==", false));
-        wnd.ok(comparer.compute("aAa", "aaa", "==", false));
+        window.ok(comparer.compute("aAa", "aAa", "==", false));
+        window.ok(comparer.compute("aAa", "aaa", "==", false));
 
-        wnd.ok(!comparer.compute("aAa", "aAa", "!=", false));
-        wnd.ok(!comparer.compute("aAa", "aaa", "!=", false));
+        window.ok(!comparer.compute("aAa", "aAa", "!=", false));
+        window.ok(!comparer.compute("aAa", "aaa", "!=", false));
     });
 
-    test("Verify_comparison_equals_non_empty", function() {
+    test("verify_equality_of_non_empty_elements", function() {
         var comparer = new analyser.Comparer();
 
-        wnd.ok(comparer.compute("aAa", "aAa", "==", true));
-        wnd.ok(comparer.compute(0, 0, "==", true));
-        wnd.ok(comparer.compute(new Date("Wed, 09 Aug 1995 00:00:00 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), "==", true));
-        wnd.ok(comparer.compute({}, {}, "==", true));
-        wnd.ok(comparer.compute({ error: true }, { error: true }, "==", true));
-        wnd.ok(comparer.compute(["a", "b"], ["a", "b"], "==", true));
+        window.ok(comparer.compute("aAa", "aAa", "==", true));
+        window.ok(comparer.compute(0, 0, "==", true));
+        window.ok(comparer.compute(new Date("Wed, 09 Aug 1995 00:00:00 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), "==", true));
+        window.ok(comparer.compute({}, {}, "==", true));
+        window.ok(comparer.compute({ error: true }, { error: true }, "==", true));
+        window.ok(comparer.compute(["a", "b"], ["a", "b"], "==", true));
 
-        wnd.ok(!comparer.compute("aAa", "aAa ", "==", true));
-        wnd.ok(!comparer.compute("aAa", " aAa", "==", true));
-        wnd.ok(!comparer.compute("aAa", "aaa", "==", true));
-        wnd.ok(!comparer.compute(0, 1, "==", true));
-        wnd.ok(!comparer.compute(new Date("Wed, 09 Aug 1995 00:00:00 GMT"), new Date("Wed, 09 Aug 1995 00:00:01 GMT"), "==", true));
-        wnd.ok(!comparer.compute({ error: true }, { error: false }, "==", true));
-        wnd.ok(!comparer.compute(["a", "b"], ["a", "B"], "==", true));
+        window.ok(!comparer.compute("aAa", "aAa ", "==", true));
+        window.ok(!comparer.compute("aAa", " aAa", "==", true));
+        window.ok(!comparer.compute("aAa", "aaa", "==", true));
+        window.ok(!comparer.compute(0, 1, "==", true));
+        window.ok(!comparer.compute(new Date("Wed, 09 Aug 1995 00:00:00 GMT"), new Date("Wed, 09 Aug 1995 00:00:01 GMT"), "==", true));
+        window.ok(!comparer.compute({ error: true }, { error: false }, "==", true));
+        window.ok(!comparer.compute(["a", "b"], ["a", "B"], "==", true));
     });
 
-    test("Verify_comparison_equals_empty", function() {
+    test("verify_equality_of_empty_elements", function() {
         var comparer = new analyser.Comparer();
 
-        wnd.ok(comparer.compute("", "", "==", true));
-        wnd.ok(comparer.compute(" ", " ", "==", true));
-        wnd.ok(comparer.compute(null, null, "==", true));
+        window.ok(comparer.compute("", "", "==", true));
+        window.ok(comparer.compute(" ", " ", "==", true));
+        window.ok(comparer.compute(null, null, "==", true));
 
-        wnd.ok(!comparer.compute("", "*", "==", true));
-        wnd.ok(!comparer.compute(" ", "*", "==", true));
-        wnd.ok(!comparer.compute(null, "*", "==", true));
+        window.ok(!comparer.compute("", "*", "==", true));
+        window.ok(!comparer.compute(" ", "*", "==", true));
+        window.ok(!comparer.compute(null, "*", "==", true));
 
-        wnd.ok(!comparer.compute("\t", "\n", "==", true));        
-        wnd.ok(!comparer.compute("", " ", "==", true));
-        wnd.ok(!comparer.compute("", null, "==", true));
-        wnd.ok(!comparer.compute(null, undefined, "==", true));
+        window.ok(!comparer.compute("\t", "\n", "==", true));        
+        window.ok(!comparer.compute("", " ", "==", true));
+        window.ok(!comparer.compute("", null, "==", true));
+        window.ok(!comparer.compute(null, undefined, "==", true));
     });
 
-    test("Verify_comparison_greater_and_less", function() {
+    test("verify_greater_and_less_comparisons", function() {
         var comparer = new analyser.Comparer();
-
         // assumption - arguments provided have exact types
 
-        wnd.ok(comparer.compute("a", "A", ">", true));
-        wnd.ok(comparer.compute("a", "A", ">=", true));
-        wnd.ok(comparer.compute("abcd", "ABCD", ">", true));
-        wnd.ok(comparer.compute("abcd", "ABCD", ">=", true));
-        wnd.ok(comparer.compute(1, 0, ">", true));
-        wnd.ok(comparer.compute(1, 0, ">=", true));
-        wnd.ok(comparer.compute(0, -1, ">", true));
-        wnd.ok(comparer.compute(0, -1, ">=", true));
-        wnd.ok(comparer.compute(1.1, 1.01, ">", true));
-        wnd.ok(comparer.compute(1.1, 1.01, ">=", true));
-        wnd.ok(comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), ">", true));
-        wnd.ok(comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), ">=", true));
+        window.ok(comparer.compute("a", "A", ">", true));
+        window.ok(comparer.compute("a", "A", ">=", true));
+        window.ok(comparer.compute("abcd", "ABCD", ">", true));
+        window.ok(comparer.compute("abcd", "ABCD", ">=", true));
+        window.ok(comparer.compute(1, 0, ">", true));
+        window.ok(comparer.compute(1, 0, ">=", true));
+        window.ok(comparer.compute(0, -1, ">", true));
+        window.ok(comparer.compute(0, -1, ">=", true));
+        window.ok(comparer.compute(1.1, 1.01, ">", true));
+        window.ok(comparer.compute(1.1, 1.01, ">=", true));
+        window.ok(comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), ">", true));
+        window.ok(comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), ">=", true));
 
-        wnd.ok(!comparer.compute("a", null, ">", true));
-        wnd.ok(!comparer.compute("a", null, ">=", true));
-        wnd.ok(!comparer.compute(null, "a", ">", true));
-        wnd.ok(!comparer.compute(null, "a", ">=", true));
+        window.ok(!comparer.compute("a", null, ">", true));
+        window.ok(!comparer.compute("a", null, ">=", true));
+        window.ok(!comparer.compute(null, "a", ">", true));
+        window.ok(!comparer.compute(null, "a", ">=", true));
 
-        wnd.ok(!comparer.compute("a", "A", "<", true));
-        wnd.ok(!comparer.compute("a", "A", "<=", true));
-        wnd.ok(!comparer.compute("abcd", "ABCD", "<", true));
-        wnd.ok(!comparer.compute("abcd", "ABCD", "<=", true));
-        wnd.ok(!comparer.compute(1, 0, "<", true));
-        wnd.ok(!comparer.compute(1, 0, "<="));
-        wnd.ok(!comparer.compute(0, -1, "<", true));
-        wnd.ok(!comparer.compute(0, -1, "<=", true));
-        wnd.ok(!comparer.compute(1.1, 1.01, "<", true));
-        wnd.ok(!comparer.compute(1.1, 1.01, "<=", true));
-        wnd.ok(!comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), "<", true));
-        wnd.ok(!comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), "<=", true));
+        window.ok(!comparer.compute("a", "A", "<", true));
+        window.ok(!comparer.compute("a", "A", "<=", true));
+        window.ok(!comparer.compute("abcd", "ABCD", "<", true));
+        window.ok(!comparer.compute("abcd", "ABCD", "<=", true));
+        window.ok(!comparer.compute(1, 0, "<", true));
+        window.ok(!comparer.compute(1, 0, "<="));
+        window.ok(!comparer.compute(0, -1, "<", true));
+        window.ok(!comparer.compute(0, -1, "<=", true));
+        window.ok(!comparer.compute(1.1, 1.01, "<", true));
+        window.ok(!comparer.compute(1.1, 1.01, "<=", true));
+        window.ok(!comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), "<", true));
+        window.ok(!comparer.compute(new Date("Wed, 09 Aug 1995 00:00:01 GMT"), new Date("Wed, 09 Aug 1995 00:00:00 GMT"), "<=", true));
 
-        wnd.ok(!comparer.compute("a", null, "<", true));
-        wnd.ok(!comparer.compute("a", null, "<=", true));
-        wnd.ok(!comparer.compute(null, "a", "<", true));
-        wnd.ok(!comparer.compute(null, "a", "<=", true));
+        window.ok(!comparer.compute("a", null, "<", true));
+        window.ok(!comparer.compute("a", null, "<=", true));
+        window.ok(!comparer.compute(null, "a", "<", true));
+        window.ok(!comparer.compute(null, "a", "<=", true));
 
-
-        wnd.raises(function() {
+        window.raises(function() {
             comparer.compute({}, {}, ">", true);
         }, function(err) {
             return err === "Greater than and less than relational operations not allowed for arguments of types other than: numeric, string or datetime.";
         });
     });
 
-    wnd.module("type helpers");
+window.module("type helper");
 
-    test("Verify_typehelper_array_contains", function () {
-        wnd.ok(analyser.typeHelper.Array.contains(["a"], "a"));
-        wnd.ok(analyser.typeHelper.Array.contains(["a", "b"], "a"));
-        wnd.ok(analyser.typeHelper.Array.contains(["a", "b"], "b"));
-        wnd.ok(!analyser.typeHelper.Array.contains(["a", "b"], "c"));
+    test("verify_array_storage", function () {
+        window.ok(helper.array.contains(["a"], "a"));
+        window.ok(helper.array.contains(["a", "b"], "a"));
+        window.ok(helper.array.contains(["a", "b"], "b"));
+        window.ok(!helper.array.contains(["a", "b"], "c"));
     });
 
-    test("Verify_typehelper_array_sanatize", function () {
+    test("verify_array_sanatization", function () {
         var array = ["a"];
-        analyser.typeHelper.Array.sanatize(["a"], "");
-        wnd.deepEqual(["a"], array);
+        helper.array.sanatize(["a"], "");
+        window.deepEqual(["a"], array);
 
         array = ["a", "a"];
-        analyser.typeHelper.Array.sanatize(array, "a");
-        wnd.deepEqual([], array);
+        helper.array.sanatize(array, "a");
+        window.deepEqual([], array);
 
         array = ["a", "b"];
-        analyser.typeHelper.Array.sanatize(array, "");
-        wnd.deepEqual(["a", "b"], array);
+        helper.array.sanatize(array, "");
+        window.deepEqual(["a", "b"], array);
 
         array = ["a", "b", "c", "a", "b"];
-        analyser.typeHelper.Array.sanatize(array, "b");
-        wnd.deepEqual(["a", "c", "a"], array);
+        helper.array.sanatize(array, "b");
+        window.deepEqual(["a", "c", "a"], array);
     });
 
-    test("Verify_typehelper_string_format", function () {
-        wnd.equal(analyser.typeHelper.String.format("{0}", "a"), "a");
-        wnd.equal(analyser.typeHelper.String.format("{0}{1}", "a", "b"), "ab");
-        wnd.equal(analyser.typeHelper.String.format("{0}{0}", "a", "b"), "aa");
-        wnd.equal(analyser.typeHelper.String.format("{0}{0}", "a"), "aa");
+    test("verify_string_formatting", function () {
+        window.equal(helper.string.format("{0}", "a"), "a");
+        window.equal(helper.string.format("{0}{1}", "a", "b"), "ab");
+        window.equal(helper.string.format("{0}{0}", "a", "b"), "aa");
+        window.equal(helper.string.format("{0}{0}", "a"), "aa");
 
-        wnd.equal(analyser.typeHelper.String.format("{0}", ["a"]), "a");
-        wnd.equal(analyser.typeHelper.String.format("{0}{1}", ["a", "b"]), "ab");
-        wnd.equal(analyser.typeHelper.String.format("{0}{0}", ["a", "b"]), "aa");
-        wnd.equal(analyser.typeHelper.String.format("{0}{0}", ["a"]), "aa");
+        window.equal(helper.string.format("{0}", ["a"]), "a");
+        window.equal(helper.string.format("{0}{1}", ["a", "b"]), "ab");
+        window.equal(helper.string.format("{0}{0}", ["a", "b"]), "aa");
+        window.equal(helper.string.format("{0}{0}", ["a"]), "aa");
     });
 
-    test("Verify_typehelper_bool_tryparse", function () {
-        wnd.equal(analyser.typeHelper.Bool.tryParse(false), false);
-        wnd.equal(analyser.typeHelper.Bool.tryParse("false"), false);
-        wnd.equal(analyser.typeHelper.Bool.tryParse("False"), false);
-        wnd.equal(analyser.typeHelper.Bool.tryParse(true), true);
-        wnd.equal(analyser.typeHelper.Bool.tryParse("true"), true);
-        wnd.equal(analyser.typeHelper.Bool.tryParse("True"), true);
+    test("verify_bool_parsing", function () {
+        window.equal(helper.bool.tryParse(false), false);
+        window.equal(helper.bool.tryParse("false"), false);
+        window.equal(helper.bool.tryParse("False"), false);
+        window.equal(helper.bool.tryParse(true), true);
+        window.equal(helper.bool.tryParse("true"), true);
+        window.equal(helper.bool.tryParse("True"), true);
         
-        var result = analyser.typeHelper.Bool.tryParse("asd");
-        wnd.equal(result.error, true);
-        wnd.equal(result.msg, "Parsing error. Given value has no boolean meaning.");
+        var result = helper.bool.tryParse("asd");
+        window.equal(result.error, true);
+        window.equal(result.msg, "Parsing error. Given value has no boolean meaning.");
     });
 
-    test("Verify_typehelper_float_tryparse", function () {
+    test("verify_float_parsing", function () {
         // integer literals
-        wnd.equal(analyser.typeHelper.Float.tryParse("-1"), -1); // negative integer string
-        wnd.equal(analyser.typeHelper.Float.tryParse("0"), 0); // zero string
-        wnd.equal(analyser.typeHelper.Float.tryParse("1"), 1); // positive integer string
-        wnd.equal(analyser.typeHelper.Float.tryParse(-1), -1); // negative integer number
-        wnd.equal(analyser.typeHelper.Float.tryParse(0), 0); // zero integer number
-        wnd.equal(analyser.typeHelper.Float.tryParse(1), 1); // positive integer number
-        wnd.equal(analyser.typeHelper.Float.tryParse(0xFF), 255); // hexadecimal integer literal
+        window.equal(helper.float.tryParse("-1"), -1); // negative integer string
+        window.equal(helper.float.tryParse("0"), 0); // zero string
+        window.equal(helper.float.tryParse("1"), 1); // positive integer string
+        window.equal(helper.float.tryParse(-1), -1); // negative integer number
+        window.equal(helper.float.tryParse(0), 0); // zero integer number
+        window.equal(helper.float.tryParse(1), 1); // positive integer number
+        window.equal(helper.float.tryParse(0xFF), 255); // hexadecimal integer literal
 
         // floating-point literals
-        wnd.equal(analyser.typeHelper.Float.tryParse("-1.1"), -1.1); // negative floating point string
-        wnd.equal(analyser.typeHelper.Float.tryParse("1.1"), 1.1); // positive floating point string
-        wnd.equal(analyser.typeHelper.Float.tryParse(-1.1), -1.1); // negative floating point number
-        wnd.equal(analyser.typeHelper.Float.tryParse(1.1), 1.1); // positive floating point number
-        wnd.equal(analyser.typeHelper.Float.tryParse("314e-2"), 3.14); // exponential notation string 
-        wnd.equal(analyser.typeHelper.Float.tryParse(314e-2), 3.14); // exponential notation
+        window.equal(helper.float.tryParse("-1.1"), -1.1); // negative floating point string
+        window.equal(helper.float.tryParse("1.1"), 1.1); // positive floating point string
+        window.equal(helper.float.tryParse(-1.1), -1.1); // negative floating point number
+        window.equal(helper.float.tryParse(1.1), 1.1); // positive floating point number
+        window.equal(helper.float.tryParse("314e-2"), 3.14); // exponential notation string 
+        window.equal(helper.float.tryParse(314e-2), 3.14); // exponential notation
 
         // non-numeric valuer
-        var result = analyser.typeHelper.Float.tryParse(""); // empty string
-        wnd.equal(result.error, true);
-        wnd.equal(result.msg, "Parsing error. Given value has no numeric meaning.");
+        var result = helper.float.tryParse(""); // empty string
+        window.equal(result.error, true);
+        window.equal(result.msg, "Parsing error. Given value has no numeric meaning.");
 
-        wnd.ok(analyser.typeHelper.Float.tryParse(" ").error); // whitespace character
-        wnd.ok(analyser.typeHelper.Float.tryParse("\t").error); // tab characters
-        wnd.ok(analyser.typeHelper.Float.tryParse("asd").error); // non-numeric character string
-        wnd.ok(analyser.typeHelper.Float.tryParse("true").error); // boolean true
-        wnd.ok(analyser.typeHelper.Float.tryParse("false").error); // boolean false
-        wnd.ok(analyser.typeHelper.Float.tryParse("asd123").error); // number with preceding non-numeric characters
-        wnd.ok(analyser.typeHelper.Float.tryParse("123asd").error); // number with trailling non-numeric characters
-        wnd.ok(analyser.typeHelper.Float.tryParse(undefined).error); // undefined value
-        wnd.ok(analyser.typeHelper.Float.tryParse(null).error); // null value
-        wnd.ok(analyser.typeHelper.Float.tryParse(NaN).error); // NaN value
-        wnd.ok(analyser.typeHelper.Float.tryParse(Infinity).error); // infinity primitive
-        wnd.ok(analyser.typeHelper.Float.tryParse(+Infinity).error); // positive Infinity
-        wnd.ok(analyser.typeHelper.Float.tryParse(-Infinity).error); // negative Infinity
-        wnd.ok(analyser.typeHelper.Float.tryParse(new Date(Date.now())).error); // date object
-        wnd.ok(analyser.typeHelper.Float.tryParse({}).error); // empty object
+        window.ok(helper.float.tryParse(" ").error); // whitespace character
+        window.ok(helper.float.tryParse("\t").error); // tab characters
+        window.ok(helper.float.tryParse("asd").error); // non-numeric character string
+        window.ok(helper.float.tryParse("true").error); // boolean true
+        window.ok(helper.float.tryParse("false").error); // boolean false
+        window.ok(helper.float.tryParse("asd123").error); // number with preceding non-numeric characters
+        window.ok(helper.float.tryParse("123asd").error); // number with trailling non-numeric characters
+        window.ok(helper.float.tryParse(undefined).error); // undefined value
+        window.ok(helper.float.tryParse(null).error); // null value
+        window.ok(helper.float.tryParse(NaN).error); // NaN value
+        window.ok(helper.float.tryParse(Infinity).error); // infinity primitive
+        window.ok(helper.float.tryParse(+Infinity).error); // positive Infinity
+        window.ok(helper.float.tryParse(-Infinity).error); // negative Infinity
+        window.ok(helper.float.tryParse(new Date(Date.now())).error); // date object
+        window.ok(helper.float.tryParse({}).error); // empty object
     });
 
-    test("Verify_typehelper_date_tryparse", function () {
+    test("verify_date_parsing", function () {
         var now = Date.now();
-        wnd.deepEqual(analyser.typeHelper.Date.tryParse(new Date(now)), new Date(now));
-        wnd.deepEqual(analyser.typeHelper.Date.tryParse("Wed, 09 Aug 1995 00:00:00 GMT"), new Date(807926400000));
-        wnd.deepEqual(analyser.typeHelper.Date.tryParse("Thu, 01 Jan 1970 00:00:00 GMT"), new Date(0));
-        wnd.deepEqual(analyser.typeHelper.Date.tryParse("Thu, 01 Jan 1970 00:00:00 GMT-0400"), new Date(14400000));
+        window.deepEqual(helper.date.tryParse(new Date(now)), new Date(now));
+        window.deepEqual(helper.date.tryParse("Wed, 09 Aug 1995 00:00:00 GMT"), new Date(807926400000));
+        window.deepEqual(helper.date.tryParse("Thu, 01 Jan 1970 00:00:00 GMT"), new Date(0));
+        window.deepEqual(helper.date.tryParse("Thu, 01 Jan 1970 00:00:00 GMT-0400"), new Date(14400000));
 
-        var result = analyser.typeHelper.Date.tryParse("");
-        wnd.equal(result.error, true);
-        wnd.equal(result.msg, "Parsing error. Given value is not a string representing an RFC 2822 or ISO 8601 date.");
+        var result = helper.date.tryParse("");
+        window.equal(result.error, true);
+        window.equal(result.msg, "Parsing error. Given value is not a string representing an RFC 2822 or ISO 8601 date.");
     });
 
-    test("Verify_typehelper_is_numeric", function () {
-        wnd.ok(analyser.typeHelper.isNumeric(1));
-        wnd.ok(!analyser.typeHelper.isNumeric(NaN));
-        wnd.ok(!analyser.typeHelper.isNumeric("1"));
+    test("verify_numeric_recognition", function () {
+        window.ok(helper.isNumeric(1));
+        window.ok(!helper.isNumeric(NaN));
+        window.ok(!helper.isNumeric("1"));
     });
 
-    test("Verify_typehelper_is_date", function () {
-        wnd.ok(analyser.typeHelper.isDate(new Date("Wed, 09 Aug 1995 00:00:00 GMT")));
-        wnd.ok(!analyser.typeHelper.isDate("Wed, 09 Aug 1995 00:00:00 GMT"));
-        wnd.ok(!analyser.typeHelper.isDate(807926400000));
+    test("verify_date_recognition", function () {
+        window.ok(helper.isDate(new Date("Wed, 09 Aug 1995 00:00:00 GMT")));
+        window.ok(!helper.isDate("Wed, 09 Aug 1995 00:00:00 GMT"));
+        window.ok(!helper.isDate(807926400000));
     });
 
-    test("Verify_typehelper_is_string", function () {
-        wnd.ok(analyser.typeHelper.isString(""));
-        wnd.ok(analyser.typeHelper.isString("123"));
-        wnd.ok(!analyser.typeHelper.isString(123));
-        wnd.ok(!analyser.typeHelper.isString({}));
-        wnd.ok(!analyser.typeHelper.isString(null));
-        wnd.ok(!analyser.typeHelper.isString(undefined));
+    test("verify_string_recognition", function () {
+        window.ok(helper.isString(""));
+        window.ok(helper.isString("123"));
+        window.ok(!helper.isString(123));
+        window.ok(!helper.isString({}));
+        window.ok(!helper.isString(null));
+        window.ok(!helper.isString(undefined));
     });
 
-    test("Verify_typehelper_is_bool", function () {
-        wnd.ok(analyser.typeHelper.isBool(true));
-        wnd.ok(!analyser.typeHelper.isBool("true"));
-        wnd.ok(!analyser.typeHelper.isBool(0));
+    test("verify_bool_recognition", function () {
+        window.ok(helper.isBool(true));
+        window.ok(!helper.isBool("true"));
+        window.ok(!helper.isBool(0));
     });
 
-}(window, logicalExpressionsAnalyser));
+}(window, ea.analyser, ea.helper));

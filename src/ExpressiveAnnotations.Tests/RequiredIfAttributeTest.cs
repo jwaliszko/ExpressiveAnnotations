@@ -58,7 +58,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_if_not_required()
+        public void verify_if_not_required()
         {
             var model = new Model {GoAbroad = false};
             Assert.IsTrue(model.IsValid(m => m.PassportNumber));
@@ -92,7 +92,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_if_required()
+        public void verify_if_required()
         {
             var model = new Model { GoAbroad = true, EmptyField = null };
             Assert.IsFalse(model.IsValid(m => m.EmptyField));
@@ -114,7 +114,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_if_nesting_works()
+        public void verify_if_nesting_works()
         {
             var model = new Model
             {
@@ -126,7 +126,7 @@ namespace ExpressiveAnnotations.Tests
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void Verify_if_proper_exception_thrown_when_extraction_fails_because_of_not_initializecd_prop_in_props_chain()
+        public void verify_if_proper_exception_thrown_when_extraction_fails_because_of_not_initializecd_prop_in_props_chain()
         {
             try
             {
@@ -148,7 +148,7 @@ namespace ExpressiveAnnotations.Tests
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
-        public void Verify_if_proper_exception_thrown_when_extraction_fails_because_of_incorrect_prop_name()
+        public void verify_if_proper_exception_thrown_when_extraction_fails_because_of_incorrect_prop_name()
         {
             try
             {
@@ -165,7 +165,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_if_target_value_extraction_works()
+        public void verify_if_target_value_extraction_works()
         {
             var today = DateTime.UtcNow;
             var tomorrow = today.AddDays(1);
@@ -195,7 +195,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify_wildcard()
+        public void verify_wildcard()
         {
             var model = new Model
             {
@@ -214,7 +214,7 @@ namespace ExpressiveAnnotations.Tests
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
-        public void Verify_types_consistency_requirement()
+        public void verify_types_consistency_requirement()
         {
             try
             {
@@ -233,7 +233,7 @@ namespace ExpressiveAnnotations.Tests
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
-        public void Verify_types_consistency_requirement_for_backend_property()
+        public void verify_types_consistency_requirement_for_backend_property()
         {
             try
             {
