@@ -3,12 +3,10 @@
  * copyright (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
  * licensed MIT: http://www.opensource.org/licenses/mit-license.php */
 
-(function($) {
-
-    var typeHelper, modelHelper, toolchain;
-
+(function($, window) {
+var
     typeHelper = {
-        String: {
+        string: {
             format: function(text, params) {
                 var i;
                 if (params instanceof Array) {
@@ -25,12 +23,12 @@
             compareOrdinal: function(strA, strB) {
                 return strA === strB ? 0 : strA > strB ? 1 : -1;
             },
-            compareOrdinalIgnoreCase: function (strA, strB) {
+            compareOrdinalIgnoreCase: function(strA, strB) {
                 strA = (strA !== null && strA !== undefined) ? strA.toLowerCase() : null;
                 strB = (strB !== null && strB !== undefined) ? strB.toLowerCase() : null;
                 return this.compareOrdinal(strA, strB);
             },
-            isNullOrWhiteSpace: function (str) {
+            isNullOrWhiteSpace: function(str) {
                 return str === null || !/\S/.test(str);
             },
             tryParse: function(value) {
@@ -40,7 +38,7 @@
                 return { error: true, msg: 'Parsing error. Given value has no boolean meaning.' };
             }
         },
-        Bool: {
+        bool: {
             tryParse: function(value) {
                 if (typeHelper.isBool(value)) {
                     return value;
@@ -54,7 +52,7 @@
                 return { error: true, msg: 'Parsing error. Given value has no boolean meaning.' };
             }
         },
-        Float: {
+        float: {
             tryParse: function(value) {
                 function isNumber(n) {
                     return !isNaN(parseFloat(n)) && isFinite(n);
@@ -66,7 +64,7 @@
                 return { error: true, msg: 'Parsing error. Given value has no numeric meaning.' };
             }
         },
-        Date: {
+        date: {
             tryParse: function(value) {
                 if (typeHelper.isDate(value)) {
                     return value;
@@ -80,7 +78,6 @@
                 return { error: true, msg: 'Parsing error. Given value is not a string representing an RFC 2822 or ISO 8601 date.' };
             }
         },
-
         isNumeric: function(value) {
             return typeof value === 'number' && !isNaN(value);
         },
@@ -97,23 +94,64 @@
             var result;
             switch (type) {
                 case 'datetime':
-                    result = this.Date.tryParse(value);
+                    result = typeHelper.date.tryParse(value);
                     break;
                 case 'numeric':
-                    result = this.Float.tryParse(value);
+                    result = typeHelper.float.tryParse(value);
                     break;
                 case 'string':
-                    result = this.String.tryParse(value);
+                    result = typeHelper.string.tryParse(value);
                     break;
                 case 'bool':
-                    result = this.Bool.tryParse(value);
+                    result = typeHelper.bool.tryParse(value);
                     break;
                 default:
                     result = { error: true };
             }
             return result.error ? { error: true } : result;
         }
-    };
+    },
+
+    toolchain = {
+        methods: {},
+        addMethod: function(name, body) {
+            if (!this.methods.hasOwnProperty(name)) {
+                this.methods[name] = body;
+            }
+        },
+        registerMethods: function(o) {
+            var name, body;
+            this.initialize();
+            for (name in this.methods) {
+                if (this.methods.hasOwnProperty(name)) {
+                    body = this.methods[name];
+                    o[name] = body;
+                }
+            }
+        },
+        initialize: function() {
+            this.methods.Today = function() {
+                var today = new Date(Date.now());
+                today.setHours(0, 0, 0, 0);
+                return today;
+            };
+            this.methods.Trim = function(text) {
+                return (text !== undefined && text !== null) ? text.trim() : null;
+            };
+            this.methods.CompareOrdinal = function(strA, strB) {
+                return typeHelper.string.compareOrdinal(strA, strB);
+            };
+            this.methods.CompareOrdinalIgnoreCase = function(strA, strB) {
+                return typeHelper.string.compareOrdinalIgnoreCase(strA, strB);
+            };
+            this.methods.IsNullOrWhiteSpace = function(str) {
+                return typeHelper.string.isNullOrWhiteSpace(str);
+            };
+            this.methods.IsNumber = function(str) {
+                return (/^[\-+]?\d+$/).test(str) || (/^[\-+]?\d*\.\d+([eE][\-+]?\d+)?$/).test(str);
+            };
+        }
+    },
 
     modelHelper = {
         appendPrefix: function(value, prefix) {
@@ -155,7 +193,7 @@
 
             return parsedValue;
         },
-        deserializeObject: function (form, typesMap, enumsMap, prefix) {
+        deserializeObject: function(form, typesMap, enumsMap, prefix) {
             function buildFieldInternal(fieldName, fieldValue, object) {
                 var props, parent, i;
                 props = fieldName.split('.');
@@ -188,50 +226,15 @@
             toolchain.registerMethods(o);
             return o;
         }
-    };
-
-    toolchain = {
-        methods: {},
+    },
+    
+    api = {
         addMethod: function(name, body) {
-            if (!this.methods.hasOwnProperty(name)) {
-                this.methods[name] = body;
-            }
-        },
-        registerMethods: function(o) {
-            var name, body;
-            this.initialize();
-            for (name in this.methods) {
-                if (this.methods.hasOwnProperty(name)) {
-                    body = this.methods[name];
-                    o[name] = body;
-                }
-            }
-        },
-        initialize: function() {
-            this.methods.Today = function() {
-                var today = new Date(Date.now());
-                today.setHours(0, 0, 0, 0);
-                return today;
-            };
-            this.methods.Trim = function(text) {
-                return (text !== undefined && text !== null) ? text.trim() : null;
-            };
-            this.methods.CompareOrdinal = function(strA, strB) {
-                return typeHelper.String.compareOrdinal(strA, strB);
-            };
-            this.methods.CompareOrdinalIgnoreCase = function(strA, strB) {
-                return typeHelper.String.compareOrdinalIgnoreCase(strA, strB);
-            };
-            this.methods.IsNullOrWhiteSpace = function(str) {
-                return typeHelper.String.isNullOrWhiteSpace(str);
-            };
-            this.methods.IsNumber = function(str) {
-                return (/^[\-+]?\d+$/).test(str) || (/^[\-+]?\d*\.\d+([eE][\-+]?\d+)?$/).test(str);
-            };
+            toolchain.addMethod(name, body);            
         }
     };
 
-    $.validator.unobtrusive.adapters.add('assertthat', ['expression', 'typesmap', 'enumsmap'], function (options) {
+    $.validator.unobtrusive.adapters.add('assertthat', ['expression', 'typesmap', 'enumsmap'], function(options) {
         options.rules.assertthat = {
             prefix: modelHelper.getPrefix(options.element.name),
             form: options.form,
@@ -244,7 +247,7 @@
         }
     });
 
-    $.validator.unobtrusive.adapters.add('requiredif', ['expression', 'typesmap', 'enumsmap', 'allowempty'], function (options) {
+    $.validator.unobtrusive.adapters.add('requiredif', ['expression', 'typesmap', 'enumsmap', 'allowempty'], function(options) {
         options.rules.requiredif = {
             prefix: modelHelper.getPrefix(options.element.name),
             form: options.form,
@@ -258,7 +261,7 @@
         }
     });
 
-    $.validator.addMethod('assertthat', function (value, element, params) {
+    $.validator.addMethod('assertthat', function(value, element, params) {
         value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
         if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
             var model = modelHelper.deserializeObject(params.form, params.typesmap, params.enumsmap, params.prefix);
@@ -271,7 +274,7 @@
         return true;
     }, '');
 
-    $.validator.addMethod('requiredif', function (value, element, params) {
+    $.validator.addMethod('requiredif', function(value, element, params) {
         value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value;
         if (value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
             || (!/\S/.test(value) && !params.allowempty)) {
@@ -285,7 +288,7 @@
         return true;
     }, '');
 
-    // expose toolchain to the global object
-    window.ea = toolchain;
+    // expose some tiny api to the ea global object
+    window.ea = api;
 
-}(jQuery));
+}(jQuery, window));
