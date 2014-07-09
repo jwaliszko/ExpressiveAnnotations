@@ -8,12 +8,12 @@ namespace ExpressiveAnnotations.Tests
     public class LexerTest
     {
         [TestMethod]
-        public void Verify_lexer_logic()
+        public void verify_logic()
         {
             const string expression =
                 "GoAbroad == true " +
                     "&& (" +
-                            "(NextCountry != \"european country\" && Compare(NextCountry, Country.Name) == 0) " +
+                            "(NextCountry != 'european country' && Compare(NextCountry, Country.Name) == 0) " +
                             "|| (Age > 24 && Age <= 55.5)" +
                         ")";
 

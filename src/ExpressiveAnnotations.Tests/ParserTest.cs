@@ -51,7 +51,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void Verify()
+        public void verify_logic_without_context()
         {
             var parser = new Parser();
             Assert.IsTrue(parser.Parse<object>("true").Invoke(null));
@@ -89,7 +89,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void VerifyContext()
+        public void verify_logic_with_context()
         {
             var model = new Model
             {
