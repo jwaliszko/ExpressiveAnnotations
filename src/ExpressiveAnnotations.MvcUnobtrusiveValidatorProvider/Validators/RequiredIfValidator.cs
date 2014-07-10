@@ -17,7 +17,6 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         private string Expression { get; set; }
         private string FormattedErrorMessage { get; set; }        
         private bool AllowEmpty { get; set; }
-        private Type CallerType { get; set; }
         private IDictionary<string, string> TypesMap { get; set; }
         private IDictionary<string, Dictionary<string, int>> EnumsMap { get; set; }
 

@@ -20,17 +20,6 @@ var
                 }
                 return text;
             },
-            compareOrdinal: function(strA, strB) {
-                return strA === strB ? 0 : strA > strB ? 1 : -1;
-            },
-            compareOrdinalIgnoreCase: function(strA, strB) {
-                strA = (strA !== null && strA !== undefined) ? strA.toLowerCase() : null;
-                strB = (strB !== null && strB !== undefined) ? strB.toLowerCase() : null;
-                return this.compareOrdinal(strA, strB);
-            },
-            isNullOrWhiteSpace: function(str) {
-                return str === null || !/\S/.test(str);
-            },
             tryParse: function(value) {
                 if (typeHelper.isString(value)) {
                     return value;
@@ -130,22 +119,28 @@ var
             }
         },
         initialize: function() {
-            this.methods.Today = function() {
-                var today = new Date(Date.now());
-                today.setHours(0, 0, 0, 0);
-                return today;
+            this.methods.Now = function() {
+                return new Date(Date.now());
             };
-            this.methods.Trim = function(text) {
-                return (text !== undefined && text !== null) ? text.trim() : null;
+            this.methods.Today = function() {
+                return new Date(this.Now().setHours(0, 0, 0, 0));
+            };
+            this.methods.Length = function(str) {
+                return str.length;
+            };
+            this.methods.Trim = function(str) {
+                return str.trim();
             };
             this.methods.CompareOrdinal = function(strA, strB) {
-                return typeHelper.string.compareOrdinal(strA, strB);
+                return strA === strB ? 0 : strA > strB ? 1 : -1;
             };
             this.methods.CompareOrdinalIgnoreCase = function(strA, strB) {
-                return typeHelper.string.compareOrdinalIgnoreCase(strA, strB);
+                strA = (strA !== null && strA !== undefined) ? strA.toLowerCase() : null;
+                strB = (strB !== null && strB !== undefined) ? strB.toLowerCase() : null;
+                return this.compareOrdinal(strA, strB);
             };
             this.methods.IsNullOrWhiteSpace = function(str) {
-                return typeHelper.string.isNullOrWhiteSpace(str);
+                return str === null || !/\S/.test(str);
             };
             this.methods.IsNumber = function(str) {
                 return (/^[\-+]?\d+$/).test(str) || (/^[\-+]?\d*\.\d+([eE][\-+]?\d+)?$/).test(str);
