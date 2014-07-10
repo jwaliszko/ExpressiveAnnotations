@@ -139,12 +139,32 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<Model>("DecNumber(Number) == 0").Invoke(model.SubModel));
 
             parser.AddFunction<DateTime>("Today", () => DateTime.Today);
-            parser.AddFunction<string, string>("Trim", text => text.Trim());
+            parser.AddFunction<string, string>("Trim", str => str.Trim());
             parser.AddFunction<string, string, int>("Compare", (strA, strB) => String.CompareOrdinal(strA, strB));
 
             Assert.IsTrue(parser.Parse<Model>("SubModel.Date > Today()").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("'hello world' == Trim(SubModel.Text)").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("Compare(Text, Trim(SubModel.Text)) == 0").Invoke(model));
+        }
+
+        [TestMethod]
+        public void verify_short_circuit_evaluation()
+        {
+            var parser = new Parser();
+            parser.AddFunction<string, bool>("NonEmpty", str => str.Length > 0);
+
+            try
+            {
+                parser.Parse<object>("NonEmpty(null)").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is NullReferenceException);
+            }
+
+            Assert.IsFalse(parser.Parse<object>("false && NonEmpty(null)").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("true || NonEmpty(null)").Invoke(null));
         }
     }
 }

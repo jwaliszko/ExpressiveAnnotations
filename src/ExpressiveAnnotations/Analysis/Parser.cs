@@ -162,7 +162,7 @@ namespace ExpressiveAnnotations.Analysis
                 return arg1;
             ReadToken();
             var arg2 = ParseOrExp();
-            return Expression.Or(arg1, arg2);
+            return Expression.OrElse(arg1, arg2); // short-circuit evaluation
         }
 
         private Expression ParseAndExp()
@@ -172,7 +172,7 @@ namespace ExpressiveAnnotations.Analysis
                 return arg1;
             ReadToken();
             var arg2 = ParseAndExp();
-            return Expression.And(arg1, arg2);
+            return Expression.AndAlso(arg1, arg2); // short-circuit evaluation
         }
 
         private Expression ParseNotExp()
