@@ -126,10 +126,16 @@ var
                 return new Date(this.Now().setHours(0, 0, 0, 0));
             };
             this.methods.Length = function(str) {
-                return str.length;
+                return str !== null && str !== undefined ? str.length : 0;
             };
             this.methods.Trim = function(str) {
-                return str.trim();
+                return str !== null && str !== undefined ? str.trim() : null;
+            };
+            this.methods.Concat = function(strA, strB) {
+                return [strA, strB].join('');
+            };
+            this.methods.Concat = function(strA, strB, strC) {
+                return [strA, strB, strC].join('');
             };
             this.methods.CompareOrdinal = function(strA, strB) {
                 return strA === strB ? 0 : strA > strB ? 1 : -1;

@@ -109,6 +109,20 @@ namespace ExpressiveAnnotations.Analysis
         }
 
         /// <summary>
+        /// Adds function signature to the parser context.
+        /// </summary>
+        /// <typeparam name="Arg1">First argument.</typeparam>
+        /// <typeparam name="Arg2">Second argument.</typeparam>
+        /// <typeparam name="Arg3">Third argument.</typeparam>
+        /// <typeparam name="Result">Type identifier of returned result.</typeparam>
+        /// <param name="name">Function name.</param>
+        /// <param name="func">Function lambda.</param>
+        public void AddFunction<Arg1, Arg2, Arg3, Result>(string name, Expression<Func<Arg1, Arg2, Arg3, Result>> func)
+        {
+            Functions.Add(name, func);
+        }
+
+        /// <summary>
         /// Gets the parsed fields and properties.
         /// </summary>
         /// <returns>Fields and properties.</returns>
