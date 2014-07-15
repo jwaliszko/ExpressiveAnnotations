@@ -59,6 +59,14 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsFalse(parser.Parse<object>("!true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("!false").Invoke(null));
 
+            Assert.IsTrue(parser.Parse<object>("true == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("false == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("true != false").Invoke(null));
+
+            Assert.IsTrue(parser.Parse<object>("!true == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("!!true == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("!!!true == false").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("true && true").Invoke(null));
             Assert.IsFalse(parser.Parse<object>("false && false").Invoke(null));
             Assert.IsFalse(parser.Parse<object>("true && false").Invoke(null));
@@ -69,17 +77,45 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("true || false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("false || true").Invoke(null));
 
-            Assert.IsTrue(parser.Parse<object>("0 == 0").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))").Invoke(null));
+
+            Assert.IsTrue(parser.Parse<object>("0 == 0 && 1 < 2").Invoke(null));
+
             Assert.IsFalse(parser.Parse<object>("0 != 0").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("0 >= 0").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("0 <= 0").Invoke(null));
 
+            Assert.IsTrue(parser.Parse<object>("0 == 0").Invoke(null));
+
             Assert.IsFalse(parser.Parse<object>("0 == 1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("-1 == -1").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("0 != 1").Invoke(null));
             Assert.IsFalse(parser.Parse<object>("0 >= 1").Invoke(null));
             Assert.IsFalse(parser.Parse<object>("0 > 1").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("0 <= 1").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("0 < 1").Invoke(null));
+
+            Assert.IsTrue(parser.Parse<object>("1 + 2 == 3").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("1 - 2 == -1").Invoke(null));
+
+            Assert.IsTrue(parser.Parse<object>("null == null").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("'' == ''").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("' ' == ' '").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("' ' != '  '").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("'asd' == 'asd'").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("'' != null").Invoke(null));
+
+            Assert.IsTrue(parser.Parse<object>("'a' + 'b' == 'ab'").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("'' + '' == ''").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("' ' + null == ' '").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("'a' + 0 + 'ab' + null + 'abc' == \"a0ababc\"").Invoke(null));
+
+            Assert.IsTrue(parser.Parse<object>("1 + 2 + 3 + 4 == 10").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("1 - 2 + 3 - 4 == -2").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("-1 - 2 - 3 - 4 == -10").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("3 - (4 - 5) == 4").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("(1 - 2) + ((3 - 4) - 5) == -7").Invoke(null));            
 
             parser.AddFunction<string, string>("Trim", text => text.Trim());
             parser.AddFunction<string, string, int>("Compare", (strA, strB) => String.CompareOrdinal(strA, strB));

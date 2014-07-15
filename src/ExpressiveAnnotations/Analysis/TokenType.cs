@@ -3,7 +3,7 @@
     /// <summary>
     /// Token identifier.
     /// </summary>
-    public enum TokenId
+    public enum TokenType
     {
         /// <summary>
         /// Logical conjunction.
@@ -51,6 +51,16 @@
         NEQ,
 
         /// <summary>
+        /// Addition.
+        /// </summary>
+        ADD,
+
+        /// <summary>
+        /// Subtraction.
+        /// </summary>
+        SUB,
+
+        /// <summary>
         /// Left bracket.
         /// </summary>
         LEFT_BRACKET,
@@ -96,8 +106,8 @@
         FUNC,
         
         /// <summary>
-        /// Invalid token.
+        /// EOF.
         /// </summary>
-        NONE
+        EOF
     }
 }

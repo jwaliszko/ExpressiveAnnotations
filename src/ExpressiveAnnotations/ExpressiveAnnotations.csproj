@@ -36,7 +36,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Analysis\TokenId.cs" />
+    <Compile Include="Analysis\TokenType.cs" />
     <Compile Include="Attributes\AssertThatAttribute.cs" />
     <Compile Include="Analysis\Token.cs" />
     <Compile Include="Analysis\Lexer.cs" />

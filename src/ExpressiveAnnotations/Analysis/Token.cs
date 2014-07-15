@@ -6,9 +6,9 @@
     public sealed class Token
     {
         /// <summary>
-        /// Gets the token identifier.
+        /// Gets the token type.
         /// </summary>
-        public TokenId Id { get; private set; }
+        public TokenType Type { get; private set; }
         /// <summary>
         /// Gets the token value.
         /// </summary>        
@@ -17,11 +17,11 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="Token"/> class.
         /// </summary>
-        /// <param name="token">The token identifier.</param>
+        /// <param name="type">The token identifier.</param>
         /// <param name="value">The token value.</param>
-        public Token(TokenId token, object value)
+        public Token(TokenType type, object value)
         {
-            Id = token;
+            Type = type;
             Value = value;
         }
     }

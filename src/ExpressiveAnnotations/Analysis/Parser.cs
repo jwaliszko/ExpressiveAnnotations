@@ -10,9 +10,11 @@ namespace ExpressiveAnnotations.Analysis
      * expression => or-exp
      * or-exp     => and-exp [ "||" or-exp ]
      * and-exp    => not-exp [ "&&" and-exp ]
-     * not-exp    => [ "!" ] rel-exp
-     * rel-exp    => val [ rel-op val ]
-     * rel-op     => "==" | "!=" | ">" | ">=" | "<" | "<="
+     * not-exp    => rel-exp | "!" not-exp
+     * rel-exp    => add-exp [ rel-op add-exp ]
+     * add-exp    => val add-exp'
+     * add-exp'   => '+' add-exp | '-' add-exp
+     * rel-op     => "==" | "!=" | ">" | ">=" | "<" | "<="     
      * val        => "null" | int | float | bool | string | func | "(" or-exp ")"
      */
 
@@ -146,9 +148,9 @@ namespace ExpressiveAnnotations.Analysis
             Tokens = new Stack<Token>(lexer.Analyze(expression).Reverse());
         }
 
-        private TokenId PeekType()
+        private TokenType PeekType()
         {
-            return Tokens.Any() ? Tokens.Peek().Id : TokenId.NONE;
+            return Tokens.Peek().Type;
         }
 
         private object PeekValue()
@@ -164,7 +166,7 @@ namespace ExpressiveAnnotations.Analysis
         private Expression ParseExpression()
         {
             var expr = ParseOrExp();
-            if (PeekType() != TokenId.NONE)
+            if (PeekType() != TokenType.EOF)
                 throw new InvalidOperationException(string.Format("Unexpected token {0}.", PeekValue()));
             return expr;
         }
@@ -172,7 +174,7 @@ namespace ExpressiveAnnotations.Analysis
         private Expression ParseOrExp()
         {
             var arg1 = ParseAndExp();
-            if (PeekType() != TokenId.OR)
+            if (PeekType() != TokenType.OR)
                 return arg1;
             ReadToken();
             var arg2 = ParseOrExp();
@@ -182,7 +184,7 @@ namespace ExpressiveAnnotations.Analysis
         private Expression ParseAndExp()
         {
             var arg1 = ParseNotExp();
-            if (PeekType() != TokenId.AND)
+            if (PeekType() != TokenType.AND)
                 return arg1;
             ReadToken();
             var arg2 = ParseAndExp();
@@ -191,16 +193,50 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseNotExp()
         {
-            if (PeekType() != TokenId.NOT)
+            if (PeekType() != TokenType.NOT)
                 return ParseRelExp();
             ReadToken();
-            return Expression.Not(ParseRelExp());
+            return Expression.Not(ParseNotExp()); // allows multiple negations
         }
 
         private Expression ParseRelExp()
         {
-            var arg1 = ParseVal();
-            if (!new[] {TokenId.LT, TokenId.LE, TokenId.GT, TokenId.GE, TokenId.EQ, TokenId.NEQ}.Contains(PeekType()))
+            var arg1 = ParseAddExp();
+            if (!new[] {TokenType.LT, TokenType.LE, TokenType.GT, TokenType.GE, TokenType.EQ, TokenType.NEQ}.Contains(PeekType()))
+                return arg1;
+            var oper = PeekType();
+            ReadToken();
+            var arg2 = ParseAddExp();
+
+            Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
+            switch (oper)
+            {
+                case TokenType.LT:
+                    return Expression.LessThan(arg1, arg2);
+                case TokenType.LE:
+                    return Expression.LessThanOrEqual(arg1, arg2);
+                case TokenType.GT:
+                    return Expression.GreaterThan(arg1, arg2);
+                case TokenType.GE:
+                    return Expression.GreaterThanOrEqual(arg1, arg2);
+                case TokenType.EQ:
+                    return Expression.Equal(arg1, arg2);
+                case TokenType.NEQ:
+                    return Expression.NotEqual(arg1, arg2);
+                default:
+                    throw new InvalidOperationException("Unexpected operator.");
+            }
+        }
+
+        private Expression ParseAddExp()
+        {
+            var arg = ParseVal();
+            return ParseAddExpInternal(arg);
+        }
+
+        private Expression ParseAddExpInternal(Expression arg1)
+        {
+            if (!new[] {TokenType.ADD, TokenType.SUB}.Contains(PeekType()))
                 return arg1;
             var oper = PeekType();
             ReadToken();
@@ -209,30 +245,28 @@ namespace ExpressiveAnnotations.Analysis
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
             switch (oper)
             {
-                case TokenId.LT:
-                    return Expression.LessThan(arg1, arg2);
-                case TokenId.LE:
-                    return Expression.LessThanOrEqual(arg1, arg2);
-                case TokenId.GT:
-                    return Expression.GreaterThan(arg1, arg2);
-                case TokenId.GE:
-                    return Expression.GreaterThanOrEqual(arg1, arg2);
-                case TokenId.EQ:
-                    return Expression.Equal(arg1, arg2);
-                case TokenId.NEQ:
-                    return Expression.NotEqual(arg1, arg2);
+                case TokenType.ADD:
+                    return ParseAddExpInternal(
+                        (arg1.Type == typeof (string) || arg2.Type == typeof (string))
+                            ? Expression.Add(
+                                Expression.Convert(arg1, typeof (object)),
+                                Expression.Convert(arg2, typeof (object)),
+                                typeof (string).GetMethod("Concat", new[] {typeof (object), typeof (object)})) // convert string + string into a call to string.Concat
+                            : Expression.Add(arg1, arg2));
+                case TokenType.SUB:
+                    return ParseAddExpInternal(Expression.Subtract(arg1, arg2));
                 default:
-                    throw new InvalidOperationException("Unexpected operator.");
+                    throw new InvalidOperationException();
             }
         }
 
         private Expression ParseVal()
         {            
-            if (PeekType() == TokenId.LEFT_BRACKET)
+            if (PeekType() == TokenType.LEFT_BRACKET)
             {
                 ReadToken();
                 var arg = ParseOrExp();
-                if (PeekType() != TokenId.RIGHT_BRACKET)
+                if (PeekType() != TokenType.RIGHT_BRACKET)
                     throw new InvalidOperationException(string.Format("Unexpected token {0}. Closing bracket missing.", PeekValue()));
                 ReadToken();
                 return arg;
@@ -240,17 +274,17 @@ namespace ExpressiveAnnotations.Analysis
             
             switch (PeekType())
             {
-                case TokenId.NULL:
+                case TokenType.NULL:
                     return ParseNull();
-                case TokenId.INT:
+                case TokenType.INT:
                     return ParseInt();
-                case TokenId.FLOAT:
+                case TokenType.FLOAT:
                     return ParseFloat();
-                case TokenId.BOOL:
+                case TokenType.BOOL:
                     return ParseBool();
-                case TokenId.STRING:
+                case TokenType.STRING:
                     return ParseString();
-                case TokenId.FUNC:
+                case TokenType.FUNC:
                     return ParseFunc();
                 default:
                     throw new InvalidOperationException(string.Format("Unexpected token {0}. Available values: null, int, float, bool, string or func.", PeekValue()));
@@ -296,30 +330,27 @@ namespace ExpressiveAnnotations.Analysis
             var name = PeekValue().ToString();
             ReadToken(); // read name
 
-            if (PeekType() != TokenId.LEFT_BRACKET)
+            if (PeekType() != TokenType.LEFT_BRACKET)
                 return ExtractMemberExpression(name);
 
-            ReadToken(); // read "("
+            // parse a function call
 
-            // read arguments
+            ReadToken(); // read "("
             var args = new List<Expression>();
-            while (PeekType() != TokenId.RIGHT_BRACKET)
+            while (PeekType() != TokenType.RIGHT_BRACKET) // read comma-separated arguments until we hit ")"
             {
                 var arg = ParseOrExp();
-                if (PeekType() == TokenId.COMMA)
+                if (PeekType() == TokenType.COMMA)
                     ReadToken();
                 args.Add(arg);
             }
-
-            if (PeekType() != TokenId.RIGHT_BRACKET)
-                throw new InvalidOperationException(string.Format("Unexpected token {0}. Function invocation does not contain closing bracket.", PeekValue()));
-            ReadToken();
+            ReadToken(); // read ")"
             
-            var mi = ContextType.GetMethod(name); // check if custom func is defined for model
+            var mi = ContextType.GetMethod(name); // take custom function if such is defined within model
             if (mi != null)
                 return Expression.Call(ContextExpression, mi, args);
 
-            if(!Functions.ContainsKey(name))
+            if(!Functions.ContainsKey(name)) // take utility function
                 throw new InvalidOperationException(string.Format("Function {0} not found.", name));
 
             return CreateLambdaCallExpression(Functions[name], args, name);
@@ -343,7 +374,7 @@ namespace ExpressiveAnnotations.Analysis
                     .SelectMany(a => a.GetTypes()).Where(t => t.IsEnum && t.FullName.EndsWith(name)).ToList();
 
                 if (enumTypes.Count() > 1)
-                    throw new ArgumentException(string.Format("Dynamic extraction failed. {0} enum identifier is ambigous. Provide detailed namespace.", name), name);
+                    throw new ArgumentException(string.Format("Dynamic extraction failed. {0} enum identifier is ambigous. Provide namespace.", name), name);
 
                 var type = enumTypes.SingleOrDefault();
                 if (type != null)
@@ -382,7 +413,8 @@ namespace ExpressiveAnnotations.Analysis
         private static InvocationExpression CreateLambdaCallExpression(LambdaExpression funcExpr, IList<Expression> parsedArgs, string funcName)
         {
             if (funcExpr.Parameters.Count != parsedArgs.Count)
-                throw new InvalidOperationException(string.Format("Incorrect number of parameters provided. Function {0} expects {1}, not {2}.", funcName, funcExpr.Parameters.Count, parsedArgs.Count));
+                throw new InvalidOperationException(
+                    string.Format("Incorrect number of parameters provided. Function {0} expects {1}, not {2}.", funcName, funcExpr.Parameters.Count, parsedArgs.Count));
 
             var convertedArgs = new List<Expression>();
             for (var i = 0; i < parsedArgs.Count; i++)

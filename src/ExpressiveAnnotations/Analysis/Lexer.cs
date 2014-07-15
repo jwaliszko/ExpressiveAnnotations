@@ -12,33 +12,35 @@ namespace ExpressiveAnnotations.Analysis
     {
         private Token Token { get; set; }
         private string Expression { get; set; }
-        private IDictionary<TokenId, string> RegexMap { get; set; }
+        private IDictionary<TokenType, string> RegexMap { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Lexer" /> class.
         /// </summary>
         public Lexer()
         {
-            RegexMap = new Dictionary<TokenId, string>
+            RegexMap = new Dictionary<TokenType, string>
             {
-                {TokenId.AND, @"&&"},
-                {TokenId.OR, @"\|\|"},
-                {TokenId.LEFT_BRACKET, @"\("},
-                {TokenId.RIGHT_BRACKET, @"\)"},
-                {TokenId.GE, @">="},
-                {TokenId.LE, @"<="},
-                {TokenId.GT, @">"},
-                {TokenId.LT, @"<"},
-                {TokenId.EQ, @"=="},
-                {TokenId.NEQ, @"!="},
-                {TokenId.NOT, @"\!"},
-                {TokenId.NULL, @"null"},
-                {TokenId.COMMA, @","},
-                {TokenId.FLOAT, @"[-+]?\d*\.\d+([eE][-+]?\d+)?"},
-                {TokenId.INT, @"[-+]?\d+"},
-                {TokenId.BOOL, @"(true|false)"},
-                {TokenId.STRING, @"([""'])(?:\\\1|.)*?\1"},
-                {TokenId.FUNC, @"[a-zA-Z]+([\.]*[a-zA-Z0-9]*)*"}
+                {TokenType.AND, @"&&"},
+                {TokenType.OR, @"\|\|"},
+                {TokenType.LEFT_BRACKET, @"\("},
+                {TokenType.RIGHT_BRACKET, @"\)"},
+                {TokenType.GE, @">="},
+                {TokenType.LE, @"<="},
+                {TokenType.GT, @">"},
+                {TokenType.LT, @"<"},
+                {TokenType.EQ, @"=="},
+                {TokenType.NEQ, @"!="},
+                {TokenType.NOT, @"\!"},
+                {TokenType.NULL, @"null"},
+                {TokenType.COMMA, @","},
+                {TokenType.FLOAT, @"[-+]?\d*\.\d+([eE][-+]?\d+)?"},
+                {TokenType.INT, @"[-+]?\d+"},
+                {TokenType.ADD, @"\+"},
+                {TokenType.SUB, @"-"},
+                {TokenType.BOOL, @"(true|false)"},
+                {TokenType.STRING, @"([""'])(?:\\\1|.)*?\1"},
+                {TokenType.FUNC, @"[a-zA-Z]+([\.]*[a-zA-Z0-9]*)*"}
             };
         }
 
@@ -46,16 +48,24 @@ namespace ExpressiveAnnotations.Analysis
         /// Analyzes the specified logical expression and extracts the array of tokens.
         /// </summary>
         /// <param name="expression">The logical expression.</param>
-        /// <returns>Array of extracted tokens.</returns>
+        /// <returns>
+        /// Array of extracted tokens.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
         public Token[] Analyze(string expression)
         {
-            var tokens = new List<Token>();
-            if (string.IsNullOrEmpty(expression))
-                return tokens.ToArray();
+            if (expression == null)
+                throw new ArgumentNullException("expression", "Expression not provided.");
 
             Expression = expression;
+
+            var tokens = new List<Token>();            
             while (Next())
                 tokens.Add(Token);
+
+            // once we've reached the end of the string, EOF token is returned - thus, parser's lookahead does not have to worry about running out of tokens
+            tokens.Add(new Token(TokenType.EOF, string.Empty));
+            
             return tokens.ToArray();
         }
 
@@ -80,19 +90,19 @@ namespace ExpressiveAnnotations.Analysis
             throw new ArgumentException(string.Format("Lexer error. Unexpected token started at {0}.", Expression));
         }
 
-        private object ConvertTokenValue(TokenId token, string value)
+        private object ConvertTokenValue(TokenType type, string value)
         {
-            switch (token)
+            switch (type)
             {
-                case TokenId.NULL:
+                case TokenType.NULL:
                     return null;
-                case TokenId.INT:
+                case TokenType.INT:
                     return int.Parse(value);
-                case TokenId.FLOAT:
+                case TokenType.FLOAT:
                     return float.Parse(value);
-                case TokenId.BOOL:
+                case TokenType.BOOL:
                     return bool.Parse(value);
-                case TokenId.STRING:
+                case TokenType.STRING:
                     return value.Substring(1, value.Length - 2);
                 default:
                     return value;
