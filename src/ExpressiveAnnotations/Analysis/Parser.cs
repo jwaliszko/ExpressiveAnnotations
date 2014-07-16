@@ -12,8 +12,10 @@ namespace ExpressiveAnnotations.Analysis
      * and-exp    => not-exp [ "&&" and-exp ]
      * not-exp    => rel-exp | "!" not-exp
      * rel-exp    => add-exp [ rel-op add-exp ]
-     * add-exp    => val add-exp'
+     * add-exp    => mul-exp add-exp'
      * add-exp'   => "+" add-exp | "-" add-exp
+     * mul-exp    => val mul-exp'
+     * mul-exp'   => "*" mul-exp | "/" mul-exp 
      * rel-op     => "==" | "!=" | ">" | ">=" | "<" | "<="     
      * val        => "null" | int | float | bool | string | func | "(" or-exp ")"
      */
@@ -238,9 +240,9 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseAddExp()
         {
-            var arg = ParseVal();
+            var arg = ParseMulExp();
             return ParseAddExpInternal(arg);
-        }
+        }        
 
         private Expression ParseAddExpInternal(Expression arg1)
         {
@@ -248,7 +250,7 @@ namespace ExpressiveAnnotations.Analysis
                 return arg1;
             var oper = PeekType();
             ReadToken();
-            var arg2 = ParseVal();
+            var arg2 = ParseMulExp();
 
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
             switch (oper)
@@ -263,6 +265,32 @@ namespace ExpressiveAnnotations.Analysis
                             : Expression.Add(arg1, arg2));
                 case TokenType.SUB:
                     return ParseAddExpInternal(Expression.Subtract(arg1, arg2));
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
+
+        private Expression ParseMulExp()
+        {
+            var arg = ParseVal();
+            return ParseMulExpInternal(arg);
+        }
+
+        private Expression ParseMulExpInternal(Expression arg1)
+        {
+            if (!new[] {TokenType.MUL, TokenType.DIV}.Contains(PeekType()))
+                return arg1;
+            var oper = PeekType();
+            ReadToken();
+            var arg2 = ParseVal();
+
+            Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
+            switch (oper)
+            {
+                case TokenType.MUL:
+                    return ParseMulExpInternal(Expression.Multiply(arg1, arg2));
+                case TokenType.DIV:
+                    return ParseMulExpInternal(Expression.Divide(arg1, arg2));
                 default:
                     throw new InvalidOperationException();
             }

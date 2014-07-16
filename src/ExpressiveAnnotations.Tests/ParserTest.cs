@@ -119,7 +119,15 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("-1 - 2 - 3 - 4 == -10").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("3 - (4 - 5) == 4").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("1 - -1 == 2").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("(1 - 2) + ((3 - 4) - 5) == -7").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("(1 - 2) + ((3 - 4) - 5) == -7").Invoke(null));
+
+            Assert.IsTrue(parser.Parse<object>("1 * 2 == 2").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("1 * 2 * 3 == 6").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("2 / 2 == 1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("4 / 2 / 2 == 1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("2 * 2 / 2 == 2").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("4 / 2 * 2 == 4").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("1.0 - 2.0 -(6.0 / ((2.0*1.5 - 1.0) + 1.0)) * -2.0 + 1.0/2.0/1.0 == 3.5").Invoke(null));
 
             Assert.IsTrue(parser.Parse<Model>("'abc' == Trim(' abc ')").Invoke(null));
             Assert.IsTrue(parser.Parse<Model>("CompareOrdinal('a', 'a') == 0").Invoke(null));

@@ -61,6 +61,16 @@
         SUB,
 
         /// <summary>
+        /// Multiplication.
+        /// </summary>
+        MUL,
+
+        /// <summary>
+        /// Division.
+        /// </summary>
+        DIV,
+
+        /// <summary>
         /// Left bracket.
         /// </summary>
         LEFT_BRACKET,

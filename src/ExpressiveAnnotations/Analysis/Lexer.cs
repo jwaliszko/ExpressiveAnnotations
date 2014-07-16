@@ -38,6 +38,8 @@ namespace ExpressiveAnnotations.Analysis
                 {TokenType.INT, @"[-+]?\d+"},
                 {TokenType.ADD, @"\+"},
                 {TokenType.SUB, @"-"},
+                {TokenType.MUL, @"\*"},
+                {TokenType.DIV, @"\/"},
                 {TokenType.BOOL, @"(true|false)"},
                 {TokenType.STRING, @"([""'])(?:\\\1|.)*?\1"},
                 {TokenType.FUNC, @"[a-zA-Z]+([\.]*[a-zA-Z0-9]*)*"}
