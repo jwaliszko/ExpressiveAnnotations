@@ -13,7 +13,7 @@ namespace ExpressiveAnnotations.Analysis
      * not-exp    => rel-exp | "!" not-exp
      * rel-exp    => add-exp [ rel-op add-exp ]
      * add-exp    => val add-exp'
-     * add-exp'   => '+' add-exp | '-' add-exp
+     * add-exp'   => "+" add-exp | "-" add-exp
      * rel-op     => "==" | "!=" | ">" | ">=" | "<" | "<="     
      * val        => "null" | int | float | bool | string | func | "(" or-exp ")"
      */
@@ -28,7 +28,7 @@ namespace ExpressiveAnnotations.Analysis
         private IDictionary<string, Type> Members { get; set; }
         private Type ContextType { get; set; }
         private Expression ContextExpression { get; set; }
-        private IDictionary<string, LambdaExpression> Functions { get; set; }
+        private IDictionary<string, IList<LambdaExpression>> Functions { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Parser" /> class.
@@ -37,7 +37,7 @@ namespace ExpressiveAnnotations.Analysis
         {
             Enums = new Dictionary<string, Type>();
             Members = new Dictionary<string, Type>();
-            Functions = new Dictionary<string, LambdaExpression>();            
+            Functions = new Dictionary<string, IList<LambdaExpression>>();
         }
 
         /// <summary>
@@ -82,7 +82,9 @@ namespace ExpressiveAnnotations.Analysis
         /// <param name="func">Function lambda.</param>
         public void AddFunction<Result>(string name, Expression<Func<Result>> func)
         {
-            Functions.Add(name, func);
+            if(!Functions.ContainsKey(name))
+                Functions[name] = new List<LambdaExpression>();
+            Functions[name].Add(func);
         }
 
         /// <summary>
@@ -94,7 +96,9 @@ namespace ExpressiveAnnotations.Analysis
         /// <param name="func">Function lambda.</param>
         public void AddFunction<Arg1, Result>(string name, Expression<Func<Arg1, Result>> func)
         {
-            Functions.Add(name, func);
+            if (!Functions.ContainsKey(name))
+                Functions[name] = new List<LambdaExpression>();
+            Functions[name].Add(func);
         }
 
         /// <summary>
@@ -107,7 +111,9 @@ namespace ExpressiveAnnotations.Analysis
         /// <param name="func">Function lambda.</param>
         public void AddFunction<Arg1, Arg2, Result>(string name, Expression<Func<Arg1, Arg2, Result>> func)
         {
-            Functions.Add(name, func);
+            if (!Functions.ContainsKey(name))
+                Functions[name] = new List<LambdaExpression>();
+            Functions[name].Add(func);
         }
 
         /// <summary>
@@ -121,7 +127,9 @@ namespace ExpressiveAnnotations.Analysis
         /// <param name="func">Function lambda.</param>
         public void AddFunction<Arg1, Arg2, Arg3, Result>(string name, Expression<Func<Arg1, Arg2, Arg3, Result>> func)
         {
-            Functions.Add(name, func);
+            if (!Functions.ContainsKey(name))
+                Functions[name] = new List<LambdaExpression>();
+            Functions[name].Add(func);
         }
 
         /// <summary>
@@ -334,7 +342,6 @@ namespace ExpressiveAnnotations.Analysis
                 return ExtractMemberExpression(name);
 
             // parse a function call
-
             ReadToken(); // read "("
             var args = new List<Expression>();
             while (PeekType() != TokenType.RIGHT_BRACKET) // read comma-separated arguments until we hit ")"
@@ -345,15 +352,26 @@ namespace ExpressiveAnnotations.Analysis
                 args.Add(arg);
             }
             ReadToken(); // read ")"
-            
-            var mi = ContextType.GetMethod(name); // take custom function if such is defined within model
-            if (mi != null)
-                return Expression.Call(ContextExpression, mi, args);
 
-            if(!Functions.ContainsKey(name)) // take utility function
+            // take function from model            
+            var methods = ContextType.GetMethods().Where(mi => name.Equals(mi.Name)).ToList();
+            if (methods.Any())
+            {
+                var choosen = methods.Where(x => x.GetParameters().Length == args.Count).ToList();
+                if (choosen.Count == 1)
+                    return Expression.Call(ContextExpression, choosen.Single(), args);
+            }
+
+            // take function from toolchain
+            if(!Functions.ContainsKey(name))
                 throw new InvalidOperationException(string.Format("Function {0} not found.", name));
+            var signatures = Functions[name].Where(x => x.Parameters.Count == args.Count).ToList();
+            if(signatures.Count == 0)
+                throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments not found.", name, args.Count));
+            if(signatures.Count > 1)
+                throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments is ambiguous.", name, args.Count));
 
-            return CreateLambdaCallExpression(Functions[name], args, name);
+            return CreateLambdaCallExpression(signatures.Single(), args, name);
         }
 
         private Expression ExtractMemberExpression(string name)
@@ -369,7 +387,7 @@ namespace ExpressiveAnnotations.Analysis
             var parts = name.Split('.');
             if (parts.Count() > 1)
             {
-                name = string.Join(".", parts.Take(parts.Count() - 1).ToArray());
+                name = string.Join(".", parts.Take(parts.Count() - 1).ToList());
                 var enumTypes = AppDomain.CurrentDomain.GetAssemblies()
                     .SelectMany(a => a.GetTypes()).Where(t => t.IsEnum && t.FullName.EndsWith(name)).ToList();
 
@@ -397,7 +415,7 @@ namespace ExpressiveAnnotations.Analysis
                 if (pi == null)
                 {
                     var fi = type.GetField(part);
-                    if (fi == null)                    
+                    if (fi == null)
                         return null;
                    
                     expr = fi.IsStatic ? Expression.Field(null, fi) : Expression.Field(expr, fi);

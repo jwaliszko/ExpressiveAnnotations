@@ -52,7 +52,7 @@ namespace ExpressiveAnnotations.Analysis
         /// Array of extracted tokens.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
-        public Token[] Analyze(string expression)
+        public IEnumerable<Token> Analyze(string expression)
         {
             if (expression == null)
                 throw new ArgumentNullException("expression", "Expression not provided.");
@@ -66,7 +66,7 @@ namespace ExpressiveAnnotations.Analysis
             // once we've reached the end of the string, EOF token is returned - thus, parser's lookahead does not have to worry about running out of tokens
             tokens.Add(new Token(TokenType.EOF, string.Empty));
             
-            return tokens.ToArray();
+            return tokens;
         }
 
         private bool Next()

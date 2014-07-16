@@ -1,5 +1,6 @@
 ﻿using System;
 using ExpressiveAnnotations.Analysis;
+using ExpressiveAnnotations.Attributes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ExpressiveAnnotations.Tests
@@ -54,6 +55,8 @@ namespace ExpressiveAnnotations.Tests
         public void verify_logic_without_context()
         {
             var parser = new Parser();
+            parser.RegisterMethods();
+
             Assert.IsTrue(parser.Parse<object>("true").Invoke(null));
             Assert.IsFalse(parser.Parse<object>("false").Invoke(null));
             Assert.IsFalse(parser.Parse<object>("!true").Invoke(null));
@@ -115,13 +118,12 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("1 - 2 + 3 - 4 == -2").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("-1 - 2 - 3 - 4 == -10").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("3 - (4 - 5) == 4").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("1 - -1 == 2").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("(1 - 2) + ((3 - 4) - 5) == -7").Invoke(null));            
 
-            parser.AddFunction<string, string>("Trim", text => text.Trim());
-            parser.AddFunction<string, string, int>("Compare", (strA, strB) => String.CompareOrdinal(strA, strB));
-            
             Assert.IsTrue(parser.Parse<Model>("'abc' == Trim(' abc ')").Invoke(null));
-            Assert.IsTrue(parser.Parse<Model>("Compare('a', 'a') == 0").Invoke(null));
+            Assert.IsTrue(parser.Parse<Model>("CompareOrdinal('a', 'a') == 0").Invoke(null));
+            Assert.IsTrue(parser.Parse<Model>("Length('abc' + 'cde') >= Length(Trim(' abc def ')) - 2 - -1").Invoke(null));
         }
 
         [TestMethod]
@@ -145,6 +147,8 @@ namespace ExpressiveAnnotations.Tests
             };
 
             var parser = new Parser();
+            parser.RegisterMethods();
+
             Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability == 0").Invoke(model));
             Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability == Stability.High").Invoke(model));
 
@@ -174,13 +178,9 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<Model>("DecNumber(SubModel.Number) == Number").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("DecNumber(Number) == 0").Invoke(model.SubModel));
 
-            parser.AddFunction<DateTime>("Today", () => DateTime.Today);
-            parser.AddFunction<string, string>("Trim", str => str.Trim());
-            parser.AddFunction<string, string, int>("Compare", (strA, strB) => String.CompareOrdinal(strA, strB));
-
             Assert.IsTrue(parser.Parse<Model>("SubModel.Date > Today()").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("'hello world' == Trim(SubModel.Text)").Invoke(model));
-            Assert.IsTrue(parser.Parse<Model>("Compare(Text, Trim(SubModel.Text)) == 0").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("CompareOrdinal(Text, Trim(SubModel.Text)) == 0").Invoke(model));
         }
 
         [TestMethod]

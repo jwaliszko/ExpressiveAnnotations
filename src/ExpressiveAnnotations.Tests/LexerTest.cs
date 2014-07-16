@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using ExpressiveAnnotations.Analysis;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -19,7 +20,7 @@ namespace ExpressiveAnnotations.Tests
                         ")";
 
             var lexer = new Lexer();
-            var tokens = lexer.Analyze(expression);
+            var tokens = lexer.Analyze(expression).ToArray();
             Assert.AreEqual(tokens.Length, 41);
             Assert.AreEqual(tokens[0].Value, "GoAbroad");
             Assert.AreEqual(tokens[0].Type, TokenType.FUNC);
