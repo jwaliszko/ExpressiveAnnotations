@@ -229,9 +229,18 @@ var
         }
     },
     
+    // map over the ea in case of overwrite
+    backup = window.ea,
+
     api = {
         addMethod: function(name, body) {
             toolchain.addMethod(name, body);            
+        },
+        noConflict: function() {
+            if (window.ea === this) {
+                window.ea = backup;
+            }
+            return this;
         }
     };
 
@@ -287,7 +296,7 @@ var
             }
         }
         return true;
-    }, '');
+    }, '');    
 
     // expose some tiny api to the ea global object
     window.ea = api;
