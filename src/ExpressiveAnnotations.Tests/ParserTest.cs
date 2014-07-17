@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -168,16 +170,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse(model.GetType(), "!SubModel.Flag").Invoke(model));
             Assert.IsFalse(parser.Parse(model.GetType(), "SubModel.Flag && true").Invoke(model));
 
-            Assert.IsTrue(parser.Parse(model.GetType(), "Number < SubModel.Number").Invoke(model));
-
-            const string expression =
-                "Flag == true " +
-                    "&& (" +
-                            "(Text != \"hello world\" && Date < SubModel.Date) " +
-                            "|| (Number >= 0 && Number < 1)" +
-                        ")";
-
-            Assert.IsTrue(parser.Parse(model.GetType(), expression).Invoke(model));
+            Assert.IsTrue(parser.Parse(model.GetType(), "Number < SubModel.Number").Invoke(model));            
 
             Assert.IsTrue(parser.Parse<Model>("SubModel.Date < NextWeek()").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("IncNumber(0) == SubModel.Number").Invoke(model));
@@ -189,6 +182,40 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<Model>("SubModel.Date > Today()").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("'hello world' == Trim(SubModel.Text)").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("CompareOrdinal(Text, Trim(SubModel.Text)) == 0").Invoke(model));
+
+            const string expression =
+                "Flag == true " +
+                    "&& (" +
+                            "(Text != \"hello world\" && Date < SubModel.Date) " +
+                            "|| ((Number >= 0 && Number < 1) && PoliticalStability == Stability.High)" +
+                        ")";
+
+            var func = parser.Parse(model.GetType(), expression);
+            Assert.IsTrue(func.Invoke(model));
+            var parsedMembers = parser.GetMembers();
+            var expectedMembers = new Dictionary<string, Type>
+            {
+                {"Flag", typeof (bool)},
+                {"Text", typeof (string)},
+                {"Date", typeof (DateTime)},
+                {"SubModel.Date", typeof (DateTime)},
+                {"Number", typeof (int)},
+                {"PoliticalStability", typeof (Utility.Stability?)}
+            };
+            Assert.IsTrue(
+                expectedMembers.Keys.All(
+                    key => parsedMembers.ContainsKey(key) &&
+                           EqualityComparer<Type>.Default.Equals(expectedMembers[key], parsedMembers[key])));
+
+            var parsedEnums = parser.GetEnums();
+            var expectedEnums = new Dictionary<string, Type>
+            {
+                {"Stability", typeof (Utility.Stability)}
+            };
+            Assert.IsTrue(
+                expectedEnums.Keys.All(
+                    key => parsedEnums.ContainsKey(key) &&
+                           EqualityComparer<Type>.Default.Equals(expectedEnums[key], parsedEnums[key])));
         }
 
         [TestMethod]

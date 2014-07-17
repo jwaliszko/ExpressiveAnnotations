@@ -43,7 +43,9 @@ namespace ExpressiveAnnotations.Attributes
         /// </summary>
         /// <param name="displayName">The user-visible name of the required field to include in the formatted message.</param>
         /// <param name="expression">The user-visible expression to include in the formatted message.</param>
-        /// <returns>The localized message to present to the user.</returns>
+        /// <returns>
+        /// The localized message to present to the user.
+        /// </returns>
         public string FormatErrorMessage(string displayName, string expression)
         {
             return string.Format(ErrorMessageString, displayName, expression);

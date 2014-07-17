@@ -47,9 +47,12 @@ namespace ExpressiveAnnotations.Analysis
         /// </summary>
         /// <typeparam name="Context">The type identifier of the context within which the expression is interpreted.</typeparam>
         /// <param name="expression">The logical expression.</param>
-        /// <returns>A delegate containing the compiled version of the lambda expression described by created expression tree.</returns>
+        /// <returns>
+        /// A delegate containing the compiled version of the lambda expression described by created expression tree.
+        /// </returns>
         public Func<Context, bool> Parse<Context>(string expression)
         {
+            Clear();
             ContextType = typeof(Context);
             var param = Expression.Parameter(typeof(Context));
             ContextExpression = param;
@@ -57,16 +60,19 @@ namespace ExpressiveAnnotations.Analysis
             var expressionTree = ParseExpression();
             var lambda = Expression.Lambda<Func<Context, bool>>(expressionTree, param);
             return lambda.Compile();
-        }
+        }        
 
         /// <summary>
         /// Parses the specified logical expression and builds expression tree.
         /// </summary>
         /// <param name="context">The type instance of the context within which the expression is interpreted.</param>
         /// <param name="expression">The logical expression.</param>
-        /// <returns>A delegate containing the compiled version of the lambda expression described by produced expression tree.</returns>
+        /// <returns>
+        /// A delegate containing the compiled version of the lambda expression described by produced expression tree.
+        /// </returns>
         public Func<object, bool> Parse(Type context, string expression)
         {
+            Clear();
             ContextType = context;
             var param = Expression.Parameter(typeof(object));
             ContextExpression = Expression.Convert(param, context);
@@ -74,7 +80,7 @@ namespace ExpressiveAnnotations.Analysis
             var expressionTree = ParseExpression();
             var lambda = Expression.Lambda<Func<object, bool>>(expressionTree, param);
             return lambda.Compile();
-        }
+        }        
 
         /// <summary>
         /// Adds function signature to the parser context.
@@ -135,21 +141,31 @@ namespace ExpressiveAnnotations.Analysis
         }
 
         /// <summary>
-        /// Gets the parsed fields and properties.
+        /// Gets the fields and properties extracted from parsed expression within specified context.
         /// </summary>
-        /// <returns>Fields and properties.</returns>
+        /// <returns>
+        /// Dictionary containing names and types.
+        /// </returns>
         public IDictionary<string, Type> GetMembers()
         {
             return Members;
         }
 
         /// <summary>
-        /// Gets the parsed enums.
+        /// Gets the parsed enums extracted from parsed expression within specified context.
         /// </summary>
-        /// <returns>Enums.</returns>
+        /// <returns>
+        /// Dictionary containing names and types.
+        /// </returns>
         public IDictionary<string, Type> GetEnums()
         {
             return Enums;
+        }
+
+        private void Clear()
+        {
+            Members.Clear();
+            Enums.Clear();
         }
 
         private void InitTokenizer(string expression)
@@ -323,7 +339,7 @@ namespace ExpressiveAnnotations.Analysis
                 case TokenType.FUNC:
                     return ParseFunc();
                 default:
-                    throw new InvalidOperationException(string.Format("Unexpected token {0}. Available values: null, int, float, bool, string or func.", PeekValue()));
+                    throw new InvalidOperationException(string.Format("Unexpected token {0}. Expected \"null\", int, float, bool, string or func.", PeekValue()));
             }
         }
 
@@ -393,9 +409,10 @@ namespace ExpressiveAnnotations.Analysis
             // take function from toolchain
             if(!Functions.ContainsKey(name))
                 throw new InvalidOperationException(string.Format("Function {0} not found.", name));
-            var signatures = Functions[name].Where(x => x.Parameters.Count == args.Count).ToList();
+            var signatures = Functions[name].Where(x => x.Parameters.Count == args.Count).ToList();            
             if(signatures.Count == 0)
                 throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments not found.", name, args.Count));
+            // signatures are only diversed by numbers of arguments
             if(signatures.Count > 1)
                 throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments is ambiguous.", name, args.Count));
 
