@@ -103,10 +103,16 @@ var
 
     toolchain = {
         methods: {},
-        addMethod: function(name, body) {
-            if (!this.methods.hasOwnProperty(name)) {
-                this.methods[name] = body;
-            }
+        addMethod: function(name, func) { // add multiple function signatures to methods object (methods overloading, based only on numbers of arguments)
+            var old = this.methods[name];
+            this.methods[name] = function() {
+                if (func.length === arguments.length) {
+                    return func.apply(this, arguments);
+                }
+                if (typeof old === 'function') {
+                    return old.apply(this, arguments);
+                }
+            };
         },
         registerMethods: function(o) {
             var name, body;
@@ -119,38 +125,38 @@ var
             }
         },
         initialize: function() {
-            this.methods.Now = function() {
+            this.addMethod("Now", function() {
                 return new Date(Date.now());
-            };
-            this.methods.Today = function() {
+            });
+            this.addMethod("Today", function() {
                 return new Date(this.Now().setHours(0, 0, 0, 0));
-            };
-            this.methods.Length = function(str) {
+            });
+            this.addMethod("Length", function(str) {
                 return str !== null && str !== undefined ? str.length : 0;
-            };
-            this.methods.Trim = function(str) {
+            });
+            this.addMethod("Trim", function(str) {
                 return str !== null && str !== undefined ? str.trim() : null;
-            };
-            this.methods.Concat = function(strA, strB) {
+            });
+            this.addMethod("Concat", function(strA, strB) {
                 return [strA, strB].join('');
-            };
-            this.methods.Concat = function(strA, strB, strC) {
+            });
+            this.addMethod("Concat", function(strA, strB, strC) {
                 return [strA, strB, strC].join('');
-            };
-            this.methods.CompareOrdinal = function(strA, strB) {
+            });
+            this.addMethod("CompareOrdinal", function(strA, strB) {
                 return strA === strB ? 0 : strA > strB ? 1 : -1;
-            };
-            this.methods.CompareOrdinalIgnoreCase = function(strA, strB) {
+            });
+            this.addMethod("CompareOrdinalIgnoreCase", function(strA, strB) {
                 strA = (strA !== null && strA !== undefined) ? strA.toLowerCase() : null;
                 strB = (strB !== null && strB !== undefined) ? strB.toLowerCase() : null;
-                return this.compareOrdinal(strA, strB);
-            };
-            this.methods.IsNullOrWhiteSpace = function(str) {
+                return this.CompareOrdinal(strA, strB);
+            });
+            this.addMethod("IsNullOrWhiteSpace", function(str) {
                 return str === null || !/\S/.test(str);
-            };
-            this.methods.IsNumber = function(str) {
+            });
+            this.addMethod("IsNumber", function(str) {
                 return (/^[\-+]?\d+$/).test(str) || (/^[\-+]?\d*\.\d+([eE][\-+]?\d+)?$/).test(str);
-            };
+            });
         }
     },
 
@@ -233,8 +239,8 @@ var
     backup = window.ea,
 
     api = {
-        addMethod: function(name, body) {
-            toolchain.addMethod(name, body);            
+        addMethod: function(name, func) {
+            toolchain.addMethod(name, func);
         },
         noConflict: function() {
             if (window.ea === this) {
