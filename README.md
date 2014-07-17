@@ -54,14 +54,14 @@ This time, the presented expression is much more complex that its predecessors, 
 
 ```
 RequiredIfAttribute(string expression,
-                    [bool AllowEmptyStrings] ...) - Validation attribute which indicates that 
-					                                annotated field is required when computed 
-													result of given logical expression is true.
-AssertThatAttribute(string expression, ...)       - Validation attribute, executed for non-null 
-                                                    annotated field, which indicates that 
-													assertion given in logical expression has 
-													to be satisfied, for such field to be 
-													considered as valid.
+                    [bool AllowEmptyStrings], ...) - Validation attribute which indicates that 
+					                                 annotated field is required when computed 
+											 		 result of given logical expression is true.
+AssertThatAttribute(string expression, ...)        - Validation attribute, executed for non-null 
+                                                     annotated field, which indicates that 
+													 assertion given in logical expression has 
+													 to be satisfied, for such field to be 
+													 considered as valid.
 
   expression        - The logical expression based on which requirement condition is computed.
   AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should allow empty or
@@ -70,21 +70,27 @@ AssertThatAttribute(string expression, ...)       - Validation attribute, execut
 
 #####Implementation:
 
-Implementation core is based on logical expressions parser, which runs on the following grammar:
+Implementation core is based on top-down recursive descent logical expressions parser, with a single token of lookahead (LL(1)), which runs on the following EBNF-like grammar:
 
 ```
 expression => or-exp
 or-exp     => and-exp [ "||" or-exp ]
 and-exp    => not-exp [ "&&" and-exp ]
-not-exp    => [ "!" ] rel-exp
-rel-exp    => val [ rel-op val ]
+not-exp    => rel-exp | "!" not-exp
+rel-exp    => add-exp [ rel-op add-exp ]
+add-exp    => mul-exp add-exp'
+add-exp'   => "+" add-exp | "-" add-exp
+mul-exp    => val mul-exp'
+mul-exp'   => "*" mul-exp | "/" mul-exp 
 rel-op     => "==" | "!=" | ">" | ">=" | "<" | "<="
 val        => "null" | int | float | bool | string | func | "(" or-exp ")"
 ```
 
+Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar, except for int, float, bool, string, func, which are assumed to be implicitly defined.
+
 func can be an enum value as well as property, field or function name.
 
-Provided expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx). A delegate containing the compiled version of the lambda expression described by produced expression tree is then executed for given model object. As a result of expression evaluation, boolean flag is returned. 
+Provided expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object. As a result of expression evaluation, boolean flag is returned, indicating that expression is true or false. 
 
 When working with ASP.NET MVC stack, client side mechanism is additionally available. Client receives unchanged expression string from server. Such an expression is then evaluated using build-in [eval](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) within the context of model object. Such a model, analogously to the server side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
 
@@ -93,12 +99,24 @@ When working with ASP.NET MVC stack, client side mechanism is additionally avail
 Toolchain functions available out of the box at server and client side: 
 
 ```
+DateTime Now()
+  Gets the current date and time, expressed as the local time.
 DateTime Today()
-  Gets the current date, with the time component set to 00:00:00.
+  Gets the current date with the time component set to 00:00:00, expressed as the local time.
+int Length(str)
+  Gets the number of characters in the specified string (null-safe).
 string Trim(string str) 
-  Removes all leading and trailing white-space characters from the current string.
+  Removes all leading and trailing white-space characters from the specified string (null-safe).
+string Concat(string strA, string strB) 
+  Concatenates two specified strings.
+string Concat(string strA, string strB, strC) 
+  Concatenates three specified strings.
 int CompareOrdinal(string strA, string strB) 
-  Compares strings using ordinal sort rules.
+  Compares strings using ordinal sort rules. An integer that indicates the lexical relationship 
+  between the two comparands is returned: 
+    less than zero    - strA is less than strB,
+    zero              - strA and strB are equal,
+	greater than zero - strA is greater than strB.
 int CompareOrdinalIgnoreCase(string strA, string strB) 
   Compares strings using ordinal sort rules and ignoring the case of the strings being compared.
 bool IsNullOrWhiteSpace(string str) 
