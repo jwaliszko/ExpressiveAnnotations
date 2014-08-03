@@ -434,7 +434,7 @@ namespace ExpressiveAnnotations.Analysis
             {
                 name = string.Join(".", parts.Take(parts.Count() - 1).ToList());
                 var enumTypes = AppDomain.CurrentDomain.GetAssemblies()
-                    .SelectMany(a => a.GetTypes()).Where(t => t.IsEnum && t.FullName.EndsWith(name)).ToList();
+                    .SelectMany(a => a.GetLoadableTypes()).Where(t => t.IsEnum && t.FullName.EndsWith(name)).ToList();
 
                 if (enumTypes.Count() > 1)
                     throw new ArgumentException(string.Format("Dynamic extraction failed. {0} enum identifier is ambigous. Provide namespace.", name), name);

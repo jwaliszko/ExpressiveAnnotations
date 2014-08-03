@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace ExpressiveAnnotations
 {
-    internal class Helper
+    internal static class Helper
     {
         public static void MakeTypesCompatible(Expression e1, Expression e2, out Expression oute1, out Expression oute2)
         {
@@ -20,6 +23,21 @@ namespace ExpressiveAnnotations
         public static bool IsNullableType(Type t)
         {
             return t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>);
+        }
+
+        public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
+        {
+            if (assembly == null) 
+                throw new ArgumentNullException("assembly");
+
+            try
+            {
+                return assembly.GetTypes();
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                return e.Types.Where(t => t != null);
+            }
         }
     }
 }
