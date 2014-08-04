@@ -2,7 +2,7 @@
 
 <sub>**Notice: This document describes latest implementation. For previous version (concept) &lt; 2.0 take a look at [EA1 branch](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/EA1).**</sub>
 
-ExpressiveAnnotations is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given RequiredIf and AssertThat attributes allows to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more condensed, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
+ExpressiveAnnotations is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given RequiredIf and AssertThat attributes allow to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more condensed, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
 
 ###RequiredIf vs AssertThat attribute?
 
@@ -54,14 +54,14 @@ This time, the presented expression is much more complex that its predecessors, 
 
 ```
 RequiredIfAttribute(string expression,
-                    [bool AllowEmptyStrings], ...) - Validation attribute which indicates that 
-					                                 annotated field is required when computed 
-											 		 result of given logical expression is true.
-AssertThatAttribute(string expression, ...)        - Validation attribute, executed for non-null 
-                                                     annotated field, which indicates that 
-													 assertion given in logical expression has 
-													 to be satisfied, for such field to be 
-													 considered as valid.
+                    [bool AllowEmptyStrings] ...) - Validation attribute which indicates that 
+					                                annotated field is required when computed 
+											 		result of given logical expression is true.
+AssertThatAttribute(string expression ...)        - Validation attribute, executed for non-null 
+                                                    annotated field, which indicates that 
+													assertion given in logical expression has 
+													to be satisfied, for such field to be 
+													considered as valid.
 
   expression        - The logical expression based on which requirement condition is computed.
   AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should allow empty or
@@ -86,13 +86,32 @@ rel-op     => "==" | "!=" | ">" | ">=" | "<" | "<="
 val        => "null" | int | float | bool | string | func | "(" or-exp ")"
 ```
 
-Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar, except for int, float, bool, string, func, which are assumed to be implicitly defined.
+Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar, except for int, float, bool, string, func, which are assumed to be implicitly defined. Func can be an enum value as well as property, field or function name.
 
-func can be an enum value as well as property, field or function name.
+In short, logical expressions can be built using:
+
+* binary operators: `||`, `&&`, `!`,
+* relational operators: `==`, `!=`,`<`, `<=`, `>`, `>=`,
+* arithmetic operators: `+`, `-`, `*`, `/`,	
+* brackets: `(`, `)`,
+* literals: 
+  * NULL literal: `null`, 
+  * integer number literals, e.g. `123`, 
+  * real number literals, e.g. `1.5` or `-0.3e-2`,
+  * boolean literals: `true` and `false`,
+  * string literals, e.g. `'in single quotes'` or `\"in escaped double quotes\"`, 
+  * property or field names, e.g. `MyProp`, 
+  * function invocations, e.g. `Trim(MyProp)`,
+  * enum values, e.g. `MyEnumType.SomeValue`.
 
 Provided expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object. As a result of expression evaluation, boolean flag is returned, indicating that expression is true or false. 
 
 When working with ASP.NET MVC stack, client side mechanism is additionally available. Client receives unchanged expression string from server. Such an expression is then evaluated using build-in [eval](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) within the context of model object. Such a model, analogously to the server side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
+
+Attention needed when coping with `null` (discrepancies between C# and JS), e.g.:
+
+* `null + "text"` - in C# `"text"`, in JS `"nulltext"`,
+* `2 * null`      - in C# `null`  , in JS `0`.
 
 #####Built-in functions:
 
