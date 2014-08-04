@@ -76,7 +76,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.AreEqual(tokens[25].Type, TokenType.FUNC);
             Assert.AreEqual(tokens[26].Value, "<=");
             Assert.AreEqual(tokens[26].Type, TokenType.LE);
-            Assert.AreEqual(tokens[27].Value, 55.5f);
+            Assert.AreEqual(tokens[27].Value, 55.5d);
             Assert.AreEqual(tokens[27].Type, TokenType.FLOAT);
             Assert.AreEqual(tokens[28].Value, ")");
             Assert.AreEqual(tokens[28].Type, TokenType.RIGHT_BRACKET);

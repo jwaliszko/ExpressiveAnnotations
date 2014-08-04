@@ -101,7 +101,7 @@ namespace ExpressiveAnnotations.Analysis
                 case TokenType.INT:
                     return int.Parse(value);
                 case TokenType.FLOAT:
-                    return float.Parse(value);
+                    return double.Parse(value); // by default, treat real numeric literals as 64-bit floating binary point values (as C# does, gives better precision than float)
                 case TokenType.BOOL:
                     return bool.Parse(value);
                 case TokenType.STRING:

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace ExpressiveAnnotations.Analysis
 {
@@ -353,14 +354,14 @@ namespace ExpressiveAnnotations.Analysis
         {
             var value = PeekValue();
             ReadToken();
-            return Expression.Constant(value, typeof(int));            
+            return Expression.Constant(value, typeof(int));
         }
 
         private Expression ParseFloat()
         {
             var value = PeekValue();
             ReadToken();
-            return Expression.Constant(value, typeof(float));
+            return Expression.Constant(value, typeof(double));
         }
 
         private Expression ParseBool()
@@ -397,27 +398,34 @@ namespace ExpressiveAnnotations.Analysis
             }
             ReadToken(); // read ")"
 
-            // take function from model            
-            var methods = ContextType.GetMethods().Where(mi => name.Equals(mi.Name)).ToList();
-            if (methods.Any())
-            {
-                var choosen = methods.Where(x => x.GetParameters().Length == args.Count).ToList();
-                if (choosen.Count == 1)
-                    return Expression.Call(ContextExpression, choosen.Single(), args);
-            }
+            var expression = FetchFunctionFromModel(name, args);
+            return expression ?? FetchFunctionFromToolchain(name, args); // firstly, try to take method from model context - if not found, take one from toolchain
+        }
 
-            // take function from toolchain
-            if(!Functions.ContainsKey(name))
-                throw new InvalidOperationException(string.Format("Function {0} not found.", name));
-            var signatures = Functions[name].Where(x => x.Parameters.Count == args.Count).ToList();            
-            if(signatures.Count == 0)
+        private Expression FetchFunctionFromModel(string name, IList<Expression> args)
+        {
+            var signatures = ContextType.GetMethods()
+                .Where(mi => name.Equals(mi.Name) && mi.GetParameters().Length == args.Count)
+                .ToList();
+            if (signatures.Count == 0)
+                return null;
+            if (signatures.Count > 1)
+                throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments is ambiguous.", name, args.Count));
+            return CreateMethodCallExpression(ContextExpression, signatures.Single(), args);
+        }
+
+        private Expression FetchFunctionFromToolchain(string name, IList<Expression> args)
+        {
+            var signatures = Functions.ContainsKey(name)
+                ? Functions[name].Where(f => f.Parameters.Count == args.Count).ToList()
+                : new List<LambdaExpression>();
+            if (signatures.Count == 0)
                 throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments not found.", name, args.Count));
-            // signatures are only diversed by numbers of arguments
-            if(signatures.Count > 1)
+            if (signatures.Count > 1)
                 throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments is ambiguous.", name, args.Count));
 
             return CreateLambdaCallExpression(signatures.Single(), args, name);
-        }
+        }        
 
         private Expression ExtractMemberExpression(string name)
         {
@@ -437,14 +445,14 @@ namespace ExpressiveAnnotations.Analysis
                     .SelectMany(a => a.GetLoadableTypes()).Where(t => t.IsEnum && t.FullName.EndsWith(name)).ToList();
 
                 if (enumTypes.Count() > 1)
-                    throw new ArgumentException(string.Format("Dynamic extraction failed. {0} enum identifier is ambigous. Provide namespace.", name), name);
+                    throw new ArgumentException(string.Format("Dynamic extraction failed. {0} enum identifier is ambigous.", name), name);
 
                 var type = enumTypes.SingleOrDefault();
                 if (type != null)
                 {
                     if (!Enums.ContainsKey(name))
                         Enums.Add(name, type);
-                    return ExtractMemberExpression(parts.Last(), type, Expression.Parameter(type));
+                    return Expression.Constant(Enum.Parse(type, parts.Last()));
                 }
             }
 
@@ -499,6 +507,35 @@ namespace ExpressiveAnnotations.Analysis
                 }
             }
             return Expression.Invoke(funcExpr, convertedArgs);
+        }
+
+        private static MethodCallExpression CreateMethodCallExpression(Expression contextExpression, MethodInfo methodInfo, IList<Expression> parsedArgs)
+        {
+            var parameters = methodInfo.GetParameters();
+            if (parameters.Count() != parsedArgs.Count)
+                throw new InvalidOperationException(
+                    string.Format("Incorrect number of parameters provided. Function {0} expects {1}, not {2}.", methodInfo.Name, parameters.Count(), parsedArgs.Count));
+
+            var convertedArgs = new List<Expression>();
+            for (var i = 0; i < parsedArgs.Count; i++)
+            {
+                var arg = parsedArgs[i];
+                var param = parameters[i];
+                if (arg.Type == param.ParameterType)
+                    convertedArgs.Add(arg);
+                else
+                {
+                    try
+                    {
+                        convertedArgs.Add(Expression.Convert(arg, param.ParameterType));
+                    }
+                    catch
+                    {
+                        throw new InvalidOperationException(string.Format("Argument {0} type conversion from {1} to needed {2} failed.", i, arg.Type.Name, param.ParameterType.Name));
+                    }
+                }
+            }
+            return Expression.Call(contextExpression, methodInfo, convertedArgs);            
         }
     }
 }

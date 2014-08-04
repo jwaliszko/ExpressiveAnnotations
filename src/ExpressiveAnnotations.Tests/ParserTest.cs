@@ -32,7 +32,7 @@ namespace ExpressiveAnnotations.Tests
             public Model SubModel { get; set; }
 
             public DateTime Date { get; set; }
-            public int Number { get; set; }
+            public int? Number { get; set; }
             public bool Flag { get; set; }
             public string Text { get; set; }
             public Utility.Stability? PoliticalStability { get; set; }
@@ -58,6 +58,10 @@ namespace ExpressiveAnnotations.Tests
         {
             var parser = new Parser();
             parser.RegisterMethods();
+
+            Assert.IsTrue(parser.Parse<object>("YesNo.Yes == 0").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("YesNo.Yes < YesNo.No").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("YesNo.Yes - YesNo.No == -1").Invoke(null));
 
             Assert.IsTrue(parser.Parse<object>("true").Invoke(null));
             Assert.IsFalse(parser.Parse<object>("false").Invoke(null));
@@ -129,7 +133,13 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("4 / 2 / 2 == 1").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("2 * 2 / 2 == 2").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("4 / 2 * 2 == 4").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("1.0 - 2.0 -(6.0 / ((2.0*1.5 - 1.0) + 1.0)) * -2.0 + 1.0/2.0/1.0 == 3.5").Invoke(null));
+
+            Assert.IsTrue(parser.Parse<object>("1.2 * 2 == 2.4").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("1.2 / 2 == 0.6").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("1.2 + 2 == 3.2").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("1.2 - 2 == -0.8").Invoke(null));
+
+            Assert.IsTrue(parser.Parse<object>("1 - 2 -(6 / ((2*1.5 - 1) + 1)) * -2 + 1/2/1 == 3.50").Invoke(null));            
 
             Assert.IsTrue(parser.Parse<Model>("'abc' == Trim(' abc ')").Invoke(null));
             Assert.IsTrue(parser.Parse<Model>("CompareOrdinal('a', 'a') == 0").Invoke(null));
@@ -159,8 +169,14 @@ namespace ExpressiveAnnotations.Tests
             var parser = new Parser();
             parser.RegisterMethods();
 
+            Assert.IsTrue(parser.Parse(model.GetType(), "Number != null").Invoke(model));
+            Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.Number / 2 == 0.5").Invoke(model));            
+
             Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability == 0").Invoke(model));
             Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability == Stability.High").Invoke(model));
+            Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability < Stability.Low").Invoke(model));
+            Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.PoliticalStability == null").Invoke(model));
+            Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.PoliticalStability != Stability.High").Invoke(model));
 
             Assert.IsTrue(parser.Parse(model.GetType(), "Flag").Invoke(model));
             Assert.IsFalse(parser.Parse(model.GetType(), "!Flag").Invoke(model));
@@ -170,7 +186,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse(model.GetType(), "!SubModel.Flag").Invoke(model));
             Assert.IsFalse(parser.Parse(model.GetType(), "SubModel.Flag && true").Invoke(model));
 
-            Assert.IsTrue(parser.Parse(model.GetType(), "Number < SubModel.Number").Invoke(model));            
+            Assert.IsTrue(parser.Parse(model.GetType(), "Number < SubModel.Number").Invoke(model));
 
             Assert.IsTrue(parser.Parse<Model>("SubModel.Date < NextWeek()").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("IncNumber(0) == SubModel.Number").Invoke(model));
@@ -199,7 +215,7 @@ namespace ExpressiveAnnotations.Tests
                 {"Text", typeof (string)},
                 {"Date", typeof (DateTime)},
                 {"SubModel.Date", typeof (DateTime)},
-                {"Number", typeof (int)},
+                {"Number", typeof (int?)},
                 {"PoliticalStability", typeof (Utility.Stability?)}
             };
             Assert.IsTrue(
