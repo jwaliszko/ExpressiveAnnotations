@@ -88,61 +88,61 @@ val        => "null" | int | float | bool | string | func | "(" or-exp ")"
 
 Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar, except for int, float, bool, string, func, which are assumed to be implicitly defined. Func can be an enum value as well as property, field or function name.
 
-In short, logical expressions can be built using:
+Preserving the syntax defined by the grammar above, logical expressions can be built using following components:
 
 * binary operators: `||`, `&&`, `!`,
 * relational operators: `==`, `!=`,`<`, `<=`, `>`, `>=`,
 * arithmetic operators: `+`, `-`, `*`, `/`,	
 * brackets: `(`, `)`,
-* literals: 
-  * NULL literal: `null`, 
+* aplhanumeric characters and whitespaces with the support of `,`, `.`, `'` and `"`, used to synthesize suitable literals: 
+  * null literal: `null`, 
   * integer number literals, e.g. `123`, 
   * real number literals, e.g. `1.5` or `-0.3e-2`,
   * boolean literals: `true` and `false`,
   * string literals, e.g. `'in single quotes'` or `\"in escaped double quotes\"`, 
-  * property or field names, e.g. `MyProp`, 
-  * function invocations, e.g. `Trim(MyProp)`,
-  * enum values, e.g. `MyEnumType.SomeValue`.
+  * name literals: property, field, function names and enum values, e.g.
+      * property or field names, e.g. `SomeProperty`,      
+      * enum values, e.g. `SomeEnumType.SomeValue`,
+	  * function invocations, e.g. `SomeFunction(...)`.
 
 Provided expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object. As a result of expression evaluation, boolean flag is returned, indicating that expression is true or false. 
 
 When working with ASP.NET MVC stack, client side mechanism is additionally available. Client receives unchanged expression string from server. Such an expression is then evaluated using build-in [eval](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) within the context of model object. Such a model, analogously to the server side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
 
-Attention needed when coping with `null` (discrepancies between C# and JS), e.g.:
+Attention needed when coping with null (discrepancies between C# and JS), e.g.:
 
 * `null + "text"` - in C# `"text"`, in JS `"nulltext"`,
-* `2 * null`      - in C# `null`  , in JS `0`.
+* `2 * null`      - in C# `null`  , in JS `0`,
+* `null > -1`     - in C# `false` , in JS `true`.
 
 #####Built-in functions:
 
 Toolchain functions available out of the box at server and client side: 
 
-```
-DateTime Now()
-  Gets the current date and time, expressed as the local time.
-DateTime Today()
-  Gets the current date with the time component set to 00:00:00, expressed as the local time.
-int Length(str)
-  Gets the number of characters in the specified string (null-safe).
-string Trim(string str) 
-  Removes all leading and trailing white-space characters from the specified string (null-safe).
-string Concat(string strA, string strB) 
-  Concatenates two specified strings.
-string Concat(string strA, string strB, strC) 
-  Concatenates three specified strings.
-int CompareOrdinal(string strA, string strB) 
-  Compares strings using ordinal sort rules. An integer that indicates the lexical relationship 
-  between the two comparands is returned: 
-    less than zero    - strA is less than strB,
-    zero              - strA and strB are equal,
-	greater than zero - strA is greater than strB.
-int CompareOrdinalIgnoreCase(string strA, string strB) 
-  Compares strings using ordinal sort rules and ignoring the case of the strings being compared.
-bool IsNullOrWhiteSpace(string str) 
-  Indicates whether a specified string is null, empty, or consists only of white-space characters.
-bool IsNumber(string str) 
-  Indicates whether a specified string represents integer or float number.
-```
+* `DateTime Now()`
+    * Gets the current date and time, expressed as the local time.
+* `DateTime Today()`
+    * Gets the current date with the time component set to 00:00:00, expressed as the local time.
+* `int Length(str)`
+    * Gets the number of characters in the specified string (null-safe).
+* `string Trim(string str)`
+    * Removes all leading and trailing white-space characters from the specified string (null-safe).
+* `string Concat(string strA, string strB)`
+    * Concatenates two specified strings.
+* `string Concat(string strA, string strB, strC)`
+    * Concatenates three specified strings.
+* `int CompareOrdinal(string strA, string strB)`
+    * Compares strings using ordinal sort rules. An integer that indicates the lexical relationship 
+      between the two comparands is returned: 
+        * less than zero    - strA is less than strB,
+        * zero              - strA and strB are equal,
+        * greater than zero - strA is greater than strB.
+* `int CompareOrdinalIgnoreCase(string strA, string strB)`
+    * Compares strings using ordinal sort rules and ignoring the case of the strings being compared.
+* `bool IsNullOrWhiteSpace(string str)`
+    * Indicates whether a specified string is null, empty, or consists only of white-space characters.
+* `bool IsNumber(string str)`
+    * Indicates whether a specified string represents integer or float number.
 
 Any custom function within the model object scope at server side is automatically recognized and can be used inside expression, e.g:
 

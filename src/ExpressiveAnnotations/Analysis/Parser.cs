@@ -398,8 +398,11 @@ namespace ExpressiveAnnotations.Analysis
             }
             ReadToken(); // read ")"
 
-            var expression = FetchFunctionFromModel(name, args);
-            return expression ?? FetchFunctionFromToolchain(name, args); // firstly, try to take method from model context - if not found, take one from toolchain
+            var expression = FetchFunctionFromModel(name, args) ?? FetchFunctionFromToolchain(name, args); // firstly, try to take method from model context - if not found, take one from toolchain
+            if (expression == null)
+                throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments not found.", name, args.Count));
+
+            return expression;
         }
 
         private Expression FetchFunctionFromModel(string name, IList<Expression> args)
@@ -411,6 +414,7 @@ namespace ExpressiveAnnotations.Analysis
                 return null;
             if (signatures.Count > 1)
                 throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments is ambiguous.", name, args.Count));
+
             return CreateMethodCallExpression(ContextExpression, signatures.Single(), args);
         }
 
@@ -420,7 +424,7 @@ namespace ExpressiveAnnotations.Analysis
                 ? Functions[name].Where(f => f.Parameters.Count == args.Count).ToList()
                 : new List<LambdaExpression>();
             if (signatures.Count == 0)
-                throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments not found.", name, args.Count));
+                return null;
             if (signatures.Count > 1)
                 throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments is ambiguous.", name, args.Count));
 
