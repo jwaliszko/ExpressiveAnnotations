@@ -13,8 +13,15 @@ namespace ExpressiveAnnotations.Tests
         {
             High,
             Low,
-            Uncertain,
+            Uncertain
         }
+    }
+
+    public enum Stability
+    {
+        Good,
+        Bad,
+        Unknown
     }
 
     [TestClass]
@@ -173,10 +180,10 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.Number / 2 == 0.5").Invoke(model));            
 
             Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability == 0").Invoke(model));
-            Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability == Stability.High").Invoke(model));
-            Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability < Stability.Low").Invoke(model));
+            Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability == Utility.Stability.High").Invoke(model));
+            Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability < Utility.Stability.Low").Invoke(model));
             Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.PoliticalStability == null").Invoke(model));
-            Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.PoliticalStability != Stability.High").Invoke(model));
+            Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.PoliticalStability != Utility.Stability.High").Invoke(model));
 
             Assert.IsTrue(parser.Parse(model.GetType(), "Flag").Invoke(model));
             Assert.IsFalse(parser.Parse(model.GetType(), "!Flag").Invoke(model));
@@ -203,7 +210,7 @@ namespace ExpressiveAnnotations.Tests
                 "Flag == true " +
                     "&& (" +
                             "(Text != \"hello world\" && Date < SubModel.Date) " +
-                            "|| ((Number >= 0 && Number < 1) && PoliticalStability == Stability.High)" +
+                            "|| ((Number >= 0 && Number < 1) && PoliticalStability == Utility.Stability.High)" +
                         ")";
 
             var func = parser.Parse(model.GetType(), expression);
@@ -226,7 +233,7 @@ namespace ExpressiveAnnotations.Tests
             var parsedEnums = parser.GetEnums();
             var expectedEnums = new Dictionary<string, Type>
             {
-                {"Stability", typeof (Utility.Stability)}
+                {"Utility.Stability", typeof (Utility.Stability)}
             };
             Assert.IsTrue(
                 expectedEnums.Keys.All(
@@ -252,6 +259,27 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.IsFalse(parser.Parse<object>("false && NonEmpty(null)").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("true || NonEmpty(null)").Invoke(null));
+        }
+
+        [TestMethod]
+        public void verify_exceptions()
+        {
+            var parser = new Parser();
+
+            try
+            {
+                parser.Parse<object>("Stability.High == 0").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    "Enum Stability is ambiguous, found following:" + Environment.NewLine +
+                    "ExpressiveAnnotations.Tests.Utility+Stability" + Environment.NewLine +
+                    "ExpressiveAnnotations.Tests.Stability",
+                    e.Message);
+            }
         }
     }
 }

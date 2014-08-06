@@ -429,7 +429,7 @@ namespace ExpressiveAnnotations.Analysis
                 throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments is ambiguous.", name, args.Count));
 
             return CreateLambdaCallExpression(signatures.Single(), args, name);
-        }        
+        }
 
         private Expression ExtractMemberExpression(string name)
         {
@@ -446,10 +446,12 @@ namespace ExpressiveAnnotations.Analysis
             {
                 name = string.Join(".", parts.Take(parts.Count() - 1).ToList());
                 var enumTypes = AppDomain.CurrentDomain.GetAssemblies()
-                    .SelectMany(a => a.GetLoadableTypes()).Where(t => t.IsEnum && t.FullName.EndsWith(name)).ToList();
+                    .SelectMany(a => a.GetLoadableTypes()).Where(t => t.IsEnum && t.FullName.Replace("+", ".").EndsWith(name)).ToList();
 
                 if (enumTypes.Count() > 1)
-                    throw new ArgumentException(string.Format("Dynamic extraction failed. {0} enum identifier is ambigous.", name), name);
+                    throw new InvalidOperationException(
+                        string.Format("Enum {0} is ambiguous, found following:{1}",
+                            name, Environment.NewLine + string.Join(Environment.NewLine, enumTypes.Select(x => x.FullName))));
 
                 var type = enumTypes.SingleOrDefault();
                 if (type != null)
@@ -460,7 +462,7 @@ namespace ExpressiveAnnotations.Analysis
                 }
             }
 
-            throw new ArgumentException(string.Format("Dynamic extraction failed. Member {0} not found.", name), name);
+            throw new ArgumentException(string.Format("Member {0} not found.", name), name);
         }
 
         private Expression ExtractMemberExpression(string name, Type type, Expression expr)
