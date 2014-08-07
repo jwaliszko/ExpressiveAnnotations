@@ -16,8 +16,18 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("4b679902-67d7-4463-a0f0-c4e75cb39ba6")]
-[assembly: InternalsVisibleTo("ExpressiveAnnotations.Tests")]
-[assembly: InternalsVisibleTo("ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider")]
+[assembly: InternalsVisibleTo("ExpressiveAnnotations.Tests, PublicKey="+
+"00240000048000009400000006020000002400005253413100040000010001000ff42e23a8247b"+
+"bd1c54c6f4428d3e592e505391131b6e28a381dadbb26a88f8407d96afa9993877cd71d3b54147"+
+"0d8ebef5a8dcd780fccf270b1846e14d70b68732f98d8ba9dada92d1f128885fe903011a2185a4"+
+"be124f5b00618413229f73692638e3c7c22d81cf9365f207a954c6b522183280c07011c325168c"+
+"148865a4")]
+[assembly: InternalsVisibleTo("ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider, PublicKey="+
+"00240000048000009400000006020000002400005253413100040000010001000ff42e23a8247b"+
+"bd1c54c6f4428d3e592e505391131b6e28a381dadbb26a88f8407d96afa9993877cd71d3b54147"+
+"0d8ebef5a8dcd780fccf270b1846e14d70b68732f98d8ba9dada92d1f128885fe903011a2185a4"+
+"be124f5b00618413229f73692638e3c7c22d81cf9365f207a954c6b522183280c07011c325168c"+
+"148865a4")]
 
 // Version information for an assembly consists of the following four values:
 //
