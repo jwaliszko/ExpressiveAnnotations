@@ -15,6 +15,13 @@ namespace ExpressiveAnnotations.Tests
             Low,
             Uncertain
         }
+
+        public enum StabilityBytes : byte
+        {
+            High,
+            Low,
+            Uncertain
+        }
     }
 
     public enum Stability
@@ -43,6 +50,7 @@ namespace ExpressiveAnnotations.Tests
             public bool Flag { get; set; }
             public string Text { get; set; }
             public Utility.Stability? PoliticalStability { get; set; }
+            public Utility.StabilityBytes? PoliticalStabilityBytes { get; set; }
 
             public DateTime NextWeek()
             {
@@ -163,6 +171,8 @@ namespace ExpressiveAnnotations.Tests
                 Flag = true,
                 Text = "hello world",
                 PoliticalStability = Utility.Stability.High,
+                PoliticalStabilityBytes = Utility.StabilityBytes.High,
+
                 SubModel = new Model
                 {
                     Date = DateTime.Now.AddDays(1),
@@ -170,6 +180,7 @@ namespace ExpressiveAnnotations.Tests
                     Flag = false,
                     Text = " hello world ",
                     PoliticalStability = null,
+                    PoliticalStabilityBytes = null,
                 }
             };
 
@@ -184,6 +195,12 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability < Utility.Stability.Low").Invoke(model));
             Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.PoliticalStability == null").Invoke(model));
             Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.PoliticalStability != Utility.Stability.High").Invoke(model));
+
+            Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStabilityBytes == 0").Invoke(model));
+            Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStabilityBytes == Utility.StabilityBytes.High").Invoke(model));
+            Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStabilityBytes < Utility.StabilityBytes.Low").Invoke(model));
+            Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.PoliticalStabilityBytes == null").Invoke(model));
+            Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.PoliticalStabilityBytes != Utility.StabilityBytes.High").Invoke(model));
 
             Assert.IsTrue(parser.Parse(model.GetType(), "Flag").Invoke(model));
             Assert.IsFalse(parser.Parse(model.GetType(), "!Flag").Invoke(model));
@@ -210,7 +227,8 @@ namespace ExpressiveAnnotations.Tests
                 "Flag == true " +
                     "&& (" +
                             "(Text != \"hello world\" && Date < SubModel.Date) " +
-                            "|| ((Number >= 0 && Number < 1) && PoliticalStability == Utility.Stability.High)" +
+                            "|| ((Number >= 0 && Number < 1) && PoliticalStability == Utility.Stability.High" +
+                            " && PoliticalStabilityBytes == Utility.StabilityBytes.High)" +
                         ")";
 
             var func = parser.Parse(model.GetType(), expression);

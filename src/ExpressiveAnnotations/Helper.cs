@@ -24,9 +24,9 @@ namespace ExpressiveAnnotations
                 oute2 = Expression.Convert(e2, Enum.GetUnderlyingType(Nullable.GetUnderlyingType(e2.Type)).ToNullable());
 
             // promote int to double - do all computations with higher precision (to be compatible with javascript, e.g. notation 1/2, should give 0.5 double not 0 int)
-            if (oute1.Type == typeof(int))
+            if ((oute1.Type == typeof(int)) || (oute1.Type == typeof(byte)))
                 oute1 = Expression.Convert(oute1, typeof(double));
-            if (oute2.Type == typeof(int))
+            if ((oute2.Type == typeof(int)) || (oute2.Type == typeof(byte)))
                 oute2 = Expression.Convert(oute2, typeof(double));
 
             // non-nullable operand is converted to nullable if necessary, and the lifted-to-nullable form of the comparison is used (C# rule, which is currently not followed by expression trees)

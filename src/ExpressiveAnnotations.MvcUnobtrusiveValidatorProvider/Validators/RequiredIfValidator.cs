@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
 using Newtonsoft.Json;
-using System.Linq;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
 {
@@ -43,7 +43,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
                 TypesMap = parser.GetMembers()
                     .ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value));
                 EnumsMap = parser.GetEnums()
-                    .ToDictionary(x => x.Key, x => Enum.GetValues(x.Value).Cast<object>().ToDictionary(v => v.ToString(), v => (int)v));
+                    .ToDictionary(x => x.Key, x => Enum.GetValues(x.Value).Cast<object>().ToDictionary(v => v.ToString(), v => Convert.ToInt32(v)));
                 
                 HttpContext.Current.Cache.Insert(typesId, TypesMap);
                 HttpContext.Current.Cache.Insert(enumsId, EnumsMap);

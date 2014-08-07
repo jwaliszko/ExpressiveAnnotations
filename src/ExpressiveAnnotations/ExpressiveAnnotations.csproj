@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\ExpressiveAnnotations.XML</DocumentationFile>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
