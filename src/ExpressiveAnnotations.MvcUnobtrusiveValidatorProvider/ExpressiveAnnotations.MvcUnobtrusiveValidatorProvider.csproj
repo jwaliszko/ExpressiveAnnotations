@@ -71,8 +71,8 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <!-- Sign the assembly if the environment variable is set -->
-  <PropertyGroup Condition="'$(PRIVATE_KEY_FILE)' != ''">
+  <!-- Sign the release assembly if the environment variable is set -->
+  <PropertyGroup Condition="'$(Configuration)' != 'DEBUG' And '$(PRIVATE_KEY_FILE)' != ''">
     <AssemblyOriginatorKeyFile>$(PRIVATE_KEY_FILE)</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <DelaySign>false</DelaySign>
