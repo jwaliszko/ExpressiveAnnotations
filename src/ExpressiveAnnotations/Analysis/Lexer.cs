@@ -89,7 +89,7 @@ namespace ExpressiveAnnotations.Analysis
                     return true;
                 }
             }
-            throw new ArgumentException(string.Format("Lexer error. Unexpected token started at {0}.", Expression));
+            throw new InvalidOperationException(string.Format("Invalid token started at: {0}", Expression));
         }
 
         private object ConvertTokenValue(TokenType type, string value)

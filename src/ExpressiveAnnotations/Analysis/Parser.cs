@@ -26,11 +26,11 @@ namespace ExpressiveAnnotations.Analysis
     /// </summary>
     public sealed class Parser
     {
-        private Stack<Token> Tokens { get; set; }
-        private IDictionary<string, Type> Enums { get; set; }
-        private IDictionary<string, Type> Members { get; set; }
+        private Stack<Token> Tokens { get; set; }        
         private Type ContextType { get; set; }
         private Expression ContextExpression { get; set; }
+        private IDictionary<string, Type> Fields { get; set; }
+        private IDictionary<string, object> Consts { get; set; }        
         private IDictionary<string, IList<LambdaExpression>> Functions { get; set; }
 
         /// <summary>
@@ -38,8 +38,8 @@ namespace ExpressiveAnnotations.Analysis
         /// </summary>
         public Parser()
         {
-            Enums = new Dictionary<string, Type>();
-            Members = new Dictionary<string, Type>();
+            Fields = new Dictionary<string, Type>();
+            Consts = new Dictionary<string, object>();            
             Functions = new Dictionary<string, IList<LambdaExpression>>();
         }
 
@@ -51,17 +51,26 @@ namespace ExpressiveAnnotations.Analysis
         /// <returns>
         /// A delegate containing the compiled version of the lambda expression described by created expression tree.
         /// </returns>
+        /// <exception cref="System.InvalidOperationException"></exception>
         public Func<Context, bool> Parse<Context>(string expression)
         {
-            Clear();
-            ContextType = typeof(Context);
-            var param = Expression.Parameter(typeof(Context));
-            ContextExpression = param;
-            InitTokenizer(expression);
-            var expressionTree = ParseExpression();
-            var lambda = Expression.Lambda<Func<Context, bool>>(expressionTree, param);
-            return lambda.Compile();
-        }        
+            try
+            {
+                Clear();
+                ContextType = typeof (Context);
+                var param = Expression.Parameter(typeof (Context));
+                ContextExpression = param;
+                InitTokenizer(expression);
+                var expressionTree = ParseExpression();
+                var lambda = Expression.Lambda<Func<Context, bool>>(expressionTree, param);
+                return lambda.Compile();
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException(
+                    string.Format("Parsing failed. Invalid expression: {0}", expression), e);
+            }
+        }
 
         /// <summary>
         /// Parses the specified logical expression and builds expression tree.
@@ -71,17 +80,26 @@ namespace ExpressiveAnnotations.Analysis
         /// <returns>
         /// A delegate containing the compiled version of the lambda expression described by produced expression tree.
         /// </returns>
+        /// <exception cref="System.InvalidOperationException"></exception>
         public Func<object, bool> Parse(Type context, string expression)
         {
-            Clear();
-            ContextType = context;
-            var param = Expression.Parameter(typeof(object));
-            ContextExpression = Expression.Convert(param, context);
-            InitTokenizer(expression);
-            var expressionTree = ParseExpression();
-            var lambda = Expression.Lambda<Func<object, bool>>(expressionTree, param);
-            return lambda.Compile();
-        }        
+            try
+            {
+                Clear();
+                ContextType = context;
+                var param = Expression.Parameter(typeof (object));
+                ContextExpression = Expression.Convert(param, context);
+                InitTokenizer(expression);
+                var expressionTree = ParseExpression();
+                var lambda = Expression.Lambda<Func<object, bool>>(expressionTree, param);
+                return lambda.Compile();
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException(
+                    string.Format("Parsing failed. Invalid expression: {0}", expression), e);
+            }
+        }
 
         /// <summary>
         /// Adds function signature to the parser context.
@@ -142,31 +160,31 @@ namespace ExpressiveAnnotations.Analysis
         }
 
         /// <summary>
-        /// Gets the fields and properties extracted from parsed expression within specified context.
+        /// Gets properties names and types extracted from parsed expression within specified context.
         /// </summary>
         /// <returns>
         /// Dictionary containing names and types.
         /// </returns>
-        public IDictionary<string, Type> GetMembers()
+        public IDictionary<string, Type> GetFields()
         {
-            return Members;
+            return Fields;
         }
 
         /// <summary>
-        /// Gets the parsed enums extracted from parsed expression within specified context.
+        /// Gets constants names and values extracted from parsed expression within specified context.
         /// </summary>
         /// <returns>
-        /// Dictionary containing names and types.
+        /// Dictionary containing names and values.
         /// </returns>
-        public IDictionary<string, Type> GetEnums()
+        public IDictionary<string, object> GetConsts()
         {
-            return Enums;
+            return Consts;
         }
 
         private void Clear()
         {
-            Members.Clear();
-            Enums.Clear();
+            Fields.Clear();
+            Consts.Clear();
         }
 
         private void InitTokenizer(string expression)
@@ -194,7 +212,7 @@ namespace ExpressiveAnnotations.Analysis
         {
             var expr = ParseOrExp();
             if (PeekType() != TokenType.EOF)
-                throw new InvalidOperationException(string.Format("Unexpected token {0}.", PeekValue()));
+                throw new InvalidOperationException(string.Format("Parsing expected to be completed. Unexpected token: {0}", PeekValue()));
             return expr;
         }
 
@@ -251,7 +269,7 @@ namespace ExpressiveAnnotations.Analysis
                 case TokenType.NEQ:
                     return Expression.NotEqual(arg1, arg2);
                 default:
-                    throw new InvalidOperationException("Unexpected operator.");
+                    throw new ArgumentOutOfRangeException(); // never gets here
             }
         }
 
@@ -283,7 +301,7 @@ namespace ExpressiveAnnotations.Analysis
                 case TokenType.SUB:
                     return ParseAddExpInternal(Expression.Subtract(arg1, arg2));
                 default:
-                    throw new InvalidOperationException();
+                    throw new ArgumentOutOfRangeException(); // never gets here
             }
         }
 
@@ -309,18 +327,18 @@ namespace ExpressiveAnnotations.Analysis
                 case TokenType.DIV:
                     return ParseMulExpInternal(Expression.Divide(arg1, arg2));
                 default:
-                    throw new InvalidOperationException();
+                    throw new ArgumentOutOfRangeException(); // never gets here
             }
         }
 
         private Expression ParseVal()
-        {            
+        {
             if (PeekType() == TokenType.LEFT_BRACKET)
             {
                 ReadToken();
                 var arg = ParseOrExp();
                 if (PeekType() != TokenType.RIGHT_BRACKET)
-                    throw new InvalidOperationException(string.Format("Unexpected token {0}. Closing bracket missing.", PeekValue()));
+                    throw new InvalidOperationException(string.Format("Closing bracket missing. Unexpected token: {0}", PeekValue()));
                 ReadToken();
                 return arg;
             }
@@ -340,7 +358,7 @@ namespace ExpressiveAnnotations.Analysis
                 case TokenType.FUNC:
                     return ParseFunc();
                 default:
-                    throw new InvalidOperationException(string.Format("Unexpected token {0}. Expected \"null\", int, float, bool, string or func.", PeekValue()));
+                    throw new InvalidOperationException(string.Format("Expected \"null\", int, float, bool, string or func. Unexpected token: {0}", PeekValue()));
             }
         }
 
@@ -384,7 +402,7 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken(); // read name
 
             if (PeekType() != TokenType.LEFT_BRACKET)
-                return ExtractMemberExpression(name);
+                return ExtractFieldExpression(name); // get property or enum
 
             // parse a function call
             ReadToken(); // read "("
@@ -398,49 +416,40 @@ namespace ExpressiveAnnotations.Analysis
             }
             ReadToken(); // read ")"
 
-            var expression = FetchFunctionFromModel(name, args) ?? FetchFunctionFromToolchain(name, args); // firstly, try to take method from model context - if not found, take one from toolchain
+            return ExtractMethodExpression(name, args); // get method call
+        }        
+
+        private Expression ExtractFieldExpression(string name)
+        {
+            var expression = FetchPropertyValue(name) ?? FetchEnumValue(name);
             if (expression == null)
-                throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments not found.", name, args.Count));
+                throw new InvalidOperationException(string.Format("Only public properties or enums are accepted. Invalid identifier: {0}", name));
 
             return expression;
-        }
+        }        
 
-        private Expression FetchFunctionFromModel(string name, IList<Expression> args)
+        private Expression FetchPropertyValue(string name)
         {
-            var signatures = ContextType.GetMethods()
-                .Where(mi => name.Equals(mi.Name) && mi.GetParameters().Length == args.Count)
-                .ToList();
-            if (signatures.Count == 0)
-                return null;
-            if (signatures.Count > 1)
-                throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments is ambiguous.", name, args.Count));
+            var type = ContextType;
+            var expr = ContextExpression;
+            var parts = name.Split('.');
 
-            return CreateMethodCallExpression(ContextExpression, signatures.Single(), args);
-        }
-
-        private Expression FetchFunctionFromToolchain(string name, IList<Expression> args)
-        {
-            var signatures = Functions.ContainsKey(name)
-                ? Functions[name].Where(f => f.Parameters.Count == args.Count).ToList()
-                : new List<LambdaExpression>();
-            if (signatures.Count == 0)
-                return null;
-            if (signatures.Count > 1)
-                throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments is ambiguous.", name, args.Count));
-
-            return CreateLambdaCallExpression(signatures.Single(), args, name);
-        }
-
-        private Expression ExtractMemberExpression(string name)
-        {
-            var expr = ExtractMemberExpression(name, ContextType, ContextExpression);
-            if (expr != null)
+            foreach (var part in parts)
             {
-                if(!Members.ContainsKey(name))
-                    Members.Add(name, expr.Type);
-                return expr;
+                var pi = type.GetProperty(part);
+                if (pi == null)
+                    return null;
+
+                expr = Expression.Property(expr, pi);
+                type = pi.PropertyType;
             }
 
+            Fields[name] = type;
+            return expr;
+        }
+
+        private Expression FetchEnumValue(string name)
+        {
             var parts = name.Split('.');
             if (parts.Count() > 1)
             {
@@ -456,39 +465,51 @@ namespace ExpressiveAnnotations.Analysis
                 var type = enumTypes.SingleOrDefault();
                 if (type != null)
                 {
-                    if (!Enums.ContainsKey(name))
-                        Enums.Add(name, type);
-                    return Expression.Constant(Enum.Parse(type, parts.Last()));
+                    var value = Enum.Parse(type, parts.Last());
+                    Consts[name] = value;
+                    return Expression.Constant(value);
                 }
             }
-
-            throw new ArgumentException(string.Format("Member {0} not found.", name), name);
+            return null;
         }
 
-        private Expression ExtractMemberExpression(string name, Type type, Expression expr)
-        {            
-            var parts = name.Split('.');
-            foreach (var part in parts)
-            {
-                var pi = type.GetProperty(part);
-                if (pi == null)
-                {
-                    var fi = type.GetField(part);
-                    if (fi == null)
-                        return null;
-                   
-                    expr = fi.IsStatic ? Expression.Field(null, fi) : Expression.Field(expr, fi);
-                    type = fi.FieldType;
-                    continue;
-                }
-                expr = Expression.Property(expr, pi);
-                type = pi.PropertyType;
-            }
-            return expr;
-        }
-
-        private static InvocationExpression CreateLambdaCallExpression(LambdaExpression funcExpr, IList<Expression> parsedArgs, string funcName)
+        private Expression ExtractMethodExpression(string name, IList<Expression> args)
         {
+            var expression = FetchModelMethod(name, args) ?? FetchToolchainMethod(name, args); // firstly, try to take method from model context - if not found, take one from toolchain
+            if (expression == null)
+                throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments not found.", name, args.Count));
+
+            return expression;
+        }
+
+        private Expression FetchModelMethod(string name, IList<Expression> args)
+        {
+            var signatures = ContextType.GetMethods()
+                .Where(mi => name.Equals(mi.Name) && mi.GetParameters().Length == args.Count)
+                .ToList();
+            if (signatures.Count == 0)
+                return null;
+            if (signatures.Count > 1)
+                throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments is ambiguous.", name, args.Count));
+
+            return CreateMethodCallExpression(ContextExpression, signatures.Single(), args);
+        }
+
+        private Expression FetchToolchainMethod(string name, IList<Expression> args)
+        {
+            var signatures = Functions.ContainsKey(name)
+                ? Functions[name].Where(f => f.Parameters.Count == args.Count).ToList()
+                : new List<LambdaExpression>();
+            if (signatures.Count == 0)
+                return null;
+            if (signatures.Count > 1)
+                throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments is ambiguous.", name, args.Count));
+
+            return CreateInvocationExpression(signatures.Single(), args, name);
+        }
+
+        private static InvocationExpression CreateInvocationExpression(LambdaExpression funcExpr, IList<Expression> parsedArgs, string funcName)
+        {            
             if (funcExpr.Parameters.Count != parsedArgs.Count)
                 throw new InvalidOperationException(
                     string.Format("Incorrect number of parameters provided. Function {0} expects {1}, not {2}.", funcName, funcExpr.Parameters.Count, parsedArgs.Count));

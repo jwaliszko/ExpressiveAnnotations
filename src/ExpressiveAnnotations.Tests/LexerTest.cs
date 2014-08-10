@@ -115,13 +115,24 @@ namespace ExpressiveAnnotations.Tests
 
             try
             {
+                lexer.Analyze(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is ArgumentNullException);
+                Assert.IsTrue(e.Message == "Expression not provided.\r\nParameter name: expression");
+            }
+
+            try
+            {
                 lexer.Analyze("true # false");
                 Assert.Fail();
             }
             catch (Exception e)
             {
-                Assert.IsTrue(e is ArgumentException);
-                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at # false.");
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.IsTrue(e.Message == "Invalid token started at: # false");
             }
 
             try
@@ -131,8 +142,8 @@ namespace ExpressiveAnnotations.Tests
             }
             catch (Exception e)
             {
-                Assert.IsTrue(e is ArgumentException);
-                Assert.IsTrue(e.Message == "Lexer error. Unexpected token started at ^.");
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.IsTrue(e.Message == "Invalid token started at: ^");
             }
         }
     }

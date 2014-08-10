@@ -185,7 +185,7 @@ var
             name = this.appendPrefix(name, prefix);
             field = $(form).find(':input[name="' + name + '"]');
             if (field.length === 0) {
-                throw typeHelper.String.format('DOM field {0} not found.', name);
+                throw typeHelper.string.format('DOM field {0} not found.', name);
             }
 
             fieldValue = getFieldValue(field);
@@ -200,7 +200,7 @@ var
 
             return parsedValue;
         },
-        deserializeObject: function(form, typesMap, enumsMap, prefix) {
+        deserializeObject: function(form, fieldsMap, constsMap, prefix) {
             function buildFieldInternal(fieldName, fieldValue, object) {
                 var props, parent, i;
                 props = fieldName.split('.');
@@ -217,16 +217,16 @@ var
             }
 
             var o = {}, name, type, value;
-            for (name in typesMap) {
-                if (typesMap.hasOwnProperty(name)) {
-                    type = typesMap[name];
+            for (name in fieldsMap) {
+                if (fieldsMap.hasOwnProperty(name)) {
+                    type = fieldsMap[name];
                     value = this.extractValue(form, name, prefix, type);
                     buildFieldInternal(name, value, o);
                 }
             }
-            for (name in enumsMap) {
-                if (enumsMap.hasOwnProperty(name)) {
-                    value = enumsMap[name];
+            for (name in constsMap) {
+                if (constsMap.hasOwnProperty(name)) {
+                    value = constsMap[name];
                     buildFieldInternal(name, value, o);
                 }
             }
@@ -250,27 +250,27 @@ var
         }
     };
 
-    $.validator.unobtrusive.adapters.add('assertthat', ['expression', 'typesmap', 'enumsmap'], function(options) {
+    $.validator.unobtrusive.adapters.add('assertthat', ['expression', 'fieldsmap', 'constsmap'], function(options) {
         options.rules.assertthat = {
             prefix: modelHelper.getPrefix(options.element.name),
             form: options.form,
             expression: $.parseJSON(options.params.expression),
-            typesmap: $.parseJSON(options.params.typesmap),
-            enumsmap: $.parseJSON(options.params.enumsmap)
+            fieldsmap: $.parseJSON(options.params.fieldsmap),
+            constsmap: $.parseJSON(options.params.constsmap)
         };
         if (options.message) {
             options.messages.assertthat = options.message;
         }
     });
 
-    $.validator.unobtrusive.adapters.add('requiredif', ['expression', 'typesmap', 'enumsmap', 'allowempty'], function(options) {
+    $.validator.unobtrusive.adapters.add('requiredif', ['expression', 'fieldsmap', 'constsmap', 'allowempty'], function (options) {
         options.rules.requiredif = {
             prefix: modelHelper.getPrefix(options.element.name),
             form: options.form,
             expression: $.parseJSON(options.params.expression),
-            typesmap: $.parseJSON(options.params.typesmap),
-            enumsmap: $.parseJSON(options.params.enumsmap),
-            allowempty: $.parseJSON(options.params.allowempty)      
+            fieldsmap: $.parseJSON(options.params.fieldsmap),
+            constsmap: $.parseJSON(options.params.constsmap),
+            allowempty: $.parseJSON(options.params.allowempty)
         };
         if (options.message) {
             options.messages.requiredif = options.message;
@@ -280,7 +280,7 @@ var
     $.validator.addMethod('assertthat', function(value, element, params) {
         value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
         if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
-            var model = modelHelper.deserializeObject(params.form, params.typesmap, params.enumsmap, params.prefix);
+            var model = modelHelper.deserializeObject(params.form, params.fieldsmap, params.constsmap, params.prefix);
             with (model) {
                 if (!eval(params.expression)) { // check if the assertion condition is not satisfied
                     return false; // assertion not satisfied => notify
@@ -294,7 +294,7 @@ var
         value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value;
         if (value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
             || (!/\S/.test(value) && !params.allowempty)) {
-            var model = modelHelper.deserializeObject(params.form, params.typesmap, params.enumsmap, params.prefix);
+            var model = modelHelper.deserializeObject(params.form, params.fieldsmap, params.constsmap, params.prefix);
             with (model) {
                 if (eval(params.expression)) {
                     return false;

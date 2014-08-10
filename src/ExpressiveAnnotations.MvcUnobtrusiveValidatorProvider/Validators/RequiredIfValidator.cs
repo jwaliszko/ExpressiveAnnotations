@@ -17,8 +17,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         private string Expression { get; set; }
         private string FormattedErrorMessage { get; set; }        
         private bool AllowEmpty { get; set; }
-        private IDictionary<string, string> TypesMap { get; set; }
-        private IDictionary<string, Dictionary<string, int>> EnumsMap { get; set; }
+        private IDictionary<string, string> FieldsMap { get; set; }
+        private IDictionary<string, object> ValuesMap { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequiredIfValidator" /> class.
@@ -26,32 +26,42 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         /// <param name="metadata">The metadata.</param>
         /// <param name="context">The context.</param>
         /// <param name="attribute">The attribute.</param>
+        /// <exception cref="System.InvalidOperationException"></exception>
         public RequiredIfValidator(ModelMetadata metadata, ControllerContext context, RequiredIfAttribute attribute)
             : base(metadata, context, attribute)
         {
-            var typesId = ("RequiredIfAttribute_types_" + metadata.ContainerType.FullName + "." + metadata.PropertyName).ToLowerInvariant();
-            var enumsId = ("RequiredIfAttribute_enums_" + metadata.ContainerType.FullName + "." + metadata.PropertyName).ToLowerInvariant();
-            TypesMap = HttpRuntime.Cache.Get(typesId) as IDictionary<string, string>;
-            EnumsMap = HttpRuntime.Cache.Get(enumsId) as IDictionary<string, Dictionary<string, int>>;
-
-            if(TypesMap == null && TypesMap == null)
+            try
             {
-                var parser = new Parser();
-                parser.RegisterMethods();
-                parser.Parse(metadata.ContainerType, attribute.Expression);
+                var attribId = string.Format("{0}.{1}.{2}", attribute.GetType().Name, metadata.ContainerType.FullName, metadata.PropertyName).ToLowerInvariant();
+                var fieldsId = string.Format("fields.{0}", attribId);
+                var constsId = string.Format("consts.{0}", attribId);
+                FieldsMap = HttpRuntime.Cache.Get(fieldsId) as IDictionary<string, string>;
+                ValuesMap = HttpRuntime.Cache.Get(constsId) as IDictionary<string, object>;
 
-                TypesMap = parser.GetMembers()
-                    .ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value));
-                EnumsMap = parser.GetEnums()
-                    .ToDictionary(x => x.Key, x => Enum.GetValues(x.Value).Cast<object>().ToDictionary(v => v.ToString(), v => Convert.ToInt32(v)));
-                
-                HttpContext.Current.Cache.Insert(typesId, TypesMap);
-                HttpContext.Current.Cache.Insert(enumsId, EnumsMap);
+                if (FieldsMap == null && ValuesMap == null)
+                {
+                    var parser = new Parser();
+                    parser.RegisterMethods();
+                    parser.Parse(metadata.ContainerType, attribute.Expression);
+
+                    FieldsMap = parser.GetFields().ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value));
+                    ValuesMap = parser.GetConsts();
+
+                    Assert.NoNamingCollisionsAtCorrespondingSegments(FieldsMap.Keys, ValuesMap.Keys);
+                    HttpContext.Current.Cache.Insert(fieldsId, FieldsMap);
+                    HttpContext.Current.Cache.Insert(constsId, ValuesMap);
+                }
+
+                Expression = attribute.Expression;
+                FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);
+                AllowEmpty = attribute.AllowEmptyStrings;
             }
-
-            Expression = attribute.Expression;
-            FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);
-            AllowEmpty = attribute.AllowEmptyStrings;
+            catch (Exception e)
+            {
+                throw new InvalidOperationException(string.Format(
+                    "Problem related to {0} attribute for {1} field with following expression specified: {2}",
+                    attribute.GetType().Name, metadata.PropertyName, attribute.Expression), e);
+            }
         }
 
         /// <summary>
@@ -68,8 +78,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
                 ValidationType = "requiredif",
             };
             rule.ValidationParameters.Add("expression", JsonConvert.SerializeObject(Expression));
-            rule.ValidationParameters.Add("typesmap", JsonConvert.SerializeObject(TypesMap));
-            rule.ValidationParameters.Add("enumsmap", JsonConvert.SerializeObject(EnumsMap));
+            rule.ValidationParameters.Add("fieldsmap", JsonConvert.SerializeObject(FieldsMap));
+            rule.ValidationParameters.Add("constsmap", JsonConvert.SerializeObject(ValuesMap));
             rule.ValidationParameters.Add("allowempty", JsonConvert.SerializeObject(AllowEmpty));
             yield return rule;
         }

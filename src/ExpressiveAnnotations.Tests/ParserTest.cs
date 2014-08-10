@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
@@ -24,7 +25,7 @@ namespace ExpressiveAnnotations.Tests
         }
     }
 
-    public enum Stability
+    internal enum Stability
     {
         Good,
         Bad,
@@ -130,7 +131,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("' ' != '  '").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("'asd' == 'asd'").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("'' != null").Invoke(null));
-
+            
             Assert.IsTrue(parser.Parse<object>("'a' + 'b' == 'ab'").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("'' + '' == ''").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("' ' + null == ' '").Invoke(null));
@@ -240,7 +241,7 @@ namespace ExpressiveAnnotations.Tests
 
             var func = parser.Parse(model.GetType(), expression);
             Assert.IsTrue(func.Invoke(model));
-            var parsedMembers = parser.GetMembers();
+            var parsedMembers = parser.GetFields();
             var expectedMembers = new Dictionary<string, Type>
             {
                 {"Flag", typeof (bool)},
@@ -248,22 +249,26 @@ namespace ExpressiveAnnotations.Tests
                 {"Date", typeof (DateTime)},
                 {"SubModel.Date", typeof (DateTime)},
                 {"Number", typeof (int?)},
-                {"PoliticalStability", typeof (Utility.Stability?)}
+                {"PoliticalStability", typeof (Utility.Stability?)},
+                {"PoliticalStabilityBytes", typeof (Utility.StabilityBytes?)}
             };
+            Assert.AreEqual(expectedMembers.Count, parsedMembers.Count);
             Assert.IsTrue(
                 expectedMembers.Keys.All(
                     key => parsedMembers.ContainsKey(key) &&
                            EqualityComparer<Type>.Default.Equals(expectedMembers[key], parsedMembers[key])));
 
-            var parsedEnums = parser.GetEnums();
-            var expectedEnums = new Dictionary<string, Type>
+            var parsedEnums = parser.GetConsts();
+            var expectedEnums = new Dictionary<string, object>
             {
-                {"Utility.Stability", typeof (Utility.Stability)}
+                {"Utility.Stability", Utility.Stability.High},
+                {"Utility.StabilityBytes", Utility.StabilityBytes.High}
             };
+            Assert.AreEqual(expectedEnums.Count, parsedEnums.Count);
             Assert.IsTrue(
                 expectedEnums.Keys.All(
                     key => parsedEnums.ContainsKey(key) &&
-                           EqualityComparer<Type>.Default.Equals(expectedEnums[key], parsedEnums[key])));
+                           EqualityComparer<object>.Default.Equals(expectedEnums[key], parsedEnums[key])));
         }
 
         [TestMethod]
@@ -282,12 +287,14 @@ namespace ExpressiveAnnotations.Tests
                 Assert.IsTrue(e is NullReferenceException);
             }
 
+            // below, the exception should not be thrown as above
+            // reason? - first argument is suffient to determine the value of the expression so the second one is not going to be evaluated
             Assert.IsFalse(parser.Parse<object>("false && NonEmpty(null)").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("true || NonEmpty(null)").Invoke(null));
         }
 
         [TestMethod]
-        public void verify_exceptions()
+        public void verify_enumeration_ambiguity()
         {
             var parser = new Parser();
 
@@ -300,11 +307,78 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
+                    "Parsing failed. Invalid expression: Stability.High == 0",
+                    e.Message);
+
+                Assert.IsNotNull(e.InnerException);
+                Assert.IsTrue(e.InnerException is InvalidOperationException);
+                Assert.AreEqual(
                     "Enum Stability is ambiguous, found following:" + Environment.NewLine +
                     "ExpressiveAnnotations.Tests.Utility+Stability" + Environment.NewLine +
                     "ExpressiveAnnotations.Tests.Stability",
-                    e.Message);
+                    e.InnerException.Message);
             }
+        }
+
+        public enum Vehicle
+        {
+            Car,
+            Truck
+        }
+
+        public class Carriage
+        {
+            public int Car { get; set; }
+            public int Truck { get; set; }
+        }
+
+        public class SampleOne
+        {
+            public SampleOne()
+            {
+                Vehicle = Vehicle.Car;
+
+                Assert.IsTrue(0 == (int)Vehicle.Car);
+                Assert.IsTrue(Vehicle == Vehicle.Car);
+            }
+
+            public Vehicle Vehicle { get; set; }
+        }
+
+        public class SampleTwo
+        {
+            public SampleTwo()
+            {
+                Vehicle = new Carriage { Car = -1 };
+
+                Assert.IsTrue(-1 == Vehicle.Car);
+                Assert.IsTrue(Vehicle.Car != (int)ParserTest.Vehicle.Car);
+            }
+
+            public Carriage Vehicle { get; set; }
+        }
+
+        [TestMethod]
+        public void verify_naming_collisions()
+        {
+            var parser = new Parser();
+
+            var one = new SampleOne();
+            var two = new SampleTwo();
+
+            Assert.IsTrue(parser.Parse<SampleOne>("0 == Vehicle.Car").Invoke(one));
+            Assert.AreEqual(0, parser.GetFields().Count);
+            Assert.AreEqual(1, parser.GetConsts().Count);
+            Assert.IsTrue(parser.Parse<SampleOne>("Vehicle == Vehicle.Car").Invoke(one));
+            Assert.AreEqual(1, parser.GetFields().Count);
+            Assert.AreEqual(1, parser.GetConsts().Count);
+
+            Assert.IsTrue(parser.Parse<SampleTwo>("-1 == Vehicle.Car").Invoke(two));
+            Assert.AreEqual(1, parser.GetFields().Count);
+            Assert.AreEqual(0, parser.GetConsts().Count);
+            Assert.IsTrue(parser.Parse<SampleTwo>("Vehicle.Car != ParserTest.Vehicle.Car").Invoke(two));
+            Assert.AreEqual(1, parser.GetFields().Count);
+            Assert.AreEqual(1, parser.GetConsts().Count);
         }
     }
 }
