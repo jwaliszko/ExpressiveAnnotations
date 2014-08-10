@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
@@ -16,13 +15,6 @@ namespace ExpressiveAnnotations.Tests
             Low,
             Uncertain
         }
-
-        public enum StabilityBytes : byte
-        {
-            High,
-            Low,
-            Uncertain
-        }
     }
 
     internal enum Stability
@@ -30,6 +22,47 @@ namespace ExpressiveAnnotations.Tests
         Good,
         Bad,
         Unknown
+    }
+
+    public enum SbyteEnum : sbyte
+    {
+        First = 1,
+        Second = 2
+    }
+    public enum ByteEnum : byte
+    {
+        First = 1,
+        Second = 2
+    }
+    public enum ShortEnum : short
+    {
+        First = 1,
+        Second = 2
+    }
+    public enum UshortEnum : ushort
+    {
+        First = 1,
+        Second = 2
+    }
+    public enum IntEnum : int
+    {
+        First = 1,
+        Second = 2
+    }
+    public enum UintEnum : uint
+    {
+        First = 1,
+        Second = 2
+    }
+    public enum LongEnum : long
+    {
+        First = 1,
+        Second = 2
+    }
+    public enum UlongEnum : ulong
+    {
+        First = 1,
+        Second = 2
     }
 
     [TestClass]
@@ -50,9 +83,16 @@ namespace ExpressiveAnnotations.Tests
             public int? Number { get; set; }
             public bool Flag { get; set; }
             public string Text { get; set; }
-            public byte SmallerNumber { get; set; }
             public Utility.Stability? PoliticalStability { get; set; }
-            public Utility.StabilityBytes? PoliticalStabilityBytes { get; set; }
+
+            public SbyteEnum? SbyteNumber { get; set; }
+            public ByteEnum? ByteNumber { get; set; }
+            public ShortEnum? ShortNumber { get; set; }
+            public UshortEnum? UshortNumber { get; set; }
+            public IntEnum? IntNumber { get; set; }
+            public UintEnum? UintNumber { get; set; }
+            public LongEnum? LongNumber { get; set; }
+            public UlongEnum? UlongNumber { get; set; }
 
             public DateTime NextWeek()
             {
@@ -131,7 +171,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("' ' != '  '").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("'asd' == 'asd'").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("'' != null").Invoke(null));
-            
+
             Assert.IsTrue(parser.Parse<object>("'a' + 'b' == 'ab'").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("'' + '' == ''").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("' ' + null == ' '").Invoke(null));
@@ -156,7 +196,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("1.2 + 2 == 3.2").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("1.2 - 2 == -0.8").Invoke(null));
 
-            Assert.IsTrue(parser.Parse<object>("1 - 2 -(6 / ((2*1.5 - 1) + 1)) * -2 + 1/2/1 == 3.50").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("1 - 2 -(6 / ((2*1.5 - 1) + 1)) * -2 + 1/2/1 == 3.50").Invoke(null));
 
             Assert.IsTrue(parser.Parse<Model>("'abc' == Trim(' abc ')").Invoke(null));
             Assert.IsTrue(parser.Parse<Model>("CompareOrdinal('a', 'a') == 0").Invoke(null));
@@ -172,9 +212,16 @@ namespace ExpressiveAnnotations.Tests
                 Number = 0,
                 Flag = true,
                 Text = "hello world",
-                SmallerNumber = 13,
                 PoliticalStability = Utility.Stability.High,
-                PoliticalStabilityBytes = Utility.StabilityBytes.High,
+
+                SbyteNumber = SbyteEnum.First,
+                ByteNumber = ByteEnum.First,
+                ShortNumber = ShortEnum.First,
+                UshortNumber = UshortEnum.First,
+                IntNumber = IntEnum.First,
+                UintNumber = UintEnum.First,
+                LongNumber = LongEnum.First,
+                UlongNumber = UlongEnum.First,
 
                 SubModel = new Model
                 {
@@ -182,9 +229,7 @@ namespace ExpressiveAnnotations.Tests
                     Number = 1,
                     Flag = false,
                     Text = " hello world ",
-                    SmallerNumber = 1,
                     PoliticalStability = null,
-                    PoliticalStabilityBytes = null,
                 }
             };
 
@@ -194,21 +239,20 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse(model.GetType(), "Number != null").Invoke(model));
             Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.Number / 2 == 0.5").Invoke(model));
 
-            Assert.IsTrue(parser.Parse<Model>("SmallerNumber != 1").Invoke(model));
-            Assert.IsTrue(parser.Parse<Model>("SmallerNumber == 13").Invoke(model));
-            Assert.IsTrue(parser.Parse<Model>("SubModel.SmallerNumber / 2 == 0.5").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("SbyteNumber / SbyteEnum.Second == 0.5").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("ByteNumber / ByteEnum.Second == 0.5").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("ShortNumber / ShortEnum.Second == 0.5").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("UshortNumber / UshortEnum.Second == 0.5").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("IntNumber / IntEnum.Second == 0.5").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("UintNumber / UintEnum.Second == 0.5").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("LongNumber / LongEnum.Second == 0.5").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("UlongNumber / UlongEnum.Second == 0.5").Invoke(model));
 
             Assert.IsTrue(parser.Parse<Model>("PoliticalStability == 0").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("PoliticalStability == Utility.Stability.High").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("PoliticalStability < Utility.Stability.Low").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("SubModel.PoliticalStability == null").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("SubModel.PoliticalStability != Utility.Stability.High").Invoke(model));
-
-            Assert.IsTrue(parser.Parse<Model>("PoliticalStabilityBytes == 0").Invoke(model));
-            Assert.IsTrue(parser.Parse<Model>("PoliticalStabilityBytes == Utility.StabilityBytes.High").Invoke(model));
-            Assert.IsTrue(parser.Parse<Model>("PoliticalStabilityBytes < Utility.StabilityBytes.Low").Invoke(model));
-            Assert.IsTrue(parser.Parse<Model>("SubModel.PoliticalStabilityBytes == null").Invoke(model));
-            Assert.IsTrue(parser.Parse<Model>("SubModel.PoliticalStabilityBytes != Utility.StabilityBytes.High").Invoke(model));
 
             Assert.IsTrue(parser.Parse<Model>("Flag").Invoke(model));
             Assert.IsFalse(parser.Parse<Model>("!Flag").Invoke(model));
@@ -235,8 +279,7 @@ namespace ExpressiveAnnotations.Tests
                 "Flag == true " +
                     "&& (" +
                             "(Text != \"hello world\" && Date < SubModel.Date) " +
-                            "|| ((Number >= 0 && Number < 1) && PoliticalStability == Utility.Stability.High" +
-                            " && PoliticalStabilityBytes == Utility.StabilityBytes.High)" +
+                            "|| ((Number >= 0 && Number < 1) && PoliticalStability == Utility.Stability.High)" +
                         ")";
             var func = parser.Parse(model.GetType(), expression);
             Assert.IsTrue(func(model));
@@ -249,8 +292,7 @@ namespace ExpressiveAnnotations.Tests
                 {"Date", typeof (DateTime)},
                 {"SubModel.Date", typeof (DateTime)},
                 {"Number", typeof (int?)},
-                {"PoliticalStability", typeof (Utility.Stability?)},
-                {"PoliticalStabilityBytes", typeof (Utility.StabilityBytes?)}
+                {"PoliticalStability", typeof (Utility.Stability?)}
             };
             Assert.AreEqual(expectedFields.Count, parsedFields.Count);
             Assert.IsTrue(
@@ -261,8 +303,7 @@ namespace ExpressiveAnnotations.Tests
             var parsedConsts = parser.GetConsts();
             var expectedConsts = new Dictionary<string, object>
             {
-                {"Utility.Stability.High", Utility.Stability.High},
-                {"Utility.StabilityBytes.High", Utility.StabilityBytes.High}
+                {"Utility.Stability.High", Utility.Stability.High}
             };
             Assert.AreEqual(expectedConsts.Count, parsedConsts.Count);
             Assert.IsTrue(
