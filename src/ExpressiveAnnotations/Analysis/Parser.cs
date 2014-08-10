@@ -453,14 +453,14 @@ namespace ExpressiveAnnotations.Analysis
             var parts = name.Split('.');
             if (parts.Count() > 1)
             {
-                name = string.Join(".", parts.Take(parts.Count() - 1).ToList());
+                var enumTypeName = string.Join(".", parts.Take(parts.Count() - 1).ToList());
                 var enumTypes = AppDomain.CurrentDomain.GetAssemblies()
-                    .SelectMany(a => a.GetLoadableTypes()).Where(t => t.IsEnum && t.FullName.Replace("+", ".").EndsWith(name)).ToList();
+                    .SelectMany(a => a.GetLoadableTypes()).Where(t => t.IsEnum && t.FullName.Replace("+", ".").EndsWith(enumTypeName)).ToList();
 
                 if (enumTypes.Count() > 1)
                     throw new InvalidOperationException(
                         string.Format("Enum {0} is ambiguous, found following:{1}",
-                            name, Environment.NewLine + string.Join(Environment.NewLine, enumTypes.Select(x => x.FullName))));
+                            enumTypeName, Environment.NewLine + string.Join(Environment.NewLine, enumTypes.Select(x => x.FullName))));
 
                 var type = enumTypes.SingleOrDefault();
                 if (type != null)

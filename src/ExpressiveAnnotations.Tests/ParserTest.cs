@@ -194,31 +194,31 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse(model.GetType(), "Number != null").Invoke(model));
             Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.Number / 2 == 0.5").Invoke(model));
 
-            Assert.IsTrue(parser.Parse(model.GetType(), "SmallerNumber != 1").Invoke(model));
-            Assert.IsTrue(parser.Parse(model.GetType(), "SmallerNumber == 13").Invoke(model));
-            Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.SmallerNumber / 2 == 0.5").Invoke(model));  
+            Assert.IsTrue(parser.Parse<Model>("SmallerNumber != 1").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("SmallerNumber == 13").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("SubModel.SmallerNumber / 2 == 0.5").Invoke(model));
 
-            Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability == 0").Invoke(model));
-            Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability == Utility.Stability.High").Invoke(model));
-            Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStability < Utility.Stability.Low").Invoke(model));
-            Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.PoliticalStability == null").Invoke(model));
-            Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.PoliticalStability != Utility.Stability.High").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("PoliticalStability == 0").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("PoliticalStability == Utility.Stability.High").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("PoliticalStability < Utility.Stability.Low").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("SubModel.PoliticalStability == null").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("SubModel.PoliticalStability != Utility.Stability.High").Invoke(model));
 
-            Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStabilityBytes == 0").Invoke(model));
-            Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStabilityBytes == Utility.StabilityBytes.High").Invoke(model));
-            Assert.IsTrue(parser.Parse(model.GetType(), "PoliticalStabilityBytes < Utility.StabilityBytes.Low").Invoke(model));
-            Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.PoliticalStabilityBytes == null").Invoke(model));
-            Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.PoliticalStabilityBytes != Utility.StabilityBytes.High").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("PoliticalStabilityBytes == 0").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("PoliticalStabilityBytes == Utility.StabilityBytes.High").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("PoliticalStabilityBytes < Utility.StabilityBytes.Low").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("SubModel.PoliticalStabilityBytes == null").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("SubModel.PoliticalStabilityBytes != Utility.StabilityBytes.High").Invoke(model));
 
-            Assert.IsTrue(parser.Parse(model.GetType(), "Flag").Invoke(model));
-            Assert.IsFalse(parser.Parse(model.GetType(), "!Flag").Invoke(model));
-            Assert.IsTrue(parser.Parse(model.GetType(), "Flag && true").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Flag").Invoke(model));
+            Assert.IsFalse(parser.Parse<Model>("!Flag").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Flag && true").Invoke(model));
 
-            Assert.IsFalse(parser.Parse(model.GetType(), "SubModel.Flag").Invoke(model));
-            Assert.IsTrue(parser.Parse(model.GetType(), "!SubModel.Flag").Invoke(model));
-            Assert.IsFalse(parser.Parse(model.GetType(), "SubModel.Flag && true").Invoke(model));
+            Assert.IsFalse(parser.Parse<Model>("SubModel.Flag").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("!SubModel.Flag").Invoke(model));
+            Assert.IsFalse(parser.Parse<Model>("SubModel.Flag && true").Invoke(model));
 
-            Assert.IsTrue(parser.Parse(model.GetType(), "Number < SubModel.Number").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Number < SubModel.Number").Invoke(model));
 
             Assert.IsTrue(parser.Parse<Model>("SubModel.Date < NextWeek()").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("IncNumber(0) == SubModel.Number").Invoke(model));
@@ -238,11 +238,11 @@ namespace ExpressiveAnnotations.Tests
                             "|| ((Number >= 0 && Number < 1) && PoliticalStability == Utility.Stability.High" +
                             " && PoliticalStabilityBytes == Utility.StabilityBytes.High)" +
                         ")";
-
             var func = parser.Parse(model.GetType(), expression);
-            Assert.IsTrue(func.Invoke(model));
-            var parsedMembers = parser.GetFields();
-            var expectedMembers = new Dictionary<string, Type>
+            Assert.IsTrue(func(model));
+
+            var parsedFields = parser.GetFields();
+            var expectedFields = new Dictionary<string, Type>
             {
                 {"Flag", typeof (bool)},
                 {"Text", typeof (string)},
@@ -252,23 +252,23 @@ namespace ExpressiveAnnotations.Tests
                 {"PoliticalStability", typeof (Utility.Stability?)},
                 {"PoliticalStabilityBytes", typeof (Utility.StabilityBytes?)}
             };
-            Assert.AreEqual(expectedMembers.Count, parsedMembers.Count);
+            Assert.AreEqual(expectedFields.Count, parsedFields.Count);
             Assert.IsTrue(
-                expectedMembers.Keys.All(
-                    key => parsedMembers.ContainsKey(key) &&
-                           EqualityComparer<Type>.Default.Equals(expectedMembers[key], parsedMembers[key])));
+                expectedFields.Keys.All(
+                    key => parsedFields.ContainsKey(key) &&
+                           EqualityComparer<Type>.Default.Equals(expectedFields[key], parsedFields[key])));
 
-            var parsedEnums = parser.GetConsts();
-            var expectedEnums = new Dictionary<string, object>
+            var parsedConsts = parser.GetConsts();
+            var expectedConsts = new Dictionary<string, object>
             {
-                {"Utility.Stability", Utility.Stability.High},
-                {"Utility.StabilityBytes", Utility.StabilityBytes.High}
+                {"Utility.Stability.High", Utility.Stability.High},
+                {"Utility.StabilityBytes.High", Utility.StabilityBytes.High}
             };
-            Assert.AreEqual(expectedEnums.Count, parsedEnums.Count);
+            Assert.AreEqual(expectedConsts.Count, parsedConsts.Count);
             Assert.IsTrue(
-                expectedEnums.Keys.All(
-                    key => parsedEnums.ContainsKey(key) &&
-                           EqualityComparer<object>.Default.Equals(expectedEnums[key], parsedEnums[key])));
+                expectedConsts.Keys.All(
+                    key => parsedConsts.ContainsKey(key) &&
+                           EqualityComparer<object>.Default.Equals(expectedConsts[key], parsedConsts[key])));
         }
 
         [TestMethod]
