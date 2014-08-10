@@ -18,7 +18,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         private string FormattedErrorMessage { get; set; }        
         private bool AllowEmpty { get; set; }
         private IDictionary<string, string> FieldsMap { get; set; }
-        private IDictionary<string, object> ValuesMap { get; set; }
+        private IDictionary<string, object> ConstsMap { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequiredIfValidator" /> class.
@@ -36,20 +36,20 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
                 var fieldsId = string.Format("fields.{0}", attribId);
                 var constsId = string.Format("consts.{0}", attribId);
                 FieldsMap = HttpRuntime.Cache.Get(fieldsId) as IDictionary<string, string>;
-                ValuesMap = HttpRuntime.Cache.Get(constsId) as IDictionary<string, object>;
+                ConstsMap = HttpRuntime.Cache.Get(constsId) as IDictionary<string, object>;
 
-                if (FieldsMap == null && ValuesMap == null)
+                if (FieldsMap == null && ConstsMap == null)
                 {
                     var parser = new Parser();
                     parser.RegisterMethods();
                     parser.Parse(metadata.ContainerType, attribute.Expression);
 
                     FieldsMap = parser.GetFields().ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value));
-                    ValuesMap = parser.GetConsts();
+                    ConstsMap = parser.GetConsts();
 
-                    Assert.NoNamingCollisionsAtCorrespondingSegments(FieldsMap.Keys, ValuesMap.Keys);
+                    Assert.NoNamingCollisionsAtCorrespondingSegments(FieldsMap.Keys, ConstsMap.Keys);
                     HttpContext.Current.Cache.Insert(fieldsId, FieldsMap);
-                    HttpContext.Current.Cache.Insert(constsId, ValuesMap);
+                    HttpContext.Current.Cache.Insert(constsId, ConstsMap);
                 }
 
                 Expression = attribute.Expression;
@@ -79,7 +79,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
             };
             rule.ValidationParameters.Add("expression", JsonConvert.SerializeObject(Expression));
             rule.ValidationParameters.Add("fieldsmap", JsonConvert.SerializeObject(FieldsMap));
-            rule.ValidationParameters.Add("constsmap", JsonConvert.SerializeObject(ValuesMap));
+            rule.ValidationParameters.Add("constsmap", JsonConvert.SerializeObject(ConstsMap));
             rule.ValidationParameters.Add("allowempty", JsonConvert.SerializeObject(AllowEmpty));
             yield return rule;
         }
