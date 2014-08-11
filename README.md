@@ -86,7 +86,7 @@ rel-op     => "==" | "!=" | ">" | ">=" | "<" | "<="
 val        => "null" | int | float | bool | string | func | "(" or-exp ")"
 ```
 
-Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar, except for int, float, bool, string, func, which are assumed to be implicitly defined. Func can be an enum value as well as property or function name.
+Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar, except for int, float, bool, string, func, which are assumed to be implicitly defined. Func can be an enum value as well as constant, property or function name.
 
 Preserving the syntax defined by the grammar above, logical expressions can be built using following components:
 
@@ -100,8 +100,9 @@ Preserving the syntax defined by the grammar above, logical expressions can be b
   * real number literals, e.g. `1.5` or `-0.3e-2`,
   * boolean literals: `true` and `false`,
   * string literals, e.g. `'in single quotes'` or `\"in escaped double quotes\"`, 
-  * name literals: property, function names and enum values, e.g.
-      * property names, e.g. `SomeProperty`,      
+  * name literals: properties, functions, constants and enums, e.g.
+      * property names, e.g. `SomeProperty`,
+	  * constants, e.g. `SomeType.CONST`,
       * enum values, e.g. `SomeEnumType.SomeValue`,
 	  * function invocations, e.g. `SomeFunction(...)`.
 

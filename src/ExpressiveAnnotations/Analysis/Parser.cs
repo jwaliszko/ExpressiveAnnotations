@@ -421,9 +421,9 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ExtractFieldExpression(string name)
         {
-            var expression = FetchPropertyValue(name) ?? FetchEnumValue(name);
+            var expression = FetchPropertyValue(name) ?? FetchEnumValue(name) ?? FetchConstValue(name);
             if (expression == null)
-                throw new InvalidOperationException(string.Format("Only public properties or enums are accepted. Invalid identifier: {0}", name));
+                throw new InvalidOperationException(string.Format("Only public properties, constants and enums are accepted. Invalid identifier: {0}", name));
 
             return expression;
         }        
@@ -455,7 +455,9 @@ namespace ExpressiveAnnotations.Analysis
             {
                 var enumTypeName = string.Join(".", parts.Take(parts.Count() - 1).ToList());
                 var enumTypes = AppDomain.CurrentDomain.GetAssemblies()
-                    .SelectMany(a => a.GetLoadableTypes()).Where(t => t.IsEnum && t.FullName.Replace("+", ".").EndsWith(enumTypeName)).ToList();
+                    .SelectMany(a => a.GetLoadableTypes())
+                    .Where(t => t.IsEnum && t.FullName.Replace("+", ".").EndsWith(enumTypeName))
+                    .ToList();
 
                 if (enumTypes.Count() > 1)
                     throw new InvalidOperationException(
@@ -466,6 +468,49 @@ namespace ExpressiveAnnotations.Analysis
                 if (type != null)
                 {
                     var value = Enum.Parse(type, parts.Last());
+                    Consts[name] = value;
+                    return Expression.Constant(value);
+                }
+            }
+            return null;
+        }
+
+        private Expression FetchConstValue(string name)
+        {
+            var parts = name.Split('.');
+            if (parts.Count() > 1)
+            {
+                var constTypeName = string.Join(".", parts.Take(parts.Count() - 1).ToList());
+                var constants = AppDomain.CurrentDomain.GetAssemblies()
+                    .SelectMany(a => a.GetLoadableTypes())
+                    .Where(t => t.FullName.Replace("+", ".").EndsWith(constTypeName))
+                    .SelectMany(
+                        t => t.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+                            .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name.Equals(parts.Last())))
+                    .ToList();
+
+                if (constants.Count() > 1)
+                    throw new InvalidOperationException(
+                        string.Format("Constant {0} is ambiguous, found following:{1}",
+                            name, Environment.NewLine + string.Join(Environment.NewLine,
+                                constants.Select(x => string.Format("{0}.{1}", x.ReflectedType.FullName, x.Name)))));
+
+                var constant = constants.SingleOrDefault();
+                if (constant != null)
+                {
+                    var value = constant.GetRawConstantValue();
+                    Consts[name] = value;
+                    return Expression.Constant(value);
+                }
+            }
+            else
+            {
+                var constant = ContextType.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+                    .SingleOrDefault(fi => fi.IsLiteral && !fi.IsInitOnly);
+
+                if (constant != null)
+                {
+                    var value = constant.GetRawConstantValue();
                     Consts[name] = value;
                     return Expression.Constant(value);
                 }

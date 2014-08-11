@@ -9,6 +9,8 @@ namespace ExpressiveAnnotations.Tests
 {
     public class Utility
     {
+        public const string CONST = "outside";
+
         public enum Stability
         {
             High,
@@ -77,6 +79,13 @@ namespace ExpressiveAnnotations.Tests
 
         private class Model
         {
+            public Model()
+            {
+                var x = Utility.CONST;
+            }
+
+            public const string CONST = "inside";
+
             public Model SubModel { get; set; }
 
             public DateTime Date { get; set; }
@@ -254,6 +263,8 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<Model>("SubModel.PoliticalStability == null").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("SubModel.PoliticalStability != Utility.Stability.High").Invoke(model));
 
+            Assert.IsTrue(parser.Parse<Model>("CONST != Utility.CONST").Invoke(model));
+
             Assert.IsTrue(parser.Parse<Model>("Flag").Invoke(model));
             Assert.IsFalse(parser.Parse<Model>("!Flag").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("Flag && true").Invoke(model));
@@ -279,8 +290,11 @@ namespace ExpressiveAnnotations.Tests
                 "Flag == true " +
                     "&& (" +
                             "(Text != \"hello world\" && Date < SubModel.Date) " +
-                            "|| ((Number >= 0 && Number < 1) && PoliticalStability == Utility.Stability.High)" +
-                        ")";
+                            "|| (" +
+                                    "(Number >= 0 && Number < 1) && PoliticalStability == Utility.Stability.High" +
+                                ")" +                            
+                        ")" +
+                    "&& CONST + Utility.CONST == 'insideoutside'";
             var func = parser.Parse(model.GetType(), expression);
             Assert.IsTrue(func(model));
 
@@ -292,7 +306,7 @@ namespace ExpressiveAnnotations.Tests
                 {"Date", typeof (DateTime)},
                 {"SubModel.Date", typeof (DateTime)},
                 {"Number", typeof (int?)},
-                {"PoliticalStability", typeof (Utility.Stability?)}
+                {"PoliticalStability", typeof (Utility.Stability?)}                
             };
             Assert.AreEqual(expectedFields.Count, parsedFields.Count);
             Assert.IsTrue(
@@ -303,7 +317,9 @@ namespace ExpressiveAnnotations.Tests
             var parsedConsts = parser.GetConsts();
             var expectedConsts = new Dictionary<string, object>
             {
-                {"Utility.Stability.High", Utility.Stability.High}
+                {"Utility.Stability.High", Utility.Stability.High},
+                {"CONST", Model.CONST},
+                {"Utility.CONST", Utility.CONST}
             };
             Assert.AreEqual(expectedConsts.Count, parsedConsts.Count);
             Assert.IsTrue(
