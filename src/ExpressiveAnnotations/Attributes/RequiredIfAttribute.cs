@@ -42,9 +42,16 @@ namespace ExpressiveAnnotations.Attributes
         /// Parses and compiles expression provided to the attribute. Compiled lambda is then cached and used for validation purposes.
         /// </summary>
         /// <param name="validationContextType">The type of the object to be validated.</param>
-        public void Compile(Type validationContextType)
+        /// <param name="force">Flag indicating whether parsing should be rerun despite the fact compiled lambda already exists.</param>
+        public void Compile(Type validationContextType, bool force = false)
         {
-            CachedValidationFunc = Parser.Parse(validationContextType, Expression);
+            if (force)
+            {
+                CachedValidationFunc = Parser.Parse(validationContextType, Expression);
+                return;
+            }
+            if (CachedValidationFunc == null)
+                CachedValidationFunc = Parser.Parse(validationContextType, Expression);
         }
 
         /// <summary>
