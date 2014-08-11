@@ -49,6 +49,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
                     Assert.NoNamingCollisionsAtCorrespondingSegments(FieldsMap.Keys, ConstsMap.Keys);
                     HttpContext.Current.Cache.Insert(fieldsId, FieldsMap);
                     HttpContext.Current.Cache.Insert(constsId, ConstsMap);
+
+                    attribute.Compile(metadata.ContainerType);
                 }
 
                 Expression = attribute.Expression;

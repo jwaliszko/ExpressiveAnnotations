@@ -39,6 +39,15 @@ namespace ExpressiveAnnotations.Attributes
         }
 
         /// <summary>
+        /// Parses and compiles expression provided to the attribute. Compiled lambda is then cached and used for validation purposes.
+        /// </summary>
+        /// <param name="validationContextType">The type of the object to be validated.</param>
+        public void Compile(Type validationContextType)
+        {
+            CachedValidationFunc = Parser.Parse(validationContextType, Expression);
+        }
+
+        /// <summary>
         /// Formats the error message.
         /// </summary>
         /// <param name="displayName">The user-visible name of the required field to include in the formatted message.</param>
