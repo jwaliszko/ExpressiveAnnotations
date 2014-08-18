@@ -437,5 +437,32 @@ namespace ExpressiveAnnotations.Tests
             Assert.AreEqual(1, parser.GetFields().Count);
             Assert.AreEqual(1, parser.GetConsts().Count);
         }
+
+        [TestMethod]
+        public void verify_toolchain_methods()
+        {
+            var parser = new Parser();
+            parser.RegisterMethods();
+
+            Assert.IsTrue(parser.Parse<object>("Now() > Today()").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Length('1234') == 4").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Trim(' a b c ') == 'a b c'").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Concat(' a ', ' b ') == ' a  b '").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Concat('', '', '') == ''").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinal(' abc ', ' ABC ') > 0").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinalIgnoreCase(' abc ', ' ABC ') == 0").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("StartsWith(' ab c', ' A') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("StartsWithIgnoreCase(' ab c', ' A') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("EndsWith(' ab c', ' C') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("EndsWithIgnoreCase(' ab c', ' C') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Contains(' ab c', 'B ') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("ContainsIgnoreCase(' ab c', 'B ') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNullOrWhiteSpace('    ') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsDigitChain('0123456789') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber('-0.3e-2') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsEmail('nickname@domain.com') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsUrl('http://www.github.com/') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsRegexMatch('-0.3e-2', '^[\\+-]?\\d*\\.?\\d+(?:[eE][\\+-]?\\d+)?$') == true").Invoke(null));
+        }
     }
 }

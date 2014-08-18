@@ -288,6 +288,11 @@ var
                 window.ea = backup;
             }
             return this;
+        },
+        ___6BE7863DC1DB4AFAA61BB53FF97FE169 : {
+            typeHelper: typeHelper,
+            modelHelper: modelHelper,
+            toolchain: toolchain
         }
     };
 
