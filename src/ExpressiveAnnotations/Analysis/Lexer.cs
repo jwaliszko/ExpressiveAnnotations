@@ -13,12 +13,14 @@ namespace ExpressiveAnnotations.Analysis
         private Token Token { get; set; }
         private string Expression { get; set; }
         private IDictionary<TokenType, string> RegexMap { get; set; }
+        private IDictionary<TokenType, Regex> CompiledRegexMap { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Lexer" /> class.
         /// </summary>
         public Lexer()
         {
+            // special characters (should be escaped if needed): .$^{[(|)*+?\
             RegexMap = new Dictionary<TokenType, string>
             {
                 {TokenType.AND, @"&&"},
@@ -31,15 +33,15 @@ namespace ExpressiveAnnotations.Analysis
                 {TokenType.LT, @"<"},
                 {TokenType.EQ, @"=="},
                 {TokenType.NEQ, @"!="},
-                {TokenType.NOT, @"\!"},
+                {TokenType.NOT, @"!"},
                 {TokenType.NULL, @"null"},
                 {TokenType.COMMA, @","},
-                {TokenType.FLOAT, @"[-+]?\d*\.\d+([eE][-+]?\d+)?"},
-                {TokenType.INT, @"[-+]?\d+"},
+                {TokenType.FLOAT, @"[\+-]?\d*\.\d+(?:[eE][\+-]?\d+)?"},
+                {TokenType.INT, @"[\+-]?\d+"},
                 {TokenType.ADD, @"\+"},
                 {TokenType.SUB, @"-"},
                 {TokenType.MUL, @"\*"},
-                {TokenType.DIV, @"\/"},
+                {TokenType.DIV, @"/"},
                 {TokenType.BOOL, @"(true|false)"},
                 {TokenType.STRING, @"([""'])(?:\\\1|.)*?\1"},
                 {TokenType.FUNC, @"[a-zA-Z]+([\.]*[a-zA-Z0-9]*)*"}
@@ -60,8 +62,9 @@ namespace ExpressiveAnnotations.Analysis
                 throw new ArgumentNullException("expression", "Expression not provided.");
 
             Expression = expression;
+            CompiledRegexMap = RegexMap.ToDictionary(kvp => kvp.Key, kvp => new Regex(string.Format("^{0}", kvp.Value), RegexOptions.Compiled));
 
-            var tokens = new List<Token>();            
+            var tokens = new List<Token>();
             while (Next())
                 tokens.Add(Token);
 
@@ -77,9 +80,9 @@ namespace ExpressiveAnnotations.Analysis
             if (string.IsNullOrEmpty(Expression))
                 return false;
 
-            foreach (var kvp in RegexMap)
+            foreach (var kvp in CompiledRegexMap)
             {
-                var regex = new Regex(string.Format("^{0}", kvp.Value));
+                var regex = kvp.Value;
                 var match = regex.Match(Expression);
                 var value = match.Value;
                 if (value.Any())
