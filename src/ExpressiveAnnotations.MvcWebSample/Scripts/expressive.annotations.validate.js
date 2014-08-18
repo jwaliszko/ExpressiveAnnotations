@@ -24,7 +24,10 @@ var
                 if (typeHelper.isString(value)) {
                     return value;
                 }
-                return { error: true, msg: 'Parsing error. Given value has no boolean meaning.' };
+                if (value !== undefined && value !== null) {
+                    return value.toString();
+                }
+                return { error: true, msg: 'Parsing error. Given value has no string meaning.' };
             }
         },
         bool: {
@@ -150,12 +153,50 @@ var
                 strA = (strA !== null && strA !== undefined) ? strA.toLowerCase() : null;
                 strB = (strB !== null && strB !== undefined) ? strB.toLowerCase() : null;
                 return this.CompareOrdinal(strA, strB);
+            });            
+            this.addMethod("StartsWith", function(str, prefix) {
+                return str !== null && str !== undefined && prefix !== null && prefix !== undefined && str.slice(0, prefix.length) === prefix;
+            });
+            this.addMethod("StartsWithIgnoreCase", function(str, prefix) {
+                str = (str !== null && str !== undefined) ? str.toLowerCase() : null;
+                prefix = (prefix !== null && prefix !== undefined) ? prefix.toLowerCase() : null;
+                return this.StartsWith(str, prefix);
+            });
+            this.addMethod("EndsWith", function(str, suffix) {
+                return str !== null && str !== undefined && suffix !== null && suffix !== undefined && str.slice(-suffix.length) === suffix;
+            });
+            this.addMethod("EndsWithIgnoreCase", function(str, suffix) {
+                str = (str !== null && str !== undefined) ? str.toLowerCase() : null;
+                suffix = (suffix !== null && suffix !== undefined) ? suffix.toLowerCase() : null;
+                return this.EndsWith(str, suffix);
+            });
+            this.addMethod("Contains", function(str, chunk) {
+                return str !== null && str !== undefined && chunk !== null && chunk !== undefined && str.indexOf(chunk) > -1;
+            });
+            this.addMethod("ContainsIgnoreCase", function(str, chunk) {
+                str = (str !== null && str !== undefined) ? str.toLowerCase() : null;
+                chunk = (chunk !== null && chunk !== undefined) ? chunk.toLowerCase() : null;
+                return this.Contains(str, chunk);
             });
             this.addMethod("IsNullOrWhiteSpace", function(str) {
                 return str === null || !/\S/.test(str);
             });
+            this.addMethod("IsDigitChain", function(str) {
+                return /^\d+$/.test(str);
+            });
             this.addMethod("IsNumber", function(str) {
-                return (/^[\-+]?\d+$/).test(str) || (/^[\-+]?\d*\.\d+([eE][\-+]?\d+)?$/).test(str);
+                return /^[\+-]?\d*\.?\d+(?:[eE][\+-]?\d+)?$/.test(str);
+            });
+            this.addMethod("IsEmail", function(str) {
+                // taken from HTML5 specification: http://www.w3.org/TR/html5/forms.html#e-mail-state-(type=email)
+                return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(str);
+            });
+            this.addMethod("IsUrl", function(str) {
+                // contributed by Diego Perini: https://gist.github.com/dperini/729294 (https://mathiasbynens.be/demo/url-regex)
+                return /^(?:(?:https?|ftp):\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/i.test(str);
+            });
+            this.addMethod("IsRegexMatch", function(str, regex) {
+                return str !== null && str !== undefined && regex !== null && regex !== undefined && new RegExp(regex).test(str);
             });
         }
     },
