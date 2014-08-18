@@ -151,11 +151,29 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Only digits are accepted..
+        /// </summary>
+        public static string DigitsOnlyAccepted {
+            get {
+                return ResourceManager.GetString("DigitsOnlyAccepted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to E-mail.
         /// </summary>
         public static string Email {
             get {
                 return ResourceManager.GetString("Email", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provided e-mail address has invalid format..
+        /// </summary>
+        public static string EmailFormatInvalid {
+            get {
+                return ResourceManager.GetString("EmailFormatInvalid", resourceCulture);
             }
         }
         

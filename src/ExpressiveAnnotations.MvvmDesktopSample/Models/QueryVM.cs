@@ -94,6 +94,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
         }
 
         [RequiredIf("GoAbroad == true")]
+        [AssertThat("IsDigitChain(PassportNumber)")]
         public string PassportNumber
         {
             get { return _passportNumber; }
@@ -223,7 +224,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             }
         }
 
-        [RequiredIf("AgreeForContact == true")]
+        [RequiredIf("AgreeForContact == true && (ContactDetails.Email != null || ContactDetails.Phone != null)")]
         public bool? ImmediateContact
         {
             get { return _immediateContact; }
@@ -265,7 +266,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
 
         public bool IsBloodType(string group)
         {
-            return Regex.IsMatch(group, "^(A|B|AB|0)[+-]$");
+            return Regex.IsMatch(group, @"^(A|B|AB|0)[\+-]$");
         }
     }
 }

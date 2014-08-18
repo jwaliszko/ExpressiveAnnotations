@@ -8,6 +8,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
         private string _phone;
 
         [RequiredIf("Phone == null")]
+        [AssertThat("IsEmail(Email)")]
         public string Email
         {
             get { return _email; }
@@ -19,6 +20,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
         }
 
         [RequiredIf("Email == null")]
+        [AssertThat("IsDigitChain(Phone)")]
         public string Phone
         {
             get { return _phone; }

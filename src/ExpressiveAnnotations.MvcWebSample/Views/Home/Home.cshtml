@@ -46,6 +46,7 @@
             <li>
                 <pre class="code">
 [RequiredIf("GoAbroad == true")]
+[AssertThat("IsDigitChain(PassportNumber)")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.PassportNumber, new { @class = "inline prefix" })
@@ -149,7 +150,7 @@
             </li>
             <li>
                 <pre class="code">
-[RequiredIf("AgreeForContact == true")]
+[RequiredIf("AgreeForContact == true && (ContactDetails.Email != null || ContactDetails.Phone != null)")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.ImmediateContact, new { @class = "inline prefix" })
@@ -169,7 +170,7 @@
 
         <script>
             // var expann = ea.noConflict(); expann.addMethod... - in case of conflict
-            ea.addMethod('IsBloodType', function (group) { return /^(A|B|AB|0)[+-]$/.test(group); });
+            ea.addMethod('IsBloodType', function (group) { return /^(A|B|AB|0)[\+-]$/.test(group); });
         </script>
     }
 

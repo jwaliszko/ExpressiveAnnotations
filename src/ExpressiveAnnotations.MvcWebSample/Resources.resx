@@ -147,8 +147,14 @@
   <data name="Country" xml:space="preserve">
     <value>Country</value>
   </data>
+  <data name="DigitsOnlyAccepted" xml:space="preserve">
+    <value>Only digits are accepted.</value>
+  </data>
   <data name="Email" xml:space="preserve">
     <value>E-mail</value>
+  </data>
+  <data name="EmailFormatInvalid" xml:space="preserve">
+    <value>Provided e-mail address has invalid format.</value>
   </data>
   <data name="EmailOrPhoneRequired" xml:space="preserve">
     <value>You do not enter any contact information. At least e-mail or phone should be provided.</value>

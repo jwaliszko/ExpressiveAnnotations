@@ -63,7 +63,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public int? Age { get; set; }
 
         [RequiredIf("GoAbroad == true",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]        
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]
+        [AssertThat("IsDigitChain(PassportNumber)",
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "DigitsOnlyAccepted")]
         [Display(ResourceType = typeof (Resources), Name = "PassportNumber")]
         public string PassportNumber { get; set; }
 
@@ -72,7 +74,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 
         [Display(ResourceType = typeof (Resources), Name = "NextCountry")]
         public string NextCountry { get; set; }
-
+        
         [RequiredIf("GoAbroad == true " +
                     "&& (" +
                             "(NextCountry != 'Other' && NextCountry == Country) " +
@@ -86,7 +88,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public DateTime LatestSuggestedReturnDate { get; set; }
 
         [RequiredIf("GoAbroad == true",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]        
         [AssertThat("ReturnDate >= Today()",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FutureDateRequired")]
         [Display(ResourceType = typeof (Resources), Name = "ReturnDate")]
@@ -126,7 +128,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "AgreeForContact")]
         public bool AgreeForContact { get; set; }
 
-        [RequiredIf("AgreeForContact == true",
+        [RequiredIf("AgreeForContact == true && (ContactDetails.Email != null || ContactDetails.Phone != null)",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ImmediateContactRequired")]
         [Display(ResourceType = typeof (Resources), Name = "ImmediateContact")]
         public bool? ImmediateContact { get; set; }
@@ -135,7 +137,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 
         public bool IsBloodType(string group)
         {
-            return Regex.IsMatch(group, "^(A|B|AB|0)[+-]$");
+            return Regex.IsMatch(group, @"^(A|B|AB|0)[\+-]$");
         }
     }
 }
