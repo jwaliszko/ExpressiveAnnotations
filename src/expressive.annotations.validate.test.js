@@ -3,10 +3,32 @@
 ///<reference path="./packages/Microsoft.jQuery.Unobtrusive.Validation.3.1.1/Content/Scripts/jquery.validate.unobtrusive.js"/>
 ///<reference path="./expressive.annotations.validate.js"/>
 
-//debugger; // enable firebug (preferably, check 'on for all web pages' option) for the debugger to aunch 
-(function($, window, ea) { //scoping function (top-level, usually anonymous, prevents global namespace pollution)
+//debugger; // enable firebug (preferably, check 'on for all web pages' option) for the debugger to launch 
+(function($, window, ea) {
 
     window.module("type helper");
+
+    test("verify_type_parsing", function() {
+        var result = ea.typeHelper.tryParse(undefined, "string");
+        window.equal(result.error, true);
+        window.equal(result.msg, "Given value was not recognized as a valid string.");
+
+        result = ea.typeHelper.tryParse("asd", "bool");
+        window.equal(result.error, true);
+        window.equal(result.msg, "Given value was not recognized as a valid boolean.");
+
+        result = ea.typeHelper.tryParse("", "numeric");
+        window.equal(result.error, true);
+        window.equal(result.msg, "Given value was not recognized as a valid float.");
+
+        result = ea.typeHelper.tryParse("", "datetime");
+        window.equal(result.error, true);
+        window.equal(result.msg, "Given value was not recognized as a valid RFC 2822 or ISO 8601 date.");
+
+        result = ea.typeHelper.tryParse("", "secret");
+        window.equal(result.error, true);
+        window.equal(result.msg, "Supported types: datetime, numeric, string and bool. Invalid target type: secret");
+    });
 
     test("verify_string_formatting", function() {
         window.equal(ea.typeHelper.string.format("{0}", "a"), "a");
@@ -27,7 +49,7 @@
 
         var result = ea.typeHelper.string.tryParse(undefined);
         window.equal(result.error, true);
-        window.equal(result.msg, "Parsing error. Given value has no string meaning.");
+        window.equal(result.msg, "Given value was not recognized as a valid string.");        
     });
 
     test("verify_bool_parsing", function() {
@@ -40,7 +62,7 @@
 
         var result = ea.typeHelper.bool.tryParse("asd");
         window.equal(result.error, true);
-        window.equal(result.msg, "Parsing error. Given value has no boolean meaning.");
+        window.equal(result.msg, "Given value was not recognized as a valid boolean.");        
     });
 
     test("verify_float_parsing", function() {
@@ -61,10 +83,10 @@
         window.equal(ea.typeHelper.float.tryParse("314e-2"), 3.14); // exponential notation string 
         window.equal(ea.typeHelper.float.tryParse(314e-2), 3.14); // exponential notation
 
-        // non-numeric valuer
+        // non-numeric values
         var result = ea.typeHelper.float.tryParse(""); // empty string
         window.equal(result.error, true);
-        window.equal(result.msg, "Parsing error. Given value has no numeric meaning.");
+        window.equal(result.msg, "Given value was not recognized as a valid float.");
 
         window.ok(ea.typeHelper.float.tryParse(" ").error); // whitespace character
         window.ok(ea.typeHelper.float.tryParse("\t").error); // tab characters
@@ -80,7 +102,7 @@
         window.ok(ea.typeHelper.float.tryParse(+Infinity).error); // positive Infinity
         window.ok(ea.typeHelper.float.tryParse(-Infinity).error); // negative Infinity
         window.ok(ea.typeHelper.float.tryParse(new Date(Date.now())).error); // date object
-        window.ok(ea.typeHelper.float.tryParse({}).error); // empty object
+        window.ok(ea.typeHelper.float.tryParse({}).error); // empty object        
     });
 
     test("verify_date_parsing", function() {
@@ -92,7 +114,7 @@
 
         var result = ea.typeHelper.date.tryParse("");
         window.equal(result.error, true);
-        window.equal(result.msg, "Parsing error. Given value is not a string representing an RFC 2822 or ISO 8601 date.");
+        window.equal(result.msg, "Given value was not recognized as a valid RFC 2822 or ISO 8601 date.");        
     });
 
     test("verify_numeric_recognition", function() {
