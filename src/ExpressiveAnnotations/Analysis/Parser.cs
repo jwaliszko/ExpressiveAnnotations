@@ -355,6 +355,8 @@ namespace ExpressiveAnnotations.Analysis
                     return ParseBool();
                 case TokenType.STRING:
                     return ParseString();
+                case TokenType.GUID:
+                    return ParseGuid();
                 case TokenType.FUNC:
                     return ParseFunc();
                 default:
@@ -394,6 +396,13 @@ namespace ExpressiveAnnotations.Analysis
             var value = PeekValue();
             ReadToken();
             return Expression.Constant(value, typeof(string));
+        }
+
+        private Expression ParseGuid()
+        {
+            var value = PeekValue();
+            ReadToken();
+            return Expression.Constant(value, typeof(Guid));
         }
 
         private Expression ParseFunc()

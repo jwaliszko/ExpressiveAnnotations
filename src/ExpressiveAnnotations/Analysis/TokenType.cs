@@ -111,6 +111,11 @@
         STRING,
 
         /// <summary>
+        /// Guid.
+        /// </summary>
+        GUID,
+
+        /// <summary>
         /// Function.
         /// </summary>
         FUNC,
