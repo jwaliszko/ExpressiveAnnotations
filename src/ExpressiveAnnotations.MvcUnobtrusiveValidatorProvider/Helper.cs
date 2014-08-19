@@ -49,6 +49,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
                 return "string";
             if (type.IsBool())
                 return "bool";
+            if (type.IsGuid())
+                return "guid";
 
             return "complex";
         }
