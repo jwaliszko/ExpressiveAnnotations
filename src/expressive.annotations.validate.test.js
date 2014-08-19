@@ -117,6 +117,11 @@
         window.equal(result.msg, "Given value was not recognized as a valid RFC 2822 or ISO 8601 date.");        
     });
 
+    test("verify_guid_parsing", function () {
+        window.equal(ea.typeHelper.guid.tryParse("{11111111-1111-1111-1111-111111111111}"), "11111111-1111-1111-1111-111111111111");
+        window.equal(ea.typeHelper.guid.tryParse("11111111-1111-1111-1111-111111111111"), "11111111-1111-1111-1111-111111111111");
+    });
+
     test("verify_numeric_recognition", function() {
         window.ok(ea.typeHelper.isNumeric(1));
         window.ok(!ea.typeHelper.isNumeric(NaN));
