@@ -70,6 +70,16 @@ var
                 return { error: true, msg: 'Parsing error. Given value is not a string representing an RFC 2822 or ISO 8601 date.' };
             }
         },
+        guid: {
+            tryParse: function(value) {
+                var stringVal = typeHelper.string.tryParse(value);
+
+                if (stringVal.error)
+                    return { error: true, msg: 'Parsing error. Given value is not a string representing a Guid.' };
+
+                return stringVal.replace(/^{+|}+$/g, '');
+            }
+        },
         isNumeric: function(value) {
             return typeof value === 'number' && !isNaN(value);
         },
@@ -96,6 +106,9 @@ var
                     break;
                 case 'bool':
                     result = typeHelper.bool.tryParse(value);
+                    break;
+                case 'guid':
+                    result = typeHelper.guid.tryParse(value);
                     break;
                 default:
                     result = { error: true };
