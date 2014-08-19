@@ -291,7 +291,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<Model>("'hello world' == Trim(SubModel.Text)").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("CompareOrdinal(Text, Trim(SubModel.Text)) == 0").Invoke(model));
 
-            Assert.IsTrue(parser.Parse<Model>("guid1 != {00000000-0000-0000-0000-000000000000}").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("guid1 != '00000000-0000-0000-0000-000000000000'").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("guid2 == {00000000-0000-0000-0000-000000000000}").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("guid1 != guid2").Invoke(model));
 
