@@ -44,6 +44,7 @@ namespace ExpressiveAnnotations.Analysis
                 {TokenType.DIV, @"/"},
                 {TokenType.BOOL, @"(true|false)"},
                 {TokenType.STRING, @"([""'])(?:\\\1|.)*?\1"},
+                {TokenType.GUID, @"^(\{([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12}\})$"},
                 {TokenType.FUNC, @"[a-zA-Z]+([\.]*[a-zA-Z0-9]*)*"}
             };
         }
@@ -109,6 +110,8 @@ namespace ExpressiveAnnotations.Analysis
                     return bool.Parse(value);
                 case TokenType.STRING:
                     return value.Substring(1, value.Length - 2);
+                case TokenType.GUID:
+                    return Guid.Parse(value);
                 default:
                     return value;
             }

@@ -23,11 +23,21 @@ namespace ExpressiveAnnotations
                     ? Expression.Convert(oute2, typeof(double?))
                     : Expression.Convert(oute2, typeof(double));
 
+            //Attempt to convert strings to Guids
+            if (oute1.Type.IsGuid() && oute2.Type == typeof(string))
+                oute2 = Expression.New(typeof(Guid).GetConstructor(new[] { typeof(string) }), oute2);
+
             // non-nullable operand is converted to nullable if necessary, and the lifted-to-nullable form of the comparison is used (C# rule, which is currently not followed by expression trees)
             if (oute1.Type.IsNullable() && !oute2.Type.IsNullable())
                 oute2 = Expression.Convert(oute2, oute1.Type);
             else if (!oute1.Type.IsNullable() && oute2.Type.IsNullable())
                 oute1 = Expression.Convert(oute1, oute2.Type);
+
+        }
+
+        public static bool IsGuid(this Type type)
+        {
+            return type != null && (type == typeof(Guid) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsGuid()));
         }
 
         public static bool IsNumeric(this Type type)
