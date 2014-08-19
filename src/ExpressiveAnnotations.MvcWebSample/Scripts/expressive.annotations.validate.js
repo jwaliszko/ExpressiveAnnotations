@@ -27,7 +27,7 @@ var
                 if (value !== undefined && value !== null) {
                     return value.toString();
                 }
-                return { error: true, msg: 'Parsing error. Given value has no string meaning.' };
+                return { error: true, msg: 'Given value was not recognized as a valid string.' };
             }
         },
         bool: {
@@ -41,7 +41,7 @@ var
                         return value === 'true';
                     }
                 }
-                return { error: true, msg: 'Parsing error. Given value has no boolean meaning.' };
+                return { error: true, msg: 'Given value was not recognized as a valid boolean.' };
             }
         },
         float: {
@@ -53,7 +53,7 @@ var
                 if (isNumber(value)) {
                     return parseFloat(value);
                 }
-                return { error: true, msg: 'Parsing error. Given value has no numeric meaning.' };
+                return { error: true, msg: 'Given value was not recognized as a valid float.' };
             }
         },
         date: {
@@ -67,7 +67,7 @@ var
                         return new Date(milisec);
                     }
                 }
-                return { error: true, msg: 'Parsing error. Given value is not a string representing an RFC 2822 or ISO 8601 date.' };
+                return { error: true, msg: 'Given value was not recognized as a valid RFC 2822 or ISO 8601 date.' };
             }
         },
         isNumeric: function(value) {
@@ -83,30 +83,24 @@ var
             return typeof value === 'boolean' || value instanceof Boolean;
         },
         tryParse: function(value, type) {
-            var result;
             switch (type) {
                 case 'datetime':
-                    result = typeHelper.date.tryParse(value);
-                    break;
+                    return typeHelper.date.tryParse(value);
                 case 'numeric':
-                    result = typeHelper.float.tryParse(value);
-                    break;
+                    return typeHelper.float.tryParse(value);
                 case 'string':
-                    result = typeHelper.string.tryParse(value);
-                    break;
+                    return typeHelper.string.tryParse(value);
                 case 'bool':
-                    result = typeHelper.bool.tryParse(value);
-                    break;
+                    return typeHelper.bool.tryParse(value);
                 default:
-                    result = { error: true };
+                    return { error: true, msg: typeHelper.string.format('Supported types: datetime, numeric, string and bool. Invalid target type: {0}', type) };
             }
-            return result.error ? { error: true } : result;
         }
     },
 
     toolchain = {
         methods: {},
-        addMethod: function(name, func) { // add multiple function signatures to methods object (methods overloading, based only on numbers of arguments)
+        addMethod: function (name, func) { // add multiple function signatures to methods object (methods overloading, based only on numbers of arguments)
             var old = this.methods[name];
             this.methods[name] = function() {
                 if (func.length === arguments.length) {
@@ -170,13 +164,13 @@ var
                 suffix = (suffix !== null && suffix !== undefined) ? suffix.toLowerCase() : null;
                 return this.EndsWith(str, suffix);
             });
-            this.addMethod("Contains", function(str, chunk) {
-                return str !== null && str !== undefined && chunk !== null && chunk !== undefined && str.indexOf(chunk) > -1;
+            this.addMethod("Contains", function(str, substr) {
+                return str !== null && str !== undefined && substr !== null && substr !== undefined && str.indexOf(substr) > -1;
             });
-            this.addMethod("ContainsIgnoreCase", function(str, chunk) {
+            this.addMethod("ContainsIgnoreCase", function(str, substr) {
                 str = (str !== null && str !== undefined) ? str.toLowerCase() : null;
-                chunk = (chunk !== null && chunk !== undefined) ? chunk.toLowerCase() : null;
-                return this.Contains(str, chunk);
+                substr = (substr !== null && substr !== undefined) ? substr.toLowerCase() : null;
+                return this.Contains(str, substr);
             });
             this.addMethod("IsNullOrWhiteSpace", function(str) {
                 return str === null || !/\S/.test(str);
@@ -275,9 +269,8 @@ var
             return o;
         }
     },
-    
-    // map over the ea in case of overwrite
-    backup = window.ea,
+        
+    backup = window.ea, // map over the ea in case of overwrite
 
     api = {
         addMethod: function(name, func) {
@@ -349,8 +342,7 @@ var
         }
         return true;
     }, '');    
-
-    // expose some tiny api to the ea global object
-    window.ea = api;
+    
+    window.ea = api; // expose some tiny api to the ea global object
 
 }(jQuery, window));
