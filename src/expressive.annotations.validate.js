@@ -70,6 +70,16 @@ var
                 return { error: true, msg: 'Given value was not recognized as a valid RFC 2822 or ISO 8601 date.' };
             }
         },
+        guid: {
+            tryParse: function(value) {
+                var stringVal = typeHelper.string.tryParse(value);
+
+                if (stringVal.error)
+                    return { error: true, msg: 'Parsing error. Given value is not a string representing a Guid.' };
+
+                return stringVal.toUpperCase();
+            }
+        },
         isNumeric: function(value) {
             return typeof value === 'number' && !isNaN(value);
         },
@@ -92,6 +102,8 @@ var
                     return typeHelper.string.tryParse(value);
                 case 'bool':
                     return typeHelper.bool.tryParse(value);
+                case 'guid':
+                    return typeHelper.guid.tryParse(value);
                 default:
                     return { error: true, msg: typeHelper.string.format('Supported types: datetime, numeric, string and bool. Invalid target type: {0}', type) };
             }
@@ -191,6 +203,9 @@ var
             });
             this.addMethod("IsRegexMatch", function(str, regex) {
                 return str !== null && str !== undefined && regex !== null && regex !== undefined && new RegExp(regex).test(str);
+            });
+            this.addMethod("Guid", function (str) {
+                return str.toUpperCase();
             });
         }
     },

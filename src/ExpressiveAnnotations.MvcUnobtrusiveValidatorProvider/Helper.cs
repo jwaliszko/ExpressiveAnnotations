@@ -39,6 +39,11 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             }
         }
 
+        public static bool IsGuid(this Type type)
+        {
+            return type != null && (type == typeof(Guid) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsGuid()));
+        }
+
         public static string GetCoarseType(Type type)
         {
             if (type.IsDateTime())
@@ -49,6 +54,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
                 return "string";
             if (type.IsBool())
                 return "bool";
+            if (type.IsGuid())
+                return "guid";
 
             return "complex";
         }

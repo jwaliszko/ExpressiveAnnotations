@@ -139,5 +139,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         {
             return Regex.IsMatch(group, @"^(A|B|AB|0)[\+-]$");
         }
+
+        [AssertThat("FlightId != Guid('00000000-0000-0000-0000-000000000000') && " +
+                    "FlightId != Guid('11111111-1111-1111-1111-111111111111')")]
+        public Guid? FlightId { get; set; }
     }
 }

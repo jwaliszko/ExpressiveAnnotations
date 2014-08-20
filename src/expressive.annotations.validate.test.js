@@ -117,6 +117,10 @@
         window.equal(result.msg, "Given value was not recognized as a valid RFC 2822 or ISO 8601 date.");        
     });
 
+    test("verify_guid_parsing", function () {
+        window.equal(ea.typeHelper.guid.tryParse("a1111111-1111-1111-1111-111111111111"), "A1111111-1111-1111-1111-111111111111");
+    });
+
     test("verify_numeric_recognition", function() {
         window.ok(ea.typeHelper.isNumeric(1));
         window.ok(!ea.typeHelper.isNumeric(NaN));
@@ -180,6 +184,7 @@
         window.ok(m.IsEmail('nickname@domain.com') == true);
         window.ok(m.IsUrl('http://www.github.com/') == true);
         window.ok(m.IsRegexMatch('-0.3e-2', '^[\\+-]?\\d*\\.?\\d+(?:[eE][\\+-]?\\d+)?$') == true);
+        window.ok(m.Guid("a1111111-1111-1111-1111-111111111111") == "A1111111-1111-1111-1111-111111111111");
     });
 
 }($, window, window.ea.___6BE7863DC1DB4AFAA61BB53FF97FE169));
