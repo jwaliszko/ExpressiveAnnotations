@@ -157,6 +157,16 @@
                 @Html.DropDownListFor(model => model.ImmediateContact, new SelectList(Model.Answers, "Value", "Text"))
                 @Html.ValidationMessageFor(model => model.ImmediateContact)
             </li>
+            <li>
+                <pre class="code">
+[AssertThat("FlightId != Guid('00000000-0000-0000-0000-000000000000') && " +
+            "FlightId != Guid('11111111-1111-1111-1111-111111111111'")]
+</pre>
+                <pre class="action">[show attribute]</pre>
+                @Html.LabelFor(model => model.FlightId, new { @class = "inline prefix" })
+                @Html.EditorFor(model => model.FlightId)
+                @Html.ValidationMessageFor(model => model.FlightId)
+            </li>
         </ol>
         <input type="submit" />
     </fieldset>
