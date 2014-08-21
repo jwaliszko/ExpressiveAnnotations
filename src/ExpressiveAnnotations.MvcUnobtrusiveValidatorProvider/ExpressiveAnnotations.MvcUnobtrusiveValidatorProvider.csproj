@@ -33,7 +33,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Net40|AnyCPU'">
     <OutputPath>..\bin\Release-Net40\</OutputPath>
-	<TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <DefineConstants>TRACE</DefineConstants>
     <DocumentationFile>..\bin\Release-Net40\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.XML</DocumentationFile>
     <Optimize>true</Optimize>
@@ -44,7 +44,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Net45|AnyCPU'">
     <OutputPath>..\bin\Release-Net45\</OutputPath>
-	<TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <DefineConstants>TRACE</DefineConstants>
     <DocumentationFile>..\bin\Release-Net45\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.XML</DocumentationFile>
     <Optimize>true</Optimize>
@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assert.cs" />
+    <Compile Include="Storage.cs" />
     <Compile Include="Validators\AssertThatValidator.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Validators\RequiredIfValidator.cs" />

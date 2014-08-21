@@ -19,6 +19,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         private bool AllowEmpty { get; set; }
         private IDictionary<string, string> FieldsMap { get; set; }
         private IDictionary<string, object> ConstsMap { get; set; }
+        private string AnnotatedField { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequiredIfValidator" /> class.
@@ -32,7 +33,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         {
             try
             {
-                var attribId = string.Format("{0}.{1}.{2}", attribute.GetType().Name, metadata.ContainerType.FullName, metadata.PropertyName).ToLowerInvariant();
+                AnnotatedField = string.Format("{0}.{1}", metadata.ContainerType.FullName, metadata.PropertyName).ToLowerInvariant(); // annotated field id
+                var attribId = string.Format("{0}.{1}", attribute.TypeId, AnnotatedField).ToLowerInvariant(); // global id used for cache
                 var fieldsId = string.Format("fields.{0}", attribId);
                 var constsId = string.Format("consts.{0}", attribId);
                 FieldsMap = HttpRuntime.Cache.Get(fieldsId) as IDictionary<string, string>;
@@ -74,10 +76,17 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         /// </returns>
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()
         {
+            var count = Storage.Get<int>(AnnotatedField) + 1;
+            Storage.Set(AnnotatedField, count);
+
+            if(count > 27)
+                throw new ApplicationException("No more than 27 unique attributes of the same type can be applied for a single field or property.");
+
+            var suffix = count == 1 ? string.Empty : char.ConvertFromUtf32(95 + count);
             var rule = new ModelClientValidationRule
             {
                 ErrorMessage = FormattedErrorMessage,
-                ValidationType = "requiredif",
+                ValidationType = string.Format("requiredif{0}", suffix)
             };
             rule.ValidationParameters.Add("expression", JsonConvert.SerializeObject(Expression));
             rule.ValidationParameters.Add("fieldsmap", JsonConvert.SerializeObject(FieldsMap));
