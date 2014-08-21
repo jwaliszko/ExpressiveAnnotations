@@ -16,6 +16,8 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "EmailOrPhoneRequired")]
         [AssertThat("IsDigitChain(Phone)",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "DigitsOnlyAccepted")]
+        [AssertThat("Length(Phone) > 8 && Length(Phone) < 16",
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "RangeViolated")]
         [Display(ResourceType = typeof (Resources), Name = "Phone")]
         public string Phone { get; set; }
     }

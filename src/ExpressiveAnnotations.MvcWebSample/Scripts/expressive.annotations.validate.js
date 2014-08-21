@@ -285,6 +285,8 @@ var
             return o;
         }
     },
+
+    annotations = ' abcdefghijklmnopqrstuvwxyz'.split(''), // suffixes for attributes annotating single field multiple times
         
     backup = window.ea, // map over the ea in case of overwrite
 
@@ -305,59 +307,71 @@ var
         }
     };
 
-    $.validator.unobtrusive.adapters.add('assertthat', ['expression', 'fieldsmap', 'constsmap'], function(options) {
-        options.rules.assertthat = {
-            prefix: modelHelper.getPrefix(options.element.name),
-            form: options.form,
-            expression: $.parseJSON(options.params.expression),
-            fieldsmap: $.parseJSON(options.params.fieldsmap),
-            constsmap: $.parseJSON(options.params.constsmap)
-        };
-        if (options.message) {
-            options.messages.assertthat = options.message;
-        }
+    $.each(annotations, function(idx, val) {
+        var adapter = 'assertthat' + val.trim();
+        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsmap', 'constsmap'], function(options) {
+            options.rules[adapter] = {
+                prefix: modelHelper.getPrefix(options.element.name),
+                form: options.form,
+                expression: $.parseJSON(options.params.expression),
+                fieldsmap: $.parseJSON(options.params.fieldsmap),
+                constsmap: $.parseJSON(options.params.constsmap)
+            };
+            if (options.message) {
+                options.messages[adapter] = options.message;
+            }
+        });
     });
 
-    $.validator.unobtrusive.adapters.add('requiredif', ['expression', 'fieldsmap', 'constsmap', 'allowempty'], function (options) {
-        options.rules.requiredif = {
-            prefix: modelHelper.getPrefix(options.element.name),
-            form: options.form,
-            expression: $.parseJSON(options.params.expression),
-            fieldsmap: $.parseJSON(options.params.fieldsmap),
-            constsmap: $.parseJSON(options.params.constsmap),
-            allowempty: $.parseJSON(options.params.allowempty)
-        };
-        if (options.message) {
-            options.messages.requiredif = options.message;
-        }
+    $.each(annotations, function(idx, val) {
+        var adapter = 'requiredif' + val.trim();
+        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsmap', 'constsmap', 'allowempty'], function(options) {
+            options.rules[adapter] = {
+                prefix: modelHelper.getPrefix(options.element.name),
+                form: options.form,
+                expression: $.parseJSON(options.params.expression),
+                fieldsmap: $.parseJSON(options.params.fieldsmap),
+                constsmap: $.parseJSON(options.params.constsmap),
+                allowempty: $.parseJSON(options.params.allowempty)
+            };
+            if (options.message) {
+                options.messages[adapter] = options.message;
+            }
+        });
     });
 
-    $.validator.addMethod('assertthat', function(value, element, params) {
-        value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
-        if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
-            var model = modelHelper.deserializeObject(params.form, params.fieldsmap, params.constsmap, params.prefix);
-            with (model) {
-                if (!eval(params.expression)) { // check if the assertion condition is not satisfied
-                    return false; // assertion not satisfied => notify
+    $.each(annotations, function(idx, val) {
+        var method = 'assertthat' + val.trim();
+        $.validator.addMethod(method, function(value, element, params) {
+            value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
+            if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
+                var model = modelHelper.deserializeObject(params.form, params.fieldsmap, params.constsmap, params.prefix);
+                with (model) {
+                    if (!eval(params.expression)) { // check if the assertion condition is not satisfied
+                        return false; // assertion not satisfied => notify
+                    }
                 }
             }
-        }
-        return true;
-    }, '');
+            return true;
+        }, '');
+    });
 
-    $.validator.addMethod('requiredif', function(value, element, params) {
-        value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value;
-        if (value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
-            || (!/\S/.test(value) && !params.allowempty)) {
-            var model = modelHelper.deserializeObject(params.form, params.fieldsmap, params.constsmap, params.prefix);
-            with (model) {
-                if (eval(params.expression)) {
-                    return false;
+    $.each(annotations, function(idx, val) {
+        var method = 'requiredif' + val.trim();
+        $.validator.addMethod(method, function(value, element, params) {
+            value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value;
+            if (value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
+                || (!/\S/.test(value) && !params.allowempty)) {
+                var model = modelHelper.deserializeObject(params.form, params.fieldsmap, params.constsmap, params.prefix);
+                with (model) {
+                    if (eval(params.expression)) {
+                        return false;
+                    }
                 }
             }
-        }
-        return true;
-    }, '');    
+            return true;
+        }, '');
+    });
     
     window.ea = api; // expose some tiny api to the ea global object
 

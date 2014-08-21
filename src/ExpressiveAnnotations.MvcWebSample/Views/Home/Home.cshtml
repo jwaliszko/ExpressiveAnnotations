@@ -81,6 +81,7 @@
                 <pre class="code">
 [RequiredIf("GoAbroad == true")]
 [AssertThat("ReturnDate >= Today()")]
+[AssertThat("ReturnDate < AddYears(Today(), 1)")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.ReturnDate, new { @class = "inline prefix" })
@@ -181,6 +182,11 @@
         <script>
             // var expann = ea.noConflict(); expann.addMethod... - in case of conflict
             ea.addMethod('IsBloodType', function (group) { return /^(A|B|AB|0)[\+-]$/.test(group); });
+            ea.addMethod('AddYears', function (from, years) {
+                var when = from.getFullYear() + years;
+                from.setFullYear(when);
+                return from;
+            });
         </script>
     }
 

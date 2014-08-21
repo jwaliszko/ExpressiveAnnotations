@@ -91,6 +91,8 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]        
         [AssertThat("ReturnDate >= Today()",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FutureDateRequired")]
+        [AssertThat("ReturnDate < AddYears(Today(), 1)",
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "NoMoreThanAYear")]
         [Display(ResourceType = typeof (Resources), Name = "ReturnDate")]
         public DateTime? ReturnDate { get; set; }
 
@@ -144,6 +146,11 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public bool IsBloodType(string group)
         {
             return Regex.IsMatch(group, @"^(A|B|AB|0)[\+-]$");
-        }        
+        }
+
+        public DateTime AddYears(DateTime from, int years)
+        {
+            return from.AddYears(years);
+        }
     }
 }

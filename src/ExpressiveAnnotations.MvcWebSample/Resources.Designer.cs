@@ -331,6 +331,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The period of stay should be less than one year..
+        /// </summary>
+        public static string NoMoreThanAYear {
+            get {
+                return ResourceManager.GetString("NoMoreThanAYear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to None.
         /// </summary>
         public static string None {
@@ -390,6 +399,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         public static string PoliticalStability {
             get {
                 return ResourceManager.GetString("PoliticalStability", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Phone number should contain from 9 to 15 digits..
+        /// </summary>
+        public static string RangeViolated {
+            get {
+                return ResourceManager.GetString("RangeViolated", resourceCulture);
             }
         }
         

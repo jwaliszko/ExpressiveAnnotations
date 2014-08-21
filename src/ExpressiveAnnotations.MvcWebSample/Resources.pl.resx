@@ -207,6 +207,9 @@
   <data name="No" xml:space="preserve">
     <value>Nie</value>
   </data>
+  <data name="NoMoreThanAYear" xml:space="preserve">
+    <value>Maksymalny okres pobytu wynosi jeden rok.</value>
+  </data>
   <data name="None" xml:space="preserve">
     <value>Brak</value>
   </data>
@@ -227,6 +230,9 @@
   </data>
   <data name="PoliticalStability" xml:space="preserve">
     <value>Stabilnośc polityczna</value>
+  </data>
+  <data name="RangeViolated" xml:space="preserve">
+    <value>Numer telefonu powinien zawierać od 9 do 15 cyfr.</value>
   </data>
   <data name="ReasonForLongTravel" xml:space="preserve">
     <value>Powód długiej podróży</value>
