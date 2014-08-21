@@ -168,6 +168,12 @@
   <data name="FieldRequired" xml:space="preserve">
     <value>The {0} field is required.</value>
   </data>
+  <data name="FlightId" xml:space="preserve">
+    <value>Flight identifier</value>
+  </data>
+  <data name="FlightIdentifierInvalid" xml:space="preserve">
+    <value>Provided flight identifier is invalid.</value>
+  </data>
   <data name="France" xml:space="preserve">
     <value>France</value>
   </data>

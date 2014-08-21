@@ -25,9 +25,13 @@
         window.equal(result.error, true);
         window.equal(result.msg, "Given value was not recognized as a valid RFC 2822 or ISO 8601 date.");
 
+        result = ea.typeHelper.tryParse("", "guid");
+        window.equal(result.error, true);
+        window.equal(result.msg, "Given value was not recognized as a valid guid. Guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).");
+
         result = ea.typeHelper.tryParse("", "secret");
         window.equal(result.error, true);
-        window.equal(result.msg, "Supported types: datetime, numeric, string and bool. Invalid target type: secret");
+        window.equal(result.msg, "Supported types: datetime, numeric, string, bool and guid. Invalid target type: secret");
     });
 
     test("verify_string_formatting", function() {
@@ -119,6 +123,10 @@
 
     test("verify_guid_parsing", function () {
         window.equal(ea.typeHelper.guid.tryParse("a1111111-1111-1111-1111-111111111111"), "A1111111-1111-1111-1111-111111111111");
+
+        var result = ea.typeHelper.guid.tryParse("");
+        window.equal(result.error, true);
+        window.equal(result.msg, "Given value was not recognized as a valid guid. Guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).");
     });
 
     test("verify_numeric_recognition", function() {
@@ -184,7 +192,7 @@
         window.ok(m.IsEmail('nickname@domain.com') == true);
         window.ok(m.IsUrl('http://www.github.com/') == true);
         window.ok(m.IsRegexMatch('-0.3e-2', '^[\\+-]?\\d*\\.?\\d+(?:[eE][\\+-]?\\d+)?$') == true);
-        window.ok(m.Guid("a1111111-1111-1111-1111-111111111111") == "A1111111-1111-1111-1111-111111111111");
+        window.ok(m.Guid('a1111111-1111-1111-1111-111111111111') == 'A1111111-1111-1111-1111-111111111111');
     });
 
 }($, window, window.ea.___6BE7863DC1DB4AFAA61BB53FF97FE169));

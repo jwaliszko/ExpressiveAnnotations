@@ -72,12 +72,10 @@ var
         },
         guid: {
             tryParse: function(value) {
-                var stringVal = typeHelper.string.tryParse(value);
-
-                if (stringVal.error)
-                    return { error: true, msg: 'Parsing error. Given value is not a string representing a Guid.' };
-
-                return stringVal.toUpperCase();
+                if (typeHelper.isGuid(value)) {
+                    return value.toUpperCase();;
+                }
+                return { error: true, msg: 'Given value was not recognized as a valid guid. Guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).' };
             }
         },
         isNumeric: function(value) {
@@ -92,6 +90,9 @@ var
         isBool: function(value) {
             return typeof value === 'boolean' || value instanceof Boolean;
         },
+        isGuid: function(value) {
+            return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value); // basic check
+        },
         tryParse: function(value, type) {
             switch (type) {
                 case 'datetime':
@@ -105,7 +106,7 @@ var
                 case 'guid':
                     return typeHelper.guid.tryParse(value);
                 default:
-                    return { error: true, msg: typeHelper.string.format('Supported types: datetime, numeric, string and bool. Invalid target type: {0}', type) };
+                    return { error: true, msg: typeHelper.string.format('Supported types: datetime, numeric, string, bool and guid. Invalid target type: {0}', type) };
             }
         }
     },
@@ -204,7 +205,7 @@ var
             this.addMethod("IsRegexMatch", function(str, regex) {
                 return str !== null && str !== undefined && regex !== null && regex !== undefined && new RegExp(regex).test(str);
             });
-            this.addMethod("Guid", function (str) {
+            this.addMethod("Guid", function(str) {
                 return str.toUpperCase();
             });
         }

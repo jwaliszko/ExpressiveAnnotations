@@ -214,6 +214,24 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Flight identifier.
+        /// </summary>
+        public static string FlightId {
+            get {
+                return ResourceManager.GetString("FlightId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Provided flight identifier is invalid..
+        /// </summary>
+        public static string FlightIdentifierInvalid {
+            get {
+                return ResourceManager.GetString("FlightIdentifierInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to France.
         /// </summary>
         public static string France {

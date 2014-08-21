@@ -133,15 +133,17 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "ImmediateContact")]
         public bool? ImmediateContact { get; set; }
 
+        [AssertThat("FlightId != Guid('00000000-0000-0000-0000-000000000000') && " +
+                    "FlightId != Guid('11111111-1111-1111-1111-111111111111')",
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FlightIdentifierInvalid")]
+        [Display(ResourceType = typeof(Resources), Name = "FlightId")]
+        public Guid? FlightId { get; set; }
+
         public Contact ContactDetails { get; set; }
 
         public bool IsBloodType(string group)
         {
             return Regex.IsMatch(group, @"^(A|B|AB|0)[\+-]$");
-        }
-
-        [AssertThat("FlightId != Guid('00000000-0000-0000-0000-000000000000') && " +
-                    "FlightId != Guid('11111111-1111-1111-1111-111111111111')")]
-        public Guid? FlightId { get; set; }
+        }        
     }
 }

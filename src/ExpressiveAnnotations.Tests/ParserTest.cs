@@ -213,6 +213,19 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<Model>("'abc' == Trim(' abc ')").Invoke(null));
             Assert.IsTrue(parser.Parse<Model>("CompareOrdinal('a', 'a') == 0").Invoke(null));
             Assert.IsTrue(parser.Parse<Model>("Length('abc' + 'cde') >= Length(Trim(' abc def ')) - 2 - -1").Invoke(null));
+
+            try
+            {
+                parser.Parse<object>("Guid('abc') == Guid('abc')").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is FormatException);
+                Assert.AreEqual(
+                    "Guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).",
+                    e.Message);
+            }
         }
 
         [TestMethod]
@@ -293,8 +306,7 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.IsTrue(parser.Parse<Model>("guid1 != Guid('00000000-0000-0000-0000-000000000000')").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("guid2 == Guid('00000000-0000-0000-0000-000000000000')").Invoke(model));
-            Assert.IsTrue(parser.Parse<Model>("guid1 != guid2").Invoke(model));
-
+            Assert.IsTrue(parser.Parse<Model>("guid1 != guid2").Invoke(model));            
 
             const string expression =
                 "Flag == true " +

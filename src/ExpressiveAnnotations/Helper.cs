@@ -35,25 +35,21 @@ namespace ExpressiveAnnotations
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            switch (Type.GetTypeCode(type))
+            var numericTypes = new HashSet<TypeCode>
             {
-                case TypeCode.SByte:    //sbyte
-                case TypeCode.Byte:     //byte
-                case TypeCode.Int16:    //short
-                case TypeCode.UInt16:   //ushort
-                case TypeCode.Int32:    //int
-                case TypeCode.UInt32:   //uint
-                case TypeCode.Int64:    //long
-                case TypeCode.UInt64:   //ulong
-                case TypeCode.Single:   //float
-                case TypeCode.Double:   //double
-                case TypeCode.Decimal:  //decimal
-                    return true;
-                case TypeCode.Object:
-                    return type.IsNullable() && Nullable.GetUnderlyingType(type).IsNumeric();
-                default:
-                    return false;
-            }
+                TypeCode.SByte,    //sbyte
+                TypeCode.Byte,     //byte
+                TypeCode.Int16,    //short
+                TypeCode.UInt16,   //ushort
+                TypeCode.Int32,    //int
+                TypeCode.UInt32,   //uint
+                TypeCode.Int64,    //long
+                TypeCode.UInt64,   //ulong
+                TypeCode.Single,   //float
+                TypeCode.Double,   //double
+                TypeCode.Decimal   //decimal
+            };
+            return numericTypes.Contains(Type.GetTypeCode(type)) || type.IsNullable() && Nullable.GetUnderlyingType(type).IsNumeric();
         }
 
         public static bool IsNullable(this Type type)
