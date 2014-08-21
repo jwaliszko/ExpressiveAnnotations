@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 using ExpressiveAnnotations.Analysis;
 
 namespace ExpressiveAnnotations.Attributes
@@ -7,7 +8,7 @@ namespace ExpressiveAnnotations.Attributes
     /// <summary>
     /// Validation attribute, executed for non-null annotated field, which indicates that assertion given in logical expression has to be satisfied, for such field to be considered as valid.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
     public sealed class AssertThatAttribute : ValidationAttribute
     {
         private const string _defaultErrorMessage = "Assertion for {0} field is not satisfied by the following logic: {1}.";
@@ -18,6 +19,11 @@ namespace ExpressiveAnnotations.Attributes
         /// Gets or sets the logical expression based on which requirement condition is computed. 
         /// </summary>
         public string Expression { get; set; }
+
+        public override object TypeId
+        {
+            get { return string.Format("{0}[{1}]", GetType().FullName, Regex.Replace(Expression, @"\s+", string.Empty)); } // distinguishes instances based on provided expressions
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AssertThatAttribute" /> class.

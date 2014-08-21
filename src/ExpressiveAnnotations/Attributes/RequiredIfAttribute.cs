@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 using ExpressiveAnnotations.Analysis;
 
 namespace ExpressiveAnnotations.Attributes
@@ -7,10 +8,10 @@ namespace ExpressiveAnnotations.Attributes
     /// <summary>
     /// Validation attribute which indicates that annotated field is required when computed result of given logical expression is true.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
     public sealed class RequiredIfAttribute : ValidationAttribute
     {
-        private const string _defaultErrorMessage = "The {0} field is required by the following logic: {1}.";        
+        private const string _defaultErrorMessage = "The {0} field is required by the following logic: {1}.";
         private Func<object, bool> CachedValidationFunc { get; set; }
         private Parser Parser { get; set; }
 
@@ -23,6 +24,29 @@ namespace ExpressiveAnnotations.Attributes
         /// Gets or sets a flag indicating whether the attribute should allow empty or whitespace strings.
         /// </summary>
         public bool AllowEmptyStrings { get; set; }
+
+        public override object TypeId
+        {
+            /* From MSDN (msdn.microsoft.com/en-us/library/system.attribute.typeid.aspx, msdn.microsoft.com/en-us/library/6w3a7b50.aspx): 
+             * 
+             * As implemented, this identifier is merely the Type of the attribute. However, it is intended that the unique identifier be used to 
+             * identify two attributes of the same type. 
+             * 
+             * When you define a custom attribute with AttributeUsageAttribute.AllowMultiple set to true, you must override the Attribute.TypeId 
+             * property to make it unique. If all instances of your attribute are unique, override Attribute.TypeId to return the object identity 
+             * of your attribute. If only some instances of your attribute are unique, return a value from Attribute.TypeId that would return equality 
+             * in those cases. For example, some attributes have a constructor parameter that acts as a unique key. For these attributes, return the 
+             * value of the constructor parameter from the Attribute.TypeId property.
+             * 
+             * To summarize: 
+             * TypeId is documented as being a "unique identifier used to identify two attributes of the same type". By default, TypeId is just the 
+             * type of the attribute, so when two attributes of the same type are encountered, they're considered "the same" by many frameworks.
+             */
+            get { return string.Format("{0}[{1}]", GetType().FullName, Regex.Replace(Expression, @"\s+", string.Empty)); } /* distinguishes instances based on provided expressions - that way of TypeId creation is choosen over the alternatives below: 
+                                                                                                                            *     - returning new object - it is too much, instances would be always different, 
+                                                                                                                            *     - returning hash code based on expression - can lead to collisions (infinitely many strings can't be mapped injectively into any finite set - best unique identifier for string is the string itself) 
+                                                                                                                            */
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequiredIfAttribute" /> class.
