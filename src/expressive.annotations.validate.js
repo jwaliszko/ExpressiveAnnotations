@@ -323,7 +323,7 @@ var
         });
     });
 
-    $.each(annotations.split(''), function(idx, val) {
+    $.each(annotations, function(idx, val) {
         var adapter = 'requiredif' + val.trim();
         $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsmap', 'constsmap', 'allowempty'], function(options) {
             options.rules[adapter] = {
@@ -340,7 +340,7 @@ var
         });
     });
 
-    $.each(annotations.split(''), function(idx, val) {
+    $.each(annotations, function(idx, val) {
         var method = 'assertthat' + val.trim();
         $.validator.addMethod(method, function(value, element, params) {
             value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
@@ -356,7 +356,7 @@ var
         }, '');
     });
 
-    $.each(annotations.split(''), function(idx, val) {
+    $.each(annotations, function(idx, val) {
         var method = 'requiredif' + val.trim();
         $.validator.addMethod(method, function(value, element, params) {
             value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value;
