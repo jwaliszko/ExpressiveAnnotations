@@ -42,7 +42,7 @@ namespace ExpressiveAnnotations.Attributes
              * TypeId is documented as being a "unique identifier used to identify two attributes of the same type". By default, TypeId is just the 
              * type of the attribute, so when two attributes of the same type are encountered, they're considered "the same" by many frameworks.
              */
-            get { return string.Format("{0}[{1}]", GetType().FullName, Regex.Replace(Expression, @"\s+", string.Empty)); } /* distinguishes instances based on provided expressions - that way of TypeId creation is choosen over the alternatives below: 
+            get { return string.Format("{0}[{1}]", GetType().FullName, Regex.Replace(Expression, @"\s+", string.Empty)); } /* distinguishes instances based on provided expressions - that way of TypeId creation is chosen over the alternatives below: 
                                                                                                                             *     - returning new object - it is too much, instances would be always different, 
                                                                                                                             *     - returning hash code based on expression - can lead to collisions (infinitely many strings can't be mapped injectively into any finite set - best unique identifier for string is the string itself) 
                                                                                                                             */

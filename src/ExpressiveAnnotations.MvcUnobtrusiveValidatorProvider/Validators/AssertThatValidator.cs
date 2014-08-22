@@ -75,16 +75,15 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()
         {
             var count = Storage.Get<int>(AnnotatedField) + 1;
-            Storage.Set(AnnotatedField, count);
+            Assert.AttribsQuantityAllowed(count);
 
-            if (count > 27)
-                throw new ApplicationException("No more than 27 unique attributes of the same type can be applied for a single field or property.");
+            Storage.Set(AnnotatedField, count);            
 
             var suffix = count == 1 ? string.Empty : char.ConvertFromUtf32(95 + count);
             var rule = new ModelClientValidationRule
             {
                 ErrorMessage = FormattedErrorMessage,
-                ValidationType = string.Format("assertthat{0}", suffix),
+                ValidationType = string.Format("assertthat{0}", suffix)
             };
             rule.ValidationParameters.Add("expression", JsonConvert.SerializeObject(Expression));
             rule.ValidationParameters.Add("fieldsmap", JsonConvert.SerializeObject(FieldsMap));
