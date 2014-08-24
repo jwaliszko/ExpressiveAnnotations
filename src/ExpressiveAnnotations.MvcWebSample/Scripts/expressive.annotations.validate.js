@@ -62,7 +62,10 @@ var
                     return value.getTime();
                 }
                 if (typeHelper.isString(value)) {
-                    var milisec = Date.parse(value);
+                    if (typeof api.settings.parseDate === 'function') {
+                        return api.settings.parseDate(value); // custom parsing of date string given in non-standard format
+                    }
+                    var milisec = Date.parse(value); // default parsing of string representing an RFC 2822 or ISO 8601 date
                     if (!/Invalid|NaN/.test(milisec)) {
                         return milisec;
                     }
@@ -291,6 +294,13 @@ var
     backup = window.ea, // map over the ea in case of overwrite
 
     api = {
+        settings: {
+            parseDate: undefined // provide implementation to parse date in non-standard format
+                                 // e.g., suppose DOM field date is given in dd/mm/yyyy format:
+                                 // parseDate = function(str) {
+                                 //     var arr = str.split('/'); return new Date(arr[2], arr[1] - 1, arr[0]).getTime();
+                                 // }
+        },
         addMethod: function(name, func) {
             toolchain.addMethod(name, func);
         },
