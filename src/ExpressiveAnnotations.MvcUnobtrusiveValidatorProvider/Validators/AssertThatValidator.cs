@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Analysis;
@@ -85,9 +87,21 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
                 ErrorMessage = FormattedErrorMessage,
                 ValidationType = string.Format("assertthat{0}", suffix)
             };
-            rule.ValidationParameters.Add("expression", JsonConvert.SerializeObject(Expression));
-            rule.ValidationParameters.Add("fieldsmap", JsonConvert.SerializeObject(FieldsMap));
-            rule.ValidationParameters.Add("constsmap", JsonConvert.SerializeObject(ConstsMap));
+
+            var stringBuilder = new StringBuilder();
+            var jsonSerializer = new JsonSerializer();            
+            using (var stringWriter =  new StringWriter(stringBuilder))
+            using (var jsonTextWriter = new JsonTextWriter(stringWriter))
+            {
+                jsonSerializer.Serialize(jsonTextWriter, Expression);
+                rule.ValidationParameters.Add("expression", stringBuilder.ToString());
+                stringBuilder.Clear();
+                jsonSerializer.Serialize(jsonTextWriter, FieldsMap);
+                rule.ValidationParameters.Add("fieldsmap", stringBuilder.ToString());
+                stringBuilder.Clear();
+                jsonSerializer.Serialize(jsonTextWriter, ConstsMap);
+                rule.ValidationParameters.Add("constsmap", stringBuilder.ToString());
+            }
             yield return rule;
         }
     }
