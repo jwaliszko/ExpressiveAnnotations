@@ -111,14 +111,15 @@
 
     test("verify_date_parsing", function() {
         var now = Date.now();
-        window.deepEqual(ea.typeHelper.date.tryParse(new Date(now)), new Date(now));
-        window.deepEqual(ea.typeHelper.date.tryParse("Wed, 09 Aug 1995 00:00:00 GMT"), new Date(807926400000));
-        window.deepEqual(ea.typeHelper.date.tryParse("Thu, 01 Jan 1970 00:00:00 GMT"), new Date(0));
-        window.deepEqual(ea.typeHelper.date.tryParse("Thu, 01 Jan 1970 00:00:00 GMT-0400"), new Date(14400000));
+        window.ok(ea.typeHelper.date.tryParse(new Date(now)) == new Date(now).getTime());
+        window.ok(ea.typeHelper.date.tryParse("Aug 9, 1995") == new Date("Aug 9, 1995").getTime());
+        window.ok(ea.typeHelper.date.tryParse("Wed, 09 Aug 1995 00:00:00 GMT") == 807926400000);
+        window.ok(ea.typeHelper.date.tryParse("Thu, 01 Jan 1970 00:00:00 GMT") == 0);
+        window.ok(ea.typeHelper.date.tryParse("Thu, 01 Jan 1970 00:00:00 GMT-0400") == 14400000);
 
         var result = ea.typeHelper.date.tryParse("");
         window.equal(result.error, true);
-        window.equal(result.msg, "Given value was not recognized as a valid RFC 2822 or ISO 8601 date.");        
+        window.equal(result.msg, "Given value was not recognized as a valid RFC 2822 or ISO 8601 date.");
     });
 
     test("verify_guid_parsing", function () {

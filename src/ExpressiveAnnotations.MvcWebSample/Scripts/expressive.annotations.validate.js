@@ -59,12 +59,12 @@ var
         date: {
             tryParse: function(value) {
                 if (typeHelper.isDate(value)) {
-                    return value;
+                    return value.getTime();
                 }
                 if (typeHelper.isString(value)) {
                     var milisec = Date.parse(value);
-                    if (typeHelper.isNumeric(milisec)) {
-                        return new Date(milisec);
+                    if (!/Invalid|NaN/.test(milisec)) {
+                        return milisec;
                     }
                 }
                 return { error: true, msg: 'Given value was not recognized as a valid RFC 2822 or ISO 8601 date.' };
