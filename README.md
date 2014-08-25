@@ -172,7 +172,6 @@ class Model
 <script>
     // expressive.annotations.validate.js already loaded
     ea.addMethod('IsBloodType', function(group) { return /^(A|B|AB|0)[\+-]$/.test(group); });
-</script>
 ```
 ###What is the context behind this implementation? 
 
@@ -215,16 +214,16 @@ Client side validation is **fully supported**. Enable it for your web project wi
 
 1. Add [**ExpressiveAnnotations.dll**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations) and [**ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider) reference libraries to your projest,
 2. In `Global.asax` register required validators (`IClientValidatable` interface is not directly implemented by the attribute, to avoid coupling of `ExpressionAnnotations` assembly with `System.Web.Mvc` dependency):
- ```    
+```    
     protected void Application_Start()
     {
         DataAnnotationsModelValidatorProvider.RegisterAdapter(
             typeof (RequiredIfAttribute), typeof (RequiredIfValidator));
         DataAnnotationsModelValidatorProvider.RegisterAdapter(
             typeof(AssertThatAttribute), typeof(AssertThatValidator));
-```			
+```
 3. Include [**expressive.annotations.validate.js**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/blob/master/src/expressive.annotations.validate.js) scripts in your page (do not forget standard jQuery validation scripts):
- ```
+```
     <script src="/Scripts/jquery.validate.js"></script>
     <script src="/Scripts/jquery.validate.unobtrusive.js"></script>
     ...
