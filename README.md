@@ -23,13 +23,14 @@ Here we are saying that annotated field is required when condition given in the 
 [AssertThat("ReturnDate >= Today()")]
 public DateTime? ReturnDate { get; set; }
 ```
-This time another attribute is used. We are not validating field requirement as before. Field value is not required to be provided - it is allowed to be null now. Nevertheless, if some value is already given, it needs to be correct. In the other words, this attribute puts restriction on field, which needs to be satisfied for such field to be considered as valid (restriction verification is executed for non-null field). Here, the value of return date field needs to be greater than or equal to the date returned by `Today()` utility function (function which simply returns current day). Both types of attributes may be combined:
+This time another attribute is used. We are not validating field requirement as before. Field value is not required to be provided - it is allowed to be null now. Nevertheless, if some value is already given, it needs to be correct. In the other words, this attribute puts restriction on field, which needs to be satisfied for such field to be considered as valid (restriction verification is executed for non-null field). Here, the value of return date field needs to be greater than or equal to the date returned by `Today()` utility function (function which simply returns current day). Both types of attributes may be combined (moreover, the same type of attribute can be applied multiple times for a single field):
 ```
 [RequiredIf("ContactDetails.Email != null")]
+[RequiredIf("ContactDetails.Phone != null")]
 [AssertThat("AgreeToContact == true")]
 public bool? AgreeToContact { get; set; }
 ```
-This one means, that if email is provided (non-null), we are forced to authorize someone to contact us (boolean value indicating contact permission has to be true). What is more, we can see here that nested properties (enums and constants either) are supported by expressions parser. Finally take a quick look at following construction:
+This one means, that either email or phone is provided (non-null), we are forced to authorize someone to contact us (boolean value indicating contact permission has to be true). What is more, we can see here that nested properties (enums and constants either) are supported by expressions parser. Finally take a quick look at following construction:
 ```
 [RequiredIf("GoAbroad == true " +
 			"&& (" +
@@ -43,7 +44,9 @@ public string ReasonForTravel { get; set; }
 This time, the presented expression is much more complex that its predecessors, but still can be intuitively understood when looking at it (reason for travel field has to be provided if you plan to go abroad, and want to visit the same foreign country twice or you are between 25 and 55).
 
 ###How to construct conditional validation attributes?
+
 #####Signatures:
+
 ```
 RequiredIfAttribute(string expression,
                     [bool AllowEmptyStrings] ...) - Validation attribute which indicates that 
@@ -59,6 +62,7 @@ AssertThatAttribute(string expression ...)        - Validation attribute, execut
   AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should allow empty or
 	                  whitespace strings.
 ```
+
 #####Implementation:
 
 Implementation core is based on top-down recursive descent logical expressions parser, with a single token of lookahead [(LL(1))](http://en.wikipedia.org/wiki/LL_parser), which runs on the following [EBNF-like](http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form) grammar:
@@ -173,7 +177,33 @@ class Model
     // expressive.annotations.validate.js already loaded
     ea.addMethod('IsBloodType', function(group) { return /^(A|B|AB|0)[\+-]$/.test(group); });
 ```
-###What is the context behind this implementation? 
+
+#####How to cope with dates given in non-standard formats?
+
+When values of DOM elemts are extracted, they are converted to appropriate types. For fields containing date strings, default JavaScript `Date.parse(dateString)` method is used. As noted in [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse), `dateString` parameter is:
+
+>A string representing an RFC2822 or ISO 8601 date (other formats may be used, but results may be unexpected)
+
+When some non-standard format needs to be handled, you can override the default behavior and provide your own implementation:
+```
+<script>
+    ea.settings.parseDate = function(str) {
+        // in case of non-standard date formats, 
+        // provide specific parsing logic here, 
+        // return milliseconds        
+    }
+```
+E.g., for UK format dd/mm/yyyy:
+```
+<script>
+    ea.settings.parseDate = function(str) {
+        var arr = str.split('/');
+        var date = new Date(arr[2], arr[1] - 1, arr[0]);
+        return date.getTime();
+    }
+```
+
+###What is the context behind this implementation?
 
 Declarative validation, when compared to imperative approach, seems to be more convenient in many cases. Clean, compact code - all validation logic can be defined within the model metadata.
 
@@ -208,6 +238,7 @@ If we choose this way instead of model fields decoration, it has negative impact
     return View("Home", model);
 }
 ```
+
 ###What about the support of ASP.NET MVC client side validation?
 
 Client side validation is **fully supported**. Enable it for your web project within the next few steps:
@@ -231,6 +262,7 @@ Client side validation is **fully supported**. Enable it for your web project wi
     ...
     <script src="/Scripts/expressive.annotations.validate.js"></script>
 ```
+
 Alternatively, using the [NuGet](https://www.nuget.org/packages/ExpressiveAnnotations/) Package Manager Console:
 
 ###`PM> Install-Package ExpressiveAnnotations`
