@@ -21,6 +21,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
 
         [RequiredIf("Email == null")]
         [AssertThat("IsDigitChain(Phone)")]
+        [AssertThat("Length(Phone) > 8 && Length(Phone) < 16")]
         public string Phone
         {
             get { return _phone; }

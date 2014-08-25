@@ -44,6 +44,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <CheckBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" 
@@ -137,6 +138,11 @@
                            Text="Immediate contact" />
                 <ComboBox Grid.Row="14" Grid.Column="1" Grid.ColumnSpan="2"
                           ItemsSource="{Binding Answers}" SelectedValuePath="Value" DisplayMemberPath="Key" SelectedValue="{Binding ImmediateContact, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock Grid.Row="15" Grid.Column="0"
+                           Text="Flight identifier" />
+                <TextBox Grid.Row="15" Grid.Column="1" Grid.ColumnSpan="2"
+                         Text="{Binding FlightId, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Static sys:String.Empty}}" />
 
             </Grid>
         </Grid>

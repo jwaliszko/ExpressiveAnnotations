@@ -23,6 +23,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
         private string _bloodType;
         private bool _agreeForContact;
         private bool? _immediateContact;
+        private Guid? _flightId;
         private DateTime? _returnDate;
         private ContactVM _contactDetails;
 
@@ -144,6 +145,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
 
         [RequiredIf("GoAbroad == true")]
         [AssertThat("ReturnDate >= Today()")]
+        [AssertThat("ReturnDate < AddYears(Today(), 1)")]
         public DateTime? ReturnDate
         {
             get { return _returnDate; }
@@ -235,6 +237,18 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             }
         }
 
+        [AssertThat("FlightId != Guid('00000000-0000-0000-0000-000000000000') && " +
+                    "FlightId != Guid('11111111-1111-1111-1111-111111111111')")]
+        public Guid? FlightId
+        {
+            get { return _flightId; }
+            set
+            {
+                _flightId = value;
+                OnPropertiesChanged();
+            }
+        }
+
         public ContactVM ContactDetails
         {
             get { return _contactDetails; }
@@ -261,12 +275,18 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             OnPropertyChanged(() => BloodType);
             OnPropertyChanged(() => AgreeForContact);
             OnPropertyChanged(() => ImmediateContact);
+            OnPropertyChanged(() => FlightId);
             OnPropertyChanged(() => ContactDetails);
         }
 
         public bool IsBloodType(string group)
         {
             return Regex.IsMatch(group, @"^(A|B|AB|0)[\+-]$");
+        }
+
+        public DateTime AddYears(DateTime from, int years)
+        {
+            return from.AddYears(years);
         }
     }
 }

@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:views="clr-namespace:ExpressiveAnnotations.MvvmDesktopSample.Views"
         Title="ExpressiveAnnotations - annotation-based conditional validation" 
-        Height="600" Width="600">
+        Height="620" Width="600">
 
     <Grid>
         <Grid.RowDefinitions>
