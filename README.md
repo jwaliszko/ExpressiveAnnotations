@@ -6,8 +6,8 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
 
 ###RequiredIf vs AssertThat attribute?
 
-* RequiredIf - if value is not yet provided, check whether it is required (annotated field is required when given condition is satisfied)
-* AssertThat - if value is already provided, check whether the condition is met (non-null annotated field is considered as valid when given condition is satisfied)
+* RequiredIf - if value is not yet provided, check whether it is required (annotated field is required when given condition is satisfied),
+* AssertThat - if value is already provided, check whether the condition is met (non-null annotated field is considered as valid when given condition is satisfied).
 
 ###What are brief examples of usage?
 
@@ -25,8 +25,8 @@ public DateTime? ReturnDate { get; set; }
 ```
 This time another attribute is used. We are not validating field requirement as before. Field value is not required to be provided - it is allowed to be null now. Nevertheless, if some value is already given, it needs to be correct. In the other words, this attribute puts restriction on field, which needs to be satisfied for such field to be considered as valid (restriction verification is executed for non-null field). Here, the value of return date field needs to be greater than or equal to the date returned by `Today()` utility function (function which simply returns current day). Both types of attributes may be combined (moreover, the same type of attribute can be applied multiple times for a single field):
 ```
-[RequiredIf("ContactDetails.Email != null")]
-[RequiredIf("ContactDetails.Phone != null")]
+[RequiredIf("Details.Email != null")]
+[RequiredIf("Details.Phone != null")]
 [AssertThat("AgreeToContact == true")]
 public bool? AgreeToContact { get; set; }
 ```
@@ -65,7 +65,7 @@ AssertThatAttribute(string expression ...)        - Validation attribute, execut
 
 #####Implementation:
 
-Implementation core is based on top-down recursive descent logical expressions parser, with a single token of lookahead [(LL(1))](http://en.wikipedia.org/wiki/LL_parser), which runs on the following [EBNF-like](http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form) grammar:
+Implementation core is based on top-down recursive descent logical expressions parser, with a single token of lookahead ([LL(1)](http://en.wikipedia.org/wiki/LL_parser)), which runs on the following [EBNF-like](http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form) grammar:
 ```
 expression => or-exp
 or-exp     => and-exp [ "||" or-exp ]
@@ -188,9 +188,7 @@ When some non-standard format needs to be handled, you can override the default 
 ```
 <script>
     ea.settings.parseDate = function(str) {
-        // in case of non-standard date formats, 
-        // provide specific parsing logic here, 
-        // return milliseconds        
+        // for non-standard date formats provide specific parsing logic here, return milliseconds
     }
 ```
 E.g., for UK format dd/mm/yyyy:
