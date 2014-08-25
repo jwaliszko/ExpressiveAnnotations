@@ -180,9 +180,16 @@
         @Scripts.Render("~/bundles/expressive")
 
         <script>
-            // var expann = ea.noConflict(); expann.addMethod... - in case of conflict
-            ea.addMethod('IsBloodType', function (group) { return /^(A|B|AB|0)[\+-]$/.test(group); });
-            ea.addMethod('AddYears', function (from, years) {
+            // var expann = ea.noConflict(); expann.addMethod... // in case of conflict
+
+            // ea.settings.parseDate = function(str) { // in case of parsing dates in non-standard formats, e.g., dd/mm/yyyy
+            //     var arr = str.split('/');
+            //     var date = new Date(arr[2], arr[1] - 1, arr[0]); // months are 0-based
+            //     return date.getTime(); // return milliseconds
+            // }
+
+            ea.addMethod('IsBloodType', function(group) { return /^(A|B|AB|0)[\+-]$/.test(group); });
+            ea.addMethod('AddYears', function(from, years) {
                 var when = from.getFullYear() + years;
                 from.setFullYear(when);
                 return from;

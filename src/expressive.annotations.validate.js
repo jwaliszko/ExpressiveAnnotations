@@ -297,8 +297,8 @@ var
         settings: {
             parseDate: undefined // provide implementation to parse date in non-standard format
                                  // e.g., suppose DOM field date is given in dd/mm/yyyy format:
-                                 // parseDate = function(str) {
-                                 //     var arr = str.split('/'); return new Date(arr[2], arr[1] - 1, arr[0]).getTime();
+                                 // parseDate = function(str) { // input string is given as a raw value extracted from DOM element
+                                 //     var arr = str.split('/'); return new Date(arr[2], arr[1] - 1, arr[0]).getTime(); // return milliseconds since January 1, 1970, 00:00:00 UTC
                                  // }
         },
         addMethod: function(name, func) {
@@ -317,7 +317,7 @@ var
         }
     };
 
-    $.each(annotations, function(idx, val) {
+    $.each(annotations, function(idx, val) { // should be optimized in terms of memory consumption (redundant handlers shouldn't be generated, there needs to be exactly as many handlers as there are unique annotations)
         var adapter = 'assertthat' + val.trim();
         $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsmap', 'constsmap'], function(options) {
             options.rules[adapter] = {

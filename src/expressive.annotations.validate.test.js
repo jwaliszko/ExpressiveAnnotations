@@ -34,6 +34,20 @@
         window.equal(result.msg, "Supported types: datetime, numeric, string, bool and guid. Invalid target type: secret");
     });
 
+    test("verify_non_standard_date_format_parsing", function () {
+        var expected = new Date("August, 11 2014").getTime();
+        var actual = ea.typeHelper.tryParse("11/08/2014", "datetime");       
+        window.ok(actual != expected); // standard Date.parse fails to understand dd/mm/yyyy format
+        window.ea.settings.parseDate = function(str) {
+            var arr = str.split('/');
+            var date = new Date(arr[2], arr[1] - 1, arr[0]);
+            return date.getTime();
+        }
+        actual = ea.typeHelper.tryParse("11/08/2014", "datetime");
+        window.ok(actual == expected);
+        window.ea.settings.parseDate = undefined; // reset state for further tests
+    });
+
     test("verify_string_formatting", function() {
         window.equal(ea.typeHelper.string.format("{0}", "a"), "a");
         window.equal(ea.typeHelper.string.format("{0}{1}", "a", "b"), "ab");
