@@ -162,7 +162,7 @@ Toolchain functions available out of the box at server and client side:
 
 #####What if there is no function I need?
 
-Create it yourself. Any custom function defined within the model class scope at server side is automatically recognized and can be used inside expressions, e.g.,
+Create it yourself. Any custom function defined within the model class scope at server side is automatically recognized and can be used inside expressions, e.g.
 ```
 class Model
 {
@@ -184,20 +184,13 @@ When values of DOM elemts are extracted, they are converted to appropriate types
 
 >A string representing an RFC2822 or ISO 8601 date (other formats may be used, but results may be unexpected)
 
-When some non-standard format needs to be handled, you can override the default behavior and provide your own implementation:
-```
-<script>
-    ea.settings.parseDate = function(str) {
-        // for non-standard date formats provide specific parsing logic here, return milliseconds
-    }
-```
-E.g., for UK format dd/mm/yyyy:
+When some non-standard format needs to be handled, you can override the default behavior and provide your own implementation, e.g. for UK format dd/mm/yyyy:
 ```
 <script>
     ea.settings.parseDate = function(str) {
         var arr = str.split('/');
         var date = new Date(arr[2], arr[1] - 1, arr[0]);
-        return date.getTime();
+        return date.getTime(); // return milliseconds since January 1, 1970, 00:00:00 UTC
     }
 ```
 
