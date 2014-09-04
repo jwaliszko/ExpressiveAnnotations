@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
+using System.Windows.Navigation;
 using ExpressiveAnnotations.MvvmDesktopSample.Models;
 
 namespace ExpressiveAnnotations.MvvmDesktopSample.Views
@@ -10,14 +12,14 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Views
     {
         public MainWindow()
         {
-            DataContext = new MainWindowVM
-            {
-                Query = new QueryVM
-                {
-                    ContactDetails = new ContactVM()
-                }
-            };
+            DataContext = new MainWindowVM();
             InitializeComponent();
+        }
+
+        private void Hyperlink_OnRequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            e.Handled = true;
         }
     }
 }

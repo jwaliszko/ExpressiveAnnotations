@@ -10,12 +10,12 @@ using ExpressiveAnnotations.MvvmDesktopSample.Properties;
 
 namespace ExpressiveAnnotations.MvvmDesktopSample.Models
 {
-    public abstract class ViewModelBase : INotifyPropertyChanged, IDataErrorInfo
+    public abstract class BaseVM : INotifyPropertyChanged, IDataErrorInfo
     {
         protected readonly Dictionary<string, IEnumerable<ValidationAttribute>> _validators;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected ViewModelBase()
+        protected BaseVM()
         {
             _validators = GetType().GetProperties()
                 .ToDictionary(p => p.Name, p => p.GetCustomAttributes<ValidationAttribute>());
@@ -31,9 +31,11 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
         [NotifyPropertyChangedInvocator]
         protected void OnPropertyChanged<T>(Expression<Func<T>> propertyExpression)
         {
-            var propertyName = GetPropertyName(propertyExpression);
             if (PropertyChanged != null)
+            {
+                var propertyName = GetPropertyName(propertyExpression);
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
 
         private string GetPropertyName<T>(Expression<Func<T>> propertyExpression)
@@ -60,18 +62,31 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
                 var context = new ValidationContext(this) {MemberName = propertyName};
                 var results = new List<ValidationResult>();
                 Validator.TryValidateProperty(value, context, results);
-                var message = string.Join(Environment.NewLine, results.Select(x => x.ErrorMessage));
-                return message;
+                return string.Join(Environment.NewLine, results.Select(x => x.ErrorMessage));
             }
         }
 
         public string Error
         {
+            get { throw new NotImplementedException(); }
+        }
+
+        public IEnumerable<PropertyInfo> AnnotatedProperties
+        {
+            get
+            {
+                return GetType().GetProperties()
+                    .Where(x => x.GetCustomAttributes().Any(a => a is ValidationAttribute))
+                    .ToList();
+            }
+        }
+
+        public IEnumerable<string> ValidationErrors
+        {
             get
             {
                 var modelResults = new List<ValidationResult>();
-                var properties = GetType().GetProperties();
-                foreach (var property in properties)
+                foreach (var property in AnnotatedProperties)
                 {
                     var value = property.GetValue(this);
                     var context = new ValidationContext(this) {MemberName = property.Name};
@@ -79,8 +94,9 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
                     Validator.TryValidateProperty(value, context, results);
                     modelResults.AddRange(results);
                 }
-                var message = string.Join(Environment.NewLine, modelResults.Select(x => x.ErrorMessage));
-                return message;
+                return modelResults
+                    .Select(x => x.ErrorMessage)
+                    .ToList();
             }
         }
     }

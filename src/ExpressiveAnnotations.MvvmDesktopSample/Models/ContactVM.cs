@@ -2,7 +2,7 @@
 
 namespace ExpressiveAnnotations.MvvmDesktopSample.Models
 {
-    public class ContactVM : ViewModelBase
+    public class ContactVM : BaseVM
     {
         private string _email;
         private string _phone;

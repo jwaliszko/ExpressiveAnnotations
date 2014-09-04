@@ -8,7 +8,7 @@ using ExpressiveAnnotations.Attributes;
 
 namespace ExpressiveAnnotations.MvvmDesktopSample.Models
 {
-    public class QueryVM : ViewModelBase
+    public class QueryVM : BaseVM
     {
         private bool _goAbroad;
         private int? _age;
@@ -35,6 +35,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             SportType = "Extreme";
             AgreeForContact = false;
             LatestSuggestedReturnDate = DateTime.UtcNow.AddMonths(1);
+            ContactDetails = new ContactVM();
         }
 
         public IEnumerable<KeyValuePair<string, string>> Countries

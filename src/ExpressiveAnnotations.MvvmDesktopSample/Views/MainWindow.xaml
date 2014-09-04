@@ -1,16 +1,40 @@
 ﻿<Window x:Class="ExpressiveAnnotations.MvvmDesktopSample.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:views="clr-namespace:ExpressiveAnnotations.MvvmDesktopSample.Views"
         Title="ExpressiveAnnotations - annotation-based conditional validation" 
-        Height="620" Width="600">
+        Width="600" Height="585"
+        MinWidth="439" MinHeight="585">
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <views:QueryView DataContext="{Binding Query}" Grid.Row="0" />
+        <TextBlock Grid.Row="0" Margin="2,0,2,-15" HorizontalAlignment="Right" VerticalAlignment="Top">
+            <Hyperlink NavigateUri="https://github.com/JaroslawWaliszko/ExpressiveAnnotations" TextDecorations="None" RequestNavigate="Hyperlink_OnRequestNavigate">[more on github]</Hyperlink>
+        </TextBlock>
+
+        <GroupBox Grid.Row="1" Margin="2">
+            <GroupBox.Header>
+                <Label>Usage sample for model validation in WPF MVVM</Label>
+            </GroupBox.Header>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <ProgressBar Grid.Row="0"
+                             Minimum="0"
+                             Maximum="1"
+                             Value="{Binding Progress, Mode=OneWay}"
+                             Margin="0,0,0,10"
+                             Height="10" />
+                <views:QueryView Grid.Row="1"
+                                 DataContext="{Binding Query}" />
+            </Grid>
+        </GroupBox>
     </Grid>
 </Window>

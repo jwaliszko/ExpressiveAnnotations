@@ -70,7 +70,7 @@
     </Compile>
     <Compile Include="Models\QueryVM.cs" />
     <Compile Include="Models\Stability.cs" />
-    <Compile Include="Models\ViewModelBase.cs" />
+    <Compile Include="Models\BaseVM.cs" />
     <Page Include="Views\ContactView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
