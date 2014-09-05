@@ -13,7 +13,9 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Margin="2,0,2,-15" HorizontalAlignment="Right" VerticalAlignment="Top">
-            <Hyperlink NavigateUri="https://github.com/JaroslawWaliszko/ExpressiveAnnotations" TextDecorations="None" RequestNavigate="Hyperlink_OnRequestNavigate">[more on github]</Hyperlink>
+            <Hyperlink NavigateUri="https://github.com/JaroslawWaliszko/ExpressiveAnnotations" 
+                       TextDecorations="None" 
+                       RequestNavigate="Hyperlink_OnRequestNavigate">[more on github]</Hyperlink>
         </TextBlock>
 
         <GroupBox Grid.Row="1" Margin="2">
@@ -27,11 +29,7 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <ProgressBar Grid.Row="0"
-                             Minimum="0"
-                             Maximum="1"
-                             Value="{Binding Progress, Mode=OneWay}"
-                             Margin="0,0,0,10"
-                             Height="10" />
+                             Minimum="0" Maximum="1" Value="{Binding Progress, Mode=OneWay}" Margin="0,0,0,10" Height="10" />
                 <views:QueryView Grid.Row="1"
                                  DataContext="{Binding Query}" />
             </Grid>

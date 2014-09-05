@@ -8,11 +8,15 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Misc
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            var stringValue = value is DateTime ? ((DateTime) value).ToShortDateString() : value.ToString();
+
             if (parameter == null)
-                return value.ToString();
+                return stringValue;
 
             var formatterString = parameter.ToString();
-            return string.IsNullOrEmpty(formatterString) ? value.ToString() : string.Format(culture, formatterString, value);
+            return string.IsNullOrEmpty(formatterString)
+                ? stringValue
+                : string.Format(culture, formatterString, stringValue);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

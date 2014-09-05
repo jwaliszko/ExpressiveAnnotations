@@ -34,7 +34,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             NextCountry = "Other";
             SportType = "Extreme";
             AgreeForContact = false;
-            LatestSuggestedReturnDate = DateTime.UtcNow.AddMonths(1);
+            LatestSuggestedReturnDate = DateTime.Today.AddMonths(1);
             ContactDetails = new ContactVM();
         }
 
