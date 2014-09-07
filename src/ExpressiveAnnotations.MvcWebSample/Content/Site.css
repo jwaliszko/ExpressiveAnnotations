@@ -1,6 +1,6 @@
 ﻿body {
     font-size: .85em;
-    font-family: "Segoe UI", Verdana, Helvetica, Sans-Serif;
+    font-family: monospace, "Segoe UI", "Segoe UI Light", Verdana, Helvetica, Sans-Serif;
     margin: 0;
     padding: 0;
 }
@@ -11,19 +11,24 @@
 }
 
 .prefix {
-    width: 170px;
+    width: 200px;
+}
+
+.date {
+    width: 85px;
 }
 
 .action {
     cursor: pointer;
     display: block;
     margin: 0;
-    color: grey;
+    color: #aaa;
+    font-size: 1.0em;
     margin: 0 0 0 -2px;
 }
 
 select {
-    width: 117px;
+    width: 212px;
 }
 
 .box {
@@ -38,6 +43,7 @@ select {
     height: 35px;
     width: 65%;
     float: right;
+    font-size: 0.8em;
 }
 
     .box-small div {
@@ -68,8 +74,9 @@ h1 {
 }
 
 .code {
-    background-color: whitesmoke;
+    background: linear-gradient(to right, whitesmoke, white);
     display: none;
+    margin: 10px 0 2px -2px;
 }
 
 a {
@@ -95,8 +102,11 @@ fieldset ol {
 }
 
 fieldset ol li {
-    padding-bottom: 3px;
+    padding: 1px;    
 }
+    fieldset ol li > div {
+        position: relative;
+    }
 
 li fieldset legend {
     display: none;
@@ -108,7 +118,7 @@ label {
     vertical-align: baseline;
 }
 
-.inline {
+.inline, .radio {
     display: inline-block;
     vertical-align: top;
 }
@@ -117,9 +127,18 @@ input, textarea {
     border: 1px solid #e2e2e2;
     background: #fff;
     color: #333;
-    margin: 5px 0 6px 0;
-    padding: 5px;
-    width: 200px;
+}
+
+input {
+    width: 208px;    
+}
+
+textarea {
+    width: 440px;
+    max-width: 440px;
+    min-width: 208px;
+    resize: both;
+    overflow: hidden;
 }
 
 input:focus, textarea:focus {
@@ -131,6 +150,8 @@ input[type="radio"] {
     background: transparent;
     border: inherit;
     width: auto;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 input[type="submit"],
@@ -168,17 +189,19 @@ button {
 
 .field-validation-error {
     color: #e80c4d;
-    font-weight: bold;
-    padding-left: 5px;
+    font-weight: bold;    
     font-size: 0.8em;
+    padding-left: 10px;
+    position: absolute;
+    top: 50%;
 }
 
-input.input-validation-error {
-    border: 1px solid #e80c4d;
+.input-validation-error {
+    outline: 1px solid #e80c4d;
 }
 
-input[type="checkbox"].input-validation-error {
-    border: 0 none;
+input[type="radio"].input-validation-error {
+    outline: 0 none;
 }
 
 .validation-summary-errors {
@@ -189,4 +212,38 @@ input[type="checkbox"].input-validation-error {
 .ctor {
     font-weight: bold;
     font-size: 1.4em;
+}
+
+/********************
+*   Mobile Styles   *
+********************/
+
+@media only screen and (max-width: 850px) {
+
+    .inline {
+        display: block;
+    }
+
+    .field-validation-error {
+        display: block;
+        position: inherit;
+        padding-left: 0;
+    }
+
+    .box-small {
+        display: none;
+    }
+
+
+    .box, fieldset {
+        display: block;
+    }
+
+    .left-corner, .right-corner  {
+        position: inherit;
+    }
+
+    .right-corner {
+        float: right;
+    }
 }

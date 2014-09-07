@@ -3,7 +3,7 @@
     var serverLabel = "server".Equals(ViewBag.Validation) ? "[server]" : "server";
 }
 <div>
-    disable or enable client side validation by excluding or including client side scripts:
+    disable or enable unobtusive client validation:
     <a href="@Url.Action("SetValidation", "System", new { type = "client", returnUrl = Request.RawUrl }, null)">@clientLabel</a>
     <a href="@Url.Action("SetValidation", "System", new { type = "server", returnUrl = Request.RawUrl }, null)">@serverLabel</a>
 </div>

@@ -1,28 +1,29 @@
 ﻿@model ExpressiveAnnotations.MvcWebSample.Models.Contact
 
-<fieldset>
-    <legend>Contact details</legend>
-    <ol>
-        <li>
-            <pre class="code">
+<ol>
+    <li>
+        <pre class="code">
 [RequiredIf("Phone == null")]
 [AssertThat("IsEmail(Email)")]
 </pre>
-            <pre class="action">[show attribute]</pre>
+        <pre class="action">[show attribute]</pre>
+        <div>
             @Html.LabelFor(model => model.Email, new { @class = "inline prefix" })
             @Html.EditorFor(model => model.Email)
             @Html.ValidationMessageFor(model => model.Email)
-        </li>
-        <li>
-            <pre class="code">
+        </div>
+    </li>
+    <li>
+        <pre class="code">
 [RequiredIf("Email == null")]
 [AssertThat("IsDigitChain(Phone)")]
 [AssertThat("Length(Phone) > 8 && Length(Phone) < 16")]
 </pre>
-            <pre class="action">[show attribute]</pre>
+        <pre class="action">[show attribute]</pre>
+        <div>
             @Html.LabelFor(model => model.Phone, new { @class = "inline prefix" })
             @Html.EditorFor(model => model.Phone)
             @Html.ValidationMessageFor(model => model.Phone)
-        </li>
-    </ol>
-</fieldset>
+        </div>
+    </li>
+</ol>

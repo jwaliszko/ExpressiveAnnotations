@@ -1,6 +1,4 @@
-﻿@using ExpressiveAnnotations.MvcWebSample
-@using ExpressiveAnnotations.MvcWebSample.Misc
-@model ExpressiveAnnotations.MvcWebSample.Models.Query
+﻿@model ExpressiveAnnotations.MvcWebSample.Models.Query
 
 @{ var lang = System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName; }
 
@@ -28,147 +26,7 @@
                 @Html.Partial("_Validation")
             </div>
         </div>
-        <ol>
-            <li>
-                @Html.CheckBoxFor(model => model.GoAbroad)
-                @Html.LabelFor(model => model.GoAbroad, new { @class = "inline" })
-                @Html.ValidationMessageFor(model => model.GoAbroad)
-            </li>
-            <li>
-                <pre class="code">
-[Required]
-</pre>
-                <pre class="action">[show attribute]</pre>
-                @Html.LabelFor(model => model.Age, new { @class = "inline prefix" })
-                @Html.DropDownListFor(x => x.Age, new SelectList(Model.Years, null))
-                @Html.ValidationMessageFor(model => model.Age)
-            </li>
-            <li>
-                <pre class="code">
-[RequiredIf("GoAbroad == true")]
-[AssertThat("IsDigitChain(PassportNumber)")]
-</pre>
-                <pre class="action">[show attribute]</pre>
-                @Html.LabelFor(model => model.PassportNumber, new { @class = "inline prefix" })
-                @Html.TextBoxFor(model => model.PassportNumber)
-                @Html.ValidationMessageFor(model => model.PassportNumber)
-            </li>
-            <li>
-                @Html.LabelFor(model => model.Country, new { @class = "inline prefix" })
-                @Html.DropDownListFor(x => x.Country, new SelectList(Model.Countries, "Value", "Text"))
-                @Html.ValidationMessageFor(model => model.Country)
-            </li>
-            <li>
-                @Html.LabelFor(model => model.NextCountry, new { @class = "inline prefix" })
-                @Html.DropDownListFor(x => x.NextCountry, new SelectList(Model.Countries, "Value", "Text"))
-                @Html.ValidationMessageFor(model => model.NextCountry)
-            </li>
-            <li>
-                <pre class="code">
-[RequiredIf("GoAbroad == true " +
-            "&& (" +
-                    "(NextCountry != 'Other' && NextCountry == Country) " +
-                    "|| (Age > 24 && Age &le; 55)" +
-                ")")]
-</pre>
-                <pre class="action">[show attribute]</pre>
-                @Html.LabelFor(model => model.ReasonForTravel, new { @class = "inline prefix" })
-                @Html.TextAreaFor(model => model.ReasonForTravel)
-                @Html.ValidationMessageFor(model => model.ReasonForTravel)
-            </li>
-            <li>
-                @Html.EditorFor(x => x.LatestSuggestedReturnDate)   @*hidden backing field storing date in RFC 2822 or ISO 8601 format*@
-                <pre class="code">
-[RequiredIf("GoAbroad == true")]
-[AssertThat("ReturnDate >= Today()")]
-[AssertThat("ReturnDate < AddYears(Today(), 1)")]
-</pre>
-                <pre class="action">[show attribute]</pre>
-                @Html.LabelFor(model => model.ReturnDate, new { @class = "inline prefix" })
-                @Html.TextBoxFor(x => x.ReturnDate) @Resources.LatestSuggestedReturnDate: @Model.LatestSuggestedReturnDate.ToString(lang == "pl" ? "yyyy-MM-dd" : "MM/dd/yyyy")
-                @Html.ValidationMessageFor(model => model.ReturnDate)
-            </li>
-            <li>
-                <pre class="code">
-[RequiredIf("GoAbroad == true && ReturnDate > LatestSuggestedReturnDate")]
-</pre>
-                <pre class="action">[show attribute]</pre>
-                @Html.LabelFor(model => model.ReasonForLongTravel, new { @class = "inline prefix" })
-                @Html.TextAreaFor(x => x.ReasonForLongTravel)
-                @Html.ValidationMessageFor(model => model.ReasonForLongTravel)
-            </li>
-            <li>
-                <pre class="code">
-[RequiredIf("GoAbroad == true")]  
-</pre>
-                <pre class="action">[show attribute]</pre>
-                @Html.LabelFor(model => model.PoliticalStability, new { @class = "inline prefix" })
-                @Html.EnumDropDownListFor(x => x.PoliticalStability)
-                @Html.ValidationMessageFor(model => model.PoliticalStability)
-            </li>
-            <li>
-                <pre class="code">
-[AssertThat("(" +
-            "    AwareOfTheRisks == true " +
-            "    && (PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain)" +
-            ") " +
-            "|| PoliticalStability == null || PoliticalStability == Stability.High")]
-</pre>
-                <pre class="action">[show attribute]</pre>
-                @Html.CheckBoxFor(model => model.AwareOfTheRisks)
-                @Html.LabelFor(model => model.AwareOfTheRisks, new { @class = "inline" })
-                @Html.ValidationMessageFor(model => model.AwareOfTheRisks)
-            </li>
-            <li>
-                @Html.LabelFor(model => model.SportType, new { @class = "inline prefix" })
-                @foreach (var item in Model.Sports)
-                {
-                    @Html.RadioButtonFor(m => m.SportType, item.Value) <label class="inline">@item.Text</label>
-                }
-                @Html.ValidationMessageFor(model => model.SportType)
-            </li>
-            <li>
-                <pre class="code">
-[RequiredIf("SportType == 'Extreme' || (SportType != 'None' && GoAbroad == true)")]
-[AssertThat("IsBloodType(Trim(BloodType))"]
-</pre>
-                <pre class="action">[show attribute]</pre>
-                @Html.LabelFor(model => model.BloodType, new { @class = "inline prefix" })
-                @Html.TextBoxFor(model => model.BloodType)
-                @Html.ValidationMessageFor(model => model.BloodType)
-            </li>
-            <li>
-                @Html.EditorFor(model => model.ContactDetails)
-            </li>
-            <li>
-                <pre class="code">
-[AssertThat("AgreeForContact == true")]
-</pre>
-                <pre class="action">[show attribute]</pre>
-                @Html.RadioButtonFor(model => model.AgreeForContact, true) <label class="inline">@Resources.SpamAllowed</label>
-                @Html.RadioButtonFor(model => model.AgreeForContact, false) <label class="inline">@Resources.SpamForbidden</label>
-                @Html.ValidationMessageFor(model => model.AgreeForContact)
-            </li>
-            <li>
-                <pre class="code">
-[RequiredIf("AgreeForContact == true && (ContactDetails.Email != null || ContactDetails.Phone != null)")]
-</pre>
-                <pre class="action">[show attribute]</pre>
-                @Html.LabelFor(model => model.ImmediateContact, new { @class = "inline prefix" })
-                @Html.DropDownListFor(model => model.ImmediateContact, new SelectList(Model.Answers, "Value", "Text"))
-                @Html.ValidationMessageFor(model => model.ImmediateContact)
-            </li>
-            <li>
-                <pre class="code">
-[AssertThat("FlightId != Guid('00000000-0000-0000-0000-000000000000') && " +
-            "FlightId != Guid('11111111-1111-1111-1111-111111111111')")]
-</pre>
-                <pre class="action">[show attribute]</pre>
-                @Html.LabelFor(model => model.FlightId, new { @class = "inline prefix" })
-                @Html.EditorFor(model => model.FlightId)
-                @Html.ValidationMessageFor(model => model.FlightId)
-            </li>
-        </ol>
+        @Html.EditorFor(model => model)
         <input type="submit" />
     </fieldset>
 }
@@ -182,11 +40,19 @@
         <script>
             // var expann = ea.noConflict(); expann.addMethod... // in case of conflict
 
-            // ea.settings.parseDate = function(str) { // in case of parsing dates in non-standard formats, e.g., dd/mm/yyyy
-            //     var arr = str.split('/');
-            //     var date = new Date(arr[2], arr[1] - 1, arr[0]); // months are 0-based
-            //     return date.getTime(); // return milliseconds
-            // }
+            @if("pl" == lang)
+            {
+                <text>
+                    ea.settings.parseDate = function (str) { // overrides default date parsing mechanism (to deal with yyyy-mm-dd format)
+                        if (!/^\d{4}-\d{2}-\d{2}$/.test(str))
+                            return Date.parse(str); // default
+
+                        var arr = str.split('-');
+                        var date = new Date(arr[0], arr[1] - 1, arr[2]); // months are 0-based
+                        return date.getTime(); // return milliseconds
+                    }
+                </text>
+            }
 
             ea.addMethod('IsBloodType', function(group) { return /^(A|B|AB|0)[\+-]$/.test(group); });
             ea.addMethod('AddYears', function(from, years) {
@@ -203,7 +69,7 @@
                 $(this).hide();
                 $(this).parent().find('.code').toggle('slow');
             });
-            $("#ReturnDate").datepicker($.datepicker.regional["@lang"]);
+            $(".date").datepicker($.datepicker.regional["@lang"]);
         });
 
         $.datepicker.regional['pl'] = {

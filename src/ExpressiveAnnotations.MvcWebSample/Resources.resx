@@ -249,6 +249,9 @@
   <data name="ReturnDate" xml:space="preserve">
     <value>Return date</value>
   </data>
+  <data name="SelectDate" xml:space="preserve">
+    <value>Select a date</value>
+  </data>
   <data name="SpamAllowed" xml:space="preserve">
     <value>I agree for contact</value>
   </data>

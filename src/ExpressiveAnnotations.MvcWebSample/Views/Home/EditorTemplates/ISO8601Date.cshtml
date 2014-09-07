@@ -1,2 +1,4 @@
 ﻿@model DateTime
-@Html.Hidden("", Model.ToString ("s", System.Globalization.CultureInfo.InvariantCulture)) @*toString with s (sortable) format returns strict ISO 8601*@
+@Html.Hidden("", Model.ToString ("o", System.Globalization.CultureInfo.InvariantCulture)) @*From MSDN: The "o" standard format specifier represents a custom date and time format 
+                                                                                            string using a pattern that preserves time zone information and emits a result string 
+                                                                                            that complies with ISO 8601*@
