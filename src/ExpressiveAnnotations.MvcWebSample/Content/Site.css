@@ -25,6 +25,7 @@
     color: #aaa;
     font-size: 1.0em;
     margin: 0 0 0 -2px;
+    width: 115px;
 }
 
 select {
@@ -40,10 +41,11 @@ select {
 
 .box-small {
     position: relative;
-    height: 35px;
+    margin-top: 35px;
     width: 65%;
     float: right;
     font-size: 0.8em;
+    z-index: 1;
 }
 
     .box-small div {

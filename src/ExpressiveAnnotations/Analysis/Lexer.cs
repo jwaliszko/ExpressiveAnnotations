@@ -42,9 +42,9 @@ namespace ExpressiveAnnotations.Analysis
                 {TokenType.SUB, @"-"},
                 {TokenType.MUL, @"\*"},
                 {TokenType.DIV, @"/"},
-                {TokenType.BOOL, @"(true|false)"},
+                {TokenType.BOOL, @"(?:true|false)"},
                 {TokenType.STRING, @"([""'])(?:\\\1|.)*?\1"},
-                {TokenType.FUNC, @"[a-zA-Z]+([\.]*[a-zA-Z0-9]*)*"}
+                {TokenType.FUNC, @"[a-zA-Z_]+(?:(?:\.[a-zA-Z_])?[a-zA-Z0-9_]*)*"}
             };
         }
 

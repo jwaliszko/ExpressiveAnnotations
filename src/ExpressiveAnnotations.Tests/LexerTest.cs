@@ -7,10 +7,10 @@ namespace ExpressiveAnnotations.Tests
 {
     [TestClass]
     public class LexerTest
-    {
+    {        
         [TestMethod]
-        public void verify_logic()
-        {
+        public void verify_complex_expression_analysis()
+        {            
             const string expression =
                 "GoAbroad == true " +
                     "&& (" +
@@ -144,6 +144,81 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.IsTrue(e.Message == "Invalid token started at: ^");
+            }
+        }
+
+        [TestMethod]
+        public void verify_float_token_extraction()
+        {
+            AssertToken("1.0", 1.0, TokenType.FLOAT);
+            AssertToken("-0.3e-2", -0.3e-2, TokenType.FLOAT);
+
+            AssertNotToken("1", TokenType.FLOAT);
+            AssertNotToken("a", TokenType.FLOAT);
+        }
+
+        [TestMethod]
+        public void verify_string_token_extraction()
+        {
+            AssertToken("\"\"", string.Empty, TokenType.STRING);
+            AssertToken("\"a\"", "a", TokenType.STRING);
+            AssertToken("\"asd\"", "asd", TokenType.STRING);
+            AssertToken("\" a s d \"", " a s d ", TokenType.STRING);
+            AssertToken("''", string.Empty, TokenType.STRING);
+            AssertToken("'a'", "a", TokenType.STRING);
+            AssertToken("'asd'", "asd", TokenType.STRING);
+            AssertToken("' a s d '", " a s d ", TokenType.STRING);
+
+            AssertNotToken("a", TokenType.STRING);
+        }
+
+        [TestMethod]
+        public void verify_func_token_extraction()
+        {
+            AssertToken("_", "_", TokenType.FUNC);
+            AssertToken("__", "__", TokenType.FUNC);
+            AssertToken("a", "a", TokenType.FUNC);
+            AssertToken("asd", "asd", TokenType.FUNC);
+            AssertToken("a_a", "a_a", TokenType.FUNC);
+            AssertToken("a.a", "a.a", TokenType.FUNC);
+            AssertToken("_a.a_", "_a.a_", TokenType.FUNC);
+            AssertToken("A", "A", TokenType.FUNC);
+            AssertToken("_._", "_._", TokenType.FUNC);
+            AssertToken("a1", "a1", TokenType.FUNC);
+            AssertToken("a12.a12", "a12.a12", TokenType.FUNC);
+            AssertToken("a1.a2.a3", "a1.a2.a3", TokenType.FUNC);
+            AssertToken("_._._", "_._._", TokenType.FUNC);
+            AssertToken("_123", "_123", TokenType.FUNC);
+
+            AssertNotToken("1", TokenType.FUNC);
+            AssertNotToken("a..a", TokenType.FUNC);
+            AssertNotToken("a.1", TokenType.FUNC);
+            AssertNotToken("a.+", TokenType.FUNC);
+        }
+
+        private static void AssertToken(string expression, object value, TokenType type)
+        {
+            var lexer = new Lexer();
+            var tokens = lexer.Analyze(expression).ToArray();
+            
+            Assert.AreEqual(tokens.Length, 2);
+            Assert.AreEqual(tokens[0].Value, value);
+            Assert.AreEqual(tokens[0].Type, type);
+            Assert.AreEqual(tokens[1].Type, TokenType.EOF);
+        }
+
+        private static void AssertNotToken(string expression, TokenType type)
+        {
+            try
+            {
+                var lexer = new Lexer();
+                var tokens = lexer.Analyze(expression).ToArray();
+
+                Assert.IsFalse(tokens.Length == 2 && tokens[0].Type == type);
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
             }
         }
     }
