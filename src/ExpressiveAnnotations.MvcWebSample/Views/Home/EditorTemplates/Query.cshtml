@@ -52,10 +52,10 @@
     <li>
         <pre class="code">
 [RequiredIf("GoAbroad == true " +
-    "&& (" +
-            "(NextCountry != 'Other' && NextCountry == Country) " +
-            "|| (Age > 24 && Age &le; 55)" +
-        ")")]
+            "&& (" +
+                    "(NextCountry != 'Other' && NextCountry == Country) " +
+                    "|| (Age > 24 && Age &le; 55)" +
+                ")")]
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>
@@ -103,10 +103,10 @@
     <li>
         <pre class="code">
 [AssertThat("(" +
-    "    AwareOfTheRisks == true " +
-    "    && (PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain)" +
-    ") " +
-    "|| PoliticalStability == null || PoliticalStability == Stability.High")]
+            "    AwareOfTheRisks == true " +
+            "    && (PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain)" +
+            ") " +
+            "|| PoliticalStability == null || PoliticalStability == Stability.High")]
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>
@@ -171,7 +171,7 @@
     <li>
         <pre class="code">
 [AssertThat("FlightId != Guid('00000000-0000-0000-0000-000000000000') && " +
-    "FlightId != Guid('11111111-1111-1111-1111-111111111111')")]
+            "FlightId != Guid('11111111-1111-1111-1111-111111111111')")]
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>

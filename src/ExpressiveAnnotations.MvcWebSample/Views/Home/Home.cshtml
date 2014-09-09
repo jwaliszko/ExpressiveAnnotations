@@ -35,17 +35,19 @@
     @if ("client".Equals(ViewBag.Validation))
     {
         @Scripts.Render("~/bundles/jqueryval")
-        @Scripts.Render("~/bundles/expressive")
+        @Scripts.Render("~/bundles/expressive") // load expressive.annotations.validate.js
 
         <script>
-            // var expann = ea.noConflict(); expann.addMethod... // in case of conflict
+            // var expann = ea.noConflict(); // in case of naming collision, return control of the ea variable back to its origins (old references of ea are saved during ExpressiveAnnotations initialization; noConflict() restores them)
+            // expann.addMethod... // do something with ExpressiveAnnotations
+            // ea... // do something with original ea variable
 
-            @if("pl" == lang)
+            @if ("pl" == lang)
             {
                 <text>
-                    ea.settings.parseDate = function (str) { // overrides default date parsing mechanism (to deal with yyyy-mm-dd format)
-                        if (!/^\d{4}-\d{2}-\d{2}$/.test(str))
-                            return Date.parse(str); // default
+                    ea.settings.parseDate = function(str) { // override default date parsing mechanism (to deal with yyyy-mm-dd format)
+                        if (!/^\d{4}-\d{2}-\d{2}$/.test(str)) // in case the str does not have the desired format...
+                            return Date.parse(str); // ...default date parser is used
 
                         var arr = str.split('-');
                         var date = new Date(arr[0], arr[1] - 1, arr[2]); // months are 0-based
@@ -54,7 +56,9 @@
                 </text>
             }
 
-            ea.addMethod('IsBloodType', function(group) { return /^(A|B|AB|0)[\+-]$/.test(group); });
+            ea.addMethod('IsBloodType', function(group) {
+                return /^(A|B|AB|0)[\+-]$/.test(group);
+            });
             ea.addMethod('AddYears', function(from, years) {
                 var when = from.getFullYear() + years;
                 from.setFullYear(when);
