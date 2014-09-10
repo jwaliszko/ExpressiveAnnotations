@@ -1,4 +1,4 @@
-﻿#ExpressiveAnnotations - annotation-based conditional validation
+﻿#ExpressiveAnnotations<sup><sup><sup>[annotation-based conditional validation]</sup></sup></sup>
 
 <sub>**Notice: This document describes latest implementation. For previous concept (version &lt; 2.0) take a look at [EA1 branch](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/EA1).**</sub>
 
@@ -6,9 +6,9 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
 
 ###What is the context behind this implementation?
 
-Metadata, in general, is awesome. Declarative validation, when [compared](README.md#declarative-vs-imperative-programming---whats-the-difference) to imperative approach, for me seems to be more convenient in many cases. Clean, compact code - all validation logic defined within the model scope. Simple to write, obvious to read.
+Metadata, in general, is awesome. Declarative validation, when [compared](README.md#declarative-vs-imperative-programming---what-is-it-about) to imperative approach, for me seems to be more convenient in many cases. Clean, compact code - all validation logic defined within the model scope. Simple to write, obvious to read.
 
-###RequiredIf vs AssertThat - what's the difference?
+###RequiredIf vs. AssertThat - where is the difference?
 
 * `RequiredIf` - if value is not yet provided, check whether it is required (annotated field is required to be non-null, when given condition is satisfied),
 * `AssertThat` - if value is already provided, check whether the condition is met (non-null annotated field is considered as valid, when given condition is satisfied).
@@ -21,30 +21,30 @@ For comprehensive examples, take a look inside chosen demo project:
 * [**WPF MVVM desktop sample**](src/ExpressiveAnnotations.MvvmDesktopSample).
 
 For the time being, to keep your ear to the ground, let's walk through few exemplary code snippets:
-```
+```C#
 [RequiredIf("GoAbroad == true")]
 public string PassportNumber { get; set; }
 ```
-Here we are saying, that annotated field is required when condition given in the logical expression is satisfied (passport number is required, if go abroad field has true boolean value).
+Above we are saying, that annotated field is required when condition given in the logical expression is satisfied (passport number is required, if go abroad field has true boolean value).
 
 Simple enough, let's move to another variation:
-```
+```C#
 [AssertThat("ReturnDate >= Today()")]
 public DateTime? ReturnDate { get; set; }
 ```
-By the usage of this attribute type, we are not validating field requirement as before - its value is allowed to be null this time. Nevertheless, if some value is already given, it needs to be correct (provided restriction needs to be satisfied). Here, the value of return date field needs to be greater than or equal to the date returned by `Today()` [built-in function](README.md#built-in-functions). 
+By the usage of this attribute type, we are not validating field requirement as before - its value is allowed to be null this time. Nevertheless, if some value is already given, provided restriction needs to be satisfied (return date needs to be greater than or equal to the date returned by `Today()` [built-in function](README.md#built-in-functions)). 
 
-Both types of attributes may be combined (moreover, the same type of attribute can be applied multiple times for a single field):
-```
+As shown below, both types of attributes may be combined (moreover, the same type can be applied multiple times for a single field):
+```C#
 [RequiredIf("Details.Email != null")]
 [RequiredIf("Details.Phone != null")]
 [AssertThat("AgreeToContact == true")]
 public bool? AgreeToContact { get; set; }
 ```
-This one means, that when either email or phone is provided, you are forced to authorize someone to contact with you (boolean value indicating contact permission has to be true). What is more, we can see here that nested properties are supported by [the expressions parser](README.md#implementation). 
+Literal translation means, that if either email or phone is provided, you are forced to authorize someone to contact with you (boolean value indicating contact permission has to be true). What is more, we can see that nested properties are supported by [the expressions parser](README.md#implementation). 
 
 Finally, take a brief look at following construction:
-```
+```C#
 [RequiredIf("GoAbroad == true " +
 			"&& (" +
 					"(NextCountry != 'Other' && NextCountry == Country) " +
@@ -179,7 +179,7 @@ Toolchain functions available out of the box at server- and client-side:
 #####What if there is no function I need?
 
 Create it yourself. Any custom function defined within the model class scope at server-side is automatically recognized and can be used inside expressions, e.g.
-```
+```C#
 class Model
 {
     public bool IsBloodType(string group) 
@@ -191,7 +191,7 @@ class Model
     public string BloodType { get; set; }
 ```
  If client-side validation is needed as well, function of the same signature (name and the number of parameters) must be available there. JavaScript corresponding implementation should be registered by the following instruction:
-```
+```JavaScript
 <script>    
     ea.addMethod('IsBloodType', function(group) {
 		return /^(A|B|AB|0)[\+-]$/.test(group);
@@ -205,7 +205,7 @@ When values of DOM elements are extracted, they are converted to appropriate typ
 >A string representing an RFC 2822 or ISO 8601 date (other formats may be used, but results may be unexpected)
 
 When some non-standard format needs to be handled, simply override the default behavior and provide your own implementation. E.g. when dealing with UK format *dd/mm/yyyy*:
-```
+```JavaScript
 <script>
     ea.settings.parseDate = function(str) {
 		if (!/^\d{2}\/\d{2}\/\d{4}$/.test(str)) // in case str format is not dd/mm/yyyy...
@@ -219,8 +219,8 @@ When some non-standard format needs to be handled, simply override the default b
 
 #####What if ea variable is already used by another library?
 
-Use `noConflict()` method. In case of naming collision return control of the `ea` variable back to its origins. Old references of `ea` are saved during ExpressiveAnnotations initialization - `noConflict()` restores them.
-```
+Use `noConflict()` method. In case of naming collision return control of the `ea` variable back to its origins. Old references of `ea` are saved during ExpressiveAnnotations initialization - `noConflict()` simply restores them:
+```JavaScript
 <script src="another.js"></script>
 <script src="expressive.annotations.validate.js"></script>
 <script>
@@ -229,20 +229,20 @@ Use `noConflict()` method. In case of naming collision return control of the `ea
 	ea... // do something with original ea variable
 ```
 
-###Declarative vs imperative programming - what's the difference?
+###Declarative vs. imperative programming - what is it about?
 
-With **declarative** programming, you write logic that expresses what you want, but not necessarily how to achieve it. You declare your desired results, but not the step-by-step.
+With **declarative** programming, you write logic that expresses *what* you want, but not necessarily *how* to achieve it. You declare your desired results, but not the necessarily step-by-step.
 
-In our example it is more about metadata, e.g.
-```
+In our case it is about metadata, e.g.
+```C#
 [RequiredIf("GoAbroad == true && NextCountry != 'Other' && NextCountry == Country",
 	ErrorMessage = "If you plan to travel abroad, why visit the same country twice?")]
 public string ReasonForTravel { get; set; }
 ```
-With **imperative** programming, you define the control flow of the computation which needs to be done. You tell the compiler what you want, step by step.
+With **imperative** programming, you define the control flow of the computation which needs to be done. You tell the compiler what you want, exactly step by step.
 
 If we choose this way instead of model fields decoration, it has negative impact on the complexity of the code. Logic responsible for validation is now implemented somewhere else in our application, e.g. inside controllers actions instead of model class itself:
-```
+```C#
     if (!model.GoAbroad)
         return View("Success");
     if (model.NextCountry == "Other")
@@ -263,7 +263,7 @@ Client-side validation is **fully supported**. Enable it for your web project wi
 1. Reference both assemblies to your project: core [**ExpressiveAnnotations.dll**](src/ExpressiveAnnotations) and subsidiary [**ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll**](src/ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider),
 2. In Global.asax register required validators (`IClientValidatable` interface is not directly implemented by the attribute, to avoid coupling of ExpressionAnnotations assembly with System.Web.Mvc dependency):
 
- ```    
+ ```C#
     protected void Application_Start()
     {
         DataAnnotationsModelValidatorProvider.RegisterAdapter(
@@ -273,7 +273,7 @@ Client-side validation is **fully supported**. Enable it for your web project wi
 ```
 3. Include [**expressive.annotations.validate.js**](src/expressive.annotations.validate.js) scripts in your page (do not forget standard jQuery validation scripts):
 
- ```
+ ```JavaScript
     <script src="/Scripts/jquery.validate.js"></script>
     <script src="/Scripts/jquery.validate.unobtrusive.js"></script>
     ...
