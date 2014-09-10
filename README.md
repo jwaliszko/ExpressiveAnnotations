@@ -6,9 +6,9 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
 
 ###What is the context behind this implementation?
 
-Metadata, in general, is awesome. Declarative validation, when [compared](https://github.com/JaroslawWaliszko/ExpressiveAnnotations#declarative-vs-imperative-programming---what-is-the-difference) to imperative approach, for me seems to be more convenient in many cases. Clean, compact code - all validation logic defined within the model scope. Simple to write, obvious to read.
+Metadata, in general, is awesome. Declarative validation, when [compared](README.md#declarative-vs-imperative-programming---whats-the-difference) to imperative approach, for me seems to be more convenient in many cases. Clean, compact code - all validation logic defined within the model scope. Simple to write, obvious to read.
 
-###RequiredIf vs AssertThat - what is the difference?
+###RequiredIf vs AssertThat - what's the difference?
 
 * `RequiredIf` - if value is not yet provided, check whether it is required (annotated field is required to be non-null, when given condition is satisfied),
 * `AssertThat` - if value is already provided, check whether the condition is met (non-null annotated field is considered as valid, when given condition is satisfied).
@@ -17,8 +17,8 @@ Metadata, in general, is awesome. Declarative validation, when [compared](https:
 
 For comprehensive examples, take a look inside chosen demo project:
 
-* [**ASP.NET MVC web sample**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations.MvcWebSample),
-* [**WPF MVVM desktop sample**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations.MvvmDesktopSample).
+* [**ASP.NET MVC web sample**](src/ExpressiveAnnotations.MvcWebSample),
+* [**WPF MVVM desktop sample**](src/ExpressiveAnnotations.MvvmDesktopSample).
 
 For the time being, to keep your ear to the ground, let's walk through few exemplary code snippets:
 ```
@@ -32,7 +32,7 @@ Simple enough, let's move to another variation:
 [AssertThat("ReturnDate >= Today()")]
 public DateTime? ReturnDate { get; set; }
 ```
-By the usage of this attribute type, we are not validating field requirement as before - its value is allowed to be null this time. Nevertheless, if some value is already given, it needs to be correct (provided restriction needs to be satisfied). Here, the value of return date field needs to be greater than or equal to the date returned by `Today()` [utility function](https://github.com/JaroslawWaliszko/ExpressiveAnnotations#built-in-functions). 
+By the usage of this attribute type, we are not validating field requirement as before - its value is allowed to be null this time. Nevertheless, if some value is already given, it needs to be correct (provided restriction needs to be satisfied). Here, the value of return date field needs to be greater than or equal to the date returned by `Today()` [built-in function](README.md#built-in-functions). 
 
 Both types of attributes may be combined (moreover, the same type of attribute can be applied multiple times for a single field):
 ```
@@ -41,7 +41,7 @@ Both types of attributes may be combined (moreover, the same type of attribute c
 [AssertThat("AgreeToContact == true")]
 public bool? AgreeToContact { get; set; }
 ```
-This one means, that when either email or phone is provided, you are forced to authorize someone to contact with you (boolean value indicating contact permission has to be true). What is more, we can see here that nested properties are supported by [the expressions parser](https://github.com/JaroslawWaliszko/ExpressiveAnnotations#implementation). 
+This one means, that when either email or phone is provided, you are forced to authorize someone to contact with you (boolean value indicating contact permission has to be true). What is more, we can see here that nested properties are supported by [the expressions parser](README.md#implementation). 
 
 Finally, take a brief look at following construction:
 ```
@@ -72,8 +72,8 @@ AssertThatAttribute(string expression ...)        - Validation attribute, execut
 													considered as valid.
 
   expression        - The logical expression based on which requirement condition is computed.
-  AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should allow empty or
-	                  whitespace strings.
+  AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should allow empty 
+                      or whitespace strings.
 ```
 
 #####Implementation:
@@ -92,7 +92,7 @@ mul-exp'   => "*" mul-exp | "/" mul-exp
 rel-op     => "==" | "!=" | ">" | ">=" | "<" | "<="
 val        => "null" | int | float | bool | string | func | "(" or-exp ")"
 ```
-Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar except for int, float, bool, string and func, which are assumed to be implicitly defined (func can be an enum value as well as constant, property or function name).
+Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar except for *int*, *float*, *bool*, *string* and *func*, which are assumed to be implicitly defined (*func* can be an enum value as well as constant, property or function name).
 
 Preserving the syntax defined by the grammar above, logical expressions can be built using following components:
 
@@ -114,7 +114,7 @@ Preserving the syntax defined by the grammar above, logical expressions can be b
 
 Provided expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object. As a result of expression evaluation, boolean flag is returned, indicating that expression is true or false. 
 
-When working with ASP.NET MVC stack, unobtrusive client-side validation mechanism is [additionally available](https://github.com/JaroslawWaliszko/ExpressiveAnnotations#what-about-the-support-of-aspnet-mvc-client---side-validation). Client receives unchanged expression string from server. Such an expression is then evaluated using build-in [eval](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) within the context of model object. Such a model, analogously to the server-side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
+When working with ASP.NET MVC stack, unobtrusive client-side validation mechanism is [additionally available](README.md#what-about-the-support-of-aspnet-mvc-client-side-validation). Client receives unchanged expression string from server. Such an expression is then evaluated using JavaScript [eval method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) within the context of reflected model object. Such a model, analogously to the server-side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
 
 Attention needed when coping with null (discrepancies between C# and JS), e.g.
 
@@ -187,7 +187,7 @@ class Model
 		return Regex.IsMatch(group, "^(A|B|AB|0)[\+-]$");
 	}
 
-	[AssertThat("IsBloodType(BloodType)")] // function available (context aware)
+	[AssertThat("IsBloodType(BloodType)")] // method known here (context aware expressions)
     public string BloodType { get; set; }
 ```
  If client-side validation is needed as well, function of the same signature (name and the number of parameters) must be available there. JavaScript corresponding implementation should be registered by the following instruction:
@@ -204,11 +204,11 @@ When values of DOM elements are extracted, they are converted to appropriate typ
 
 >A string representing an RFC 2822 or ISO 8601 date (other formats may be used, but results may be unexpected)
 
-When some non-standard format needs to be handled, simply override the default behavior and provide your own implementation. E.g. when dealing with UK format dd/mm/yyyy:
+When some non-standard format needs to be handled, simply override the default behavior and provide your own implementation. E.g. when dealing with UK format *dd/mm/yyyy*:
 ```
 <script>
     ea.settings.parseDate = function(str) {
-		if (!/^\d{2}\/\d{2}\/\d{4}$/.test(str)) // in case the str does not have dd/mm/yyyy format...
+		if (!/^\d{2}\/\d{2}\/\d{4}$/.test(str)) // in case str format is not dd/mm/yyyy...
 			return Date.parse(str); // ...default date parser is used
 
         var arr = str.split('/');
@@ -229,7 +229,7 @@ Use `noConflict()` method. In case of naming collision return control of the `ea
 	ea... // do something with original ea variable
 ```
 
-###Declarative vs imperative programming - what is the difference?
+###Declarative vs imperative programming - what's the difference?
 
 With **declarative** programming, you write logic that expresses what you want, but not necessarily how to achieve it. You declare your desired results, but not the step-by-step.
 
@@ -260,7 +260,7 @@ If we choose this way instead of model fields decoration, it has negative impact
 
 Client-side validation is **fully supported**. Enable it for your web project within the next few steps:
 
-1. Reference both assemblies to your project: core [**ExpressiveAnnotations.dll**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations) and subsidiary [**ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/master/src/ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider),
+1. Reference both assemblies to your project: core [**ExpressiveAnnotations.dll**](src/ExpressiveAnnotations) and subsidiary [**ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll**](src/ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider),
 2. In Global.asax register required validators (`IClientValidatable` interface is not directly implemented by the attribute, to avoid coupling of ExpressionAnnotations assembly with System.Web.Mvc dependency):
 
  ```    
@@ -271,7 +271,7 @@ Client-side validation is **fully supported**. Enable it for your web project wi
         DataAnnotationsModelValidatorProvider.RegisterAdapter(
             typeof(AssertThatAttribute), typeof(AssertThatValidator));
 ```
-3. Include [**expressive.annotations.validate.js**](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/blob/master/src/expressive.annotations.validate.js) scripts in your page (do not forget standard jQuery validation scripts):
+3. Include [**expressive.annotations.validate.js**](src/expressive.annotations.validate.js) scripts in your page (do not forget standard jQuery validation scripts):
 
  ```
     <script src="/Scripts/jquery.validate.js"></script>
