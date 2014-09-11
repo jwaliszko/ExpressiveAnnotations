@@ -1,21 +1,21 @@
-﻿#ExpressiveAnnotations<sup><sup><sup>[annotation-based conditional validation]</sup></sup></sup>
+﻿#<a id="expressiveannotations-annotation-based-conditional-validation">ExpressiveAnnotations <sup><sup><sup>[annotation-based conditional validation]</sup></sup></sup></a>
 
 <sub>**Notice: This document describes latest implementation. For previous concept (version &lt; 2.0) take a look at [EA1 branch](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/EA1).**</sub>
 
-ExpressiveAnnotations is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given RequiredIf and AssertThat attributes allow to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more condensed, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
+ExpressiveAnnotations is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given `RequiredIf` and `AssertThat` attributes allow to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more condensed, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
 
-###What is the context behind this implementation?
+###<a id="what-is-the-context-behind-this-implementation">What is the context behind this implementation?</a>
 
-Metadata, in general, is awesome. Declarative validation, when [compared](README.md#declarative-vs-imperative-programming---what-is-it-about) to imperative approach, for me seems to be more convenient in many cases. Clean, compact code - all validation logic defined within the model scope. Simple to write, obvious to read.
+Metadata, in general, is awesome. Declarative validation, when [compared](#declarative-vs-imperative-programming---what-is-it-about) to imperative approach, for me seems to be more convenient in many cases. Clean, compact code - all validation logic defined within the model scope. Simple to write, obvious to read.
 
-###RequiredIf vs. AssertThat - where is the difference?
+###<a id="requiredif-vs-assertthat---where-is-the-difference">RequiredIf vs. AssertThat - where is the difference?</a>
 
 * `RequiredIf` - if value is not yet provided, check whether it is required (annotated field is required to be non-null, when given condition is satisfied),
 * `AssertThat` - if value is already provided, check whether the condition is met (non-null annotated field is considered as valid, when given condition is satisfied).
 
-###What are brief examples of usage?
+###<a id="what-are-brief-examples-of-usage">What are brief examples of usage?</a>
 
-For comprehensive examples, take a look inside chosen demo project:
+If you're interested in comprehensive examples, take a look inside chosen demo project:
 
 * [**ASP.NET MVC web sample**](src/ExpressiveAnnotations.MvcWebSample),
 * [**WPF MVVM desktop sample**](src/ExpressiveAnnotations.MvvmDesktopSample).
@@ -32,7 +32,7 @@ Simple enough, let's move to another variation:
 [AssertThat("ReturnDate >= Today()")]
 public DateTime? ReturnDate { get; set; }
 ```
-By the usage of this attribute type, we are not validating field requirement as before - its value is allowed to be null this time. Nevertheless, if some value is already given, provided restriction needs to be satisfied (return date needs to be greater than or equal to the date returned by `Today()` [built-in function](README.md#built-in-functions)). 
+By the usage of this attribute type, we are not validating field requirement as before - its value is allowed to be null this time. Nevertheless, if some value is already given, provided restriction needs to be satisfied (return date needs to be greater than or equal to the date returned by [`Today()` built-in function](#built-in-functions)). 
 
 As shown below, both types of attributes may be combined (moreover, the same type can be applied multiple times for a single field):
 ```C#
@@ -41,24 +41,24 @@ As shown below, both types of attributes may be combined (moreover, the same typ
 [AssertThat("AgreeToContact == true")]
 public bool? AgreeToContact { get; set; }
 ```
-Literal translation means, that if either email or phone is provided, you are forced to authorize someone to contact with you (boolean value indicating contact permission has to be true). What is more, we can see that nested properties are supported by [the expressions parser](README.md#implementation). 
+Literal translation means, that if either email or phone is provided, you are forced to authorize someone to contact with you (boolean value indicating contact permission has to be true). What is more, we can see that nested properties are supported by [the expressions parser](#implementation). 
 
 Finally, take a brief look at following construction:
 ```C#
 [RequiredIf("GoAbroad == true " +
-			"&& (" +
-					"(NextCountry != 'Other' && NextCountry == Country) " +
-					"|| (Age > 24 && Age <= 55)" +
-				")")]
+            "&& (" +
+                    "(NextCountry != 'Other' && NextCountry == Country) " +
+                    "|| (Age > 24 && Age <= 55)" +
+                ")")]
 public string ReasonForTravel { get; set; }
 ```
 <sub>Notice: Expression is splitted into multiple lines because such a form is easier to comprehend.</sub>
 
 Restriction above is slightly more complex than its predecessors, but still can be quickly understood (reason for travel has to be provided if you plan to go abroad and: want to visit the same definite country twice, or have between 25 and 55 years).
 
-###How to construct conditional validation attributes?
+###<a id="how-to-construct-conditional-validation-attributes">How to construct conditional validation attributes?</a>
 
-#####Signatures:
+#####<a id="signatures">Signatures:</a>
 
 ```
 RequiredIfAttribute(string expression,
@@ -76,9 +76,9 @@ AssertThatAttribute(string expression ...)        - Validation attribute, execut
                       or whitespace strings.
 ```
 
-#####Implementation:
+#####<a id="implementation">Implementation:</a>
 
-Implementation core is based on top-down recursive descent logical expressions parser, with a single token of lookahead ([LL(1)](http://en.wikipedia.org/wiki/LL_parser)), which runs on the following [EBNF-like](http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form) grammar:
+Implementation core is based on top-down recursive descent [logical expressions parser](src/ExpressiveAnnotations/Analysis/Parser.cs), with a single token of lookahead ([LL(1)](http://en.wikipedia.org/wiki/LL_parser)), which runs on the following [EBNF-like](http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form) grammar:
 ```
 expression => or-exp
 or-exp     => and-exp [ "||" or-exp ]
@@ -114,16 +114,18 @@ Preserving the syntax defined by the grammar above, logical expressions can be b
 
 Provided expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object. As a result of expression evaluation, boolean flag is returned, indicating that expression is true or false. 
 
-When working with ASP.NET MVC stack, unobtrusive client-side validation mechanism is [additionally available](README.md#what-about-the-support-of-aspnet-mvc-client-side-validation). Client receives unchanged expression string from server. Such an expression is then evaluated using JavaScript [eval method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) within the context of reflected model object. Such a model, analogously to the server-side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
+When working with ASP.NET MVC stack, unobtrusive client-side validation mechanism is [additionally available](#what-about-the-support-of-aspnet-mvc-client-side-validation). Client receives unchanged expression string from server. Such an expression is then evaluated using JavaScript [`eval()` method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) within the context of reflected model object. Such a model, analogously to the server-side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
 
-Attention needed when coping with null (discrepancies between C# and JS), e.g.
+#####<a id="traps">Traps:</a>
+
+Attention needed when coping with `null` (discrepancies between C# and JavaScript), e.g.
 
 * `null + "text"` - in C# `"text"`, in JS `"nulltext"`,
 * `2 * null`      - in C# `null`  , in JS `0`,
 * `null > -1`     - in C# `false` , in JS `true`,
 * and more...
 
-#####Built-in functions:
+#####<a id="built-in-functions">Built-in functions:</a>
 
 Toolchain functions available out of the box at server- and client-side: 
 
@@ -174,20 +176,20 @@ Toolchain functions available out of the box at server- and client-side:
 * `Guid Guid(string str)`
     * Initializes a new instance of the Guid structure by using the value represented by the specified string.
 
-###Frequently asked questions:
+###<a id="frequently-asked-questions">Frequently asked questions:</a>
 
-#####What if there is no function I need?
+#####<a id="what-if-there-is-no-function-i-need">What if there is no function I need?</a>
 
 Create it yourself. Any custom function defined within the model class scope at server-side is automatically recognized and can be used inside expressions, e.g.
 ```C#
 class Model
 {
     public bool IsBloodType(string group) 
-	{ 
-		return Regex.IsMatch(group, "^(A|B|AB|0)[\+-]$");
-	}
+    { 
+        return Regex.IsMatch(group, "^(A|B|AB|0)[\+-]$");
+    }
 
-	[AssertThat("IsBloodType(BloodType)")] // method known here (context aware expressions)
+    [AssertThat("IsBloodType(BloodType)")] // method known here (context aware expressions)
     public string BloodType { get; set; }
 ```
  If client-side validation is needed as well, function of the same signature (name and the number of parameters) must be available there. JavaScript corresponding implementation should be registered by the following instruction:
@@ -198,9 +200,9 @@ class Model
 	});
 ```
 
-#####How to cope with dates given in non-standard formats?
+#####<a id="how-to-cope-with-dates-given-in-non-standard-formats">How to cope with dates given in non-standard formats?</a>
 
-When values of DOM elements are extracted, they are converted to appropriate types. For fields containing date strings, `Date.parse(dateString)` JavaScript method is used by default. As noted in [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse), `dateString` parameter is:
+When values of DOM elements are extracted, they are converted to appropriate types. For fields containing date strings, JavaScript `Date.parse()` method is used by default. As noted in [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse), the input parameter is:
 
 >A string representing an RFC 2822 or ISO 8601 date (other formats may be used, but results may be unexpected)
 
@@ -208,8 +210,8 @@ When some non-standard format needs to be handled, simply override the default b
 ```JavaScript
 <script>
     ea.settings.parseDate = function(str) {
-		if (!/^\d{2}\/\d{2}\/\d{4}$/.test(str)) // in case str format is not dd/mm/yyyy...
-			return Date.parse(str); // ...default date parser is used
+        if (!/^\d{2}\/\d{2}\/\d{4}$/.test(str)) // in case str format is not dd/mm/yyyy...
+            return Date.parse(str); // ...default date parser is used
 
         var arr = str.split('/');
         var date = new Date(arr[2], arr[1] - 1, arr[0]);
@@ -217,26 +219,26 @@ When some non-standard format needs to be handled, simply override the default b
     }
 ```
 
-#####What if ea variable is already used by another library?
+#####<a id="what-if-ea-variable-is-already-used-by-another-library">What if ea variable is already used by another library?</a>
 
 Use `noConflict()` method. In case of naming collision return control of the `ea` variable back to its origins. Old references of `ea` are saved during ExpressiveAnnotations initialization - `noConflict()` simply restores them:
 ```JavaScript
 <script src="another.js"></script>
 <script src="expressive.annotations.validate.js"></script>
 <script>
-	var expann = ea.noConflict();
-	expann.addMethod... // do something with ExpressiveAnnotations
-	ea... // do something with original ea variable
+    var expann = ea.noConflict();
+    expann.addMethod... // do something with ExpressiveAnnotations
+    ea... // do something with original ea variable
 ```
 
-###Declarative vs. imperative programming - what is it about?
+###<a id="declarative-vs-imperative-programming---what-is-it-about">Declarative vs. imperative programming - what is it about?</a>
 
 With **declarative** programming, you write logic that expresses *what* you want, but not necessarily *how* to achieve it. You declare your desired results, but not the necessarily step-by-step.
 
-In our case it is about metadata, e.g.
+In our case, this concept is materialized by attributes, e.g.
 ```C#
 [RequiredIf("GoAbroad == true && NextCountry != 'Other' && NextCountry == Country",
-	ErrorMessage = "If you plan to travel abroad, why visit the same country twice?")]
+    ErrorMessage = "If you plan to travel abroad, why visit the same country twice?")]
 public string ReasonForTravel { get; set; }
 ```
 With **imperative** programming, you define the control flow of the computation which needs to be done. You tell the compiler what you want, exactly step by step.
@@ -250,13 +252,13 @@ If we choose this way instead of model fields decoration, it has negative impact
     if (model.NextCountry != model.Country)
         return View("Success");
     
-	ModelState.AddModelError("ReasonForTravel", 
-		"If you plan to travel abroad, why visit the same country twice?");
+    ModelState.AddModelError("ReasonForTravel", 
+        "If you plan to travel abroad, why visit the same country twice?");
     return View("Home", model);
 }
 ```
 
-###What about the support of ASP.NET MVC client-side validation?
+###<a id="what-about-the-support-of-aspnet-mvc-client-side-validation">What about the support of ASP.NET MVC client-side validation?</a>
 
 Client-side validation is **fully supported**. Enable it for your web project within the next few steps:
 
