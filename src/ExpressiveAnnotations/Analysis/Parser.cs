@@ -484,8 +484,8 @@ namespace ExpressiveAnnotations.Analysis
                 var constants = AppDomain.CurrentDomain.GetAssemblies()
                     .SelectMany(a => a.GetLoadableTypes())
                     .Where(t => t.FullName.Replace("+", ".").EndsWith(constTypeName))
-                    .SelectMany(
-                        t => t.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+                    .SelectMany(t =>
+                        t.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
                             .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name.Equals(parts.Last())))
                     .ToList();
 
@@ -506,7 +506,7 @@ namespace ExpressiveAnnotations.Analysis
             else
             {
                 var constant = ContextType.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
-                    .SingleOrDefault(fi => fi.IsLiteral && !fi.IsInitOnly);
+                    .SingleOrDefault(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name.Equals(name));
 
                 if (constant != null)
                 {

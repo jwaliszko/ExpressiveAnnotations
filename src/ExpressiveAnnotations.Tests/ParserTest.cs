@@ -375,10 +375,9 @@ namespace ExpressiveAnnotations.Tests
         [TestMethod]
         public void verify_enumeration_ambiguity()
         {
-            var parser = new Parser();
-
             try
             {
+                var parser = new Parser();
                 parser.Parse<object>("Stability.High == 0").Invoke(null);
                 Assert.Fail();
             }
@@ -395,6 +394,32 @@ namespace ExpressiveAnnotations.Tests
                     "Enum Stability is ambiguous, found following:" + Environment.NewLine +
                     "ExpressiveAnnotations.Tests.Utility+Stability" + Environment.NewLine +
                     "ExpressiveAnnotations.Tests.Stability",
+                    e.InnerException.Message);
+            }
+        }
+
+        [TestMethod]
+        public void verify_invalid_func_identifier()
+        {
+            try
+            {
+                var model = new Model();
+                var parser = new Parser();
+
+                parser.Parse<Model>("NonExistent == 0").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    "Parsing failed. Invalid expression: NonExistent == 0",
+                    e.Message);
+
+                Assert.IsNotNull(e.InnerException);
+                Assert.IsTrue(e.InnerException is InvalidOperationException);
+                Assert.AreEqual(
+                    "Only public properties, constants and enums are accepted. Invalid identifier: NonExistent",
                     e.InnerException.Message);
             }
         }
