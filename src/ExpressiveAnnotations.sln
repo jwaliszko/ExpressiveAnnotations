@@ -7,17 +7,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations", "Ex
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.Tests", "ExpressiveAnnotations.Tests\ExpressiveAnnotations.Tests.csproj", "{2DE111D5-E3A5-4FC8-8261-AA2DA743A3AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvcWebSample", "ExpressiveAnnotations.MvcWebSample\ExpressiveAnnotations.MvcWebSample.csproj", "{78E4B95D-B0C3-486E-8847-CA444EF5BB95}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider", "ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.csproj", "{1926A95D-19EE-451B-9DA4-C3EAF555B15D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExpressiveAnnotations.Scripts", "ExpressiveAnnotations.Scripts", "{56496E2F-18D3-4633-90A5-082C83132B83}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvcWebSample", "ExpressiveAnnotations.MvcWebSample\ExpressiveAnnotations.MvcWebSample.csproj", "{78E4B95D-B0C3-486E-8847-CA444EF5BB95}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvvmDesktopSample", "ExpressiveAnnotations.MvvmDesktopSample\ExpressiveAnnotations.MvvmDesktopSample.csproj", "{94B9466A-3C9E-47A3-A300-6E45AAE763D7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExpressiveAnnotations.Scripts", "ExpressiveAnnotations.Scripts", "{5908C2CC-F987-4FCE-AFFA-17CC259EF970}"
 	ProjectSection(SolutionItems) = preProject
 		expressive.annotations.validate.js = expressive.annotations.validate.js
 		expressive.annotations.validate.test.js = expressive.annotations.validate.test.js
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvvmDesktopSample", "ExpressiveAnnotations.MvvmDesktopSample\ExpressiveAnnotations.MvvmDesktopSample.csproj", "{94B9466A-3C9E-47A3-A300-6E45AAE763D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,15 +43,6 @@ Global
 		{2DE111D5-E3A5-4FC8-8261-AA2DA743A3AD}.Release-Net40|Any CPU.Build.0 = Release|Any CPU
 		{2DE111D5-E3A5-4FC8-8261-AA2DA743A3AD}.Release-Net45|Any CPU.ActiveCfg = Release|Any CPU
 		{2DE111D5-E3A5-4FC8-8261-AA2DA743A3AD}.Release-Net45|Any CPU.Build.0 = Release|Any CPU
-		{78E4B95D-B0C3-486E-8847-CA444EF5BB95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{78E4B95D-B0C3-486E-8847-CA444EF5BB95}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{78E4B95D-B0C3-486E-8847-CA444EF5BB95}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{78E4B95D-B0C3-486E-8847-CA444EF5BB95}.Release|Any CPU.Build.0 = Release|Any CPU
-		{78E4B95D-B0C3-486E-8847-CA444EF5BB95}.Release-Net40|Any CPU.ActiveCfg = Release|Any CPU
-		{78E4B95D-B0C3-486E-8847-CA444EF5BB95}.Release-Net40|Any CPU.Build.0 = Release|Any CPU
-		{78E4B95D-B0C3-486E-8847-CA444EF5BB95}.Release-Net45|Any CPU.ActiveCfg = Release|Any CPU
-		{78E4B95D-B0C3-486E-8847-CA444EF5BB95}.Release-Net45|Any CPU.Build.0 = Release|Any CPU
-		{78E4B95D-B0C3-486E-8847-CA444EF5BB95}.Release-Net45|Any CPU.Deploy.0 = Release|Any CPU
 		{1926A95D-19EE-451B-9DA4-C3EAF555B15D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1926A95D-19EE-451B-9DA4-C3EAF555B15D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1926A95D-19EE-451B-9DA4-C3EAF555B15D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -60,6 +51,14 @@ Global
 		{1926A95D-19EE-451B-9DA4-C3EAF555B15D}.Release-Net40|Any CPU.Build.0 = Release-Net40|Any CPU
 		{1926A95D-19EE-451B-9DA4-C3EAF555B15D}.Release-Net45|Any CPU.ActiveCfg = Release-Net45|Any CPU
 		{1926A95D-19EE-451B-9DA4-C3EAF555B15D}.Release-Net45|Any CPU.Build.0 = Release-Net45|Any CPU
+		{78E4B95D-B0C3-486E-8847-CA444EF5BB95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78E4B95D-B0C3-486E-8847-CA444EF5BB95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78E4B95D-B0C3-486E-8847-CA444EF5BB95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78E4B95D-B0C3-486E-8847-CA444EF5BB95}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78E4B95D-B0C3-486E-8847-CA444EF5BB95}.Release-Net40|Any CPU.ActiveCfg = Release|Any CPU
+		{78E4B95D-B0C3-486E-8847-CA444EF5BB95}.Release-Net40|Any CPU.Build.0 = Release|Any CPU
+		{78E4B95D-B0C3-486E-8847-CA444EF5BB95}.Release-Net45|Any CPU.ActiveCfg = Release|Any CPU
+		{78E4B95D-B0C3-486E-8847-CA444EF5BB95}.Release-Net45|Any CPU.Build.0 = Release|Any CPU
 		{94B9466A-3C9E-47A3-A300-6E45AAE763D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{94B9466A-3C9E-47A3-A300-6E45AAE763D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94B9466A-3C9E-47A3-A300-6E45AAE763D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -68,7 +67,6 @@ Global
 		{94B9466A-3C9E-47A3-A300-6E45AAE763D7}.Release-Net40|Any CPU.Build.0 = Release|Any CPU
 		{94B9466A-3C9E-47A3-A300-6E45AAE763D7}.Release-Net45|Any CPU.ActiveCfg = Release|Any CPU
 		{94B9466A-3C9E-47A3-A300-6E45AAE763D7}.Release-Net45|Any CPU.Build.0 = Release|Any CPU
-		{94B9466A-3C9E-47A3-A300-6E45AAE763D7}.Release-Net45|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

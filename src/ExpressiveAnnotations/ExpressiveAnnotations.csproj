@@ -31,9 +31,6 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\ExpressiveAnnotations.XML</DocumentationFile>
   </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Net40|AnyCPU'">
     <OutputPath>..\bin\Release-Net40\</OutputPath>
 	<TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
