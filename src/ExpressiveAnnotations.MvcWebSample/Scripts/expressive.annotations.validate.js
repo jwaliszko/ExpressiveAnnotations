@@ -78,7 +78,7 @@ var
                 if (typeHelper.isGuid(value)) {
                     return value.toUpperCase();;
                 }
-                return { error: true, msg: 'Given value was not recognized as a valid guid. Guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).' };
+                return { error: true, msg: 'Given value was not recognized as a valid guid - guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).' };
             }
         },
         isNumeric: function(value) {
@@ -157,7 +157,13 @@ var
                 return [strA, strB, strC].join('');
             });
             this.addMethod("CompareOrdinal", function(strA, strB) {
-                return strA === strB ? 0 : strA > strB ? 1 : -1;
+                if (strA === strB)
+                    return 0;
+                if (strA !== null && strB === null)
+                    return 1;
+                if (strA === null && strB !== null)
+                    return -1;                
+                return strA > strB ? 1 : -1;
             });
             this.addMethod("CompareOrdinalIgnoreCase", function(strA, strB) {
                 strA = (strA !== null && strA !== undefined) ? strA.toLowerCase() : null;
@@ -209,7 +215,11 @@ var
                 return str !== null && str !== undefined && regex !== null && regex !== undefined && new RegExp(regex).test(str);
             });
             this.addMethod("Guid", function(str) {
-                return str.toUpperCase();
+                var guid = typeHelper.guid.tryParse(str);
+                if (guid.error) {
+                    throw guid.msg;
+                }
+                return guid;
             });
         }
     },
@@ -249,7 +259,7 @@ var
 
             parsedValue = typeHelper.tryParse(fieldValue, type); // convert to required type
             if (parsedValue.error) {
-                throw 'Data extraction fatal error. DOM value conversion to reflect required type failed.';
+                throw typeHelper.string.format('DOM field {0} value conversion to {1} failed. {2}', name, type, parsedValue.msg);
             }
 
             return parsedValue;

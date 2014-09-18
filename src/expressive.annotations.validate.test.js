@@ -27,7 +27,7 @@
 
         result = ea.typeHelper.tryParse("", "guid");
         window.equal(result.error, true);
-        window.equal(result.msg, "Given value was not recognized as a valid guid. Guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).");
+        window.equal(result.msg, "Given value was not recognized as a valid guid - guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).");
 
         result = ea.typeHelper.tryParse("", "secret");
         window.equal(result.error, true);
@@ -141,7 +141,7 @@
 
         var result = ea.typeHelper.guid.tryParse("");
         window.equal(result.error, true);
-        window.equal(result.msg, "Given value was not recognized as a valid guid. Guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).");
+        window.equal(result.msg, "Given value was not recognized as a valid guid - guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).");
     });
 
     test("verify_numeric_recognition", function() {
@@ -189,25 +189,131 @@
         var m = ea.toolchain.methods;
 
         window.ok(m.Now() > m.Today());
-        window.ok(m.Length('1234') == 4);
+
+        window.ok(m.Length('0123') == 4);
+        window.ok(m.Length('    ') == 4);
+        window.ok(m.Length(null) == 0);
+        window.ok(m.Length('') == 0);
+
         window.ok(m.Trim(' a b c ') == 'a b c');
+        window.ok(m.Trim(null) == null);
+        window.ok(m.Trim('') == '');
+
         window.ok(m.Concat(' a ', ' b ') == ' a  b ');
+        window.ok(m.Concat(null, null) == '');
+        window.ok(m.Concat('', '') == '');
+
+        window.ok(m.Concat(' a ', ' b ', ' c ') == ' a  b  c ');
+        window.ok(m.Concat(null, null, null) == '');
         window.ok(m.Concat('', '', '') == '');
-        window.ok(m.CompareOrdinal(' abc ', ' ABC ') > 0);
+
+        window.ok(m.CompareOrdinal(' abc ', ' ABC ') == 1);
+        window.ok(m.CompareOrdinal('a', 'a') == 0);
+        window.ok(m.CompareOrdinal('a', 'A') == 1);
+        window.ok(m.CompareOrdinal('A', 'a') == -1);
+        window.ok(m.CompareOrdinal('a', 'b') == -1);
+        window.ok(m.CompareOrdinal('b', 'a') == 1);
+        window.ok(m.CompareOrdinal(null, 'a') == -1);
+        window.ok(m.CompareOrdinal('a', null) == 1);
+        window.ok(m.CompareOrdinal(' ', 'a') == -1);
+        window.ok(m.CompareOrdinal('a', ' ') == 1);
+        window.ok(m.CompareOrdinal(null, '') == -1);
+        window.ok(m.CompareOrdinal('', null) == 1);
+        window.ok(m.CompareOrdinal(null, null) == 0);
+        window.ok(m.CompareOrdinal('', '') == 0);
+
         window.ok(m.CompareOrdinalIgnoreCase(' abc ', ' ABC ') == 0);
+        window.ok(m.CompareOrdinalIgnoreCase('a', 'a') == 0);
+        window.ok(m.CompareOrdinalIgnoreCase('a', 'A') == 0);
+        window.ok(m.CompareOrdinalIgnoreCase('A', 'a') == 0);
+        window.ok(m.CompareOrdinalIgnoreCase('a', 'b') == -1);
+        window.ok(m.CompareOrdinalIgnoreCase('b', 'a') == 1);
+        window.ok(m.CompareOrdinalIgnoreCase(null, 'a') == -1);
+        window.ok(m.CompareOrdinalIgnoreCase('a', null) == 1);
+        window.ok(m.CompareOrdinalIgnoreCase(' ', 'a') == -1);
+        window.ok(m.CompareOrdinalIgnoreCase('a', ' ') == 1);
+        window.ok(m.CompareOrdinalIgnoreCase(null, '') == -1);
+        window.ok(m.CompareOrdinalIgnoreCase('', null) == 1);
+        window.ok(m.CompareOrdinalIgnoreCase(null, null) == 0);
+        window.ok(m.CompareOrdinalIgnoreCase('', '') == 0);
+
         window.ok(m.StartsWith(' ab c', ' A') == false);
+        window.ok(m.StartsWith(' ab c', ' a') == true);
+        window.ok(m.StartsWith(' ', ' ') == true);        
+        window.ok(m.StartsWith('', '') == true);
+        window.ok(m.StartsWith(null, '') == false);
+        window.ok(m.StartsWith('', null) == false);
+        window.ok(m.StartsWith(null, null) == false);
+
         window.ok(m.StartsWithIgnoreCase(' ab c', ' A') == true);
+        window.ok(m.StartsWithIgnoreCase(' ab c', ' a') == true);
+        window.ok(m.StartsWithIgnoreCase(' ', ' ') == true);
+        window.ok(m.StartsWithIgnoreCase('', '') == true);
+        window.ok(m.StartsWithIgnoreCase(null, '') == false);
+        window.ok(m.StartsWithIgnoreCase('', null) == false);
+        window.ok(m.StartsWithIgnoreCase(null, null) == false);
+
         window.ok(m.EndsWith(' ab c', ' C') == false);
+        window.ok(m.EndsWith(' ab c', ' c') == true);
+        window.ok(m.EndsWith(' ', ' ') == true);
+        window.ok(m.EndsWith('', '') == true);
+        window.ok(m.EndsWith(null, '') == false);
+        window.ok(m.EndsWith('', null) == false);
+        window.ok(m.EndsWith(null, null) == false);
+
         window.ok(m.EndsWithIgnoreCase(' ab c', ' C') == true);
+        window.ok(m.EndsWithIgnoreCase(' ab c', ' c') == true);
+        window.ok(m.EndsWithIgnoreCase(' ', ' ') == true);
+        window.ok(m.EndsWithIgnoreCase('', '') == true);
+        window.ok(m.EndsWithIgnoreCase(null, '') == false);
+        window.ok(m.EndsWithIgnoreCase('', null) == false);
+        window.ok(m.EndsWithIgnoreCase(null, null) == false);
+
         window.ok(m.Contains(' ab c', 'B ') == false);
+        window.ok(m.Contains(' ab c', 'b ') == true);
+        window.ok(m.Contains(' ', ' ') == true);
+        window.ok(m.Contains('', '') == true);
+        window.ok(m.Contains(null, '') == false);
+        window.ok(m.Contains('', null) == false);
+        window.ok(m.Contains(null, null) == false);
+
         window.ok(m.ContainsIgnoreCase(' ab c', 'B ') == true);
-        window.ok(m.IsNullOrWhiteSpace('    ') == true);
+        window.ok(m.ContainsIgnoreCase(' ab c', 'b ') == true);
+        window.ok(m.ContainsIgnoreCase(' ', ' ') == true);
+        window.ok(m.ContainsIgnoreCase('', '') == true);
+        window.ok(m.ContainsIgnoreCase(null, '') == false);
+        window.ok(m.ContainsIgnoreCase('', null) == false);
+        window.ok(m.ContainsIgnoreCase(null, null) == false);
+
+        window.ok(m.IsNullOrWhiteSpace(' ') == true);
+        window.ok(m.IsNullOrWhiteSpace(null) == true);
+        window.ok(m.IsNullOrWhiteSpace('') == true);
+
         window.ok(m.IsDigitChain('0123456789') == true);
+        window.ok(m.IsDigitChain(null) == false);
+        window.ok(m.IsDigitChain('') == false);
+
         window.ok(m.IsNumber('-0.3e-2') == true);
+        window.ok(m.IsNumber(null) == false);
+        window.ok(m.IsNumber('') == false);
+
         window.ok(m.IsEmail('nickname@domain.com') == true);
+        window.ok(m.IsEmail(null) == false);
+        window.ok(m.IsEmail('') == false);
+
         window.ok(m.IsUrl('http://www.github.com/') == true);
+        window.ok(m.IsUrl(null) == false);
+        window.ok(m.IsUrl('') == false);
+
         window.ok(m.IsRegexMatch('-0.3e-2', '^[\\+-]?\\d*\\.?\\d+(?:[eE][\\+-]?\\d+)?$') == true);
-        window.ok(m.Guid('a1111111-1111-1111-1111-111111111111') == 'A1111111-1111-1111-1111-111111111111');
+        window.ok(m.IsRegexMatch(null, '^[\\+-]?\\d*\\.?\\d+(?:[eE][\\+-]?\\d+)?$') == false);
+        window.ok(m.IsRegexMatch('', '^[\\+-]?\\d*\\.?\\d+(?:[eE][\\+-]?\\d+)?$') == false);
+        window.ok(m.IsRegexMatch('', '') == true);
+        window.ok(m.IsRegexMatch(null, '') == false);
+        window.ok(m.IsRegexMatch('', null) == false);
+        window.ok(m.IsRegexMatch(null, null) == false);
+
+        window.ok(m.Guid('a1111111-1111-1111-1111-111111111111') == m.Guid('A1111111-1111-1111-1111-111111111111'));
     });
 
 }($, window, window.ea.___6BE7863DC1DB4AFAA61BB53FF97FE169));

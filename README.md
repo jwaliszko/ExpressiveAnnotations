@@ -1,4 +1,4 @@
-﻿#<a id="expressiveannotations-annotation-based-conditional-validation">ExpressiveAnnotations <sup><sup><sup>[annotation-based conditional validation]</sup></sup></sup></a>
+﻿#<a id="expressiveannotations-annotation-based-conditional-validation">ExpressiveAnnotations<sup><sup><sup>[annotation-based conditional validation]</sup></sup></sup></a>
 
 <sub>**Notice: This document describes latest implementation. For previous concept (version &lt; 2.0) take a look at [EA1 branch](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/EA1).**</sub>
 
@@ -6,7 +6,7 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
 
 ###<a id="what-is-the-context-behind-this-implementation">What is the context behind this implementation?</a>
 
-Metadata, in general, is awesome. Declarative validation, when [compared](#declarative-vs-imperative-programming---what-is-it-about) to imperative approach, for me seems to be more convenient in many cases. Clean, compact code - all validation logic defined within the model scope. Simple to write, obvious to read.
+There are number of cases where the concept of metadata is used for justified reasons. Attributes are one of the ways to associate complementary information with existing data. Such annotations may also define the correctness of data. Declarative validation when [compared](#declarative-vs-imperative-programming---what-is-it-about) to imperative approach seems to be more convenient in many cases. Clean, compact code - all validation logic defined within the model scope. Simple to write, obvious to read.
 
 ###<a id="requiredif-vs-assertthat---where-is-the-difference">RequiredIf vs. AssertThat - where is the difference?</a>
 
@@ -15,7 +15,7 @@ Metadata, in general, is awesome. Declarative validation, when [compared](#decla
 
 ###<a id="what-are-brief-examples-of-usage">What are brief examples of usage?</a>
 
-If you're interested in comprehensive examples, take a look inside chosen demo project:
+If you'll be interested in comprehensive examples afterwards, take a look inside chosen demo project:
 
 * [**ASP.NET MVC web sample**](src/ExpressiveAnnotations.MvcWebSample),
 * [**WPF MVVM desktop sample**](src/ExpressiveAnnotations.MvvmDesktopSample).
@@ -61,19 +61,20 @@ Restriction above is slightly more complex than its predecessors, but still can 
 #####<a id="signatures">Signatures:</a>
 
 ```
-RequiredIfAttribute(string expression,
-                    [bool AllowEmptyStrings] ...) - Validation attribute which indicates that 
-                                                    annotated field is required when computed 
-                                                    result of given logical expression is true.
-AssertThatAttribute(string expression ...)        - Validation attribute, executed for non-null 
-                                                    annotated field, which indicates that 
-													assertion given in logical expression has 
-													to be satisfied, for such field to be 
-													considered as valid.
+RequiredIfAttribute(
+    string expression,
+    [bool AllowEmptyStrings] ...) - Validation attribute which indicates that annotated 
+                                    field is required when computed result of given logical 
+                                    expression is true.
+AssertThatAttribute(
+    string expression ...)        - Validation attribute, executed for non-null annotated 
+                                    field, which indicates that assertion given in logical 
+                                    expression has to be satisfied, for such field to be 
+                                    considered as valid.
 
-  expression        - The logical expression based on which requirement condition is computed.
-  AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should allow empty 
-                      or whitespace strings.
+expression        - The logical expression based on which requirement condition is computed.
+AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should allow empty 
+                    or whitespace strings.
 ```
 
 #####<a id="implementation">Implementation:</a>
@@ -138,41 +139,41 @@ Toolchain functions available out of the box at server- and client-side:
 * `string Trim(string str)`
     * Removes all leading and trailing white-space characters from the specified string (null-safe).
 * `string Concat(string strA, string strB)`
-    * Concatenates two specified strings.
+    * Concatenates two specified strings (null-safe).
 * `string Concat(string strA, string strB, strC)`
-    * Concatenates three specified strings.
+    * Concatenates three specified strings (null-safe).
 * `int CompareOrdinal(string strA, string strB)`
     * Compares strings using ordinal sort rules. An integer that indicates the lexical relationship 
-      between the two comparands is returned: 
-        * less than zero    - strA is less than strB,
-        * zero              - strA and strB are equal,
-        * greater than zero - strA is greater than strB.
+      between the two comparands is returned (null-safe): 
+        * -1    - strA is less than strB,
+        *  0    - strA and strB are equal,
+        *  1    - strA is greater than strB.
 * `int CompareOrdinalIgnoreCase(string strA, string strB)`
-    * Compares strings using ordinal sort rules and ignoring the case of the strings being compared.
+    * Compares strings using ordinal sort rules and ignoring the case of the strings being compared (null-safe).
 * `bool StartsWith(string str, string prefix)`
-    * Determines whether the beginning of specified string matches a specified prefix.
+    * Determines whether the beginning of specified string matches a specified prefix (null-safe).
 * `bool StartsWithIgnoreCase(string str, string prefix)`
-    * Determines whether the beginning of specified string matches a specified prefix, ignoring the case of the strings.
+    * Determines whether the beginning of specified string matches a specified prefix, ignoring the case of the strings (null-safe).
 * `bool EndsWith(string str, string suffix)`
-    * Determines whether the end of specified string matches a specified suffix.
+    * Determines whether the end of specified string matches a specified suffix (null-safe).
 * `bool EndsWithIgnoreCase(string str, string suffix)`
-    * Determines whether the end of specified string matches a specified suffix, ignoring the case of the strings.
+    * Determines whether the end of specified string matches a specified suffix, ignoring the case of the strings (null-safe).
 * `bool Contains(string str, string substr)`
-    * Returns a value indicating whether a specified substring occurs within a specified string.
+    * Returns a value indicating whether a specified substring occurs within a specified string (null-safe).
 * `bool ContainsIgnoreCase(string str, string substr)`
-    * Returns a value indicating whether a specified substring occurs within a specified string, ignoring the case of the strings.
+    * Returns a value indicating whether a specified substring occurs within a specified string, ignoring the case of the strings (null-safe).
 * `bool IsNullOrWhiteSpace(string str)`
-    * Indicates whether a specified string is null, empty, or consists only of white-space characters.
+    * Indicates whether a specified string is null, empty, or consists only of white-space characters (null-safe).
 * `bool IsDigitChain(string str)`
-    * Indicates whether a specified string represents a sequence of digits.
+    * Indicates whether a specified string represents a sequence of digits (null-safe).
 * `bool IsNumber(string str)`
-    * Indicates whether a specified string represents integer or float number.
+    * Indicates whether a specified string represents integer or float number (null-safe).
 * `bool IsEmail(string str)`
-    * Indicates whether a specified string represents valid e-mail address.
+    * Indicates whether a specified string represents valid e-mail address (null-safe).
 * `bool IsUrl(string str)`
-    * Indicates whether a specified string represents valid url.
+    * Indicates whether a specified string represents valid url (null-safe).
 * `bool IsRegexMatch(string str, string regex)`
-    * Indicates whether the regular expression finds a match in the input string.
+    * Indicates whether the regular expression finds a match in the input string (null-safe).
 * `Guid Guid(string str)`
     * Initializes a new instance of the Guid structure by using the value represented by the specified string.
 
@@ -196,8 +197,8 @@ class Model
 ```JavaScript
 <script>    
     ea.addMethod('IsBloodType', function(group) {
-		return /^(A|B|AB|0)[\+-]$/.test(group);
-	});
+        return /^(A|B|AB|0)[\+-]$/.test(group);
+    });
 ```
 
 #####<a id="how-to-cope-with-dates-given-in-non-standard-formats">How to cope with dates given in non-standard formats?</a>
@@ -206,7 +207,7 @@ When values of DOM elements are extracted, they are converted to appropriate typ
 
 >A string representing an RFC 2822 or ISO 8601 date (other formats may be used, but results may be unexpected)
 
-When some non-standard format needs to be handled, simply override the default behavior and provide your own implementation. E.g. when dealing with UK format *dd/mm/yyyy*:
+When some non-standard format needs to be handled, simply override the default behavior and provide your own implementation. E.g. when dealing with UK format dd/mm/yyyy:
 ```JavaScript
 <script>
     ea.settings.parseDate = function(str) {
@@ -233,7 +234,7 @@ Use `noConflict()` method. In case of naming collision return control of the `ea
 
 ###<a id="declarative-vs-imperative-programming---what-is-it-about">Declarative vs. imperative programming - what is it about?</a>
 
-With **declarative** programming, you write logic that expresses *what* you want, but not necessarily *how* to achieve it. You declare your desired results, but not the necessarily step-by-step.
+With **declarative** programming you write logic that expresses *what* you want, but not necessarily *how* to achieve it. You declare your desired results, but not the necessarily step-by-step.
 
 In our case, this concept is materialized by attributes, e.g.
 ```C#
@@ -241,7 +242,7 @@ In our case, this concept is materialized by attributes, e.g.
     ErrorMessage = "If you plan to travel abroad, why visit the same country twice?")]
 public string ReasonForTravel { get; set; }
 ```
-With **imperative** programming, you define the control flow of the computation which needs to be done. You tell the compiler what you want, exactly step by step.
+With **imperative** programming you define the control flow of the computation which needs to be done. You tell the compiler what you want, exactly step by step.
 
 If we choose this way instead of model fields decoration, it has negative impact on the complexity of the code. Logic responsible for validation is now implemented somewhere else in our application, e.g. inside controllers actions instead of model class itself:
 ```C#
@@ -260,7 +261,7 @@ If we choose this way instead of model fields decoration, it has negative impact
 
 ###<a id="what-about-the-support-of-aspnet-mvc-client-side-validation">What about the support of ASP.NET MVC client-side validation?</a>
 
-Client-side validation is **fully supported**. Enable it for your web project within the next few steps:
+Client-side validation is fully supported. Enable it for your web project within the next few steps:
 
 1. Reference both assemblies to your project: core [**ExpressiveAnnotations.dll**](src/ExpressiveAnnotations) and subsidiary [**ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll**](src/ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider),
 2. In Global.asax register required validators (`IClientValidatable` interface is not directly implemented by the attribute, to avoid coupling of ExpressionAnnotations assembly with System.Web.Mvc dependency):

@@ -79,11 +79,6 @@ namespace ExpressiveAnnotations.Tests
 
         private class Model
         {
-            public Model()
-            {
-                var x = Utility.CONST;
-            }
-
             public const string CONST = "inside";
 
             public Model SubModel { get; set; }
@@ -103,8 +98,8 @@ namespace ExpressiveAnnotations.Tests
             public LongEnum? LongNumber { get; set; }
             public UlongEnum? UlongNumber { get; set; }
 
-            public Guid? guid1 { get; set; }
-            public Guid? guid2 { get; set; }
+            public Guid? Guid1 { get; set; }
+            public Guid? Guid2 { get; set; }
 
             public DateTime NextWeek()
             {
@@ -119,6 +114,23 @@ namespace ExpressiveAnnotations.Tests
             public int DecNumber(int number)
             {
                 return --number;
+            }
+        }
+
+        private class ModelWithoutMethod
+        {
+        }
+
+        private class ModelWithMethod
+        {
+            public string Whoami()
+            {
+                return "model method";
+            }
+
+            public string Whoami(int i)
+            {
+                return string.Format("model method {0}", i);
             }
         }
 
@@ -176,6 +188,7 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.IsTrue(parser.Parse<object>("1 + 2 == 3").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("1 - 2 == -1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("2 - 1 > 0").Invoke(null));
 
             Assert.IsTrue(parser.Parse<object>("null == null").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("'' == ''").Invoke(null));
@@ -208,23 +221,34 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("1.2 + 2 == 3.2").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("1.2 - 2 == -0.8").Invoke(null));
 
+            //ToDo: modify engine to handle this
+            //Assert.IsTrue(parser.Parse<object>("1+2==3").Invoke(null));
+            //Assert.IsTrue(parser.Parse<object>("1-2==-1").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("1*2>-1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("1/2==0.5").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("1 - 2 -(6 / ((2*1.5 - 1) + 1)) * -2 + 1/2/1 == 3.50").Invoke(null));
 
-            Assert.IsTrue(parser.Parse<Model>("'abc' == Trim(' abc ')").Invoke(null));
-            Assert.IsTrue(parser.Parse<Model>("CompareOrdinal('a', 'a') == 0").Invoke(null));
-            Assert.IsTrue(parser.Parse<Model>("Length('abc' + 'cde') >= Length(Trim(' abc def ')) - 2 - -1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("\"abc\" == Trim(\" abc \")").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("Length(null) + Length('abc' + 'cde') >= Length(Trim(' abc def ')) - 2 - -1").Invoke(null));
 
             try
             {
-                parser.Parse<object>("Guid('abc') == Guid('abc')").Invoke(null);
+                parser.Parse<object>("1").Invoke(null); // non-bool exp
                 Assert.Fail();
             }
             catch (Exception e)
             {
-                Assert.IsTrue(e is FormatException);
+                Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    "Guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).",
+                    "Parsing failed. Invalid expression: 1",
                     e.Message);
+
+                Assert.IsNotNull(e.InnerException);
+                Assert.IsTrue(e.InnerException is ArgumentException);
+                Assert.AreEqual(
+                    "Expression of type 'System.Int32' cannot be used for return type 'System.Boolean'",
+                    e.InnerException.Message);
             }
         }
 
@@ -247,8 +271,8 @@ namespace ExpressiveAnnotations.Tests
                 UintNumber = UintEnum.First,
                 LongNumber = LongEnum.First,
                 UlongNumber = UlongEnum.First,
-                guid1 = Guid.NewGuid(),
-                guid2 = Guid.Empty,
+                Guid1 = Guid.NewGuid(),
+                Guid2 = Guid.Empty,
 
                 SubModel = new Model
                 {
@@ -304,9 +328,9 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<Model>("'hello world' == Trim(SubModel.Text)").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("CompareOrdinal(Text, Trim(SubModel.Text)) == 0").Invoke(model));
 
-            Assert.IsTrue(parser.Parse<Model>("guid1 != Guid('00000000-0000-0000-0000-000000000000')").Invoke(model));
-            Assert.IsTrue(parser.Parse<Model>("guid2 == Guid('00000000-0000-0000-0000-000000000000')").Invoke(model));
-            Assert.IsTrue(parser.Parse<Model>("guid1 != guid2").Invoke(model));            
+            Assert.IsTrue(parser.Parse<Model>("Guid1 != Guid('00000000-0000-0000-0000-000000000000')").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Guid2 == Guid('00000000-0000-0000-0000-000000000000')").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Guid1 != Guid2").Invoke(model));
 
             const string expression =
                 "Flag == true " +
@@ -314,7 +338,7 @@ namespace ExpressiveAnnotations.Tests
                             "(Text != \"hello world\" && Date < SubModel.Date) " +
                             "|| (" +
                                     "(Number >= 0 && Number < 1) && PoliticalStability == Utility.Stability.High" +
-                                ")" +                            
+                                ")" +
                         ")" +
                     "&& CONST + Utility.CONST == 'insideoutside'";
             var func = parser.Parse(model.GetType(), expression);
@@ -347,18 +371,36 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(
                 expectedConsts.Keys.All(
                     key => parsedConsts.ContainsKey(key) &&
-                           EqualityComparer<object>.Default.Equals(expectedConsts[key], parsedConsts[key])));
+                           EqualityComparer<object>.Default.Equals(expectedConsts[key], parsedConsts[key])));            
+        }
+
+        [TestMethod]
+        public void verify_methods_overriding()
+        {
+            var m1 = new ModelWithoutMethod();
+            var m2 = new ModelWithMethod();
+
+            var parser = new Parser();
+            parser.AddFunction("Whoami", () => "utility method");
+            parser.AddFunction<int, string>("Whoami", i => string.Format("utility method {0}", i));
+
+            Assert.IsTrue(parser.Parse<ModelWithoutMethod>("Whoami() == 'utility method'").Invoke(m1));
+            Assert.IsTrue(parser.Parse<ModelWithoutMethod>("Whoami(2) == 'utility method 2'").Invoke(m1));
+
+            // model methods take precedence
+            Assert.IsTrue(parser.Parse<ModelWithMethod>("Whoami() == 'model method'").Invoke(m2));
+            Assert.IsTrue(parser.Parse<ModelWithMethod>("Whoami(2) == 'model method 2'").Invoke(m2));
         }
 
         [TestMethod]
         public void verify_short_circuit_evaluation()
         {
             var parser = new Parser();
-            parser.AddFunction<string, bool>("NonEmpty", str => str.Length > 0);
+            parser.AddFunction<object, bool>("CastToBool", obj => (bool)obj);
 
             try
             {
-                parser.Parse<object>("NonEmpty(null)").Invoke(null);
+                parser.Parse<object>("CastToBool(null)").Invoke(null);
                 Assert.Fail();
             }
             catch (Exception e)
@@ -368,8 +410,8 @@ namespace ExpressiveAnnotations.Tests
 
             // below, the exception should not be thrown as above
             // reason? - first argument is suffient to determine the value of the expression so the second one is not going to be evaluated
-            Assert.IsFalse(parser.Parse<object>("false && NonEmpty(null)").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("true || NonEmpty(null)").Invoke(null));
+            Assert.IsFalse(parser.Parse<object>("false && CastToBool(null)").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("true || CastToBool(null)").Invoke(null));
         }
 
         [TestMethod]
@@ -406,20 +448,20 @@ namespace ExpressiveAnnotations.Tests
                 var model = new Model();
                 var parser = new Parser();
 
-                parser.Parse<Model>("NonExistent == 0").Invoke(model);
+                parser.Parse<Model>("NotMe == 0").Invoke(model);
                 Assert.Fail();
             }
             catch (Exception e)
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    "Parsing failed. Invalid expression: NonExistent == 0",
+                    "Parsing failed. Invalid expression: NotMe == 0",
                     e.Message);
 
                 Assert.IsNotNull(e.InnerException);
                 Assert.IsTrue(e.InnerException is InvalidOperationException);
                 Assert.AreEqual(
-                    "Only public properties, constants and enums are accepted. Invalid identifier: NonExistent",
+                    "Only public properties, constants and enums are accepted. Invalid identifier: NotMe",
                     e.InnerException.Message);
             }
         }
@@ -492,24 +534,144 @@ namespace ExpressiveAnnotations.Tests
             parser.RegisterMethods();
 
             Assert.IsTrue(parser.Parse<object>("Now() > Today()").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("Length('1234') == 4").Invoke(null));
+
+            Assert.IsTrue(parser.Parse<object>("Length('0123') == 4").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Length('    ') == 4").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Length(null) == 0").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Length('') == 0").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("Trim(' a b c ') == 'a b c'").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Trim(null) == null").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Trim('') == ''").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("Concat(' a ', ' b ') == ' a  b '").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Concat(null, null) == ''").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Concat('', '') == ''").Invoke(null));
+
+            Assert.IsTrue(parser.Parse<object>("Concat(' a ', ' b ', ' c ') == ' a  b  c '").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Concat(null, null, null) == ''").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("Concat('', '', '') == ''").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("CompareOrdinal(' abc ', ' ABC ') > 0").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("CompareOrdinalIgnoreCase(' abc ', ' ABC ') == 0").Invoke(null));            
+
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinal(' abc ', ' ABC ') == 1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinal('a', 'a') == 0").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinal('a', 'A') == 1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinal('A', 'a') == -1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinal('a', 'b') == -1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinal('b', 'a') == 1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinal(null, 'a') == -1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinal('a', null) == 1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinal(' ', 'a') == -1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinal('a', ' ') == 1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinal(null, '') == -1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinal('', null) == 1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinal(null, null) == 0").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinal('', '') == 0").Invoke(null));
+
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinalIgnoreCase(' abc ', ' ABC ') == 0").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinalIgnoreCase('a', 'a') == 0").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinalIgnoreCase('a', 'A') == 0").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinalIgnoreCase('A', 'a') == 0").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinalIgnoreCase('a', 'b') == -1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinalIgnoreCase('b', 'a') == 1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinalIgnoreCase(null, 'a') == -1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinalIgnoreCase('a', null) == 1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinalIgnoreCase(' ', 'a') == -1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinalIgnoreCase('a', ' ') == 1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinalIgnoreCase(null, '') == -1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinalIgnoreCase('', null) == 1").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinalIgnoreCase(null, null) == 0").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("CompareOrdinalIgnoreCase('', '') == 0").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("StartsWith(' ab c', ' A') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("StartsWith(' ab c', ' a') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("StartsWith(' ', ' ') == true").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("StartsWith('', '') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("StartsWith(null, '') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("StartsWith('', null) == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("StartsWith(null, null) == false").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("StartsWithIgnoreCase(' ab c', ' A') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("StartsWithIgnoreCase(' ab c', ' a') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("StartsWithIgnoreCase(' ', ' ') == true").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("StartsWithIgnoreCase('', '') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("StartsWithIgnoreCase(null, '') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("StartsWithIgnoreCase('', null) == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("StartsWithIgnoreCase(null, null) == false").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("EndsWith(' ab c', ' C') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("EndsWith(' ab c', ' c') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("EndsWith(' ', ' ') == true").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("EndsWith('', '') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("EndsWith(null, '') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("EndsWith('', null) == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("EndsWith(null, null) == false").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("EndsWithIgnoreCase(' ab c', ' C') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("EndsWithIgnoreCase(' ab c', ' c') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("EndsWithIgnoreCase(' ', ' ') == true").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("EndsWithIgnoreCase('', '') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("EndsWithIgnoreCase(null, '') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("EndsWithIgnoreCase('', null) == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("EndsWithIgnoreCase(null, null) == false").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("Contains(' ab c', 'B ') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Contains(' ab c', 'b ') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Contains(' ', ' ') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Contains('', '') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Contains(null, '') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Contains('', null) == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Contains(null, null) == false").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("ContainsIgnoreCase(' ab c', 'B ') == true").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("IsNullOrWhiteSpace('    ') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("ContainsIgnoreCase(' ab c', 'b ') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("ContainsIgnoreCase(' ', ' ') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("ContainsIgnoreCase('', '') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("ContainsIgnoreCase(null, '') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("ContainsIgnoreCase('', null) == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("ContainsIgnoreCase(null, null) == false").Invoke(null));            
+
+            Assert.IsTrue(parser.Parse<object>("IsNullOrWhiteSpace(' ') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNullOrWhiteSpace(null) == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNullOrWhiteSpace('') == true").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("IsDigitChain('0123456789') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsDigitChain(null) == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsDigitChain('') == false").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("IsNumber('-0.3e-2') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber(null) == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber('') == false").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("IsEmail('nickname@domain.com') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsEmail(null) == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsEmail('') == false").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("IsUrl('http://www.github.com/') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsUrl(null) == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsUrl('') == false").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("IsRegexMatch('-0.3e-2', '^[\\+-]?\\d*\\.?\\d+(?:[eE][\\+-]?\\d+)?$') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsRegexMatch(null, '^[\\+-]?\\d*\\.?\\d+(?:[eE][\\+-]?\\d+)?$') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsRegexMatch('', '^[\\+-]?\\d*\\.?\\d+(?:[eE][\\+-]?\\d+)?$') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsRegexMatch('', '') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsRegexMatch(null, '') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsRegexMatch('', null) == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsRegexMatch(null, null) == false").Invoke(null));
+
+            Assert.IsTrue(parser.Parse<object>("Guid('a1111111-1111-1111-1111-111111111111') == Guid('A1111111-1111-1111-1111-111111111111')").Invoke(null));
+
+            try
+            {
+                parser.Parse<object>("Guid('abc') == Guid('abc')").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is FormatException);
+                Assert.AreEqual(
+                    "Guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).",
+                    e.Message);
+            }
         }
     }
 }
