@@ -146,8 +146,8 @@ Toolchain functions available out of the box at server- and client-side:
     * Compares strings using ordinal sort rules. An integer that indicates the lexical relationship 
       between the two comparands is returned (null-safe): 
         * -1    - strA is less than strB,
-        *  0    - strA and strB are equal,
-        *  1    - strA is greater than strB.
+        * &nbsp;0    - strA and strB are equal,
+        * &nbsp;1    - strA is greater than strB.
 * `int CompareOrdinalIgnoreCase(string strA, string strB)`
     * Compares strings using ordinal sort rules and ignoring the case of the strings being compared (null-safe).
 * `bool StartsWith(string str, string prefix)`
@@ -200,6 +200,7 @@ class Model
         return /^(A|B|AB|0)[\+-]$/.test(group);
     });
 ```
+For a single function name multiple signatures can be defined. Types are not taken under consideration as a differentiating factor though. Methods overloading is based on the number of arguments only. Functions with the same name and exact number of arguments are considered as ambiguous. The next issue important here is the fact that custom methods take precedence over built-in ones. If exact signatures are provided built-in methods are simply overridden by new definitions.
 
 #####<a id="how-to-cope-with-dates-given-in-non-standard-formats">How to cope with dates given in non-standard formats?</a>
 

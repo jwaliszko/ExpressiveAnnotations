@@ -182,8 +182,25 @@
 
     window.module("toolchain");
 
-    test("verify_methods_overriding", function() {
+    test("verify_methods_overloading", function() {
+        var m = ea.toolchain.methods;
 
+        ea.toolchain.addMethod('Whoami', function() {
+            return 'method A';
+        });
+        ea.toolchain.addMethod('Whoami', function(i) {
+            return 'method A' + i;
+        });
+        ea.toolchain.addMethod('Whoami', function(i, s) {
+            return 'method A' + i + ' - ' + s;
+        });
+
+        window.ok(m.Whoami() == 'method A');
+        window.ok(m.Whoami(1) == 'method A1');
+        window.ok(m.Whoami(2, 'final') == 'method A2 - final');
+    });
+
+    test("verify_methods_overriding", function() {
         var m = ea.toolchain.methods;
 
         ea.toolchain.addMethod('Whoami', function() {
@@ -196,6 +213,7 @@
         window.ok(m.Whoami() == 'method A');
         window.ok(m.Whoami(1) == 'method A1');
 
+        // redefine methods
         ea.toolchain.addMethod('Whoami', function() {
             return 'method B';
         });

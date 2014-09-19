@@ -117,23 +117,6 @@ namespace ExpressiveAnnotations.Tests
             }
         }
 
-        private class ModelWithoutMethod
-        {
-        }
-
-        private class ModelWithMethod
-        {
-            public string Whoami()
-            {
-                return "model method";
-            }
-
-            public string Whoami(int i)
-            {
-                return string.Format("model method {0}", i);
-            }
-        }
-
         [TestMethod]
         public void verify_logic_without_context()
         {
@@ -374,23 +357,161 @@ namespace ExpressiveAnnotations.Tests
                            EqualityComparer<object>.Default.Equals(expectedConsts[key], parsedConsts[key])));            
         }
 
+        private class ModelWithMethods
+        {
+            public string Whoami()
+            {
+                return "model method";
+            }
+
+            public string Whoami(int i)
+            {
+                return string.Format("model method {0}", i);
+            }
+        }
+
+        private class ModelWithAmbiguousMethods
+        {
+            public string Whoami(string s)
+            {
+                return string.Format("model method {0}", s);
+            }
+
+            public string Whoami(int i)
+            {
+                return string.Format("model method {0}", i);
+            }
+        }
+
+        [TestMethod]
+        public void verify_methods_overloading()
+        {
+            // methods overloading is based on the number of arguments
+            var parser = new Parser();            
+            parser.AddFunction("Whoami", () => "utility method");
+            parser.AddFunction<int, string>("Whoami", i => string.Format("utility method {0}", i));
+            parser.AddFunction<int, string, string>("Whoami", (i, s) => string.Format("utility method {0} - {1}", i, s));
+
+            Assert.IsTrue(parser.Parse<object>("Whoami() == 'utility method'").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Whoami(1) == 'utility method 1'").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Whoami(2, 'final') == 'utility method 2 - final'").Invoke(null));
+        }
+
+        [TestMethod]
+        public void verify_methods_ambiguity()
+        {
+            // since arguments types are not taken under consideration for methods overloading, following logic should fail
+            var parser = new Parser();            
+            parser.AddFunction<int, string>("Whoami", i => string.Format("utility method {0}", i));
+            parser.AddFunction<string, string>("Whoami", s => string.Format("utility method {0}", s));
+
+            try
+            {                
+                Assert.IsTrue(parser.Parse<object>("Whoami(0) == 'utility method 0'").Invoke(null));    
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    "Parsing failed. Invalid expression: Whoami(0) == 'utility method 0'",
+                    e.Message);
+
+                Assert.IsNotNull(e.InnerException);
+                Assert.IsTrue(e.InnerException is InvalidOperationException);
+                Assert.AreEqual(
+                    "Function Whoami accepting 1 arguments is ambiguous.",
+                    e.InnerException.Message);
+            }
+
+            // not only built-in, but also context extracted methods are subjected to the same rules
+            parser = new Parser();            
+            var model = new ModelWithAmbiguousMethods();
+
+            try
+            {
+                Assert.IsTrue(parser.Parse<ModelWithAmbiguousMethods>("Whoami(0) == 'model method 0'").Invoke(model));
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    "Parsing failed. Invalid expression: Whoami(0) == 'model method 0'",
+                    e.Message);
+
+                Assert.IsNotNull(e.InnerException);
+                Assert.IsTrue(e.InnerException is InvalidOperationException);
+                Assert.AreEqual(
+                    "Function Whoami accepting 1 arguments is ambiguous.",
+                    e.InnerException.Message);
+            }
+        }
+
         [TestMethod]
         public void verify_methods_overriding()
         {
-            var m1 = new ModelWithoutMethod();
-            var m2 = new ModelWithMethod();
-
             var parser = new Parser();
+
+            // register utility methods
             parser.AddFunction("Whoami", () => "utility method");
             parser.AddFunction<int, string>("Whoami", i => string.Format("utility method {0}", i));
 
-            Assert.IsTrue(parser.Parse<ModelWithoutMethod>("Whoami() == 'utility method'").Invoke(m1));
-            Assert.IsTrue(parser.Parse<ModelWithoutMethod>("Whoami(2) == 'utility method 2'").Invoke(m1));
+            var model = new ModelWithMethods();
 
-            // model methods take precedence
-            Assert.IsTrue(parser.Parse<ModelWithMethod>("Whoami() == 'model method'").Invoke(m2));
-            Assert.IsTrue(parser.Parse<ModelWithMethod>("Whoami(2) == 'model method 2'").Invoke(m2));
+            // redefined model methods take precedence
+            Assert.IsTrue(parser.Parse<ModelWithMethods>("Whoami() == 'model method'").Invoke(model));
+            Assert.IsTrue(parser.Parse<ModelWithMethods>("Whoami(1) == 'model method 1'").Invoke(model));
         }
+
+        [TestMethod]
+        public void verify_invalid_arguments_conversion()
+        {
+            var parser = new Parser();
+            parser.AddFunction<object, string>("Whoami", o => string.Format("utility method {0}", o));
+            parser.AddFunction<int, string, string>("Whoami", (i, s) => string.Format("utility method {0} - {1}", i, s));
+
+            Assert.IsTrue(parser.Parse<object>("Whoami('0') == 'utility method 0'").Invoke(null)); // successful conversion from String to Object
+            Assert.IsTrue(parser.Parse<object>("Whoami(1, '2') == 'utility method 1 - 2'").Invoke(null)); // types matched, no conversion needed
+
+            try
+            {
+                Assert.IsTrue(parser.Parse<object>("Whoami('1', '2') == 'utility method 1 - 2'").Invoke(null));
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    "Parsing failed. Invalid expression: Whoami('1', '2') == 'utility method 1 - 2'",
+                    e.Message);
+
+                Assert.IsNotNull(e.InnerException);
+                Assert.IsTrue(e.InnerException is InvalidOperationException);
+                Assert.AreEqual(
+                    "Argument 0 type conversion from String to needed Int32 failed.",
+                    e.InnerException.Message);
+            }
+
+            try
+            {
+                Assert.IsTrue(parser.Parse<object>("Whoami(1, 2) == 'utility method 1 - 2'").Invoke(null));
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    "Parsing failed. Invalid expression: Whoami(1, 2) == 'utility method 1 - 2'",
+                    e.Message);
+
+                Assert.IsNotNull(e.InnerException);
+                Assert.IsTrue(e.InnerException is InvalidOperationException);
+                Assert.AreEqual(
+                    "Argument 1 type conversion from Int32 to needed String failed.",
+                    e.InnerException.Message);
+            }
+        }                
 
         [TestMethod]
         public void verify_short_circuit_evaluation()
@@ -417,9 +538,10 @@ namespace ExpressiveAnnotations.Tests
         [TestMethod]
         public void verify_enumeration_ambiguity()
         {
+            var parser = new Parser();
+
             try
             {
-                var parser = new Parser();
                 parser.Parse<object>("Stability.High == 0").Invoke(null);
                 Assert.Fail();
             }
@@ -443,11 +565,11 @@ namespace ExpressiveAnnotations.Tests
         [TestMethod]
         public void verify_invalid_func_identifier()
         {
+            var parser = new Parser();
+            var model = new Model();
+
             try
             {
-                var model = new Model();
-                var parser = new Parser();
-
                 parser.Parse<Model>("NotMe == 0").Invoke(model);
                 Assert.Fail();
             }
