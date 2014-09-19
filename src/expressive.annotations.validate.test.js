@@ -34,9 +34,9 @@
         window.equal(result.msg, "Supported types: datetime, numeric, string, bool and guid. Invalid target type: secret");
     });
 
-    test("verify_non_standard_date_format_parsing", function () {
+    test("verify_non_standard_date_format_parsing", function() {
         var expected = new Date("August, 11 2014").getTime();
-        var actual = ea.typeHelper.tryParse("11/08/2014", "datetime");       
+        var actual = ea.typeHelper.tryParse("11/08/2014", "datetime");
         window.ok(actual != expected); // standard Date.parse fails to understand dd/mm/yyyy format
         window.ea.settings.parseDate = function(str) {
             var arr = str.split('/');
@@ -136,7 +136,7 @@
         window.equal(result.msg, "Given value was not recognized as a valid RFC 2822 or ISO 8601 date.");
     });
 
-    test("verify_guid_parsing", function () {
+    test("verify_guid_parsing", function() {
         window.equal(ea.typeHelper.guid.tryParse("a1111111-1111-1111-1111-111111111111"), "A1111111-1111-1111-1111-111111111111");
 
         var result = ea.typeHelper.guid.tryParse("");
@@ -181,6 +181,31 @@
     });
 
     window.module("toolchain");
+
+    test("verify_methods_overriding", function() {
+
+        var m = ea.toolchain.methods;
+
+        ea.toolchain.addMethod('Whoami', function() {
+            return 'method A';
+        });
+        ea.toolchain.addMethod('Whoami', function(i) {
+            return 'method A' + i;
+        });
+
+        window.ok(m.Whoami() == 'method A');
+        window.ok(m.Whoami(1) == 'method A1');
+
+        ea.toolchain.addMethod('Whoami', function() {
+            return 'method B';
+        });
+        ea.toolchain.addMethod('Whoami', function(i) {
+            return 'method B' + i;
+        });
+
+        window.ok(m.Whoami() == 'method B');
+        window.ok(m.Whoami(1) == 'method B1');
+    });
 
     test("verify_toolchain_methods", function() {
 
@@ -239,7 +264,7 @@
 
         window.ok(m.StartsWith(' ab c', ' A') == false);
         window.ok(m.StartsWith(' ab c', ' a') == true);
-        window.ok(m.StartsWith(' ', ' ') == true);        
+        window.ok(m.StartsWith(' ', ' ') == true);
         window.ok(m.StartsWith('', '') == true);
         window.ok(m.StartsWith(null, '') == false);
         window.ok(m.StartsWith('', null) == false);
