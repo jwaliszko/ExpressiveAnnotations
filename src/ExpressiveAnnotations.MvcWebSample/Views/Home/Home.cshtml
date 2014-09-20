@@ -106,11 +106,11 @@
 [RequiredIfExpression( /* interpretation => GoAbroad == true 
                         *                   && ReturnDate > value_from_latest_suggested_return_date (stored in RFC 2822 or ISO 8601 format)
                         */
-            Expression = "{0} && {1}",
-            DependentProperties = new[] {"GoAbroad", "ReturnDate"},
-            RelationalOperators = new[] {"==",       ">"},
-            TargetValues = new object[] {true,       "[LatestSuggestedReturnDate]"},
-            ErrorMessage = "If you plan to stay abroad longer than one month from now, write down your reasons.")]
+    Expression = "{0} && {1}",
+    DependentProperties = new[] {"GoAbroad", "ReturnDate"},
+    RelationalOperators = new[] {"==",       ">"},
+    TargetValues = new object[] {true,       "[LatestSuggestedReturnDate]"},
+    ErrorMessage = "If you plan to stay abroad longer than one month from now, write down your reasons.")]
 </pre>
                 <pre class="action">[show attribute]</pre>
                 @Html.LabelFor(model => model.ReasonForLongTravel, new { @class = "inline prefix" })

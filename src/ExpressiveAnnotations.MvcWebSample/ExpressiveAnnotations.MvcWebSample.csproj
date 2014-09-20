@@ -254,9 +254,6 @@
   <ItemGroup>
     <Content Include="Views\Home\EditorTemplates\ISO8601Date.cshtml" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="JSLintNet.json" />
-  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
