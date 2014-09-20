@@ -17,11 +17,11 @@ namespace ExpressiveAnnotations.MvcWebSample
             DataAnnotationsModelValidatorProvider.RegisterAdapter(
                 typeof (RequiredIfAttribute), typeof (RequiredIfValidator));
             DataAnnotationsModelValidatorProvider.RegisterAdapter(
-                typeof(RequiredIfExpressionAttribute), typeof(RequiredIfExpressionValidator));
+                typeof (RequiredIfExpressionAttribute), typeof (RequiredIfExpressionValidator));
             DataAnnotationsModelValidatorProvider.RegisterAdapter(
-                typeof(AssertThatAttribute), typeof(AssertThatValidator));
+                typeof (AssertThatAttribute), typeof (AssertThatValidator));
             DataAnnotationsModelValidatorProvider.RegisterAdapter(
-                typeof(AssertThatExpressionAttribute), typeof(AssertThatExpressionValidator));
+                typeof (AssertThatExpressionAttribute), typeof (AssertThatExpressionValidator));
 
             AreaRegistration.RegisterAllAreas();
 

@@ -19,76 +19,76 @@ If you'll be interested in comprehensive examples afterwards, take a look inside
 
 * Simplest (without logical expressions):
  
- ```C#
-[RequiredIf(DependentProperty = "GoAbroad", TargetValue = true)]
-public string PassportNumber { get; set; }
-```
+    ```C#
+    [RequiredIf(DependentProperty = "GoAbroad", TargetValue = true)]
+    public string PassportNumber { get; set; }
+    ```
 
- Here we are saying that annotated field is required when dependent field has appropriate value (passport number is required, if go abroad option is selected). Simple enough, let's move to another variation:
+    Here we are saying that annotated field is required when dependent field has appropriate value (passport number is required, if go abroad option is selected). Simple enough, let's move to another variation:
 
- ```C#
-[RequiredIf(
-    DependentProperty = "ContactDetails.Email",
-    TargetValue = "*",
-    ErrorMessage = "You have to authorize us to make contact.")]
-public bool AgreeToContact { get; set; }
-```
+    ```C#
+    [RequiredIf(
+        DependentProperty = "ContactDetails.Email",
+        TargetValue = "*",
+        ErrorMessage = "You have to authorize us to make contact.")]
+    public bool AgreeToContact { get; set; }
+    ```
 
- This one means, that if email is non-empty, boolean value indicating contact permission has to be true. What is more, we can see here that nested properties are supported by the mechanism. The last thing shown is wildcard character `*` used as target value. It is special character which stands for any non-empty value (other than null, empty or whitespace strings).
+    This one means, that if email is non-empty, boolean value indicating contact permission has to be true. What is more, we can see here that nested properties are supported by the mechanism. The last thing shown is wildcard character `*` used as target value. It is special character which stands for any non-empty value (other than null, empty or whitespace strings).
 
- ```C#
-[AssertThat(
-    DependentProperty = "ReturnDate",
-    RelationalOperator = ">=",
-    TargetValue = "[Today]")]
-public DateTime? ReturnDate { get; set; }
-```
+    ```C#
+    [AssertThat(
+        DependentProperty = "ReturnDate",
+        RelationalOperator = ">=",
+        TargetValue = "[Today]")]
+    public DateTime? ReturnDate { get; set; }
+    ```
 
- Here return date needs to be greater than or equal to the date given in target value. This time we are not validating field requirement as before. Now attribute puts restriction on field, which needs to be satisfied for such field to be considered as valid (restriction verification is executed for non-null field). 
+    Here return date needs to be greater than or equal to the date given in target value. This time we are not validating field requirement as before. Now attribute puts restriction on field, which needs to be satisfied for such field to be considered as valid (restriction verification is executed for non-null field). 
  
- The second thing shown here is the possibility of dynamic extraction of target values from backing fields, by providing their names inside square brackets `[]` (here today field value is extracted). Therefore not only hardcoded values are accepted as target values (nevertheless date can be hardcoded as RFC 2822 or ISO 8601 formatted string). 
+    The second thing shown here is the possibility of dynamic extraction of target values from backing fields, by providing their names inside square brackets `[]` (here today field value is extracted). Therefore not only hardcoded values are accepted as target values (nevertheless date can be hardcoded as RFC 2822 or ISO 8601 formatted string). 
  
- Comparing to the previous examples, this one introduces in addition one more new concept, namely the usage of explicitly provided relational operators. Such operators indicate relationships between dependent fields values and corresponding target values. If relational operators are not explicitly provided, relationships are by default defined by equality operator `==` (just like in the preceding examples).
+    Comparing to the previous examples, this one introduces in addition one more new concept, namely the usage of explicitly provided relational operators. Such operators indicate relationships between dependent fields values and corresponding target values. If relational operators are not explicitly provided, relationships are by default defined by equality operator `==` (just like in the preceding examples).
 
 * More complex (using logical expressions):
  
- ```C#
-[RequiredIfExpression(
-    Expression = "{0} && !{1} && {2}",
-    DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry"},
-    TargetValues = new object[] {true,       "Other",       "[Country]"},
-    ErrorMessage = "If you plan to travel abroad, why visit the same country twice?")]
-public string ReasonForTravel { get; set; }
-```
+    ```C#
+    [RequiredIfExpression(
+        Expression = "{0} && !{1} && {2}",
+        DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry"},
+        TargetValues = new object[] {true,       "Other",       "[Country]"},
+        ErrorMessage = "If you plan to travel abroad, why visit the same country twice?")]
+    public string ReasonForTravel { get; set; }
+    ```
 
- Here we are saying that annotated field is required when computed result of given logical expression is true. How such an expression should be understood?
+    Here we are saying that annotated field is required when computed result of given logical expression is true. How such an expression should be understood?
 
- ```C#
-GoAbroad == true && !(NextCountry == "Other") && NextCountry == value_from_country
-```
+    ```C#
+    GoAbroad == true && !(NextCountry == "Other") && NextCountry == value_from_country
+    ```
 
- Finally, if we are slightly familiar with this syntax, let's move to even more enriched use case:
+    Finally, if we are slightly familiar with this syntax, let's move to even more enriched use case:
  
- ```C#
-[RequiredIfExpression(
-    Expression = "{0} && ( (!{1} && {2}) || ({3} && {4}) )",
-    DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry", "Age", "Age"},
-    RelationalOperators = new[] {"==",       "==",          "==",          ">",   "<="},
-    TargetValues = new object[] {true,       "Other",       "[Country]",   24,    55},
-    ErrorMessage = "If you plan to go abroad and you are between 25 and 55 or plan to 
-                    visit the same foreign country twice, write down your reasons.")]
-public string ReasonForTravel { get; set; }
-```
+    ```C#
+    [RequiredIfExpression(
+        Expression = "{0} && ( (!{1} && {2}) || ({3} && {4}) )",
+        DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry", "Age", "Age"},
+        RelationalOperators = new[] {"==",       "==",          "==",          ">",   "<="},
+        TargetValues = new object[] {true,       "Other",       "[Country]",   24,    55},
+        ErrorMessage = "If you plan to go abroad and you are between 25 and 55 or plan to 
+                        visit the same foreign country twice, write down your reasons.")]
+    public string ReasonForTravel { get; set; }
+    ```
 
- So, how such an expression should be understood this time?
+    So, how such an expression should be understood this time?
 
- ```C#
-GoAbroad == true 
-&& ( 
-     (NextCountry != "Other" && NextCountry == value_from_country) 
-     || Age ∈ (24, 55> 
-   )
-``` 
+    ```C#
+    GoAbroad == true 
+    && ( 
+         (NextCountry != "Other" && NextCountry == value_from_country) 
+         || Age ∈ (24, 55> 
+    )
+    ``` 
 
 ###How to construct conditional validation attributes?
 #####Signatures:
@@ -185,27 +185,27 @@ Logical expression is an expression in which relationship between operands is sp
 
 1. Operands `{n}` are expanded into basic relational expressions:
 
- ```DependentProperties[n] RelationalOperators[n] TargetValues[n]```
+    ```DependentProperties[n] RelationalOperators[n] TargetValues[n]```
 
-  <sub>Notice: Arrays indexes of dependent fields and its corresponding target values given inside curly brackets `{}`.</sub>
+    <sub>Notice: Arrays indexes of dependent fields and its corresponding target values given inside curly brackets `{}`.</sub>
 2. Based on the assumption from previous step, our expression is interpreted as:
 
- ```(DependentProperties[0] == TargetValues[0]) && !(DependentProperties[1] == TargetValues[1])```
+    ```(DependentProperties[0] == TargetValues[0]) && !(DependentProperties[1] == TargetValues[1])```
 
- <sub>Notice: Interpretation based on assumption that relational operators are not provided, so equality operator `==` is taken by default when computing operands.</sub>
+    <sub>Notice: Interpretation based on assumption that relational operators are not provided, so equality operator `==` is taken by default when computing operands.</sub>
 3. Values are extracted from arrays and computed (compared for equality in this case). Next, computation results (boolean flags) are injected into corresponding brackets, let's say:
 
- ```true && !false```
+    ```true && !false```
 4. Such preprocessed expression is then converted from infix notation syntax into postfix one using [shunting-yard algorithm](http://en.wikipedia.org/wiki/Shunting-yard_algorithm):
 
- ```true false ! &&```
+    ```true false ! &&```
 5. Reverse Polish Notation (RPN) expression is finally evaluated using [postfix algorithm](http://en.wikipedia.org/wiki/Reverse_Polish_notation) to give validation result: 
 
- ```true false ! &&      =>      true true &&      =>      true```
+    ```true false ! &&      =>      true true &&      =>      true```
 
- Here the computed result is true, which means that condition is fulfilled, so: 
-  * when `RequiredIfExpression` used - error message is risen if annotated field value is not provided (i.e. is null, empty or whitespace string or has false boolean meaning),
-  * when `AssertThatExpression` used - no error (successful validation).
+    Here the computed result is true, which means that condition is fulfilled, so: 
+    * when `RequiredIfExpression` used - error message is risen if annotated field value is not provided (i.e. is null, empty or whitespace string or has false boolean meaning),
+    * when `AssertThatExpression` used - no error (successful validation).
 
 ###<a id="declarative-vs-imperative-programming---what-is-it-about">Declarative vs. imperative programming - what is it about?</a>
 
@@ -244,27 +244,27 @@ Client-side validation is fully supported. Enable it for your web project within
 1. Reference both assemblies to your project: core [**ExpressiveAnnotations.dll**](src/ExpressiveAnnotations) and subsidiary [**ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll**](src/ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider),
 2. In Global.asax register required validators (`IClientValidatable` interface is not directly implemented by the attribute, to avoid coupling of ExpressionAnnotations assembly with System.Web.Mvc dependency):
 
- ```C#
+    ```C#
     protected void Application_Start()
     {
         DataAnnotationsModelValidatorProvider.RegisterAdapter(
             typeof (RequiredIfAttribute), typeof (RequiredIfValidator));
         DataAnnotationsModelValidatorProvider.RegisterAdapter(
-            typeof(RequiredIfExpressionAttribute), typeof(RequiredIfExpressionValidator));
+            typeof (RequiredIfExpressionAttribute), typeof (RequiredIfExpressionValidator));
         DataAnnotationsModelValidatorProvider.RegisterAdapter(
-            typeof(AssertThatAttribute), typeof(AssertThatValidator));
+            typeof (AssertThatAttribute), typeof (AssertThatValidator));
         DataAnnotationsModelValidatorProvider.RegisterAdapter(
-            typeof(AssertThatExpressionAttribute), typeof(AssertThatExpressionValidator));
-```			
+            typeof (AssertThatExpressionAttribute), typeof (AssertThatExpressionValidator));
+    ```			
 3. Include [**expressive.annotations.analysis.js**](src/expressive.annotations.analysis.js) and [**expressive.annotations.validate.js**](src/expressive.annotations.validate.js) scripts in your page (do not forget standard jQuery validation scripts):
 
- ```JavaScript
+    ```JavaScript
     <script src="/Scripts/jquery.validate.js"></script>
     <script src="/Scripts/jquery.validate.unobtrusive.js"></script>
     ...
     <script src="/Scripts/expressive.annotations.analysis.js"></script>
     <script src="/Scripts/expressive.annotations.validate.js"></script>
-```
+    ```
 
 Alternatively, using the [NuGet](https://www.nuget.org/packages/ExpressiveAnnotations/) Package Manager Console:
 
