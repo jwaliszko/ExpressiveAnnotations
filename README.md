@@ -101,7 +101,7 @@ Preserving the syntax defined by the grammar above, logical expressions can be b
 * relational operators: `==`, `!=`,`<`, `<=`, `>`, `>=`,
 * arithmetic operators: `+`, `-`, `*`, `/`,	
 * brackets: `(`, `)`,
-* aplhanumeric characters and whitespaces with the support of `,`, `.`, `_`, `'` and `"`, used to synthesize suitable literals: 
+* alphanumeric characters and whitespaces with the support of `,`, `.`, `_`, `'` and `"`, used to synthesize suitable literals: 
   * null literal: `null`, 
   * integer number literals, e.g. `123`, 
   * real number literals, e.g. `1.5` or `-0.3e-2`,
@@ -200,7 +200,7 @@ class Model
         return /^(A|B|AB|0)[\+-]$/.test(group);
     });
 ```
-For a single function name multiple signatures can be defined. Types are not taken under consideration as a differentiating factor though. Methods overloading is based on the number of arguments only. Functions with the same name and exact number of arguments are considered as ambiguous. The next issue important here is the fact that custom methods take precedence over built-in ones. If exact signatures are provided built-in methods are simply overridden by new definitions.
+Many signatures can be defined for a single function name. Types are not taken under consideration as a differentiating factor though. Methods overloading is based on the number of arguments only. Functions with the same name and exact number of arguments are considered as ambiguous. The next issue important here is the fact that custom methods take precedence over built-in ones. If exact signatures are provided built-in methods are simply overridden by new definitions.
 
 #####<a id="how-to-cope-with-dates-given-in-non-standard-formats">How to cope with dates given in non-standard formats?</a>
 
@@ -267,22 +267,22 @@ Client-side validation is fully supported. Enable it for your web project within
 1. Reference both assemblies to your project: core [**ExpressiveAnnotations.dll**](src/ExpressiveAnnotations) and subsidiary [**ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll**](src/ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider),
 2. In Global.asax register required validators (`IClientValidatable` interface is not directly implemented by the attribute, to avoid coupling of ExpressionAnnotations assembly with System.Web.Mvc dependency):
 
- ```C#
+    ```C#
     protected void Application_Start()
     {
         DataAnnotationsModelValidatorProvider.RegisterAdapter(
             typeof (RequiredIfAttribute), typeof (RequiredIfValidator));
         DataAnnotationsModelValidatorProvider.RegisterAdapter(
-            typeof(AssertThatAttribute), typeof(AssertThatValidator));
-```
+            typeof (AssertThatAttribute), typeof (AssertThatValidator));
+    ```
 3. Include [**expressive.annotations.validate.js**](src/expressive.annotations.validate.js) scripts in your page (do not forget standard jQuery validation scripts):
 
- ```JavaScript
+    ```JavaScript
     <script src="/Scripts/jquery.validate.js"></script>
     <script src="/Scripts/jquery.validate.unobtrusive.js"></script>
     ...
     <script src="/Scripts/expressive.annotations.validate.js"></script>
-```
+    ```
 
 Alternatively, using the [NuGet](https://www.nuget.org/packages/ExpressiveAnnotations/) Package Manager Console:
 

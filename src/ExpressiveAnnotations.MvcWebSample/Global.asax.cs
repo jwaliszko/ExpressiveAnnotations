@@ -17,7 +17,7 @@ namespace ExpressiveAnnotations.MvcWebSample
             DataAnnotationsModelValidatorProvider.RegisterAdapter(
                 typeof (RequiredIfAttribute), typeof (RequiredIfValidator));
             DataAnnotationsModelValidatorProvider.RegisterAdapter(
-                typeof(AssertThatAttribute), typeof(AssertThatValidator));
+                typeof (AssertThatAttribute), typeof (AssertThatValidator));
 
             AreaRegistration.RegisterAllAreas();
 
