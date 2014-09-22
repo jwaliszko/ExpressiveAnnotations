@@ -139,6 +139,9 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Content Include="..\expressive.annotations.validate.js">
+      <Link>Scripts\expressive.annotations.validate.js</Link>
+    </Content>
     <Content Include="Content\themes\base\images\animated-overlay.gif" />
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
     <Content Include="Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
@@ -201,7 +204,6 @@
     <Content Include="Content\themes\base\minified\jquery.ui.tabs.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.theme.min.css" />
     <Content Include="Content\themes\base\minified\jquery.ui.tooltip.min.css" />
-    <Content Include="Scripts\expressive.annotations.validate.js" />
     <Content Include="Scripts\jquery-1.8.2.js" />
     <Content Include="Scripts\jquery-ui-1.10.4.js" />
     <Content Include="Scripts\jquery.validate.js" />
@@ -263,7 +265,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Home\EditorTemplates\Query.cshtml" />
-  </ItemGroup>
+  </ItemGroup>  
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -295,6 +297,13 @@
   <PropertyGroup>
     <PreBuildEvent>$(SolutionDir)packages\nuget.exe install "$(ProjectDir)packages.config" -o "$(SolutionDir)packages"</PreBuildEvent>
   </PropertyGroup>
+  <Target Name="CopyLinkedContentFiles" BeforeTargets="Build">
+    <Copy SourceFiles="%(Content.Identity)" 
+          DestinationFiles="%(Content.Link)" 
+          SkipUnchangedFiles='true' 
+          OverwriteReadOnlyFiles='true' 
+          Condition="'%(Content.Link)' != ''" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
