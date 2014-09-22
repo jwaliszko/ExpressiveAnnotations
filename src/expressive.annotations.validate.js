@@ -36,7 +36,7 @@ var
                     return value;
                 }
                 if (typeHelper.isString(value)) {
-                    value = value.trim().toLowerCase();
+                    value = $.trim(value).toLowerCase();
                     if (value === 'true' || value === 'false') {
                         return value === 'true';
                     }
@@ -148,7 +148,7 @@ var
                 return str !== null && str !== undefined ? str.length : 0;
             });
             this.addMethod("Trim", function(str) {
-                return str !== null && str !== undefined ? str.trim() : null;
+                return str !== null && str !== undefined ? $.trim(str) : null;
             });
             this.addMethod("Concat", function(strA, strB) {
                 return [strA, strB].join('');
@@ -328,7 +328,7 @@ var
     };
 
     $.each(annotations, function(idx, val) { // should be optimized in terms of memory consumption (redundant handlers shouldn't be generated, there needs to be exactly as many handlers as there are unique annotations)
-        var adapter = 'assertthat' + val.trim();
+        var adapter = 'assertthat' + $.trim(val);
         $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsmap', 'constsmap'], function(options) {
             options.rules[adapter] = {
                 prefix: modelHelper.getPrefix(options.element.name),
@@ -344,7 +344,7 @@ var
     });
 
     $.each(annotations, function(idx, val) {
-        var adapter = 'requiredif' + val.trim();
+        var adapter = 'requiredif' + $.trim(val);
         $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsmap', 'constsmap', 'allowempty'], function(options) {
             options.rules[adapter] = {
                 prefix: modelHelper.getPrefix(options.element.name),
@@ -361,7 +361,7 @@ var
     });
 
     $.each(annotations, function(idx, val) {
-        var method = 'assertthat' + val.trim();
+        var method = 'assertthat' + $.trim(val);
         $.validator.addMethod(method, function(value, element, params) {
             value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
             if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
@@ -377,7 +377,7 @@ var
     });
 
     $.each(annotations, function(idx, val) {
-        var method = 'requiredif' + val.trim();
+        var method = 'requiredif' + $.trim(val);
         $.validator.addMethod(method, function(value, element, params) {
             value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value;
             if (value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
