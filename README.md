@@ -165,9 +165,9 @@ Toolchain functions available out of the box at server- and client-side:
 * `bool IsNullOrWhiteSpace(string str)`
     * Indicates whether a specified string is null, empty, or consists only of white-space characters (null-safe).
 * `bool IsDigitChain(string str)`
-    * Indicates whether a specified string represents a sequence of digits (null-safe).
+    * Indicates whether a specified string represents a sequence of digits (ASCII characters only, null-safe).
 * `bool IsNumber(string str)`
-    * Indicates whether a specified string represents integer or float number (null-safe).
+    * Indicates whether a specified string represents integer or float number (ASCII characters only, null-safe).
 * `bool IsEmail(string str)`
     * Indicates whether a specified string represents valid e-mail address (null-safe).
 * `bool IsUrl(string str)`
