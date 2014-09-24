@@ -333,7 +333,7 @@ var
             options.rules[adapter] = {
                 prefix: modelHelper.getPrefix(options.element.name),
                 form: options.form,
-                expression: options.params.expression
+                expression: options.params.expression,
                 fieldsmap: $.parseJSON(options.params.fieldsmap),
                 constsmap: $.parseJSON(options.params.constsmap),
             };
