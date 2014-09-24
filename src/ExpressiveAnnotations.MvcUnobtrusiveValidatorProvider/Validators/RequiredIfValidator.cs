@@ -90,23 +90,10 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
                 ValidationType = string.Format("requiredif{0}", suffix)
             };
 
-            var stringBuilder = new StringBuilder();
-            var jsonSerializer = new JsonSerializer();
-            using (var stringWriter = new StringWriter(stringBuilder))
-            using (var jsonTextWriter = new JsonTextWriter(stringWriter))
-            {
-                jsonSerializer.Serialize(jsonTextWriter, Expression);
-                rule.ValidationParameters.Add("expression", stringBuilder.ToString());
-                stringBuilder.Clear();
-                jsonSerializer.Serialize(jsonTextWriter, FieldsMap);
-                rule.ValidationParameters.Add("fieldsmap", stringBuilder.ToString());
-                stringBuilder.Clear();
-                jsonSerializer.Serialize(jsonTextWriter, ConstsMap);
-                rule.ValidationParameters.Add("constsmap", stringBuilder.ToString());
-                stringBuilder.Clear();
-                jsonSerializer.Serialize(jsonTextWriter, AllowEmpty);
-                rule.ValidationParameters.Add("allowempty", stringBuilder.ToString());
-            }
+            rule.ValidationParameters.Add("expression", Expression);
+            rule.ValidationParameters.Add("fieldsmap", FieldsMap.ToJson());
+            rule.ValidationParameters.Add("constsmap", ConstsMap.ToJson());
+            rule.ValidationParameters.Add("allowempty", AllowEmpty);
             yield return rule;
         }
     }

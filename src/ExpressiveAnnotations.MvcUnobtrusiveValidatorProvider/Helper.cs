@@ -1,4 +1,7 @@
 ﻿using System;
+using System.IO;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 {
@@ -38,6 +41,18 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
                 return "guid";
 
             return "complex";
+        }
+
+        public static string ToJson(this object data)
+        {
+            var stringBuilder = new StringBuilder();
+            var jsonSerializer = new JsonSerializer();
+            using (var stringWriter = new StringWriter(stringBuilder))
+            using (var jsonTextWriter = new JsonTextWriter(stringWriter))
+            {
+                jsonSerializer.Serialize(jsonTextWriter, data);
+                return stringBuilder.ToString();
+            }
         }
     }
 }

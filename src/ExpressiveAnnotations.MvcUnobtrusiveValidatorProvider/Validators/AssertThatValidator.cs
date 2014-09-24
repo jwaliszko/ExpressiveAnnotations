@@ -58,7 +58,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
                 }
 
                 Expression = attribute.Expression;
-                FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);    
+                FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);
             }
             catch (Exception e)
             {
@@ -88,20 +88,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
                 ValidationType = string.Format("assertthat{0}", suffix)
             };
 
-            var stringBuilder = new StringBuilder();
-            var jsonSerializer = new JsonSerializer();            
-            using (var stringWriter =  new StringWriter(stringBuilder))
-            using (var jsonTextWriter = new JsonTextWriter(stringWriter))
-            {
-                jsonSerializer.Serialize(jsonTextWriter, Expression);
-                rule.ValidationParameters.Add("expression", stringBuilder.ToString());
-                stringBuilder.Clear();
-                jsonSerializer.Serialize(jsonTextWriter, FieldsMap);
-                rule.ValidationParameters.Add("fieldsmap", stringBuilder.ToString());
-                stringBuilder.Clear();
-                jsonSerializer.Serialize(jsonTextWriter, ConstsMap);
-                rule.ValidationParameters.Add("constsmap", stringBuilder.ToString());
-            }
+            rule.ValidationParameters.Add("expression", Expression);
+            rule.ValidationParameters.Add("fieldsmap", FieldsMap.ToJson());
+            rule.ValidationParameters.Add("constsmap", ConstsMap.ToJson());
             yield return rule;
         }
     }

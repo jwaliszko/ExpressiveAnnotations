@@ -333,9 +333,9 @@ var
             options.rules[adapter] = {
                 prefix: modelHelper.getPrefix(options.element.name),
                 form: options.form,
-                expression: $.parseJSON(options.params.expression),
+                expression: options.params.expression
                 fieldsmap: $.parseJSON(options.params.fieldsmap),
-                constsmap: $.parseJSON(options.params.constsmap)
+                constsmap: $.parseJSON(options.params.constsmap),
             };
             if (options.message) {
                 options.messages[adapter] = options.message;
@@ -349,10 +349,10 @@ var
             options.rules[adapter] = {
                 prefix: modelHelper.getPrefix(options.element.name),
                 form: options.form,
-                expression: $.parseJSON(options.params.expression),
+                expression: options.params.expression,
                 fieldsmap: $.parseJSON(options.params.fieldsmap),
-                constsmap: $.parseJSON(options.params.constsmap),
-                allowempty: $.parseJSON(options.params.allowempty)
+                constsmap: $.parseJSON(options.params.constsmap),                
+                allowempty: options.params.allowempty
             };
             if (options.message) {
                 options.messages[adapter] = options.message;
