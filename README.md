@@ -45,11 +45,11 @@ Literal translation means, that if either email or phone is provided, you are fo
 
 Finally, take a brief look at following construction:
 ```C#
-[RequiredIf("GoAbroad == true " +
-            "&& (" +
-                    "(NextCountry != 'Other' && NextCountry == Country) " +
-                    "|| (Age > 24 && Age <= 55)" +
-                ")")]
+[RequiredIf(@"GoAbroad == true
+              && (
+                     (NextCountry != 'Other' && NextCountry == Country)
+                     || (Age > 24 && Age <= 55)
+                 )")]
 public string ReasonForTravel { get; set; }
 ```
 <sub>Notice: Expression is splitted into multiple lines because such a form is easier to comprehend.</sub>
@@ -101,12 +101,12 @@ Preserving the syntax defined by the grammar above, logical expressions can be b
 * relational operators: `==`, `!=`,`<`, `<=`, `>`, `>=`,
 * arithmetic operators: `+`, `-`, `*`, `/`,	
 * brackets: `(`, `)`,
-* alphanumeric characters and whitespaces with the support of `,`, `.`, `_`, `'` and `"`, used to synthesize suitable literals: 
+* alphanumeric characters and whitespaces with the support of `,`, `.`, `_`, `'` and `"`, used to synthesize suitable literals:
   * null literal: `null`, 
   * integer number literals, e.g. `123`, 
   * real number literals, e.g. `1.5` or `-0.3e-2`,
   * boolean literals: `true` and `false`,
-  * string literals: `'in single quotes'` (internal quote escape sequence: `\'`, `\n` character represents new line no matter the platform)
+  * string literals: `'in single quotes'` (internal quote escape sequence: `\'`, `\n` character represents new line no matter the platform),
   * func literals:
       * property names, e.g. `SomeProperty`,
 	  * constants, e.g. `SomeType.CONST`,
@@ -128,7 +128,7 @@ Attention needed when coping with `null` (discrepancies between C# and JavaScrip
 
 #####<a id="built-in-functions">Built-in functions:</a>
 
-Toolchain functions available out of the box at server- and client-side: 
+Toolchain functions available out of the box at server- and client-side:
 
 * `DateTime Now()`
     * Gets the current date and time, expressed as the local time.
@@ -187,7 +187,7 @@ class Model
 {
     public bool IsBloodType(string group) 
     { 
-        return Regex.IsMatch(group, "^(A|B|AB|0)[\+-]$");
+        return Regex.IsMatch(group, @"^(A|B|AB|0)[\+-]$");
     }
 
     [AssertThat("IsBloodType(BloodType)")] // method known here (context aware expressions)

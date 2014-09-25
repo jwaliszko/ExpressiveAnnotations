@@ -10,6 +10,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 {
     public class Query
     {
+        public const string SIMONS_CAT = @"Simon's cat named ""\\""
+ (Double Backslash)";
+
         public IEnumerable<SelectListItem> Sports
         {
             get
@@ -65,7 +68,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [RequiredIf("GoAbroad == true",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]
         [AssertThat("IsDigitChain(PassportNumber)",
-            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "DigitsOnlyAccepted")]
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "DigitsOnlyAccepted")]
         [Display(ResourceType = typeof (Resources), Name = "PassportNumber")]
         public string PassportNumber { get; set; }
 
@@ -74,13 +77,15 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 
         [Display(ResourceType = typeof (Resources), Name = "NextCountry")]
         public string NextCountry { get; set; }
-        
-        [RequiredIf("GoAbroad == true " +
-                    "&& (" +
-                            "(NextCountry != 'Other' && NextCountry == Country) " +
-                            "|| (Age > 24 && Age <= 55)" +
-                        ")",
+
+        [RequiredIf(@"GoAbroad == true
+                      && (
+                             (NextCountry != 'Other' && NextCountry == Country)
+                             || (Age > 24 && Age <= 55)
+                         )",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ReasonForTravelRequired")]
+        [AssertThat(@"ReasonForTravel != 'John\'s cat named ""\\\'""\n (Backslash Quote)' && ReasonForTravel != SIMONS_CAT",
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "SecretAnswerDetected")]
         [Display(ResourceType = typeof (Resources), Name = "ReasonForTravel")]
         public string ReasonForTravel { get; set; }
 
@@ -88,16 +93,16 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public DateTime LatestSuggestedReturnDate { get; set; }
 
         [RequiredIf("GoAbroad == true",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]        
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]
         [AssertThat("ReturnDate >= Today()",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FutureDateRequired")]
         [AssertThat("ReturnDate < AddYears(Today(), 1)",
-            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "NoMoreThanAYear")]
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "NoMoreThanAYear")]
         [Display(ResourceType = typeof (Resources), Name = "ReturnDate")]
         public DateTime? ReturnDate { get; set; }
 
         [RequiredIf("GoAbroad == true && ReturnDate > LatestSuggestedReturnDate",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ReasonForLongTravelRequired")]
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ReasonForLongTravelRequired")]        
         [Display(ResourceType = typeof (Resources), Name = "ReasonForLongTravel")]
         public string ReasonForLongTravel { get; set; }
 
@@ -106,13 +111,13 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "PoliticalStability")]
         public Stability? PoliticalStability { get; set; }
 
-        [AssertThat("(" +
-                    "    AwareOfTheRisks == true " +
-                    "    && (PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain)" +
-                    ") " +
-                    "|| PoliticalStability == null || PoliticalStability == Stability.High",
-            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "AwareOfTheRisksRequired")]
-        [Display(ResourceType = typeof(Resources), Name = "AwareOfTheRisks")]        
+        [AssertThat(@"(
+                          AwareOfTheRisks == true
+                          && (PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain)
+                      ) 
+                      || PoliticalStability == null || PoliticalStability == Stability.High",
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "AwareOfTheRisksRequired")]
+        [Display(ResourceType = typeof (Resources), Name = "AwareOfTheRisks")]
         public bool AwareOfTheRisks { get; set; }
 
         [Display(ResourceType = typeof (Resources), Name = "SportType")]
@@ -135,17 +140,22 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "ImmediateContact")]
         public bool? ImmediateContact { get; set; }
 
-        [AssertThat("FlightId != Guid('00000000-0000-0000-0000-000000000000') && " +
-                    "FlightId != Guid('11111111-1111-1111-1111-111111111111')",
+        [AssertThat(@"FlightId != Guid('00000000-0000-0000-0000-000000000000')
+                      && FlightId != Guid('11111111-1111-1111-1111-111111111111')",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FlightIdentifierInvalid")]
-        [Display(ResourceType = typeof(Resources), Name = "FlightId")]
+        [Display(ResourceType = typeof (Resources), Name = "FlightId")]
         public Guid? FlightId { get; set; }
 
         public Contact ContactDetails { get; set; }
 
         public bool IsBloodType(string group)
         {
-            return Regex.IsMatch(group, @"^(A|B|AB|0)[\+-]$");
+            return Regex.IsMatch(group, @"^(A|B|AB|0)[\+-]$"); /* Reminder: verbatim string usage is adviced when working with regex patterns. Regex patterns are full of backslashes, 
+                                                                * and backslash characters need to be escaped in regular string literals. Verbatim string literal, on the other hand, 
+                                                                * is such a string which does not need to be escaped. It is treated literally by the compiler, since compiler does not 
+                                                                * interpret backslash control characters anymore - they lose any special significance for it (one thing to remember is 
+                                                                * usage of "" for quote escape sequence: http://msdn.microsoft.com/en-us/library/aa691090(v=vs.71).aspx).
+                                                                */
         }
 
         public DateTime AddYears(DateTime from, int years)

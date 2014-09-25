@@ -457,6 +457,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sorry, it is not a question about John&apos;s cat nor Simon&apos;s cat..
+        /// </summary>
+        public static string SecretAnswerDetected {
+            get {
+                return ResourceManager.GetString("SecretAnswerDetected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select a date.
         /// </summary>
         public static string SelectDate {

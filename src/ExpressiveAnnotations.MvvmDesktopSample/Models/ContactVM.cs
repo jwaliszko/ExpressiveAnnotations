@@ -20,7 +20,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
         }
 
         [RequiredIf("Email == null")]
-        [AssertThat("IsDigitChain(Phone)")]
+        [AssertThat(@"IsRegexMatch(Phone, '^\\d+$')")]
         [AssertThat("Length(Phone) > 8 && Length(Phone) < 16")]
         public string Phone
         {

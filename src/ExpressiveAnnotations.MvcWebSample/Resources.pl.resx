@@ -249,6 +249,9 @@
   <data name="ReturnDate" xml:space="preserve">
     <value>Data powrotu</value>
   </data>
+  <data name="SecretAnswerDetected" xml:space="preserve">
+    <value>Przepraszamy, ale to nie jest pytanie dotyczące zwierząt.</value>
+  </data>
   <data name="SelectDate" xml:space="preserve">
     <value>Wybierz datę</value>
   </data>
