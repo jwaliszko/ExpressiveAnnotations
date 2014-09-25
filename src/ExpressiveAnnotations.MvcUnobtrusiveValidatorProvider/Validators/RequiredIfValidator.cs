@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
-using Newtonsoft.Json;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
 {
@@ -93,7 +90,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
             rule.ValidationParameters.Add("expression", Expression);
             rule.ValidationParameters.Add("fieldsmap", FieldsMap.ToJson());
             rule.ValidationParameters.Add("constsmap", ConstsMap.ToJson());
-            rule.ValidationParameters.Add("allowempty", AllowEmpty);
+            rule.ValidationParameters.Add("allowempty", AllowEmpty.ToJson());
             yield return rule;
         }
     }

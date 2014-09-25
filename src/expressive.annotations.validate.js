@@ -352,7 +352,7 @@ var
                 expression: options.params.expression,
                 fieldsmap: $.parseJSON(options.params.fieldsmap),
                 constsmap: $.parseJSON(options.params.constsmap),                
-                allowempty: options.params.allowempty
+                allowempty: $.parseJSON(options.params.allowempty)
             };
             if (options.message) {
                 options.messages[adapter] = options.message;
