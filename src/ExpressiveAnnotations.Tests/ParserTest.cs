@@ -183,7 +183,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("'a' + 'b' == 'ab'").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("'' + '' == ''").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("' ' + null == ' '").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("'a' + 0 + 'ab' + null + 'abc' == \"a0ababc\"").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("'a' + 0 + 'ab' + null + 'abc' == 'a0ababc'").Invoke(null));
 
             Assert.IsTrue(parser.Parse<object>("1 + 2 + 3 + 4 == 10").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("1 - 2 + 3 - 4 == -2").Invoke(null));
@@ -212,7 +212,7 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.IsTrue(parser.Parse<object>("1 - 2 -(6 / ((2*1.5 - 1) + 1)) * -2 + 1/2/1 == 3.50").Invoke(null));
 
-            Assert.IsTrue(parser.Parse<object>("\"abc\" == Trim(\" abc \")").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("'abc' == Trim(' abc ')").Invoke(null));            
             Assert.IsTrue(parser.Parse<object>("Length(null) + Length('abc' + 'cde') >= Length(Trim(' abc def ')) - 2 - -1").Invoke(null));
 
             try
@@ -318,7 +318,7 @@ namespace ExpressiveAnnotations.Tests
             const string expression =
                 "Flag == true " +
                     "&& (" +
-                            "(Text != \"hello world\" && Date < SubModel.Date) " +
+                            "(Text != 'hello world' && Date < SubModel.Date) " +
                             "|| (" +
                                     "(Number >= 0 && Number < 1) && PoliticalStability == Utility.Stability.High" +
                                 ")" +

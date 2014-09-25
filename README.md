@@ -106,7 +106,7 @@ Preserving the syntax defined by the grammar above, logical expressions can be b
   * integer number literals, e.g. `123`, 
   * real number literals, e.g. `1.5` or `-0.3e-2`,
   * boolean literals: `true` and `false`,
-  * string literals, e.g. `'in single quotes'` or `\"in escaped double quotes\"`, 
+  * string literals: `'in single quotes'` (internal quote escape sequence: `\'`, `\n` character represents new line no matter the platform)
   * func literals:
       * property names, e.g. `SomeProperty`,
 	  * constants, e.g. `SomeType.CONST`,

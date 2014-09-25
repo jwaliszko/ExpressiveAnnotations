@@ -499,7 +499,7 @@ namespace ExpressiveAnnotations.Analysis
                 if (constant != null)
                 {
                     var value = constant.GetRawConstantValue();
-                    Consts[name] = value;
+                    Consts[name] = (value is string) ? ((string)value).Replace(Environment.NewLine, "\n") : value; // in our language new line is represented by \n
                     return Expression.Constant(value);
                 }
             }
@@ -511,7 +511,7 @@ namespace ExpressiveAnnotations.Analysis
                 if (constant != null)
                 {
                     var value = constant.GetRawConstantValue();
-                    Consts[name] = value;
+                    Consts[name] = (value is string) ? ((string)value).Replace(Environment.NewLine, "\n") : value;
                     return Expression.Constant(value);
                 }
             }

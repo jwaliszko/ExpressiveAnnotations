@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
-using Newtonsoft.Json;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
 {
@@ -57,7 +54,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
                     attribute.Compile(metadata.ContainerType);
                 }
 
-                Expression = attribute.Expression;
+                Expression = attribute.Expression; // expression will be pushed to JavaScript side to be processed by eval(), so it should be perfectly valid JavaScript code
                 FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);
             }
             catch (Exception e)

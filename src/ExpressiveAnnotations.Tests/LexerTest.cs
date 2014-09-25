@@ -145,6 +145,19 @@ namespace ExpressiveAnnotations.Tests
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.IsTrue(e.Message == "Invalid token started at: ^");
             }
+
+            try
+            {
+                lexer.Analyze("'John's cat'");
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    "Invalid token started at: '",
+                    e.Message);
+            }
         }
 
         [TestMethod]
@@ -160,16 +173,17 @@ namespace ExpressiveAnnotations.Tests
         [TestMethod]
         public void verify_string_token_extraction()
         {
-            AssertToken("\"\"", string.Empty, TokenType.STRING);
-            AssertToken("\"a\"", "a", TokenType.STRING);
-            AssertToken("\"asd\"", "asd", TokenType.STRING);
-            AssertToken("\" a s d \"", " a s d ", TokenType.STRING);
             AssertToken("''", string.Empty, TokenType.STRING);
             AssertToken("'a'", "a", TokenType.STRING);
-            AssertToken("'asd'", "asd", TokenType.STRING);
+            AssertToken("'0123'", "0123", TokenType.STRING);
             AssertToken("' a s d '", " a s d ", TokenType.STRING);
+            AssertToken(@"'Simon\'s cat named ""\\\\""\n (Double Backslash)'", @"Simon's cat named ""\\""
+ (Double Backslash)", TokenType.STRING);
+            // below, non-verbatim version, see \r\n which represents current environment new line (simply expressed by \n in our language)
+            AssertToken("'Simon\\\'s cat named \"\\\\\\\\\"\\n (Double Backslash)'", "Simon's cat named \"\\\\\"\r\n (Double Backslash)", TokenType.STRING);
 
-            AssertNotToken("a", TokenType.STRING);
+            AssertNotToken("\"0123\"", TokenType.STRING);
+            AssertNotToken("'John's cat'", TokenType.STRING);
         }
 
         [TestMethod]
@@ -197,7 +211,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         private static void AssertToken(string expression, object value, TokenType type)
-        {
+        {            
             var lexer = new Lexer();
             var tokens = lexer.Analyze(expression).ToArray();
             
@@ -219,6 +233,7 @@ namespace ExpressiveAnnotations.Tests
             catch (Exception e)
             {
                 Assert.IsTrue(e is InvalidOperationException);
+                Assert.IsTrue(e.Message.StartsWith("Invalid token started at: "));
             }
         }
     }
