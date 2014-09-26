@@ -164,7 +164,7 @@ namespace ExpressiveAnnotations.Tests
         public void verify_float_token_extraction()
         {
             AssertToken("1.0", 1.0, TokenType.FLOAT);
-            AssertToken("-0.3e-2", -0.3e-2, TokenType.FLOAT);
+            AssertToken("0.3e-2", 0.3e-2, TokenType.FLOAT);
 
             AssertNotToken("1", TokenType.FLOAT);
             AssertNotToken("a", TokenType.FLOAT);
@@ -182,7 +182,7 @@ namespace ExpressiveAnnotations.Tests
             // below, non-verbatim version, see \r\n which represents current environment new line (simply expressed by \n in our language)
             AssertToken("'Simon\\\'s cat named \"\\\\\\\\\"\\n (Double Backslash)'", "Simon's cat named \"\\\\\"\r\n (Double Backslash)", TokenType.STRING);
 
-            AssertNotToken("\"0123\"", TokenType.STRING);
+            AssertNotToken("\"0123\"", TokenType.STRING); // double-quoted text is not accepted as string literal
             AssertNotToken("'John's cat'", TokenType.STRING);
         }
 

@@ -39,7 +39,7 @@ namespace ExpressiveAnnotations.Analysis
         public Parser()
         {
             Fields = new Dictionary<string, Type>();
-            Consts = new Dictionary<string, object>();            
+            Consts = new Dictionary<string, object>();
             Functions = new Dictionary<string, IList<LambdaExpression>>();
         }
 
@@ -222,7 +222,7 @@ namespace ExpressiveAnnotations.Analysis
             if (PeekType() != TokenType.OR)
                 return arg1;
             ReadToken();
-            var arg2 = ParseOrExp();
+            var arg2 = ParseOrExp();            
             return Expression.OrElse(arg1, arg2); // short-circuit evaluation
         }
 
@@ -275,7 +275,12 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseAddExp()
         {
+            var sign = UnifySign();
             var arg = ParseMulExp();
+
+            if (sign == TokenType.SUB)
+                arg = InverseNumber(arg);
+
             return ParseAddExpInternal(arg);
         }        
 
@@ -285,7 +290,11 @@ namespace ExpressiveAnnotations.Analysis
                 return arg1;
             var oper = PeekType();
             ReadToken();
+            var sign = UnifySign();
             var arg2 = ParseMulExp();
+
+            if (sign == TokenType.SUB)
+                arg2 = InverseNumber(arg2);
 
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
             switch (oper)
@@ -307,7 +316,12 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseMulExp()
         {
+            var sgn = UnifySign();
             var arg = ParseVal();
+
+            if (sgn == TokenType.SUB)
+                arg = InverseNumber(arg);
+
             return ParseMulExpInternal(arg);
         }
 
@@ -317,7 +331,11 @@ namespace ExpressiveAnnotations.Analysis
                 return arg1;
             var oper = PeekType();
             ReadToken();
+            var sign = UnifySign();
             var arg2 = ParseVal();
+
+            if (sign == TokenType.SUB)
+                arg2 = InverseNumber(arg2);
 
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
             switch (oper)
@@ -499,7 +517,8 @@ namespace ExpressiveAnnotations.Analysis
                 if (constant != null)
                 {
                     var value = constant.GetRawConstantValue();
-                    Consts[name] = (value is string) ? ((string)value).Replace(Environment.NewLine, "\n") : value; // in our language new line is represented by \n
+                    Consts[name] = (value is string) ? ((string)value).Replace(Environment.NewLine, "\n") : value; // in our language new line is represented by \n char (consts map 
+                                                                                                                   // is then sent to JavaScript, and JavaScript new line is also \n)
                     return Expression.Constant(value);
                 }
             }
@@ -608,6 +627,28 @@ namespace ExpressiveAnnotations.Analysis
                 }
             }
             return Expression.Call(contextExpression, methodInfo, convertedArgs);            
+        }
+
+        private TokenType UnifySign()
+        {
+            var operators = new List<TokenType>();
+            while (true)
+            {
+                if (!new[] {TokenType.ADD, TokenType.SUB}.Contains(PeekType()))
+                    return operators.Count(x => x.Equals(TokenType.SUB))%2 == 1
+                        ? TokenType.SUB
+                        : TokenType.ADD;
+
+                operators.Add(PeekType());
+                ReadToken();
+            }
+        }
+
+        private Expression InverseNumber(Expression arg)
+        {
+            Expression zero = Expression.Constant(0);
+            Helper.MakeTypesCompatible(zero, arg, out zero, out arg);
+            return Expression.Subtract(zero, arg);
         }
     }
 }

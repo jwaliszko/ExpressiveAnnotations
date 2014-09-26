@@ -71,6 +71,16 @@
         DIV,
 
         /// <summary>
+        /// Prefix/postfix inc(++).
+        /// </summary>
+        INC,
+
+        /// <summary>
+        /// Prefix/postfix dec(--).
+        /// </summary>
+        DEC,
+
+        /// <summary>
         /// Left bracket.
         /// </summary>
         LEFT_BRACKET,

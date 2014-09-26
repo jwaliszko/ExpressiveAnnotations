@@ -203,12 +203,13 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("1.2 / 2 == 0.6").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("1.2 + 2 == 3.2").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("1.2 - 2 == -0.8").Invoke(null));
-
-            //ToDo: modify engine to handle this
-            //Assert.IsTrue(parser.Parse<object>("1+2==3").Invoke(null));
-            //Assert.IsTrue(parser.Parse<object>("1-2==-1").Invoke(null));            
+            
+            Assert.IsTrue(parser.Parse<object>("1+2==3").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("1-2==-1").Invoke(null));            
             Assert.IsTrue(parser.Parse<object>("1*2>-1").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("1/2==0.5").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("-1*-+- -+-1==-1").Invoke(null)); // weird construction, but since C# and JavaScript allows it, our language also doesn't mind
+            Assert.IsTrue(parser.Parse<object>("'a'+'b'+null+''+'c'=='abc'").Invoke(null));
 
             Assert.IsTrue(parser.Parse<object>("1 - 2 -(6 / ((2*1.5 - 1) + 1)) * -2 + 1/2/1 == 3.50").Invoke(null));
 
@@ -231,6 +232,25 @@ namespace ExpressiveAnnotations.Tests
                 Assert.IsTrue(e.InnerException is ArgumentException);
                 Assert.AreEqual(
                     "Expression of type 'System.Int32' cannot be used for return type 'System.Boolean'",
+                    e.InnerException.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>("1++ +1==2").Invoke(null); // non-bool exp
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    "Parsing failed. Invalid expression: 1++ +1==2",
+                    e.Message);
+
+                Assert.IsNotNull(e.InnerException);
+                Assert.IsTrue(e.InnerException is InvalidOperationException);
+                Assert.AreEqual(
+                    "Parsing expected to be completed. Unexpected token: ++",
                     e.InnerException.Message);
             }
         }
@@ -316,14 +336,14 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<Model>("Guid1 != Guid2").Invoke(model));
 
             const string expression =
-                "Flag == true " +
-                    "&& (" +
-                            "(Text != 'hello world' && Date < SubModel.Date) " +
-                            "|| (" +
-                                    "(Number >= 0 && Number < 1) && PoliticalStability == Utility.Stability.High" +
-                                ")" +
-                        ")" +
-                    "&& CONST + Utility.CONST == 'insideoutside'";
+                @"Flag == true
+                      && (
+                             (Text != 'hello world' && Date < SubModel.Date)
+                             || (
+                                    (Number >= 0 && Number < 1) && PoliticalStability == Utility.Stability.High
+                                )
+                         ) 
+                      && CONST + Utility.CONST == 'insideoutside'";
             var func = parser.Parse(model.GetType(), expression);
             Assert.IsTrue(func(model));
 
@@ -772,9 +792,10 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("IsUrl(null) == false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsUrl('') == false").Invoke(null));
 
-            Assert.IsTrue(parser.Parse<object>("IsRegexMatch('-0.3e-2', '^[\\+-]?\\d*\\.?\\d+(?:[eE][\\+-]?\\d+)?$') == true").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("IsRegexMatch(null, '^[\\+-]?\\d*\\.?\\d+(?:[eE][\\+-]?\\d+)?$') == false").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("IsRegexMatch('', '^[\\+-]?\\d*\\.?\\d+(?:[eE][\\+-]?\\d+)?$') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>(@"IsRegexMatch('-0.3e-2', '^[\\+-]?\\d*\\.?\\d+(?:[eE][\\+-]?\\d+)?$') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>(@"IsRegexMatch(null, '^[\\+-]?\\d*\\.?\\d+(?:[eE][\\+-]?\\d+)?$') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>(@"IsRegexMatch('', '^[\\+-]?\\d*\\.?\\d+(?:[eE][\\+-]?\\d+)?$') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>(@"IsRegexMatch('John\'s cat named ""\\\'""\n (Backslash Quote)', '^\\d+$') == false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsRegexMatch('', '') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsRegexMatch(null, '') == false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsRegexMatch('', null) == false").Invoke(null));

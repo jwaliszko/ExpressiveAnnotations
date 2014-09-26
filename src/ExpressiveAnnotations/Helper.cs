@@ -13,7 +13,7 @@ namespace ExpressiveAnnotations
             oute1 = e1;
             oute2 = e2;
 
-            // promote numeric values to double - do all computations with higher precision (to be compatible with javascript, e.g. notation 1/2, should give 0.5 double not 0 int)
+            // promote numeric values to double - do all computations with higher precision (to be compatible with JavaScript, e.g. notation 1/2, should give 0.5 double not 0 int)
             if (oute1.Type != typeof(double) && oute1.Type != typeof(double?) && oute1.Type.IsNumeric())
                 oute1 = oute1.Type.IsNullable()
                     ? Expression.Convert(oute1, typeof (double?))
@@ -28,6 +28,26 @@ namespace ExpressiveAnnotations
                 oute2 = Expression.Convert(oute2, oute1.Type);
             else if (!oute1.Type.IsNullable() && oute2.Type.IsNullable())
                 oute1 = Expression.Convert(oute1, oute2.Type);
+        }
+
+        public static bool IsDateTime(this Type type)
+        {
+            return type != null && (type == typeof(DateTime) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsDateTime()));
+        }
+
+        public static bool IsBool(this Type type)
+        {
+            return type != null && (type == typeof(bool) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsBool()));
+        }
+
+        public static bool IsGuid(this Type type)
+        {
+            return type != null && (type == typeof(Guid) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsGuid()));
+        }
+
+        public static bool IsString(this Type type)
+        {
+            return type != null && type == typeof(string);
         }
 
         public static bool IsNumeric(this Type type)
