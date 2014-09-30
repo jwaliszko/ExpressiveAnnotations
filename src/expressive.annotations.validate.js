@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.validate.js - v2.2.1
+﻿/* expressive.annotations.validate.js - v2.2.2
  * this script is a part of client side component of ExpresiveAnnotations - annotation-based conditional validation library
  * copyright (c) 2014 Jaroslaw Waliszko - https://github.com/JaroslawWaliszko
  * licensed MIT: http://www.opensource.org/licenses/mit-license.php */
@@ -116,7 +116,7 @@ var
 
     toolchain = {
         methods: {},
-        addMethod: function (name, func) { // add multiple function signatures to methods object (methods overloading, based only on numbers of arguments)
+        addMethod: function(name, func) { // add multiple function signatures to methods object (methods overloading, based only on numbers of arguments)
             var old = this.methods[name];
             this.methods[name] = function() {
                 if (func.length === arguments.length) {
