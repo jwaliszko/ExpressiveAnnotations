@@ -55,15 +55,15 @@ If you'll be interested in comprehensive examples afterwards, take a look inside
     ```C#
     [RequiredIfExpression(
         Expression = "{0} && !{1} && {2}",
-        DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry"},
-        TargetValues = new object[] {true,       "Other",       "[Country]"},
+        DependentProperties = new[]{"GoAbroad", "NextCountry", "NextCountry"},
+        TargetValues = new object[]{true,       "Other",       "[Country]"},
         ErrorMessage = "If you plan to travel abroad, why visit the same country twice?")]
     public string ReasonForTravel { get; set; }
     ```
 
     Here we are saying that annotated field is required when computed result of given logical expression is true. How such an expression should be understood?
 
-    ```C#
+    ```
     GoAbroad == true && !(NextCountry == "Other") && NextCountry == value_from_country
     ```
 
@@ -72,9 +72,9 @@ If you'll be interested in comprehensive examples afterwards, take a look inside
     ```C#
     [RequiredIfExpression(
         Expression = "{0} && ( (!{1} && {2}) || ({3} && {4}) )",
-        DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry", "Age", "Age"},
-        RelationalOperators = new[] {"==",       "==",          "==",          ">",   "<="},
-        TargetValues = new object[] {true,       "Other",       "[Country]",   24,    55},
+        DependentProperties = new[]{"GoAbroad", "NextCountry", "NextCountry", "Age", "Age"},
+        RelationalOperators = new[]{"==",       "==",          "==",          ">",   "<="},
+        TargetValues = new object[]{true,       "Other",       "[Country]",   24,    55},
         ErrorMessage = "If you plan to go abroad and you are between 25 and 55 or plan to 
                         visit the same foreign country twice, write down your reasons.")]
     public string ReasonForTravel { get; set; }
@@ -82,7 +82,7 @@ If you'll be interested in comprehensive examples afterwards, take a look inside
 
     So, how such an expression should be understood this time?
 
-    ```C#
+    ```
     GoAbroad == true 
     && ( 
          (NextCountry != "Other" && NextCountry == value_from_country) 
@@ -170,13 +170,13 @@ Logical expression is an expression in which relationship between operands is sp
 #####Logical expressions schematic interpretation:
 
  ```
-       == (by default), !=, >, >=, <, <=         binary logical operators
-                   .---------.                .----.
-(!)(DependProps[0] RelOpers[0] TargetVals[0]) ||, && (!)(DependProps[1] RelOpers[1] TargetVals[1]) …
- | '----------------------------------------'         | '----------------------------------------' ^
- |     {0} - 0th operand (relational expr)            |     {1} - 1st operand (relational expr)    |
- |                                                    |     {n} - nth operand ---------------------'
- '----------------------------------------------------'> unary logical operators (optional)
+     == (by default), !=, >, >=, <, <=      binary logical operators
+                .---------.              .----.
+(!)(DepProps[0] RelOpers[0] TarVals[0])  ||, &&  (!)(DepProps[1] RelOpers[1] TarVals[1]) ...
+ | '----------------------------------'           | '----------------------------------'  ^
+ |  {0}- 0th operand (relational expr)            |  {1}- 1st operand (relational expr)   |
+ |                                                |  {n}- nth operand --------------------'
+ '-----> unary logical operators (optional) <-----'
 ```
 
 <sub>Notice: Schematic view uses abbreviated names.</sub>
@@ -215,8 +215,8 @@ In our case, this concept is materialized by attributes, e.g.
 ```C#
 [RequiredIfExpression(
     Expression = "{0} && !{1} && {2}",
-    DependentProperties = new[] {"GoAbroad", "NextCountry", "NextCountry"},
-    TargetValues = new object[] {true,       "Other",       "[Country]"},
+    DependentProperties = new[]{"GoAbroad", "NextCountry", "NextCountry"},
+    TargetValues = new object[]{true,       "Other",       "[Country]"},
     ErrorMessage = "If you plan to travel abroad, why visit the same country twice?")]
 public string ReasonForTravel { get; set; }
 ```
