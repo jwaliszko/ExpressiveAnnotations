@@ -1,4 +1,8 @@
-﻿namespace ExpressiveAnnotations.Analysis
+﻿/* https://github.com/JaroslawWaliszko/ExpressiveAnnotations
+ * Copyright (c) 2014 Jaroslaw Waliszko
+ * Licensed MIT: http://opensource.org/licenses/MIT */
+
+namespace ExpressiveAnnotations.Analysis
 {
     /// <summary>
     /// Token identifier.

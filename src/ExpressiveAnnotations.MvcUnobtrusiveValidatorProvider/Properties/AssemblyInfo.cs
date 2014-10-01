@@ -1,4 +1,8 @@
-﻿using System.Reflection;
+﻿/* https://github.com/JaroslawWaliszko/ExpressiveAnnotations
+ * Copyright (c) 2014 Jaroslaw Waliszko
+ * Licensed MIT: http://opensource.org/licenses/MIT */
+
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
