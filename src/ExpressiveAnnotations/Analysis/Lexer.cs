@@ -15,17 +15,16 @@ namespace ExpressiveAnnotations.Analysis
     public sealed class Lexer
     {
         private Token Token { get; set; }
-        private string Expression { get; set; }
-        private IDictionary<TokenType, string> RegexMap { get; set; }
-        private IDictionary<TokenType, Regex> CompiledRegexMap { get; set; }
+        private ParseState CurrentContext { get; set; }
+        private IDictionary<TokenType, Regex> RegexMap { get; set; }        
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Lexer" /> class.
         /// </summary>
         public Lexer()
-        {
+        {            
             // special characters (should be escaped if needed): .$^{[(|)*+?\
-            RegexMap = new Dictionary<TokenType, string>
+            var patterns = new Dictionary<TokenType, string>
             {
                 {TokenType.AND, @"&&"},
                 {TokenType.OR, @"\|\|"},
@@ -52,6 +51,10 @@ namespace ExpressiveAnnotations.Analysis
                 {TokenType.STRING, @"(['])(?:\\\1|.)*?\1"}, // '1234', 'John\'s cat'
                 {TokenType.FUNC, @"[a-zA-Z_]+(?:(?:\.[a-zA-Z_])?[a-zA-Z0-9_]*)*"} // field, field.value, func(...)
             };
+
+            RegexMap = patterns.ToDictionary(
+                kvp => kvp.Key,
+                kvp => new Regex(string.Format("^{0}", kvp.Value), RegexOptions.Compiled));
         }
 
         /// <summary>
@@ -66,39 +69,46 @@ namespace ExpressiveAnnotations.Analysis
         {
             if (expression == null)
                 throw new ArgumentNullException("expression", "Expression not provided.");
-
-            Expression = expression;
-            CompiledRegexMap = RegexMap.ToDictionary(kvp => kvp.Key, kvp => new Regex(string.Format("^{0}", kvp.Value), RegexOptions.Compiled));
+                                    
+            CurrentContext = new ParseState(expression, line: 1, column: 1);
 
             var tokens = new List<Token>();
             while (Next())
                 tokens.Add(Token);
 
             // once we've reached the end of the string, EOF token is returned - thus, parser's lookahead does not have to worry about running out of tokens
-            tokens.Add(new Token(TokenType.EOF, string.Empty));
+            Token = new Token(TokenType.EOF, string.Empty, new ParseState(CurrentContext));
+            tokens.Add(Token);
             
             return tokens;
         }
 
         private bool Next()
         {
-            Expression = Expression.Trim();
-            if (string.IsNullOrEmpty(Expression))
+            int column, line;
+            CurrentContext.Expression = CurrentContext.Expression.TrimStart(out column, out line);
+            CurrentContext.Line += line;
+            CurrentContext.Column = line > 0 ? column : CurrentContext.Column + column;
+
+            if (string.IsNullOrEmpty(CurrentContext.Expression))
                 return false;
 
-            foreach (var kvp in CompiledRegexMap)
+            foreach (var kvp in RegexMap)
             {
                 var regex = kvp.Value;
-                var match = regex.Match(Expression);
+                var match = regex.Match(CurrentContext.Expression);
                 var value = match.Value;
                 if (value.Any())
                 {
-                    Token = new Token(kvp.Key, ConvertTokenValue(kvp.Key, value));
-                    Expression = Expression.Substring(value.Length);
+                    Token = new Token(kvp.Key, ConvertTokenValue(kvp.Key, value), new ParseState(CurrentContext));
+
+                    CurrentContext.Expression = CurrentContext.Expression.Substring(value.Length, out column, out line);
+                    CurrentContext.Line += line;
+                    CurrentContext.Column = line > 0 ? column : CurrentContext.Column + column;
                     return true;
                 }
             }
-            throw new InvalidOperationException(string.Format("Invalid token started at: {0}", Expression));
+            throw new ParseErrorException("Invalid token.", CurrentContext);
         }
 
         private object ConvertTokenValue(TokenType type, string value)

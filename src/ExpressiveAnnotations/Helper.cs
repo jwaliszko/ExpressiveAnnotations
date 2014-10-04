@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -105,6 +106,87 @@ namespace ExpressiveAnnotations
             {
                 return e.Types.Where(t => t != null);
             }
+        }
+
+        public static string TrimStart(this string input, out int column, out int line)
+        {
+            var output = input.TrimStart();
+            var redundancy = input.RemoveSuffix(output);
+            var lastLineBreak = redundancy.LastIndexOf('\n');
+            column = lastLineBreak > 0
+                ? redundancy.Length - lastLineBreak
+                : input.Length - output.Length;
+            line = redundancy.CountLineBreaks();
+            return output;
+        }
+
+        public static string Substring(this string input, int start, out int column, out int line)
+        {
+            var output = input.Substring(start);
+            var redundancy = input.RemoveSuffix(output);
+            var lastLineBreak = redundancy.LastIndexOf('\n');
+            column = lastLineBreak > 0
+                ? redundancy.Length - lastLineBreak
+                : input.Length - output.Length;
+            line = redundancy.CountLineBreaks();
+            return output;
+        }
+
+        public static string RemoveSuffix(this string input, string suffix)
+        {
+            return input.EndsWith(suffix)
+                ? input.Substring(0, input.Length - suffix.Length)
+                : input;
+        }
+
+        public static int CountLineBreaks(this string input)
+        {
+            var n = 0;
+            for (var i = 0; i < input.Length; i++)
+            {                
+                if (input[i] == '\n') n++;
+            }
+            return n;
+        }
+
+        public static string FirstLine(this string input)
+        {
+            return input.Split('\n').First().Trim();
+        }
+
+        public static string Indicator(this string input)
+        {
+            return string.Format(
+@"
+... {0} ...
+    ^--- ", input.FirstLine());
+        }
+
+        public static string ToOrdinal(this int num)
+        {
+            if (num <= 0) 
+                return num.ToString(CultureInfo.InvariantCulture);
+
+            switch (num % 100)
+            {
+                case 11:
+                case 12:
+                case 13:
+                    return num + "th";
+            }
+
+            switch (num % 10)
+            {
+                case 1:
+                    return num + "st";
+                case 2:
+                    return num + "nd";
+                case 3:
+                    return num + "rd";
+                default:
+                    return num + "th";
+            }
+
         }
     }
 }

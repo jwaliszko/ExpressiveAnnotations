@@ -30,7 +30,8 @@ namespace ExpressiveAnnotations.Analysis
     /// </summary>
     public sealed class Parser
     {
-        private Stack<Token> Tokens { get; set; }        
+        private Stack<Token> TokensToProcess { get; set; }
+        private Stack<Token> TokensProcessed { get; set; }
         private Type ContextType { get; set; }
         private Expression ContextExpression { get; set; }
         private IDictionary<string, Type> Fields { get; set; }
@@ -64,15 +65,18 @@ namespace ExpressiveAnnotations.Analysis
                 ContextType = typeof (Context);
                 var param = Expression.Parameter(typeof (Context));
                 ContextExpression = param;
-                InitTokenizer(expression);
+                Tokenize(expression);
                 var expressionTree = ParseExpression();
                 var lambda = Expression.Lambda<Func<Context, bool>>(expressionTree, param);
                 return lambda.Compile();
             }
+            catch (ParseErrorException e)
+            {
+                throw new InvalidOperationException(BuildParseError(e), e);
+            }
             catch (Exception e)
             {
-                throw new InvalidOperationException(
-                    string.Format("Parsing failed. Invalid expression: {0}", expression), e);
+                throw new InvalidOperationException(string.Format("Parse fatal error. {0}", e.Message), e);
             }
         }
 
@@ -93,15 +97,18 @@ namespace ExpressiveAnnotations.Analysis
                 ContextType = context;
                 var param = Expression.Parameter(typeof (object));
                 ContextExpression = Expression.Convert(param, context);
-                InitTokenizer(expression);
+                Tokenize(expression);
                 var expressionTree = ParseExpression();
                 var lambda = Expression.Lambda<Func<object, bool>>(expressionTree, param);
                 return lambda.Compile();
             }
+            catch (ParseErrorException e)
+            {
+                throw new InvalidOperationException(BuildParseError(e), e);
+            }
             catch (Exception e)
             {
-                throw new InvalidOperationException(
-                    string.Format("Parsing failed. Invalid expression: {0}", expression), e);
+                throw new InvalidOperationException(string.Format("Parse fatal error. {0}", e.Message), e);
             }
         }
 
@@ -183,7 +190,7 @@ namespace ExpressiveAnnotations.Analysis
         public IDictionary<string, object> GetConsts()
         {
             return Consts;
-        }
+        }        
 
         private void Clear()
         {
@@ -191,32 +198,54 @@ namespace ExpressiveAnnotations.Analysis
             Consts.Clear();
         }
 
-        private void InitTokenizer(string expression)
+        private void Tokenize(string expression)
         {
             var lexer = new Lexer();
-            Tokens = new Stack<Token>(lexer.Analyze(expression).Reverse());
+            var tokens = lexer.Analyze(expression);
+            TokensToProcess = new Stack<Token>(tokens.Reverse());
+            TokensProcessed = new Stack<Token>();
+        }
+
+        private string BuildParseError(ParseErrorException e)
+        {
+            var ctx = e.Context;
+            return ctx == null
+                ? string.Format("Parse error: {0}", e.Message)
+                : string.Format("Parse error line {0}, column {1}:{2}{3}", ctx.Line, ctx.Column, ctx.Expression.Indicator(), e.Message);
         }
 
         private TokenType PeekType()
         {
-            return Tokens.Peek().Type;
+            return TokensToProcess.Peek().Type;
         }
 
         private object PeekValue()
         {
-            return Tokens.Peek().Value;
+            return TokensToProcess.Peek().Value;
         }
 
         private void ReadToken()
         {
-            Tokens.Pop();
+            TokensProcessed.Push(TokensToProcess.Pop());
+        }
+
+        private ParseState PeekContext(int depth = 0)
+        {
+            if(depth < 0)
+                throw new ArgumentOutOfRangeException("depth", "Depth can not be negative, surprisingly.");
+
+            return depth == 0 
+                ? TokensToProcess.Peek().Context // for 0 depth take crrent context
+                : TokensProcessed.Skip(depth - 1).Take(1).Single().Context; // otherwise dig through processed tokens
         }
 
         private Expression ParseExpression()
         {
             var expr = ParseOrExp();
             if (PeekType() != TokenType.EOF)
-                throw new InvalidOperationException(string.Format("Parsing expected to be completed. Unexpected token: {0}", PeekValue()));
+                throw new ParseErrorException(
+                    string.Format("Unexpected token: {0}", PeekValue()),
+                    PeekContext());
             return expr;
         }
 
@@ -279,16 +308,17 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseAddExp()
         {
-            var sign = UnifySign();
+            var ctx = PeekContext();
+            var sign = UnifySign();            
             var arg = ParseMulExp();
 
             if (sign == TokenType.SUB)
                 arg = InverseNumber(arg);
 
-            return ParseAddExpInternal(arg);
+            return ParseAddExpInternal(arg, ctx);
         }        
 
-        private Expression ParseAddExpInternal(Expression arg1)
+        private Expression ParseAddExpInternal(Expression arg1, ParseState ctx)
         {
             if (!new[] {TokenType.ADD, TokenType.SUB}.Contains(PeekType()))
                 return arg1;
@@ -301,6 +331,11 @@ namespace ExpressiveAnnotations.Analysis
                 arg2 = InverseNumber(arg2);
 
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
+            if ((arg1.Type.IsString() || arg2.Type.IsString()) && oper == TokenType.SUB)
+                throw new ParseErrorException(
+                    string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'", oper, arg1.Type, arg2.Type),
+                    ctx);
+            
             switch (oper)
             {
                 case TokenType.ADD:
@@ -310,9 +345,9 @@ namespace ExpressiveAnnotations.Analysis
                                 Expression.Convert(arg1, typeof (object)),
                                 Expression.Convert(arg2, typeof (object)),
                                 typeof (string).GetMethod("Concat", new[] {typeof (object), typeof (object)})) // convert string + string into a call to string.Concat
-                            : Expression.Add(arg1, arg2));
+                            : Expression.Add(arg1, arg2), PeekContext());
                 case TokenType.SUB:
-                    return ParseAddExpInternal(Expression.Subtract(arg1, arg2));
+                    return ParseAddExpInternal(Expression.Subtract(arg1, arg2), PeekContext());
                 default:
                     throw new ArgumentOutOfRangeException(); // never gets here
             }
@@ -320,16 +355,17 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseMulExp()
         {
-            var sgn = UnifySign();
+            var ctx = PeekContext();
+            var sgn = UnifySign();            
             var arg = ParseVal();
 
             if (sgn == TokenType.SUB)
                 arg = InverseNumber(arg);
 
-            return ParseMulExpInternal(arg);
+            return ParseMulExpInternal(arg, ctx);
         }
 
-        private Expression ParseMulExpInternal(Expression arg1)
+        private Expression ParseMulExpInternal(Expression arg1, ParseState ctx)
         {
             if (!new[] {TokenType.MUL, TokenType.DIV}.Contains(PeekType()))
                 return arg1;
@@ -342,12 +378,17 @@ namespace ExpressiveAnnotations.Analysis
                 arg2 = InverseNumber(arg2);
 
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
+            if (!arg1.Type.IsNumeric() || !arg2.Type.IsNumeric())
+                throw new ParseErrorException(
+                    string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'", oper, arg1.Type, arg2.Type),
+                    ctx);
+            
             switch (oper)
             {
                 case TokenType.MUL:
-                    return ParseMulExpInternal(Expression.Multiply(arg1, arg2));
+                    return ParseMulExpInternal(Expression.Multiply(arg1, arg2), PeekContext());
                 case TokenType.DIV:
-                    return ParseMulExpInternal(Expression.Divide(arg1, arg2));
+                    return ParseMulExpInternal(Expression.Divide(arg1, arg2), PeekContext());
                 default:
                     throw new ArgumentOutOfRangeException(); // never gets here
             }
@@ -360,7 +401,9 @@ namespace ExpressiveAnnotations.Analysis
                 ReadToken();
                 var arg = ParseOrExp();
                 if (PeekType() != TokenType.RIGHT_BRACKET)
-                    throw new InvalidOperationException(string.Format("Closing bracket missing. Unexpected token: {0}", PeekValue()));
+                    throw new ParseErrorException(
+                        string.Format("Closing bracket missing. Unexpected token: {0}", PeekValue()),
+                        PeekContext());
                 ReadToken();
                 return arg;
             }
@@ -379,8 +422,14 @@ namespace ExpressiveAnnotations.Analysis
                     return ParseString();
                 case TokenType.FUNC:
                     return ParseFunc();
+                case TokenType.EOF:
+                    throw new ParseErrorException(
+                        string.Format("Expected \"null\", int, float, bool, string or func. Unexpected end of expression."),
+                        PeekContext());
                 default:
-                    throw new InvalidOperationException(string.Format("Expected \"null\", int, float, bool, string or func. Unexpected token: {0}", PeekValue()));
+                    throw new ParseErrorException(
+                        string.Format("Expected \"null\", int, float, bool, string or func. Unexpected token: {0}", PeekValue()),
+                        PeekContext());
             }
         }
 
@@ -445,7 +494,9 @@ namespace ExpressiveAnnotations.Analysis
         {
             var expression = FetchPropertyValue(name) ?? FetchEnumValue(name) ?? FetchConstValue(name);
             if (expression == null)
-                throw new InvalidOperationException(string.Format("Only public properties, constants and enums are accepted. Invalid identifier: {0}", name));
+                throw new ParseErrorException(
+                    string.Format("Only public properties, constants and enums are accepted. Invalid identifier: {0}", name),
+                    PeekContext(1));
 
             return expression;
         }        
@@ -482,9 +533,11 @@ namespace ExpressiveAnnotations.Analysis
                     .ToList();
 
                 if (enumTypes.Count() > 1)
-                    throw new InvalidOperationException(
-                        string.Format("Enum {0} is ambiguous, found following:{1}",
-                            enumTypeName, Environment.NewLine + string.Join(Environment.NewLine, enumTypes.Select(x => x.FullName))));
+                    throw new ParseErrorException(
+                        string.Format("Enum {0} is ambiguous, found following:{1}{2}",
+                            enumTypeName, Environment.NewLine, string.Join(Environment.NewLine,
+                                enumTypes.Select(x => x.FullName))),
+                        PeekContext(1));
 
                 var type = enumTypes.SingleOrDefault();
                 if (type != null)
@@ -512,17 +565,20 @@ namespace ExpressiveAnnotations.Analysis
                     .ToList();
 
                 if (constants.Count() > 1)
-                    throw new InvalidOperationException(
-                        string.Format("Constant {0} is ambiguous, found following:{1}",
-                            name, Environment.NewLine + string.Join(Environment.NewLine,
-                                constants.Select(x => string.Format("{0}.{1}", x.ReflectedType.FullName, x.Name)))));
+                    throw new ParseErrorException(
+                        string.Format("Constant {0} is ambiguous, found following:{1}{2}",
+                            name, Environment.NewLine, string.Join(Environment.NewLine,
+                                constants.Select(x => string.Format("{0}.{1}", x.ReflectedType.FullName, x.Name)))),
+                        PeekContext(1));
 
                 var constant = constants.SingleOrDefault();
                 if (constant != null)
                 {
                     var value = constant.GetRawConstantValue();
-                    Consts[name] = (value is string) ? ((string)value).Replace(Environment.NewLine, "\n") : value; // in our language new line is represented by \n char (consts map 
-                                                                                                                   // is then sent to JavaScript, and JavaScript new line is also \n)
+                    Consts[name] = (value is string) 
+                        ? ((string)value).Replace(Environment.NewLine, "\n") 
+                        : value; // in our language new line is represented by \n char (consts map 
+                                 // is then sent to JavaScript, and JavaScript new line is also \n)
                     return Expression.Constant(value);
                 }
             }
@@ -534,7 +590,9 @@ namespace ExpressiveAnnotations.Analysis
                 if (constant != null)
                 {
                     var value = constant.GetRawConstantValue();
-                    Consts[name] = (value is string) ? ((string)value).Replace(Environment.NewLine, "\n") : value;
+                    Consts[name] = (value is string) 
+                        ? ((string)value).Replace(Environment.NewLine, "\n") 
+                        : value;
                     return Expression.Constant(value);
                 }
             }
@@ -545,7 +603,9 @@ namespace ExpressiveAnnotations.Analysis
         {
             var expression = FetchModelMethod(name, args) ?? FetchToolchainMethod(name, args); // firstly, try to take method from model context - if not found, take one from toolchain
             if (expression == null)
-                throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments not found.", name, args.Count));
+                throw new ParseErrorException(
+                    string.Format("Function {0} accepting {1} parameters not found.", name, args.Count),
+                    PeekContext(1));
 
             return expression;
         }
@@ -557,8 +617,7 @@ namespace ExpressiveAnnotations.Analysis
                 .ToList();
             if (signatures.Count == 0)
                 return null;
-            if (signatures.Count > 1)
-                throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments is ambiguous.", name, args.Count));
+            AssertNonAmbiguity(signatures.Count, name, args.Count);
 
             return CreateMethodCallExpression(ContextExpression, signatures.Single(), args);
         }
@@ -570,67 +629,74 @@ namespace ExpressiveAnnotations.Analysis
                 : new List<LambdaExpression>();
             if (signatures.Count == 0)
                 return null;
-            if (signatures.Count > 1)
-                throw new InvalidOperationException(string.Format("Function {0} accepting {1} arguments is ambiguous.", name, args.Count));
+            AssertNonAmbiguity(signatures.Count, name, args.Count);
 
             return CreateInvocationExpression(signatures.Single(), args, name);
         }
 
-        private static InvocationExpression CreateInvocationExpression(LambdaExpression funcExpr, IList<Expression> parsedArgs, string funcName)
-        {            
-            if (funcExpr.Parameters.Count != parsedArgs.Count)
-                throw new InvalidOperationException(
-                    string.Format("Incorrect number of parameters provided. Function {0} expects {1}, not {2}.", funcName, funcExpr.Parameters.Count, parsedArgs.Count));
+        private InvocationExpression CreateInvocationExpression(LambdaExpression funcExpr, IList<Expression> parsedArgs, string funcName)
+        {
+            AssertParamsEquality(funcExpr.Parameters.Count, parsedArgs.Count, funcName);                
 
             var convertedArgs = new List<Expression>();
             for (var i = 0; i < parsedArgs.Count; i++)
             {
                 var arg = parsedArgs[i];
                 var param = funcExpr.Parameters[i];
-                if (arg.Type == param.Type)
-                    convertedArgs.Add(arg);
-                else
-                {
-                    try
-                    {
-                        convertedArgs.Add(Expression.Convert(arg, param.Type));
-                    }
-                    catch
-                    {
-                        throw new InvalidOperationException(string.Format("Argument {0} type conversion from {1} to needed {2} failed.", i, arg.Type.Name, param.Type.Name));
-                    }
-                }
+                convertedArgs.Add(arg.Type == param.Type
+                    ? arg
+                    : ConvertArgument(arg, param.Type, funcName, i + 1));
             }
             return Expression.Invoke(funcExpr, convertedArgs);
-        }
+        }        
 
-        private static MethodCallExpression CreateMethodCallExpression(Expression contextExpression, MethodInfo methodInfo, IList<Expression> parsedArgs)
+        private MethodCallExpression CreateMethodCallExpression(Expression contextExpression, MethodInfo methodInfo, IList<Expression> parsedArgs)
         {
             var parameters = methodInfo.GetParameters();
-            if (parameters.Count() != parsedArgs.Count)
-                throw new InvalidOperationException(
-                    string.Format("Incorrect number of parameters provided. Function {0} expects {1}, not {2}.", methodInfo.Name, parameters.Count(), parsedArgs.Count));
-
+            AssertParamsEquality(parameters.Count(), parsedArgs.Count, methodInfo.Name);
+                        
             var convertedArgs = new List<Expression>();
             for (var i = 0; i < parsedArgs.Count; i++)
             {
                 var arg = parsedArgs[i];
                 var param = parameters[i];
-                if (arg.Type == param.ParameterType)
-                    convertedArgs.Add(arg);
-                else
-                {
-                    try
-                    {
-                        convertedArgs.Add(Expression.Convert(arg, param.ParameterType));
-                    }
-                    catch
-                    {
-                        throw new InvalidOperationException(string.Format("Argument {0} type conversion from {1} to needed {2} failed.", i, arg.Type.Name, param.ParameterType.Name));
-                    }
-                }
+                convertedArgs.Add(arg.Type == param.ParameterType
+                    ? arg
+                    : ConvertArgument(arg, param.ParameterType, methodInfo.Name, i + 1));
             }
             return Expression.Call(contextExpression, methodInfo, convertedArgs);            
+        }
+
+        private void AssertNonAmbiguity(int signatures, string funcName, int args)
+        {
+            if (signatures > 1)
+                throw new ParseErrorException(
+                    string.Format("Function {0} accepting {1} parameter{2} is ambiguous.", funcName, args, args == 1 ? string.Empty : "s"),
+                    null);
+        }
+
+        private void AssertParamsEquality(int expected, int actual, string funcName)
+        {
+            if (expected != actual)
+                throw new ParseErrorException(
+                    string.Format("Incorrect number of arguments provided. Function {0} expects {1}, not {2}.",
+                        funcName, expected, actual),
+                    null);
+        }
+
+        private Expression ConvertArgument(Expression arg, Type type, string funcName, int paramPosition)
+        {
+            try
+            {
+                return Expression.Convert(arg, type);
+            }
+            catch
+            {
+                throw new ParseErrorException(
+                    string.Format("Function {0} {1} argument conversion from {2} to expected {3} failed.",
+                        funcName, paramPosition.ToOrdinal(), arg.Type.Name, type.Name),
+                    null);
+            }
         }
 
         private TokenType UnifySign()

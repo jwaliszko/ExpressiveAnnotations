@@ -10,14 +10,14 @@ namespace ExpressiveAnnotations.Tests
     {        
         [TestMethod]
         public void verify_complex_expression_analysis()
-        {            
+        {
             const string expression =
-                "GoAbroad == true " +
-                    "&& (" +
-                            "(NextCountry != 'european country' && Compare(NextCountry, Country.Name) == 0) " +
-                            "|| (Age > 24 && Age <= 55.5)" +
-                            "&& (1 + 2 * 2 > 1 - 2 / 2)" +
-                        ")";
+                @"GoAbroad == true
+                      && (
+                             (NextCountry != 'european country' && Compare(NextCountry, Country.Name) == 0)
+                             || (Age > 24 && Age <= 55.5)
+                             && (1+2*2>1-2/2)
+                         )";
 
             var lexer = new Lexer();
             var tokens = lexer.Analyze(expression).ToArray();
@@ -111,7 +111,13 @@ namespace ExpressiveAnnotations.Tests
             Assert.AreEqual(tokens[43].Value, ")");
             Assert.AreEqual(tokens[43].Type, TokenType.RIGHT_BRACKET);
             Assert.AreEqual(tokens[44].Value, string.Empty);
-            Assert.AreEqual(tokens[44].Type, TokenType.EOF);
+            Assert.AreEqual(tokens[44].Type, TokenType.EOF);            
+        }
+
+        [TestMethod]
+        public void verify_invalid_tokens_detection()
+        {
+            var lexer = new Lexer();
 
             try
             {
@@ -121,7 +127,7 @@ namespace ExpressiveAnnotations.Tests
             catch (Exception e)
             {
                 Assert.IsTrue(e is ArgumentNullException);
-                Assert.IsTrue(e.Message == "Expression not provided.\r\nParameter name: expression");
+                Assert.AreEqual(e.Message, "Expression not provided.\r\nParameter name: expression");
             }
 
             try
@@ -131,8 +137,13 @@ namespace ExpressiveAnnotations.Tests
             }
             catch (Exception e)
             {
-                Assert.IsTrue(e is InvalidOperationException);
-                Assert.IsTrue(e.Message == "Invalid token started at: # false");
+                Assert.IsTrue(e is ParseErrorException);
+                Assert.AreEqual(e.Message, "Invalid token.");
+
+                var ctx = ((ParseErrorException)e).Context;
+                Assert.AreEqual(ctx.Expression, "# false");
+                Assert.AreEqual(ctx.Line, 1);
+                Assert.AreEqual(ctx.Column, 6);
             }
 
             try
@@ -142,8 +153,13 @@ namespace ExpressiveAnnotations.Tests
             }
             catch (Exception e)
             {
-                Assert.IsTrue(e is InvalidOperationException);
-                Assert.IsTrue(e.Message == "Invalid token started at: ^");
+                Assert.IsTrue(e is ParseErrorException);
+                Assert.AreEqual(e.Message, "Invalid token.");
+
+                var ctx = ((ParseErrorException)e).Context;
+                Assert.AreEqual(ctx.Expression, "^");
+                Assert.AreEqual(ctx.Line, 1);
+                Assert.AreEqual(ctx.Column, 9);
             }
 
             try
@@ -153,10 +169,13 @@ namespace ExpressiveAnnotations.Tests
             }
             catch (Exception e)
             {
-                Assert.IsTrue(e is InvalidOperationException);
-                Assert.AreEqual(
-                    "Invalid token started at: '",
-                    e.Message);
+                Assert.IsTrue(e is ParseErrorException);
+                Assert.AreEqual(e.Message, "Invalid token.");
+
+                var ctx = ((ParseErrorException)e).Context;
+                Assert.AreEqual(ctx.Expression, "'");
+                Assert.AreEqual(ctx.Line, 1);
+                Assert.AreEqual(ctx.Column, 12);
             }
         }
 
@@ -232,8 +251,8 @@ namespace ExpressiveAnnotations.Tests
             }
             catch (Exception e)
             {
-                Assert.IsTrue(e is InvalidOperationException);
-                Assert.IsTrue(e.Message.StartsWith("Invalid token started at: "));
+                Assert.IsTrue(e is ParseErrorException);
+                Assert.AreEqual(e.Message, "Invalid token.");
             }
         }
     }

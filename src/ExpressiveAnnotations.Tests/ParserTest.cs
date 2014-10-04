@@ -215,44 +215,6 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.IsTrue(parser.Parse<object>("'abc' == Trim(' abc ')").Invoke(null));            
             Assert.IsTrue(parser.Parse<object>("Length(null) + Length('abc' + 'cde') >= Length(Trim(' abc def ')) - 2 - -1").Invoke(null));
-
-            try
-            {
-                parser.Parse<object>("1").Invoke(null); // non-bool exp
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(e is InvalidOperationException);
-                Assert.AreEqual(
-                    "Parsing failed. Invalid expression: 1",
-                    e.Message);
-
-                Assert.IsNotNull(e.InnerException);
-                Assert.IsTrue(e.InnerException is ArgumentException);
-                Assert.AreEqual(
-                    "Expression of type 'System.Int32' cannot be used for return type 'System.Boolean'",
-                    e.InnerException.Message);
-            }
-
-            try
-            {
-                parser.Parse<object>("1++ +1==2").Invoke(null); // non-bool exp
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(e is InvalidOperationException);
-                Assert.AreEqual(
-                    "Parsing failed. Invalid expression: 1++ +1==2",
-                    e.Message);
-
-                Assert.IsNotNull(e.InnerException);
-                Assert.IsTrue(e.InnerException is InvalidOperationException);
-                Assert.AreEqual(
-                    "Parsing expected to be completed. Unexpected token: ++",
-                    e.InnerException.Message);
-            }
         }
 
         [TestMethod]
@@ -377,6 +339,46 @@ namespace ExpressiveAnnotations.Tests
                            EqualityComparer<object>.Default.Equals(expectedConsts[key], parsedConsts[key])));            
         }
 
+        [TestMethod]
+        public void verify_non_bool_expression_failure()
+        {
+            var parser = new Parser();
+
+            try
+            {
+                parser.Parse<object>("1").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.IsTrue(e.Message.StartsWith("Parse fatal error."));
+            }
+        }
+
+        [TestMethod]
+        public void verify_various_parsing_errors()
+        {
+            var parser = new Parser();
+
+            try
+            {
+                parser.Parse<object>("1++ +1==2").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+@"Parse error line 1, column 2:
+... ++ +1==2 ...
+    ^--- Unexpected token: ++",
+                    e.Message);
+            }
+
+            //ToDo: complete
+        }
+
         private class ModelWithMethods
         {
             public string Whoami()
@@ -404,7 +406,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void verify_methods_overloading()
+        public void verify_methods_overloading() // overloading concept exists, when there are two methods of the same name, but different signature
         {
             // methods overloading is based on the number of arguments
             var parser = new Parser();            
@@ -415,61 +417,10 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("Whoami() == 'utility method'").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("Whoami(1) == 'utility method 1'").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("Whoami(2, 'final') == 'utility method 2 - final'").Invoke(null));
-        }
+        }        
 
         [TestMethod]
-        public void verify_methods_ambiguity()
-        {
-            // since arguments types are not taken under consideration for methods overloading, following logic should fail
-            var parser = new Parser();            
-            parser.AddFunction<int, string>("Whoami", i => string.Format("utility method {0}", i));
-            parser.AddFunction<string, string>("Whoami", s => string.Format("utility method {0}", s));
-
-            try
-            {                
-                Assert.IsTrue(parser.Parse<object>("Whoami(0) == 'utility method 0'").Invoke(null));    
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(e is InvalidOperationException);
-                Assert.AreEqual(
-                    "Parsing failed. Invalid expression: Whoami(0) == 'utility method 0'",
-                    e.Message);
-
-                Assert.IsNotNull(e.InnerException);
-                Assert.IsTrue(e.InnerException is InvalidOperationException);
-                Assert.AreEqual(
-                    "Function Whoami accepting 1 arguments is ambiguous.",
-                    e.InnerException.Message);
-            }
-
-            // not only built-in, but also context extracted methods are subjected to the same rules
-            parser = new Parser();            
-            var model = new ModelWithAmbiguousMethods();
-
-            try
-            {
-                Assert.IsTrue(parser.Parse<ModelWithAmbiguousMethods>("Whoami(0) == 'model method 0'").Invoke(model));
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(e is InvalidOperationException);
-                Assert.AreEqual(
-                    "Parsing failed. Invalid expression: Whoami(0) == 'model method 0'",
-                    e.Message);
-
-                Assert.IsNotNull(e.InnerException);
-                Assert.IsTrue(e.InnerException is InvalidOperationException);
-                Assert.AreEqual(
-                    "Function Whoami accepting 1 arguments is ambiguous.",
-                    e.InnerException.Message);
-            }
-        }
-
-        [TestMethod]
-        public void verify_methods_overriding()
+        public void verify_methods_overriding() // overriding concept exists, when there are two methods of the same name and signature, but different implementation
         {
             var parser = new Parser();
 
@@ -482,6 +433,60 @@ namespace ExpressiveAnnotations.Tests
             // redefined model methods take precedence
             Assert.IsTrue(parser.Parse<ModelWithMethods>("Whoami() == 'model method'").Invoke(model));
             Assert.IsTrue(parser.Parse<ModelWithMethods>("Whoami(1) == 'model method 1'").Invoke(model));
+        }
+
+        [TestMethod]
+        public void verify_methods_ambiguity()
+        {
+            // since arguments types are not taken under consideration for methods overloading, following logic should fail
+            var parser = new Parser();
+            parser.AddFunction<int, string>("Whoami", i => string.Format("utility method {0}", i));
+            parser.AddFunction<string, string>("Whoami", s => string.Format("utility method {0}", s));
+
+            parser.AddFunction<string, string, string>("Glue", (s1, s2) => string.Concat(s1, s2));
+            parser.AddFunction<int, int, string>("Glue", (i1, i2) => string.Concat(i1, i2));
+
+            try
+            {
+                Assert.IsTrue(parser.Parse<object>("Whoami(0) == 'utility method 0'").Invoke(null));
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    "Parse error: Function Whoami accepting 1 parameter is ambiguous.",
+                    e.Message);
+            }
+
+            try
+            {
+                Assert.IsTrue(parser.Parse<object>("Glue('a', 'b') == 'ab'").Invoke(null));
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    "Parse error: Function Glue accepting 2 parameters is ambiguous.",
+                    e.Message);
+            }
+
+            // not only built-in, but also context extracted methods are subjected to the same rules
+            parser = new Parser();
+            var model = new ModelWithAmbiguousMethods();
+
+            try
+            {
+                Assert.IsTrue(parser.Parse<ModelWithAmbiguousMethods>("Whoami(0) == 'model method 0'").Invoke(model));
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.AreEqual(
+                    "Parse error: Function Whoami accepting 1 parameter is ambiguous.",
+                    e.Message);
+            }
         }
 
         [TestMethod]
@@ -503,14 +508,8 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    "Parsing failed. Invalid expression: Whoami('1', '2') == 'utility method 1 - 2'",
+                    "Parse error: Function Whoami 1st argument conversion from String to expected Int32 failed.",
                     e.Message);
-
-                Assert.IsNotNull(e.InnerException);
-                Assert.IsTrue(e.InnerException is InvalidOperationException);
-                Assert.AreEqual(
-                    "Argument 0 type conversion from String to needed Int32 failed.",
-                    e.InnerException.Message);
             }
 
             try
@@ -522,16 +521,10 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    "Parsing failed. Invalid expression: Whoami(1, 2) == 'utility method 1 - 2'",
+                    "Parse error: Function Whoami 2nd argument conversion from Int32 to expected String failed.",
                     e.Message);
-
-                Assert.IsNotNull(e.InnerException);
-                Assert.IsTrue(e.InnerException is InvalidOperationException);
-                Assert.AreEqual(
-                    "Argument 1 type conversion from Int32 to needed String failed.",
-                    e.InnerException.Message);
             }
-        }                
+        }
 
         [TestMethod]
         public void verify_short_circuit_evaluation()
@@ -569,16 +562,12 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    "Parsing failed. Invalid expression: Stability.High == 0",
+@"Parse error line 1, column 1:
+... Stability.High == 0 ...
+    ^--- Enum Stability is ambiguous, found following:
+ExpressiveAnnotations.Tests.Utility+Stability
+ExpressiveAnnotations.Tests.Stability",
                     e.Message);
-
-                Assert.IsNotNull(e.InnerException);
-                Assert.IsTrue(e.InnerException is InvalidOperationException);
-                Assert.AreEqual(
-                    "Enum Stability is ambiguous, found following:" + Environment.NewLine +
-                    "ExpressiveAnnotations.Tests.Utility+Stability" + Environment.NewLine +
-                    "ExpressiveAnnotations.Tests.Stability",
-                    e.InnerException.Message);
             }
         }
 
@@ -597,14 +586,10 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    "Parsing failed. Invalid expression: NotMe == 0",
+@"Parse error line 1, column 1:
+... NotMe == 0 ...
+    ^--- Only public properties, constants and enums are accepted. Invalid identifier: NotMe",
                     e.Message);
-
-                Assert.IsNotNull(e.InnerException);
-                Assert.IsTrue(e.InnerException is InvalidOperationException);
-                Assert.AreEqual(
-                    "Only public properties, constants and enums are accepted. Invalid identifier: NotMe",
-                    e.InnerException.Message);
             }
         }
 
