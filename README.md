@@ -128,6 +128,11 @@ Attention needed when coping with `null` (discrepancies between C# and JavaScrip
 
 #####<a id="built-in-functions">Built-in functions:</a>
 
+As already noted, there is an option to reinforce expressions with functions, e.g.
+```C#
+[AssertThat("StartsWith(CodeName, 'abc.') || EndsWith(CodeName, '.xyz')")]
+public string CodeName { get; set; }
+```
 Toolchain functions available out of the box at server- and client-side:
 
 * `DateTime Now()`
@@ -287,3 +292,15 @@ Client-side validation is fully supported. Enable it for your web project within
 Alternatively, using the [NuGet](https://www.nuget.org/packages/ExpressiveAnnotations/) Package Manager Console:
 
 ###`PM> Install-Package ExpressiveAnnotations`
+
+###<a id="contributors">Contributors</a>
+
+[GitHub Users](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/graphs/contributors)
+
+Special thanks to Szymon Malczak
+
+###<a id="license">License</a>
+
+Copyright (c) 2014 Jaroslaw Waliszko
+
+Licensed MIT: http://opensource.org/licenses/MIT
