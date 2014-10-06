@@ -139,6 +139,8 @@ Toolchain functions available out of the box at server- and client-side:
     * Gets the current date and time, expressed as the local time.
 * `DateTime Today()`
     * Gets the current date with the time component set to 00:00:00, expressed as the local time.
+* `DateTime Date(int year, int month, int day)`
+    * Initializes a new date to the specified year, month (months are 1-based), and day, with the time component set to 00:00:00.
 * `int Length(str)`
     * Gets the number of characters in the specified string (null-safe).
 * `string Trim(string str)`
