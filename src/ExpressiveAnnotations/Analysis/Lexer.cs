@@ -15,14 +15,15 @@ namespace ExpressiveAnnotations.Analysis
     public sealed class Lexer
     {
         private Token Token { get; set; }
-        private ParseState CurrentContext { get; set; }
-        private IDictionary<TokenType, Regex> RegexMap { get; set; }        
+        private Location Location { get; set; }
+        private string Expression { get; set; }
+        private IDictionary<TokenType, Regex> RegexMap { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Lexer" /> class.
         /// </summary>
         public Lexer()
-        {            
+        {
             // special characters (should be escaped if needed): .$^{[(|)*+?\
             var patterns = new Dictionary<TokenType, string>
             {
@@ -69,46 +70,45 @@ namespace ExpressiveAnnotations.Analysis
         {
             if (expression == null)
                 throw new ArgumentNullException("expression", "Expression not provided.");
-                                    
-            CurrentContext = new ParseState(expression, line: 1, column: 1);
+
+            Location = new Location(line: 1, column: 1);
+            Expression = expression;
 
             var tokens = new List<Token>();
             while (Next())
                 tokens.Add(Token);
 
             // once we've reached the end of the string, EOF token is returned - thus, parser's lookahead does not have to worry about running out of tokens
-            Token = new Token(TokenType.EOF, string.Empty, new ParseState(CurrentContext));
-            tokens.Add(Token);
-            
+            tokens.Add(new Token(TokenType.EOF, string.Empty, new Location(Location)));
             return tokens;
         }
 
         private bool Next()
         {
-            int column, line;
-            CurrentContext.Expression = CurrentContext.Expression.TrimStart(out column, out line);
-            CurrentContext.Line += line;
-            CurrentContext.Column = line > 0 ? column : CurrentContext.Column + column;
+            int line, column;
+            Expression = Expression.TrimStart(out line, out column);
+            Location.Line += line;
+            Location.Column = line > 0 ? column : Location.Column + column;
 
-            if (string.IsNullOrEmpty(CurrentContext.Expression))
+            if (Expression.Length == 0)
                 return false;
 
             foreach (var kvp in RegexMap)
             {
                 var regex = kvp.Value;
-                var match = regex.Match(CurrentContext.Expression);
+                var match = regex.Match(Expression);
                 var value = match.Value;
                 if (value.Any())
                 {
-                    Token = new Token(kvp.Key, ConvertTokenValue(kvp.Key, value), new ParseState(CurrentContext));
+                    Token = new Token(kvp.Key, ConvertTokenValue(kvp.Key, value), new Location(Location));
 
-                    CurrentContext.Expression = CurrentContext.Expression.Substring(value.Length, out column, out line);
-                    CurrentContext.Line += line;
-                    CurrentContext.Column = line > 0 ? column : CurrentContext.Column + column;
+                    Expression = Expression.Substring(value.Length, out line, out column);
+                    Location.Line += line;
+                    Location.Column = line > 0 ? column : Location.Column + column;
                     return true;
                 }
             }
-            throw new ParseErrorException("Invalid token.", CurrentContext);
+            throw new ParseErrorException("Invalid token.", new Location(Location));
         }
 
         private object ConvertTokenValue(TokenType type, string value)

@@ -9,7 +9,7 @@ namespace ExpressiveAnnotations.Tests
 {
     public class Utility
     {
-        public const string CONST = "outside";
+        public const string Const = "outside";
 
         public enum Stability
         {
@@ -79,7 +79,7 @@ namespace ExpressiveAnnotations.Tests
 
         private class Model
         {
-            public const string CONST = "inside";
+            public const string Const = "inside";
 
             public Model SubModel { get; set; }
 
@@ -209,7 +209,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("1*2>-1").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("1/2==0.5").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("-1*-+- -+-1==-1").Invoke(null)); // weird construction, but since C# and JavaScript allows it, our language also doesn't mind
-            Assert.IsTrue(parser.Parse<object>("'a'+'b'+null+''+'c'=='abc'").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("- - -1+'a'+'b'+null+''+'c'+1+2=='-1abc12'").Invoke(null));
 
             Assert.IsTrue(parser.Parse<object>("1 - 2 -(6 / ((2*1.5 - 1) + 1)) * -2 + 1/2/1 == 3.50").Invoke(null));
 
@@ -270,7 +270,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<Model>("SubModel.PoliticalStability == null").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("SubModel.PoliticalStability != Utility.Stability.High").Invoke(model));
 
-            Assert.IsTrue(parser.Parse<Model>("CONST != Utility.CONST").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Const != Utility.Const").Invoke(model));
 
             Assert.IsTrue(parser.Parse<Model>("Flag").Invoke(model));
             Assert.IsFalse(parser.Parse<Model>("!Flag").Invoke(model));
@@ -305,7 +305,7 @@ namespace ExpressiveAnnotations.Tests
                                     (Number >= 0 && Number < 1) && PoliticalStability == Utility.Stability.High
                                 )
                          ) 
-                      && CONST + Utility.CONST == 'insideoutside'";
+                      && Const + Utility.Const == 'insideoutside'";
             var func = parser.Parse(model.GetType(), expression);
             Assert.IsTrue(func(model));
 
@@ -329,8 +329,8 @@ namespace ExpressiveAnnotations.Tests
             var expectedConsts = new Dictionary<string, object>
             {
                 {"Utility.Stability.High", Utility.Stability.High},
-                {"CONST", Model.CONST},
-                {"Utility.CONST", Utility.CONST}
+                {"Const", Model.Const},
+                {"Utility.Const", Utility.Const}
             };
             Assert.AreEqual(expectedConsts.Count, parsedConsts.Count);
             Assert.IsTrue(
@@ -354,29 +354,6 @@ namespace ExpressiveAnnotations.Tests
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.IsTrue(e.Message.StartsWith("Parse fatal error."));
             }
-        }
-
-        [TestMethod]
-        public void verify_various_parsing_errors()
-        {
-            var parser = new Parser();
-
-            try
-            {
-                parser.Parse<object>("1++ +1==2").Invoke(null);
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(e is InvalidOperationException);
-                Assert.AreEqual(
-@"Parse error line 1, column 2:
-... ++ +1==2 ...
-    ^--- Unexpected token: ++",
-                    e.Message);
-            }
-
-            //ToDo: complete
         }
 
         private class ModelWithMethods
@@ -455,7 +432,9 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    "Parse error: Function Whoami accepting 1 parameter is ambiguous.",
+@"Parse error line 1, column 1:
+... Whoami(0) == 'utility method 0' ...
+    ^--- Function 'Whoami' accepting 1 argument is ambiguous.",
                     e.Message);
             }
 
@@ -468,7 +447,9 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    "Parse error: Function Glue accepting 2 parameters is ambiguous.",
+@"Parse error line 1, column 1:
+... Glue('a', 'b') == 'ab' ...
+    ^--- Function 'Glue' accepting 2 arguments is ambiguous.",
                     e.Message);
             }
 
@@ -484,13 +465,15 @@ namespace ExpressiveAnnotations.Tests
             catch (Exception e)
             {
                 Assert.AreEqual(
-                    "Parse error: Function Whoami accepting 1 parameter is ambiguous.",
+@"Parse error line 1, column 1:
+... Whoami(0) == 'model method 0' ...
+    ^--- Function 'Whoami' accepting 1 argument is ambiguous.",
                     e.Message);
             }
         }
 
         [TestMethod]
-        public void verify_invalid_arguments_conversion()
+        public void verify_implicit_type_conversion()
         {
             var parser = new Parser();
             parser.AddFunction<object, string>("Whoami", o => string.Format("utility method {0}", o));
@@ -508,7 +491,9 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    "Parse error: Function Whoami 1st argument conversion from String to expected Int32 failed.",
+@"Parse error line 1, column 8:
+... '1', '2') == 'utility method 1 - 2' ...
+    ^--- Function 'Whoami' 1st argument implicit conversion from 'System.String' to expected 'System.Int32' failed.",
                     e.Message);
             }
 
@@ -521,7 +506,9 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    "Parse error: Function Whoami 2nd argument conversion from Int32 to expected String failed.",
+@"Parse error line 1, column 11:
+... 2) == 'utility method 1 - 2' ...
+    ^--- Function 'Whoami' 2nd argument implicit conversion from 'System.Int32' to expected 'System.String' failed.",
                     e.Message);
             }
         }
@@ -564,9 +551,9 @@ namespace ExpressiveAnnotations.Tests
                 Assert.AreEqual(
 @"Parse error line 1, column 1:
 ... Stability.High == 0 ...
-    ^--- Enum Stability is ambiguous, found following:
-ExpressiveAnnotations.Tests.Utility+Stability
-ExpressiveAnnotations.Tests.Stability",
+    ^--- Enum 'Stability' is ambiguous, found following:
+'ExpressiveAnnotations.Tests.Utility+Stability',
+'ExpressiveAnnotations.Tests.Stability'.",
                     e.Message);
             }
         }
@@ -588,7 +575,7 @@ ExpressiveAnnotations.Tests.Stability",
                 Assert.AreEqual(
 @"Parse error line 1, column 1:
 ... NotMe == 0 ...
-    ^--- Only public properties, constants and enums are accepted. Invalid identifier: NotMe",
+    ^--- Only public properties, constants and enums are accepted. Identifier 'NotMe' not known.",
                     e.Message);
             }
         }
@@ -655,7 +642,7 @@ ExpressiveAnnotations.Tests.Stability",
         }
 
         [TestMethod]
-        public void verify_toolchain_methods()
+        public void verify_toolchain_methods_logic()
         {
             var parser = new Parser();
             parser.RegisterMethods();
@@ -798,6 +785,174 @@ ExpressiveAnnotations.Tests.Stability",
                 Assert.IsTrue(e is FormatException);
                 Assert.AreEqual(
                     "Guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).",
+                    e.Message);
+            }
+        }
+
+        [TestMethod]
+        public void verify_various_parsing_errors()
+        {
+            var parser = new Parser();
+            parser.AddFunction<int, int, int>("Max", (x, y) => Math.Max(x, y));
+
+            try
+            {
+                parser.Parse<object>("1++ +1==2").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+@"Parse error line 1, column 2:
+... ++ +1==2 ...
+    ^--- Unexpected token: '++'.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>("true # false").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+@"Parse error line 1, column 6:
+... # false ...
+    ^--- Invalid token.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>("'abc' - 'abc'").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+@"Parse error line 1, column 7:
+... - 'abc' ...
+    ^--- Operator '-' cannot be applied to operands of type 'System.String' and 'System.String'.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>("1 + 2 + 'abc' - 'abc' > 0").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+@"Parse error line 1, column 15:
+... - 'abc' > 0 ...
+    ^--- Operator '-' cannot be applied to operands of type 'System.String' and 'System.String'.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>(
+@"1 - 2
+    - (6 / ((2*'1.5' - 1) + 1)) * -2 
+    + 1/2/1 == 3.50").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+@"Parse error line 2, column 15:
+... *'1.5' - 1) + 1)) * -2 ...
+    ^--- Operator '*' cannot be applied to operands of type 'System.Int32' and 'System.String'.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>(
+@"1 - 2
+    - 6
+    + 1/x/1 == 3.50").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+@"Parse error line 3, column 9:
+... x/1 == 3.50 ...
+    ^--- Only public properties, constants and enums are accepted. Identifier 'x' not known.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>(
+@"WriteLine('hello')").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+@"Parse error line 1, column 1:
+... WriteLine('hello') ...
+    ^--- Function 'WriteLine' not known.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>(
+@"Max(1.1)").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+@"Parse error line 1, column 1:
+... Max(1.1) ...
+    ^--- Function 'Max' accepting 1 argument not found.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>(
+@"Max(1.1, 1.2, 'a')").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+@"Parse error line 1, column 1:
+... Max(1.1, 1.2, 'a') ...
+    ^--- Function 'Max' accepting 3 arguments not found.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>(
+@"Max(1, 
+      Max(1, 'a')) == 1.1").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+@"Parse error line 2, column 14:
+... 'a')) == 1.1 ...
+    ^--- Function 'Max' 2nd argument implicit conversion from 'System.String' to expected 'System.Int32' failed.",
                     e.Message);
             }
         }

@@ -5,7 +5,7 @@
 namespace ExpressiveAnnotations.Analysis
 {
     /// <summary>
-    /// Token identifier.
+    /// Token type.
     /// </summary>
     public enum TokenType
     {

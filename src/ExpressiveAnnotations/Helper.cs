@@ -108,8 +108,11 @@ namespace ExpressiveAnnotations
             }
         }
 
-        public static string TrimStart(this string input, out int column, out int line)
+        public static string TrimStart(this string input, out int line, out int column)
         {
+            if (input == null)
+                throw new ArgumentNullException("input");
+
             var output = input.TrimStart();
             var redundancy = input.RemoveSuffix(output);
             var lastLineBreak = redundancy.LastIndexOf('\n');
@@ -120,8 +123,13 @@ namespace ExpressiveAnnotations
             return output;
         }
 
-        public static string Substring(this string input, int start, out int column, out int line)
+        public static string Substring(this string input, int start, out int line, out int column)
         {
+            if (input == null)
+                throw new ArgumentNullException("input");
+            if (start < 0)
+                throw new ArgumentOutOfRangeException("start", "Start index can not be negative.");
+
             var output = input.Substring(start);
             var redundancy = input.RemoveSuffix(output);
             var lastLineBreak = redundancy.LastIndexOf('\n');
@@ -134,6 +142,11 @@ namespace ExpressiveAnnotations
 
         public static string RemoveSuffix(this string input, string suffix)
         {
+            if (input == null)
+                throw new ArgumentNullException("input");
+            if (suffix == null)
+                throw new ArgumentNullException("suffix");
+
             return input.EndsWith(suffix)
                 ? input.Substring(0, input.Length - suffix.Length)
                 : input;
@@ -141,25 +154,20 @@ namespace ExpressiveAnnotations
 
         public static int CountLineBreaks(this string input)
         {
-            var n = 0;
-            for (var i = 0; i < input.Length; i++)
-            {                
-                if (input[i] == '\n') n++;
-            }
-            return n;
+            if (input == null)
+                throw new ArgumentNullException("input");
+
+            return input.Count(n => n == '\n');
         }
 
-        public static string FirstLine(this string input)
+        public static string TakeLine(this string input, int index)
         {
-            return input.Split('\n').First().Trim();
-        }
+            if (input == null)
+                throw new ArgumentNullException("input");
+            if (index < 0)
+                throw new ArgumentOutOfRangeException("index", "Line indexes are 0-based.");
 
-        public static string Indicator(this string input)
-        {
-            return string.Format(
-@"
-... {0} ...
-    ^--- ", input.FirstLine());
+            return input.Split('\n').Skip(index).First().TrimEnd();
         }
 
         public static string ToOrdinal(this int num)
@@ -187,6 +195,17 @@ namespace ExpressiveAnnotations
                     return num + "th";
             }
 
+        }
+
+        public static string Indicator(this string input)
+        {
+            if (input == null)
+                throw new ArgumentNullException("input");
+
+            return string.Format(
+@"
+... {0} ...
+    ^--- ", input);
         }
     }
 }

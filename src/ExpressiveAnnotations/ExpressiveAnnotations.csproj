@@ -50,7 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analysis\ParseErrorException.cs" />
-    <Compile Include="Analysis\ParseState.cs" />
+    <Compile Include="Analysis\Location.cs" />
     <Compile Include="Analysis\TokenType.cs" />
     <Compile Include="Attributes\AssertThatAttribute.cs" />
     <Compile Include="Analysis\Token.cs" />

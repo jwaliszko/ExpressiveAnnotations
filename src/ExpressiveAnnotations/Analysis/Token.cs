@@ -20,21 +20,21 @@ namespace ExpressiveAnnotations.Analysis
         public object Value { get; private set; }
 
         /// <summary>
-        /// Gets or sets the state dump of parse operation related with this token position.
+        /// Gets or sets the token location within specified expression.
         /// </summary>
-        public ParseState Context { get; set; }
+        public Location Location { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Token" /> class.
         /// </summary>
-        /// <param name="type">The token identifier.</param>
+        /// <param name="type">The token type.</param>
         /// <param name="value">The token value.</param>
-        /// <param name="context">The state dump of parse operation related with this token position.</param>
-        public Token(TokenType type, object value, ParseState context)
+        /// <param name="location">The token location within specified expression.</param>
+        public Token(TokenType type, object value, Location location)
         {
             Type = type;
             Value = value;
-            Context = context;
+            Location = location;
         }
     }
 }

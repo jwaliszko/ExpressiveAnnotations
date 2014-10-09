@@ -53,6 +53,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="AttribTest.cs" />
+    <Compile Include="Helper.cs" />
     <Compile Include="LexerTest.cs" />
     <Compile Include="ParserTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
