@@ -136,15 +136,17 @@ public string CodeName { get; set; }
 Toolchain functions available out of the box at server- and client-side:
 
 * `DateTime Now()`
-    * Gets the current date and time, expressed as the local time.
+    * Gets the current local date and time.
 * `DateTime Today()`
-    * Gets the current date with the time component set to 00:00:00, expressed as the local time.
+    * Gets the current date with the time component set to 00:00:00.
 * `DateTime Date(int year, int month, int day)`
-    * Initializes a new date to the specified year, month (months are 1-based), and day, with the time component set to 00:00:00.
+    * Initializes a new date to a specified year, month (months are 1-based), and day, with the time component set to 00:00:00.
+* `DateTime Date(int year, int month, int day, int hour, int minute, int second)`
+    * Initializes a new date to a specified year, month (months are 1-based), day, hour, minute, and second.
 * `int Length(str)`
-    * Gets the number of characters in the specified string (null-safe).
+    * Gets the number of characters in a specified string (null-safe).
 * `string Trim(string str)`
-    * Removes all leading and trailing white-space characters from the specified string (null-safe).
+    * Removes all leading and trailing white-space characters from a specified string (null-safe).
 * `string Concat(string strA, string strB)`
     * Concatenates two specified strings (null-safe).
 * `string Concat(string strA, string strB, strC)`
@@ -182,7 +184,7 @@ Toolchain functions available out of the box at server- and client-side:
 * `bool IsRegexMatch(string str, string regex)`
     * Indicates whether the regular expression finds a match in the input string (null-safe).
 * `Guid Guid(string str)`
-    * Initializes a new instance of the Guid structure by using the value represented by the specified string.
+    * Initializes a new instance of the Guid structure by using the value represented by a specified string.
 
 ###<a id="frequently-asked-questions">Frequently asked questions:</a>
 

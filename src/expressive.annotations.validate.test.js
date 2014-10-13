@@ -224,7 +224,7 @@
         window.ok(m.Whoami(1) == 'method B1');
     });
 
-    test("verify_toolchain_methods", function() {
+    test("verify_toolchain_methods_logic", function() {
 
         var o = {};
         ea.toolchain.registerMethods(o);

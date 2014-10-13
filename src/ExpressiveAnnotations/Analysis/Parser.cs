@@ -171,6 +171,60 @@ namespace ExpressiveAnnotations.Analysis
         }
 
         /// <summary>
+        ///     Registers function signature for the parser.
+        /// </summary>
+        /// <typeparam name="Arg1">First argument.</typeparam>
+        /// <typeparam name="Arg2">Second argument.</typeparam>
+        /// <typeparam name="Arg3">Third argument.</typeparam>
+        /// <typeparam name="Arg4">Fourth argument.</typeparam>
+        /// <typeparam name="Result">Type identifier of returned result.</typeparam>
+        /// <param name="name">Function name.</param>
+        /// <param name="func">Function lambda.</param>
+        public void AddFunction<Arg1, Arg2, Arg3, Arg4, Result>(string name, Expression<Func<Arg1, Arg2, Arg3, Arg4, Result>> func)
+        {
+            if (!Functions.ContainsKey(name))
+                Functions[name] = new List<LambdaExpression>();
+            Functions[name].Add(func);
+        }
+
+        /// <summary>
+        ///     Registers function signature for the parser.
+        /// </summary>
+        /// <typeparam name="Arg1">First argument.</typeparam>
+        /// <typeparam name="Arg2">Second argument.</typeparam>
+        /// <typeparam name="Arg3">Third argument.</typeparam>
+        /// <typeparam name="Arg4">Fourth argument.</typeparam>
+        /// <typeparam name="Arg5">Fifth argument.</typeparam>
+        /// <typeparam name="Result">Type identifier of returned result.</typeparam>
+        /// <param name="name">Function name.</param>
+        /// <param name="func">Function lambda.</param>
+        public void AddFunction<Arg1, Arg2, Arg3, Arg4, Arg5, Result>(string name, Expression<Func<Arg1, Arg2, Arg3, Arg4, Arg5, Result>> func)
+        {
+            if (!Functions.ContainsKey(name))
+                Functions[name] = new List<LambdaExpression>();
+            Functions[name].Add(func);
+        }
+
+        /// <summary>
+        ///     Registers function signature for the parser.
+        /// </summary>
+        /// <typeparam name="Arg1">First argument.</typeparam>
+        /// <typeparam name="Arg2">Second argument.</typeparam>
+        /// <typeparam name="Arg3">Third argument.</typeparam>
+        /// <typeparam name="Arg4">Fourth argument.</typeparam>
+        /// <typeparam name="Arg5">Fifth argument.</typeparam>
+        /// <typeparam name="Arg6">Sixth argument.</typeparam>
+        /// <typeparam name="Result">Type identifier of returned result.</typeparam>
+        /// <param name="name">Function name.</param>
+        /// <param name="func">Function lambda.</param>
+        public void AddFunction<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Result>(string name, Expression<Func<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Result>> func)
+        {
+            if (!Functions.ContainsKey(name))
+                Functions[name] = new List<LambdaExpression>();
+            Functions[name].Add(func);
+        }
+
+        /// <summary>
         ///     Gets names and types of properties extracted from specified expression within given context.
         /// </summary>
         /// <returns>

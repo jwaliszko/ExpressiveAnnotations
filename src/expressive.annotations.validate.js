@@ -149,6 +149,9 @@
                 this.addMethod("Date", function(year, month, day) { // months are 1-based
                     return new Date(year, month - 1, day);
                 });
+                this.addMethod("Date", function(year, month, day, hour, minute, second) { // months are 1-based
+                    return new Date(year, month -1, day, hour, minute, second);
+                });
                 this.addMethod("Length", function(str) {
                     return str !== null && str !== undefined ? str.length : 0;
                 });
