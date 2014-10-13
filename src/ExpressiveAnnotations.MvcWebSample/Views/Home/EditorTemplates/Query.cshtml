@@ -1,8 +1,9 @@
-﻿@using ExpressiveAnnotations.MvcWebSample
+﻿@using System.Threading
+@using ExpressiveAnnotations.MvcWebSample
 @using ExpressiveAnnotations.MvcWebSample.Misc
 @model ExpressiveAnnotations.MvcWebSample.Models.Query
 
-@{ var lang = System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName; }
+@{ var lang = Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName; }
 
 <ol>
     <li>

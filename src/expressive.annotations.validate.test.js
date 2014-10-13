@@ -1,8 +1,7 @@
-///<reference path="./packages/jQuery.1.8.2/Content/Scripts/jquery-1.8.2.js"/>
-///<reference path="./packages/jQuery.Validation.1.10.0/Content/Scripts/jquery.validate.js"/>
-///<reference path="./packages/Microsoft.jQuery.Unobtrusive.Validation.3.1.1/Content/Scripts/jquery.validate.unobtrusive.js"/>
-///<reference path="./expressive.annotations.validate.js"/>
-
+/// <reference path="./packages/jQuery.1.8.2/Content/Scripts/jquery-1.8.2.js" />
+/// <reference path="./packages/jQuery.Validation.1.10.0/Content/Scripts/jquery.validate.js" />
+/// <reference path="./packages/Microsoft.jQuery.Unobtrusive.Validation.3.1.1/Content/Scripts/jquery.validate.unobtrusive.js" />
+/// <reference path="./expressive.annotations.validate.js" />
 //debugger; // enable firebug (preferably, check 'on for all web pages' option) for the debugger to launch 
 (function($, window, ea) {
 
@@ -42,7 +41,7 @@
             var arr = str.split('/');
             var date = new Date(arr[2], arr[1] - 1, arr[0]);
             return date.getTime();
-        }
+        };
         actual = ea.typeHelper.tryParse("11/08/2014", "datetime");
         window.ok(actual == expected);
         window.ea.settings.parseDate = undefined; // reset state for further tests
@@ -67,7 +66,7 @@
 
         var result = ea.typeHelper.string.tryParse(undefined);
         window.equal(result.error, true);
-        window.equal(result.msg, "Given value was not recognized as a valid string.");        
+        window.equal(result.msg, "Given value was not recognized as a valid string.");
     });
 
     test("verify_bool_parsing", function() {
@@ -80,7 +79,7 @@
 
         var result = ea.typeHelper.bool.tryParse("asd");
         window.equal(result.error, true);
-        window.equal(result.msg, "Given value was not recognized as a valid boolean.");        
+        window.equal(result.msg, "Given value was not recognized as a valid boolean.");
     });
 
     test("verify_float_parsing", function() {

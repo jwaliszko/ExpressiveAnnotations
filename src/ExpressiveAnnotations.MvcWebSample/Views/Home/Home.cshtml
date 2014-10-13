@@ -1,6 +1,7 @@
-﻿@model ExpressiveAnnotations.MvcWebSample.Models.Query
+﻿@using System.Threading
+@model ExpressiveAnnotations.MvcWebSample.Models.Query
 
-@{ var lang = System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName; }
+@{ var lang = Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName; }
 
 <div class="box">
     <div class="left-corner">

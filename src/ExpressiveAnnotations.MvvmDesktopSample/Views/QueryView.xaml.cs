@@ -3,7 +3,7 @@
 namespace ExpressiveAnnotations.MvvmDesktopSample.Views
 {
     /// <summary>
-    /// Interaction logic for QueryView.xaml
+    ///     Interaction logic for QueryView.xaml
     /// </summary>
     public partial class QueryView : UserControl
     {

@@ -16,7 +16,7 @@ namespace ExpressiveAnnotations.Tests
             High,
             Low,
             Uncertain
-        }
+        }        
     }
 
     internal enum Stability
@@ -31,36 +31,43 @@ namespace ExpressiveAnnotations.Tests
         First = 1,
         Second = 2
     }
+
     public enum ByteEnum : byte
     {
         First = 1,
         Second = 2
     }
+
     public enum ShortEnum : short
     {
         First = 1,
         Second = 2
     }
+
     public enum UshortEnum : ushort
     {
         First = 1,
         Second = 2
     }
-    public enum IntEnum : int
+
+    public enum IntEnum
     {
         First = 1,
         Second = 2
     }
+
     public enum UintEnum : uint
     {
         First = 1,
         Second = 2
     }
+
     public enum LongEnum : long
     {
         First = 1,
         Second = 2
     }
+
     public enum UlongEnum : ulong
     {
         First = 1,
@@ -70,51 +77,11 @@ namespace ExpressiveAnnotations.Tests
     [TestClass]
     public class ParserTest
     {
-        private enum YesNo
+        public enum Vehicle
         {
-            Yes,
-            No,
+            Car,
+            Truck,
             Uncertain,
-        }
-
-        private class Model
-        {
-            public const string Const = "inside";
-
-            public Model SubModel { get; set; }
-
-            public DateTime Date { get; set; }
-            public int? Number { get; set; }
-            public bool Flag { get; set; }
-            public string Text { get; set; }
-            public Utility.Stability? PoliticalStability { get; set; }
-
-            public SbyteEnum? SbyteNumber { get; set; }
-            public ByteEnum? ByteNumber { get; set; }
-            public ShortEnum? ShortNumber { get; set; }
-            public UshortEnum? UshortNumber { get; set; }
-            public IntEnum? IntNumber { get; set; }
-            public UintEnum? UintNumber { get; set; }
-            public LongEnum? LongNumber { get; set; }
-            public UlongEnum? UlongNumber { get; set; }
-
-            public Guid? Guid1 { get; set; }
-            public Guid? Guid2 { get; set; }
-
-            public DateTime NextWeek()
-            {
-                return DateTime.Now.AddDays(7);
-            }
-
-            public int IncNumber(int number)
-            {
-                return ++number;
-            }
-
-            public int DecNumber(int number)
-            {
-                return --number;
-            }
         }
 
         [TestMethod]
@@ -203,9 +170,9 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("1.2 / 2 == 0.6").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("1.2 + 2 == 3.2").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("1.2 - 2 == -0.8").Invoke(null));
-            
+
             Assert.IsTrue(parser.Parse<object>("1+2==3").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("1-2==-1").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("1-2==-1").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("1*2>-1").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("1/2==0.5").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("-1*-+- -+-1==-1").Invoke(null)); // weird construction, but since C# and JavaScript allows it, our language also doesn't mind
@@ -213,7 +180,7 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.IsTrue(parser.Parse<object>("1 - 2 -(6 / ((2*1.5 - 1) + 1)) * -2 + 1/2/1 == 3.50").Invoke(null));
 
-            Assert.IsTrue(parser.Parse<object>("'abc' == Trim(' abc ')").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("'abc' == Trim(' abc ')").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("Length(null) + Length('abc' + 'cde') >= Length(Trim(' abc def ')) - 2 - -1").Invoke(null));
         }
 
@@ -227,7 +194,6 @@ namespace ExpressiveAnnotations.Tests
                 Flag = true,
                 Text = "hello world",
                 PoliticalStability = Utility.Stability.High,
-
                 SbyteNumber = SbyteEnum.First,
                 ByteNumber = ByteEnum.First,
                 ShortNumber = ShortEnum.First,
@@ -238,7 +204,6 @@ namespace ExpressiveAnnotations.Tests
                 UlongNumber = UlongEnum.First,
                 Guid1 = Guid.NewGuid(),
                 Guid2 = Guid.Empty,
-
                 SubModel = new Model
                 {
                     Date = DateTime.Now.AddDays(1),
@@ -317,7 +282,7 @@ namespace ExpressiveAnnotations.Tests
                 {"Date", typeof (DateTime)},
                 {"SubModel.Date", typeof (DateTime)},
                 {"Number", typeof (int?)},
-                {"PoliticalStability", typeof (Utility.Stability?)}                
+                {"PoliticalStability", typeof (Utility.Stability?)}
             };
             Assert.AreEqual(expectedFields.Count, parsedFields.Count);
             Assert.IsTrue(
@@ -336,7 +301,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(
                 expectedConsts.Keys.All(
                     key => parsedConsts.ContainsKey(key) &&
-                           EqualityComparer<object>.Default.Equals(expectedConsts[key], parsedConsts[key])));            
+                           EqualityComparer<object>.Default.Equals(expectedConsts[key], parsedConsts[key])));
         }
 
         [TestMethod]
@@ -356,37 +321,11 @@ namespace ExpressiveAnnotations.Tests
             }
         }
 
-        private class ModelWithMethods
-        {
-            public string Whoami()
-            {
-                return "model method";
-            }
-
-            public string Whoami(int i)
-            {
-                return string.Format("model method {0}", i);
-            }
-        }
-
-        private class ModelWithAmbiguousMethods
-        {
-            public string Whoami(string s)
-            {
-                return string.Format("model method {0}", s);
-            }
-
-            public string Whoami(int i)
-            {
-                return string.Format("model method {0}", i);
-            }
-        }
-
         [TestMethod]
         public void verify_methods_overloading() // overloading concept exists, when there are two methods of the same name, but different signature
         {
             // methods overloading is based on the number of arguments
-            var parser = new Parser();            
+            var parser = new Parser();
             parser.AddFunction("Whoami", () => "utility method");
             parser.AddFunction<int, string>("Whoami", i => string.Format("utility method {0}", i));
             parser.AddFunction<int, string, string>("Whoami", (i, s) => string.Format("utility method {0} - {1}", i, s));
@@ -394,7 +333,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("Whoami() == 'utility method'").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("Whoami(1) == 'utility method 1'").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("Whoami(2, 'final') == 'utility method 2 - final'").Invoke(null));
-        }        
+        }
 
         [TestMethod]
         public void verify_methods_overriding() // overriding concept exists, when there are two methods of the same name and signature, but different implementation
@@ -432,7 +371,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-@"Parse error line 1, column 1:
+                    @"Parse error line 1, column 1:
 ... Whoami(0) == 'utility method 0' ...
     ^--- Function 'Whoami' accepting 1 argument is ambiguous.",
                     e.Message);
@@ -447,7 +386,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-@"Parse error line 1, column 1:
+                    @"Parse error line 1, column 1:
 ... Glue('a', 'b') == 'ab' ...
     ^--- Function 'Glue' accepting 2 arguments is ambiguous.",
                     e.Message);
@@ -465,7 +404,7 @@ namespace ExpressiveAnnotations.Tests
             catch (Exception e)
             {
                 Assert.AreEqual(
-@"Parse error line 1, column 1:
+                    @"Parse error line 1, column 1:
 ... Whoami(0) == 'model method 0' ...
     ^--- Function 'Whoami' accepting 1 argument is ambiguous.",
                     e.Message);
@@ -491,7 +430,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-@"Parse error line 1, column 8:
+                    @"Parse error line 1, column 8:
 ... '1', '2') == 'utility method 1 - 2' ...
     ^--- Function 'Whoami' 1st argument implicit conversion from 'System.String' to expected 'System.Int32' failed.",
                     e.Message);
@@ -506,7 +445,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-@"Parse error line 1, column 11:
+                    @"Parse error line 1, column 11:
 ... 2) == 'utility method 1 - 2' ...
     ^--- Function 'Whoami' 2nd argument implicit conversion from 'System.Int32' to expected 'System.String' failed.",
                     e.Message);
@@ -517,7 +456,7 @@ namespace ExpressiveAnnotations.Tests
         public void verify_short_circuit_evaluation()
         {
             var parser = new Parser();
-            parser.AddFunction<object, bool>("CastToBool", obj => (bool)obj);
+            parser.AddFunction<object, bool>("CastToBool", obj => (bool) obj);
 
             try
             {
@@ -549,7 +488,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-@"Parse error line 1, column 1:
+                    @"Parse error line 1, column 1:
 ... Stability.High == 0 ...
     ^--- Enum 'Stability' is ambiguous, found following:
 'ExpressiveAnnotations.Tests.Utility+Stability',
@@ -573,49 +512,11 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-@"Parse error line 1, column 1:
+                    @"Parse error line 1, column 1:
 ... NotMe == 0 ...
     ^--- Only public properties, constants and enums are accepted. Identifier 'NotMe' not known.",
                     e.Message);
             }
-        }
-
-        public enum Vehicle
-        {
-            Car,
-            Truck
-        }
-
-        public class Carriage
-        {
-            public int Car { get; set; }
-            public int Truck { get; set; }
-        }
-
-        public class SampleOne
-        {
-            public SampleOne()
-            {
-                Vehicle = Vehicle.Car;
-
-                Assert.IsTrue(0 == (int)Vehicle.Car);
-                Assert.IsTrue(Vehicle == Vehicle.Car);
-            }
-
-            public Vehicle Vehicle { get; set; }
-        }
-
-        public class SampleTwo
-        {
-            public SampleTwo()
-            {
-                Vehicle = new Carriage { Car = -1 };
-
-                Assert.IsTrue(-1 == Vehicle.Car);
-                Assert.IsTrue(Vehicle.Car != (int)ParserTest.Vehicle.Car);
-            }
-
-            public Carriage Vehicle { get; set; }
         }
 
         [TestMethod]
@@ -698,7 +599,7 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.IsTrue(parser.Parse<object>("StartsWith(' ab c', ' A') == false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("StartsWith(' ab c', ' a') == true").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("StartsWith(' ', ' ') == true").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("StartsWith(' ', ' ') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("StartsWith('', '') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("StartsWith(null, '') == false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("StartsWith('', null) == false").Invoke(null));
@@ -706,7 +607,7 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.IsTrue(parser.Parse<object>("StartsWithIgnoreCase(' ab c', ' A') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("StartsWithIgnoreCase(' ab c', ' a') == true").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("StartsWithIgnoreCase(' ', ' ') == true").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("StartsWithIgnoreCase(' ', ' ') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("StartsWithIgnoreCase('', '') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("StartsWithIgnoreCase(null, '') == false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("StartsWithIgnoreCase('', null) == false").Invoke(null));
@@ -714,7 +615,7 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.IsTrue(parser.Parse<object>("EndsWith(' ab c', ' C') == false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("EndsWith(' ab c', ' c') == true").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("EndsWith(' ', ' ') == true").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("EndsWith(' ', ' ') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("EndsWith('', '') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("EndsWith(null, '') == false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("EndsWith('', null) == false").Invoke(null));
@@ -722,7 +623,7 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.IsTrue(parser.Parse<object>("EndsWithIgnoreCase(' ab c', ' C') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("EndsWithIgnoreCase(' ab c', ' c') == true").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("EndsWithIgnoreCase(' ', ' ') == true").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("EndsWithIgnoreCase(' ', ' ') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("EndsWithIgnoreCase('', '') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("EndsWithIgnoreCase(null, '') == false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("EndsWithIgnoreCase('', null) == false").Invoke(null));
@@ -742,7 +643,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("ContainsIgnoreCase('', '') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("ContainsIgnoreCase(null, '') == false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("ContainsIgnoreCase('', null) == false").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("ContainsIgnoreCase(null, null) == false").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("ContainsIgnoreCase(null, null) == false").Invoke(null));
 
             Assert.IsTrue(parser.Parse<object>("IsNullOrWhiteSpace(' ') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsNullOrWhiteSpace(null) == true").Invoke(null));
@@ -804,7 +705,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-@"Parse error line 1, column 2:
+                    @"Parse error line 1, column 2:
 ... ++ +1==2 ...
     ^--- Unexpected token: '++'.",
                     e.Message);
@@ -819,7 +720,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-@"Parse error line 1, column 6:
+                    @"Parse error line 1, column 6:
 ... # false ...
     ^--- Invalid token.",
                     e.Message);
@@ -834,7 +735,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-@"Parse error line 1, column 7:
+                    @"Parse error line 1, column 7:
 ... - 'abc' ...
     ^--- Operator '-' cannot be applied to operands of type 'System.String' and 'System.String'.",
                     e.Message);
@@ -849,7 +750,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-@"Parse error line 1, column 15:
+                    @"Parse error line 1, column 15:
 ... - 'abc' > 0 ...
     ^--- Operator '-' cannot be applied to operands of type 'System.String' and 'System.String'.",
                     e.Message);
@@ -858,7 +759,7 @@ namespace ExpressiveAnnotations.Tests
             try
             {
                 parser.Parse<object>(
-@"1 - 2
+                    @"1 - 2
     - (6 / ((2*'1.5' - 1) + 1)) * -2 
     + 1/2/1 == 3.50").Invoke(null);
                 Assert.Fail();
@@ -867,7 +768,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-@"Parse error line 2, column 15:
+                    @"Parse error line 2, column 15:
 ... *'1.5' - 1) + 1)) * -2 ...
     ^--- Operator '*' cannot be applied to operands of type 'System.Int32' and 'System.String'.",
                     e.Message);
@@ -876,7 +777,7 @@ namespace ExpressiveAnnotations.Tests
             try
             {
                 parser.Parse<object>(
-@"1 - 2
+                    @"1 - 2
     - 6
     + 1/x/1 == 3.50").Invoke(null);
                 Assert.Fail();
@@ -885,7 +786,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-@"Parse error line 3, column 9:
+                    @"Parse error line 3, column 9:
 ... x/1 == 3.50 ...
     ^--- Only public properties, constants and enums are accepted. Identifier 'x' not known.",
                     e.Message);
@@ -893,15 +794,14 @@ namespace ExpressiveAnnotations.Tests
 
             try
             {
-                parser.Parse<object>(
-@"WriteLine('hello')").Invoke(null);
+                parser.Parse<object>("WriteLine('hello')").Invoke(null);
                 Assert.Fail();
             }
             catch (Exception e)
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-@"Parse error line 1, column 1:
+                    @"Parse error line 1, column 1:
 ... WriteLine('hello') ...
     ^--- Function 'WriteLine' not known.",
                     e.Message);
@@ -909,15 +809,14 @@ namespace ExpressiveAnnotations.Tests
 
             try
             {
-                parser.Parse<object>(
-@"Max(1.1)").Invoke(null);
+                parser.Parse<object>("Max(1.1)").Invoke(null);
                 Assert.Fail();
             }
             catch (Exception e)
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-@"Parse error line 1, column 1:
+                    @"Parse error line 1, column 1:
 ... Max(1.1) ...
     ^--- Function 'Max' accepting 1 argument not found.",
                     e.Message);
@@ -925,15 +824,14 @@ namespace ExpressiveAnnotations.Tests
 
             try
             {
-                parser.Parse<object>(
-@"Max(1.1, 1.2, 'a')").Invoke(null);
+                parser.Parse<object>("Max(1.1, 1.2, 'a')").Invoke(null);
                 Assert.Fail();
             }
             catch (Exception e)
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-@"Parse error line 1, column 1:
+                    @"Parse error line 1, column 1:
 ... Max(1.1, 1.2, 'a') ...
     ^--- Function 'Max' accepting 3 arguments not found.",
                     e.Message);
@@ -942,7 +840,7 @@ namespace ExpressiveAnnotations.Tests
             try
             {
                 parser.Parse<object>(
-@"Max(1, 
+                    @"Max(1, 
       Max(1, 'a')) == 1.1").Invoke(null);
                 Assert.Fail();
             }
@@ -950,11 +848,116 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-@"Parse error line 2, column 14:
+                    @"Parse error line 2, column 14:
 ... 'a')) == 1.1 ...
     ^--- Function 'Max' 2nd argument implicit conversion from 'System.String' to expected 'System.Int32' failed.",
                     e.Message);
             }
+        }        
+
+        private class Model
+        {
+            public const string Const = "inside";
+
+            public Model SubModel { get; set; }
+
+            public DateTime Date { get; set; }
+            public int? Number { get; set; }
+            public bool Flag { get; set; }
+            public string Text { get; set; }
+            public Utility.Stability? PoliticalStability { get; set; }
+
+            public SbyteEnum? SbyteNumber { get; set; }
+            public ByteEnum? ByteNumber { get; set; }
+            public ShortEnum? ShortNumber { get; set; }
+            public UshortEnum? UshortNumber { get; set; }
+            public IntEnum? IntNumber { get; set; }
+            public UintEnum? UintNumber { get; set; }
+            public LongEnum? LongNumber { get; set; }
+            public UlongEnum? UlongNumber { get; set; }
+
+            public Guid? Guid1 { get; set; }
+            public Guid? Guid2 { get; set; }
+
+            public DateTime NextWeek()
+            {
+                return DateTime.Now.AddDays(7);
+            }
+
+            public int IncNumber(int number)
+            {
+                return ++number;
+            }
+
+            public int DecNumber(int number)
+            {
+                return --number;
+            }
+        }
+
+        private class ModelWithAmbiguousMethods
+        {
+            public string Whoami(string s)
+            {
+                return string.Format("model method {0}", s);
+            }
+
+            public string Whoami(int i)
+            {
+                return string.Format("model method {0}", i);
+            }
+        }
+
+        private class ModelWithMethods
+        {
+            public string Whoami()
+            {
+                return "model method";
+            }
+
+            public string Whoami(int i)
+            {
+                return string.Format("model method {0}", i);
+            }
+        }
+
+        public class Carriage
+        {
+            public int Car { get; set; }
+            public int Truck { get; set; }
+        }
+
+        public class SampleOne
+        {
+            public SampleOne()
+            {
+                Vehicle = Vehicle.Car;
+
+                Assert.IsTrue(0 == (int) Vehicle.Car);
+                Assert.IsTrue(Vehicle == Vehicle.Car);
+            }
+
+            public Vehicle Vehicle { get; set; }
+        }
+
+        public class SampleTwo
+        {
+            public SampleTwo()
+            {
+                Vehicle = new Carriage {Car = -1};
+
+                Assert.IsTrue(-1 == Vehicle.Car);
+                Assert.IsTrue(Vehicle.Car != (int) ParserTest.Vehicle.Car);
+            }
+
+            public Carriage Vehicle { get; set; }
+        }
+
+        private enum YesNo
+        {
+            Yes,
+            No,
+            Uncertain,
         }
     }
 }

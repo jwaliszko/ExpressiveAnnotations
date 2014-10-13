@@ -7,7 +7,7 @@ namespace ExpressiveAnnotations.Tests
 {
     [TestClass]
     public class LexerTest
-    {        
+    {
         [TestMethod]
         public void verify_complex_expression_analysis()
         {
@@ -56,7 +56,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.AreEqual(TokenType.RIGHT_BRACKET, tokens[15].Type);
             Assert.AreEqual("==", tokens[16].Value);
             Assert.AreEqual(TokenType.EQ, tokens[16].Type);
-            Assert.AreEqual( 0, tokens[17].Value);
+            Assert.AreEqual(0, tokens[17].Value);
             Assert.AreEqual(TokenType.INT, tokens[17].Type);
             Assert.AreEqual(")", tokens[18].Value);
             Assert.AreEqual(TokenType.RIGHT_BRACKET, tokens[18].Type);
@@ -129,7 +129,7 @@ namespace ExpressiveAnnotations.Tests
                 Assert.IsTrue(e is ArgumentNullException);
                 Assert.AreEqual("Expression not provided.\r\nParameter name: expression", e.Message);
             }
-            
+
             try
             {
                 lexer.Analyze("true # false");
@@ -140,7 +140,7 @@ namespace ExpressiveAnnotations.Tests
                 Assert.IsTrue(e is ParseErrorException);
                 Assert.AreEqual("Invalid token.", e.Message);
 
-                var ctx = ((ParseErrorException)e).Location;
+                var ctx = ((ParseErrorException) e).Location;
                 Assert.AreEqual(1, ctx.Line);
                 Assert.AreEqual(6, ctx.Column);
             }
@@ -155,7 +155,7 @@ namespace ExpressiveAnnotations.Tests
                 Assert.IsTrue(e is ParseErrorException);
                 Assert.AreEqual("Invalid token.", e.Message);
 
-                var ctx = ((ParseErrorException)e).Location;
+                var ctx = ((ParseErrorException) e).Location;
                 Assert.AreEqual(2, ctx.Line);
                 Assert.AreEqual(4, ctx.Column);
             }
@@ -170,7 +170,7 @@ namespace ExpressiveAnnotations.Tests
                 Assert.IsTrue(e is ParseErrorException);
                 Assert.AreEqual("Invalid token.", e.Message);
 
-                var ctx = ((ParseErrorException)e).Location;
+                var ctx = ((ParseErrorException) e).Location;
                 Assert.AreEqual(1, ctx.Line);
                 Assert.AreEqual(12, ctx.Column);
             }
@@ -194,12 +194,12 @@ namespace ExpressiveAnnotations.Tests
             AssertToken("'0123'", "0123", TokenType.STRING);
             AssertToken("' a s d '", " a s d ", TokenType.STRING);
             AssertToken(
-@"'Simon\'s cat named ""\\\\""\n (Double Backslash)'",
-@"Simon's cat named ""\\""
+                @"'Simon\'s cat named ""\\\\""\n (Double Backslash)'",
+                @"Simon's cat named ""\\""
  (Double Backslash)", TokenType.STRING);
             AssertToken( // here, non-verbatim version, see \r\n which represents current environment new line (simply expressed by \n in our language)
-"'Simon\\\'s cat named \"\\\\\\\\\"\\n (Double Backslash)'",
-"Simon's cat named \"\\\\\"\r\n (Double Backslash)", TokenType.STRING);
+                "'Simon\\\'s cat named \"\\\\\\\\\"\\n (Double Backslash)'",
+                "Simon's cat named \"\\\\\"\r\n (Double Backslash)", TokenType.STRING);
 
             AssertNotToken("\"0123\"", TokenType.STRING); // double-quoted text is not accepted as string literal
             AssertNotToken("'John's cat'", TokenType.STRING);
@@ -230,10 +230,10 @@ namespace ExpressiveAnnotations.Tests
         }
 
         private static void AssertToken(string expression, object value, TokenType type)
-        {            
+        {
             var lexer = new Lexer();
             var tokens = lexer.Analyze(expression).ToArray();
-            
+
             Assert.AreEqual(2, tokens.Length);
             Assert.AreEqual(value, tokens[0].Value);
             Assert.AreEqual(type, tokens[0].Type);

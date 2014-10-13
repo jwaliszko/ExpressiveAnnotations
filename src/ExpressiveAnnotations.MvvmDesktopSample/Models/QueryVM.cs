@@ -13,22 +13,22 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
         public const string SIMONS_CAT = @"Simon's cat named ""\\""
  (Double Backslash)";
 
-        private bool _goAbroad;
         private int? _age;
-        private string _passportNumber;
-        private string _country;
-        private string _nextCountry;
-        private string _reasonForTravel;
-        private string _reasonForLongTravel;
-        private Stability? _politicalStability;
-        private bool _awareOfTheRisks;
-        private string _sportType;
-        private string _bloodType;
         private bool _agreeForContact;
-        private bool? _immediateContact;
-        private Guid? _flightId;
-        private DateTime? _returnDate;
+        private bool _awareOfTheRisks;
+        private string _bloodType;
         private ContactVM _contactDetails;
+        private string _country;
+        private Guid? _flightId;
+        private bool _goAbroad;
+        private bool? _immediateContact;
+        private string _nextCountry;
+        private string _passportNumber;
+        private Stability? _politicalStability;
+        private string _reasonForLongTravel;
+        private string _reasonForTravel;
+        private DateTime? _returnDate;
+        private string _sportType;
 
         public QueryVM()
         {
@@ -54,6 +54,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
                 };
             }
         }
+
         public IEnumerable<KeyValuePair<string, bool?>> Answers
         {
             get

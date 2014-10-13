@@ -1,6 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using System.Threading
+<!DOCTYPE html>
 
-@{ var lang = System.Threading.Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName; }
+@{ var lang = Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName; }
 
 <html lang="@lang">
     <head>
@@ -15,7 +16,7 @@
                 @RenderBody()
             </section>
         </div>
-        
+
         @Scripts.Render("~/bundles/jquery")
         @Scripts.Render("~/bundles/jqueryui")
         @RenderSection("scripts", required: false)

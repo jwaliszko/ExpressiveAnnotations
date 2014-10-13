@@ -10,14 +10,14 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
 {
     public static class Extensions
     {
-        public static MvcHtmlString EnumDropDownListFor<TModel, TEnum>(this HtmlHelper<TModel> htmlHelper, Expression<Func<TModel, TEnum>> expression) 
+        public static MvcHtmlString EnumDropDownListFor<TModel, TEnum>(this HtmlHelper<TModel> htmlHelper, Expression<Func<TModel, TEnum>> expression)
         {
             return EnumDropDownListFor(htmlHelper, expression, null);
         }
 
         public static MvcHtmlString EnumDropDownListFor<TModel, TEnum>(this HtmlHelper<TModel> htmlHelper, Expression<Func<TModel, TEnum>> expression, object htmlAttributes)
-        {            
-            var metadata = ModelMetadata.FromLambdaExpression(expression, htmlHelper.ViewData);            
+        {
+            var metadata = ModelMetadata.FromLambdaExpression(expression, htmlHelper.ViewData);
             var type = Nullable.GetUnderlyingType(metadata.ModelType) ?? metadata.ModelType;
             if (!type.IsEnum)
                 throw new ArgumentException("Given parameter expression has to indicate enum type.", "expression");
@@ -34,12 +34,12 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
                 items = new[] {new SelectListItem()}.Concat(items);
 
             return htmlHelper.DropDownListFor(expression, items, htmlAttributes);
-        }     
+        }
 
         private static string GetEnumDisplayText<TEnum>(TEnum value)
         {
             var field = value.GetType().GetField(value.ToString());
-            var attrib = field.GetCustomAttributes(typeof(DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
+            var attrib = field.GetCustomAttributes(typeof (DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
             return attrib != null ? attrib.GetName() : value.ToString();
         }
     }

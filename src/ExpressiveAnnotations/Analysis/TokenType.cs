@@ -5,132 +5,132 @@
 namespace ExpressiveAnnotations.Analysis
 {
     /// <summary>
-    /// Token type.
+    ///     Token type.
     /// </summary>
     public enum TokenType
     {
         /// <summary>
-        /// Logical conjunction.
+        ///     Logical conjunction.
         /// </summary>
         AND,
 
         /// <summary>
-        /// Logical disjunction.
+        ///     Logical disjunction.
         /// </summary>
         OR,
 
         /// <summary>
-        /// Logical negation.
+        ///     Logical negation.
         /// </summary>
-        NOT,        
+        NOT,
 
         /// <summary>
-        /// Greater than or equal to.
+        ///     Greater than or equal to.
         /// </summary>
         GE,
 
         /// <summary>
-        /// Less than or equal to.
+        ///     Less than or equal to.
         /// </summary>
         LE,
 
         /// <summary>
-        /// Greater than.
+        ///     Greater than.
         /// </summary>
         GT,
 
         /// <summary>
-        /// Less than.
+        ///     Less than.
         /// </summary>
         LT,
 
         /// <summary>
-        /// Equal to.
+        ///     Equal to.
         /// </summary>
         EQ,
 
         /// <summary>
-        /// Not equal to.
+        ///     Not equal to.
         /// </summary>
         NEQ,
 
         /// <summary>
-        /// Addition.
+        ///     Addition.
         /// </summary>
         ADD,
 
         /// <summary>
-        /// Subtraction.
+        ///     Subtraction.
         /// </summary>
         SUB,
 
         /// <summary>
-        /// Multiplication.
+        ///     Multiplication.
         /// </summary>
         MUL,
 
         /// <summary>
-        /// Division.
+        ///     Division.
         /// </summary>
         DIV,
 
         /// <summary>
-        /// Prefix/postfix inc(++).
+        ///     Prefix/postfix inc(++).
         /// </summary>
         INC,
 
         /// <summary>
-        /// Prefix/postfix dec(--).
+        ///     Prefix/postfix dec(--).
         /// </summary>
         DEC,
 
         /// <summary>
-        /// Left bracket.
+        ///     Left bracket.
         /// </summary>
         LEFT_BRACKET,
 
         /// <summary>
-        /// Right bracket.
+        ///     Right bracket.
         /// </summary>
         RIGHT_BRACKET,
 
         /// <summary>
-        /// Comma.
+        ///     Comma.
         /// </summary>
         COMMA,
 
         /// <summary>
-        /// NULL.
+        ///     NULL.
         /// </summary>
         NULL,
 
         /// <summary>
-        /// Integer value.
+        ///     Integer value.
         /// </summary>
         INT,
 
         /// <summary>
-        /// Boolean value.
+        ///     Boolean value.
         /// </summary>
         BOOL,
 
         /// <summary>
-        /// Float value.
+        ///     Float value.
         /// </summary>
         FLOAT,
 
         /// <summary>
-        /// String.
+        ///     String.
         /// </summary>
         STRING,
 
         /// <summary>
-        /// Function.
+        ///     Function.
         /// </summary>
         FUNC,
-        
+
         /// <summary>
-        /// EOF.
+        ///     EOF.
         /// </summary>
         EOF
     }

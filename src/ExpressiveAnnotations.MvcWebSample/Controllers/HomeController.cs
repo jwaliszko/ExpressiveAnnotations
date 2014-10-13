@@ -1,13 +1,13 @@
-﻿using System.Web.Mvc;
+﻿using System;
+using System.Web.Mvc;
 using ExpressiveAnnotations.MvcWebSample.Models;
-using System;
 
 namespace ExpressiveAnnotations.MvcWebSample.Controllers
 {
     public class HomeController : BaseController
     {
         public ActionResult Index()
-        {            
+        {
             var model = new Query
             {
                 GoAbroad = true,

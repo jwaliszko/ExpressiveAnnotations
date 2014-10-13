@@ -13,23 +13,16 @@ using ExpressiveAnnotations.Attributes;
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
 {
     /// <summary>
-    /// Model validator for <see cref="RequiredIfAttribute" />.
+    ///     Model validator for <see cref="RequiredIfAttribute" />.
     /// </summary>
     public class RequiredIfValidator : DataAnnotationsModelValidator<RequiredIfAttribute>
     {
-        private string Expression { get; set; }
-        private string FormattedErrorMessage { get; set; }        
-        private bool AllowEmpty { get; set; }
-        private IDictionary<string, string> FieldsMap { get; set; }
-        private IDictionary<string, object> ConstsMap { get; set; }
-        private string AnnotatedField { get; set; }
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="RequiredIfValidator" /> class.
+        ///     Initializes a new instance of the <see cref="RequiredIfValidator" /> class.
         /// </summary>
-        /// <param name="metadata">The metadata.</param>
-        /// <param name="context">The context.</param>
-        /// <param name="attribute">The attribute.</param>
+        /// <param name="metadata">The model metadata instance.</param>
+        /// <param name="context">The controller context instance.</param>
+        /// <param name="attribute">The expressive requirement attribute instance.</param>
         /// <exception cref="System.InvalidOperationException"></exception>
         public RequiredIfValidator(ModelMetadata metadata, ControllerContext context, RequiredIfAttribute attribute)
             : base(metadata, context, attribute)
@@ -71,11 +64,18 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
             }
         }
 
+        private string Expression { get; set; }
+        private string FormattedErrorMessage { get; set; }
+        private bool AllowEmpty { get; set; }
+        private IDictionary<string, string> FieldsMap { get; set; }
+        private IDictionary<string, object> ConstsMap { get; set; }
+        private string AnnotatedField { get; set; }
+
         /// <summary>
-        /// Retrieves a collection of client validation rules (rules sent to browsers).
+        ///     Retrieves a collection of client validation rules (rules sent to browsers).
         /// </summary>
         /// <returns>
-        /// A collection of client validation rules.
+        ///     A collection of client validation rules.
         /// </returns>
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()
         {

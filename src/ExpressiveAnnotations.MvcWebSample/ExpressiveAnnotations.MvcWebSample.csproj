@@ -265,7 +265,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Home\EditorTemplates\Query.cshtml" />
-  </ItemGroup>  
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
@@ -300,8 +300,8 @@
   <Target Name="CopyLinkedContentFiles" BeforeTargets="Build">
     <Copy SourceFiles="%(Content.Identity)" 
           DestinationFiles="%(Content.Link)" 
-          SkipUnchangedFiles='true' 
-          OverwriteReadOnlyFiles='true' 
+          SkipUnchangedFiles="true" 
+          OverwriteReadOnlyFiles="true" 
           Condition="'%(Content.Link)' != ''" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

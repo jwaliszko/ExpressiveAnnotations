@@ -7,17 +7,12 @@ using System;
 namespace ExpressiveAnnotations.Analysis
 {
     /// <summary>
-    /// The exception thrown when parse operation detects error in specified expression.
+    ///     The exception thrown when parse operation detects error in a specified expression.
     /// </summary>
-    internal class ParseErrorException: Exception
+    internal class ParseErrorException : Exception
     {
         /// <summary>
-        /// Gets erratic code location related to this error.
-        /// </summary>
-        public Location Location { get; private set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ParseErrorException" />.
+        ///     Initializes a new instance of the <see cref="ParseErrorException" />.
         /// </summary>
         /// <param name="message">The error message.</param>
         /// <param name="location">The erratic code location.</param>
@@ -26,5 +21,10 @@ namespace ExpressiveAnnotations.Analysis
         {
             Location = location;
         }
+
+        /// <summary>
+        ///     Gets the erratic code location related to this error.
+        /// </summary>
+        public Location Location { get; private set; }
     }
 }

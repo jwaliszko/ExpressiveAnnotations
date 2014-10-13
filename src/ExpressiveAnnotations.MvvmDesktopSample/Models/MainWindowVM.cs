@@ -2,7 +2,7 @@
 
 namespace ExpressiveAnnotations.MvvmDesktopSample.Models
 {
-    public class MainWindowVM: BaseVM
+    public class MainWindowVM : BaseVM
     {
         public MainWindowVM()
         {

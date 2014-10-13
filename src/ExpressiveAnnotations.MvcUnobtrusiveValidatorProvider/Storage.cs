@@ -9,7 +9,7 @@ using System.Web;
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 {
     /// <summary>
-    /// Stores data for the current request.
+    ///     Stores arbitrary data for the current request.
     /// </summary>
     internal class Storage
     {
@@ -25,9 +25,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 
         public static T Get<T>(string key)
         {
-            if (Items[key] == null)
-                return default(T);
-            return (T)Items[key];
+            return Items[key] == null
+                ? default(T)
+                : (T) Items[key];
         }
 
         public static void Set<T>(string key, T value)

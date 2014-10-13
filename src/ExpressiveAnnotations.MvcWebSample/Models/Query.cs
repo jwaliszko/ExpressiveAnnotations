@@ -102,7 +102,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public DateTime? ReturnDate { get; set; }
 
         [RequiredIf("GoAbroad == true && ReturnDate > LatestSuggestedReturnDate",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ReasonForLongTravelRequired")]        
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ReasonForLongTravelRequired")]
         [Display(ResourceType = typeof (Resources), Name = "ReasonForLongTravel")]
         public string ReasonForLongTravel { get; set; }
 

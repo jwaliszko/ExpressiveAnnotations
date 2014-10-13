@@ -7,12 +7,6 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Misc
 {
     public class NullableEnumerationExtension : MarkupExtension
     {
-        public class EnumItem
-        {
-            public string Name { get; set; }
-            public object Value { get; set; }
-        }
-
         private Type _enumType;
 
         public NullableEnumerationExtension(Type enumType)
@@ -29,7 +23,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Misc
             {
                 if (_enumType == value)
                     return;
-                
+
                 var enumType = value;
                 if (enumType.IsEnum == false)
                     throw new ArgumentException("Type must be an Enum.");
@@ -62,6 +56,12 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Misc
                 .FirstOrDefault() as DisplayAttribute;
 
             return displayAttrib != null ? displayAttrib.Name : enumValue.ToString();
-        }        
+        }
+
+        public class EnumItem
+        {
+            public string Name { get; set; }
+            public object Value { get; set; }
+        }
     }
 }

@@ -7,6 +7,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
     public class CultureManager
     {
         private static readonly CultureManager _instance = new CultureManager();
+
         private CultureManager()
         {
         }
@@ -26,7 +27,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
         {
             var culture = GetCultureFromCookie(httpContext);
             if (culture == null)
-            {                
+            {
                 culture = CultureInfo.CreateSpecificCulture("en"); // force default culture to be "en"
                 SetCultureToCookie(culture, httpContext);
             }

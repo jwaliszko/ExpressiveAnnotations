@@ -10,21 +10,16 @@ using System.Text.RegularExpressions;
 namespace ExpressiveAnnotations.Analysis
 {
     /// <summary>
-    /// Performs lexical analysis of provided logical expression.
+    ///     Performs the lexical analysis of a specified logical expression.
     /// </summary>
     public sealed class Lexer
     {
-        private Token Token { get; set; }
-        private Location Location { get; set; }
-        private string Expression { get; set; }
-        private IDictionary<TokenType, Regex> RegexMap { get; set; }
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="Lexer" /> class.
+        ///     Initializes a new instance of the <see cref="Lexer" /> class.
         /// </summary>
         public Lexer()
         {
-            // special characters (should be escaped if needed): .$^{[(|)*+?\
+            // regex special characters (should be escaped if needed): .$^{[(|)*+?\
             var patterns = new Dictionary<TokenType, string>
             {
                 {TokenType.AND, @"&&"},
@@ -58,12 +53,17 @@ namespace ExpressiveAnnotations.Analysis
                 kvp => new Regex(string.Format("^{0}", kvp.Value), RegexOptions.Compiled));
         }
 
+        private Token Token { get; set; }
+        private Location Location { get; set; }
+        private string Expression { get; set; }
+        private IDictionary<TokenType, Regex> RegexMap { get; set; }
+
         /// <summary>
-        /// Analyzes the specified logical expression and extracts the array of tokens.
+        ///     Analyzes a specified logical expression and extracts a sequence of tokens.
         /// </summary>
         /// <param name="expression">The logical expression.</param>
         /// <returns>
-        /// Array of extracted tokens.
+        ///     A sequence of extracted tokens.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
         public IEnumerable<Token> Analyze(string expression)

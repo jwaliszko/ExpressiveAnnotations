@@ -13,22 +13,16 @@ using ExpressiveAnnotations.Attributes;
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
 {
     /// <summary>
-    /// Model validator for <see cref="AssertThatAttribute" />.
+    ///     Model validator for <see cref="AssertThatAttribute" />.
     /// </summary>
     public class AssertThatValidator : DataAnnotationsModelValidator<AssertThatAttribute>
     {
-        private string Expression { get; set; }
-        private string FormattedErrorMessage { get; set; }
-        private IDictionary<string, string> FieldsMap { get; set; }
-        private IDictionary<string, object> ConstsMap { get; set; }
-        private string AnnotatedField { get; set; }
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="AssertThatValidator" /> class.
+        ///     Initializes a new instance of the <see cref="AssertThatValidator" /> class.
         /// </summary>
-        /// <param name="metadata">The metadata.</param>
-        /// <param name="context">The context.</param>
-        /// <param name="attribute">The attribute.</param>
+        /// <param name="metadata">The model metadata instance.</param>
+        /// <param name="context">The controller context instance.</param>
+        /// <param name="attribute">The expressive assertion attribute instance.</param>
         /// <exception cref="System.InvalidOperationException"></exception>
         public AssertThatValidator(ModelMetadata metadata, ControllerContext context, AssertThatAttribute attribute)
             : base(metadata, context, attribute)
@@ -69,18 +63,24 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
             }
         }
 
+        private string Expression { get; set; }
+        private string FormattedErrorMessage { get; set; }
+        private IDictionary<string, string> FieldsMap { get; set; }
+        private IDictionary<string, object> ConstsMap { get; set; }
+        private string AnnotatedField { get; set; }
+
         /// <summary>
-        /// Retrieves a collection of client validation rules (rules sent to browsers).
+        ///     Retrieves a collection of client validation rules (rules sent to browsers).
         /// </summary>
         /// <returns>
-        /// A collection of client validation rules.
+        ///     A collection of client validation rules.
         /// </returns>
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()
         {
             var count = Storage.Get<int>(AnnotatedField) + 1;
             Assert.AttribsQuantityAllowed(count);
 
-            Storage.Set(AnnotatedField, count);            
+            Storage.Set(AnnotatedField, count);
 
             var suffix = count == 1 ? string.Empty : char.ConvertFromUtf32(95 + count);
             var rule = new ModelClientValidationRule

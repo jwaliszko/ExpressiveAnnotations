@@ -19,14 +19,14 @@ namespace ExpressiveAnnotations
             oute2 = e2;
 
             // promote numeric values to double - do all computations with higher precision (to be compatible with JavaScript, e.g. notation 1/2, should give 0.5 double not 0 int)
-            if (oute1.Type != typeof(double) && oute1.Type != typeof(double?) && oute1.Type.IsNumeric())
+            if (oute1.Type != typeof (double) && oute1.Type != typeof (double?) && oute1.Type.IsNumeric())
                 oute1 = oute1.Type.IsNullable()
                     ? Expression.Convert(oute1, typeof (double?))
                     : Expression.Convert(oute1, typeof (double));
-            if (oute2.Type != typeof(double) && oute2.Type != typeof(double?) && oute2.Type.IsNumeric())
+            if (oute2.Type != typeof (double) && oute2.Type != typeof (double?) && oute2.Type.IsNumeric())
                 oute2 = oute2.Type.IsNullable()
-                    ? Expression.Convert(oute2, typeof(double?))
-                    : Expression.Convert(oute2, typeof(double));
+                    ? Expression.Convert(oute2, typeof (double?))
+                    : Expression.Convert(oute2, typeof (double));
 
             // non-nullable operand is converted to nullable if necessary, and the lifted-to-nullable form of the comparison is used (C# rule, which is currently not followed by expression trees)
             if (oute1.Type.IsNullable() && !oute2.Type.IsNullable())
@@ -37,22 +37,22 @@ namespace ExpressiveAnnotations
 
         public static bool IsDateTime(this Type type)
         {
-            return type != null && (type == typeof(DateTime) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsDateTime()));
+            return type != null && (type == typeof (DateTime) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsDateTime()));
         }
 
         public static bool IsBool(this Type type)
         {
-            return type != null && (type == typeof(bool) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsBool()));
+            return type != null && (type == typeof (bool) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsBool()));
         }
 
         public static bool IsGuid(this Type type)
         {
-            return type != null && (type == typeof(Guid) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsGuid()));
+            return type != null && (type == typeof (Guid) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsGuid()));
         }
 
         public static bool IsString(this Type type)
         {
-            return type != null && type == typeof(string);
+            return type != null && type == typeof (string);
         }
 
         public static bool IsNumeric(this Type type)
@@ -62,19 +62,20 @@ namespace ExpressiveAnnotations
 
             var numericTypes = new HashSet<TypeCode>
             {
-                TypeCode.SByte,    //sbyte
-                TypeCode.Byte,     //byte
-                TypeCode.Int16,    //short
-                TypeCode.UInt16,   //ushort
-                TypeCode.Int32,    //int
-                TypeCode.UInt32,   //uint
-                TypeCode.Int64,    //long
-                TypeCode.UInt64,   //ulong
-                TypeCode.Single,   //float
-                TypeCode.Double,   //double
-                TypeCode.Decimal   //decimal
+                TypeCode.SByte,     //sbyte
+                TypeCode.Byte,      //byte
+                TypeCode.Int16,     //short
+                TypeCode.UInt16,    //ushort
+                TypeCode.Int32,     //int
+                TypeCode.UInt32,    //uint
+                TypeCode.Int64,     //long
+                TypeCode.UInt64,    //ulong
+                TypeCode.Single,    //float
+                TypeCode.Double,    //double
+                TypeCode.Decimal    //decimal
             };
-            return numericTypes.Contains(Type.GetTypeCode(type)) || type.IsNullable() && Nullable.GetUnderlyingType(type).IsNumeric();
+            return numericTypes.Contains(Type.GetTypeCode(type)) ||
+                   type.IsNullable() && Nullable.GetUnderlyingType(type).IsNumeric();
         }
 
         public static bool IsNullable(this Type type)
@@ -82,7 +83,7 @@ namespace ExpressiveAnnotations
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Nullable<>);
         }
 
         public static Type ToNullable(this Type type)
@@ -95,7 +96,7 @@ namespace ExpressiveAnnotations
 
         public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
         {
-            if (assembly == null) 
+            if (assembly == null)
                 throw new ArgumentNullException("assembly");
 
             try
@@ -172,10 +173,10 @@ namespace ExpressiveAnnotations
 
         public static string ToOrdinal(this int num)
         {
-            if (num <= 0) 
+            if (num <= 0)
                 return num.ToString(CultureInfo.InvariantCulture);
 
-            switch (num % 100)
+            switch (num%100)
             {
                 case 11:
                 case 12:
@@ -183,7 +184,7 @@ namespace ExpressiveAnnotations
                     return num + "th";
             }
 
-            switch (num % 10)
+            switch (num%10)
             {
                 case 1:
                     return num + "st";
@@ -194,7 +195,6 @@ namespace ExpressiveAnnotations
                 default:
                     return num + "th";
             }
-
         }
 
         public static string Indicator(this string input)
@@ -203,7 +203,7 @@ namespace ExpressiveAnnotations
                 throw new ArgumentNullException("input");
 
             return string.Format(
-@"
+                @"
 ... {0} ...
     ^--- ", input);
         }

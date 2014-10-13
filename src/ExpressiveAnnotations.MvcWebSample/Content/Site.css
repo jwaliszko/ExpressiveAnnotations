@@ -1,13 +1,13 @@
 ﻿body {
-    font-size: .85em;
     font-family: monospace, "Segoe UI", "Segoe UI Light", Verdana, Helvetica, Sans-Serif;
+    font-size: .85em;
     margin: 0;
     padding: 0;
 }
 
 #body {
-    padding-top: 10px;
     padding-bottom: 10px;
+    padding-top: 10px;
 }
 
 .prefix {
@@ -19,11 +19,11 @@
 }
 
 .action {
+    color: #aaa;
     cursor: pointer;
     display: block;
-    margin: 0;
-    color: #aaa;
     font-size: 1.0em;
+    margin: 0;
     margin: 0 0 0 -2px;
     width: 115px;
 }
@@ -33,18 +33,18 @@ select {
 }
 
 .box {
-    position: relative;
     height: 40px;
-    width: 100%;
     margin-bottom: 15px;
+    position: relative;
+    width: 100%;
 }
 
 .box-small {
-    position: relative;
-    margin-top: 35px;
-    width: 65%;
     float: right;
     font-size: 0.8em;
+    margin-top: 35px;
+    position: relative;
+    width: 65%;
     z-index: 1;
 }
 
@@ -54,15 +54,15 @@ select {
     }
 
 .left-corner {
-    position: absolute;
-    left: 0;
     bottom: 0;
+    left: 0;
+    position: absolute;
 }
 
 .right-corner {
+    bottom: 0;
     position: absolute;
     right: 0;
-    bottom: 0;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -94,27 +94,28 @@ fieldset {
     margin: 0;
 }
 
-fieldset legend {
-    font-size: 1.1em;
-}
-
-fieldset ol {
-    padding: 0;    
-    list-style: none;
-}
-
-fieldset ol li {
-    padding: 1px;    
-}
-    fieldset ol li > div {
-        position: relative;
+    fieldset legend {
+        font-size: 1.1em;
     }
+
+    fieldset ol {
+        list-style: none;
+        padding: 0;
+    }
+
+        fieldset ol li {
+            padding: 1px;
+        }
+
+            fieldset ol li > div {
+                position: relative;
+            }
 
 li fieldset legend {
     display: none;
 }
 
-label {    
+label {
     display: block;
     font-weight: 600;
     vertical-align: baseline;
@@ -126,34 +127,34 @@ label {
 }
 
 input, textarea {
-    border: 1px solid #e2e2e2;
     background: #fff;
+    border: 1px solid #e2e2e2;
     color: #333;
 }
 
 input {
-    width: 208px;    
+    width: 208px;
 }
 
 textarea {
-    width: 440px;
     max-width: 440px;
     min-width: 208px;
-    resize: both;
     overflow: hidden;
+    resize: both;
+    width: 440px;
 }
 
-input:focus, textarea:focus {
-    border: 1px solid #7ac0da;
-}
+    input:focus, textarea:focus {
+        border: 1px solid #7ac0da;
+    }
 
 input[type="checkbox"],
 input[type="radio"] {
     background: transparent;
     border: inherit;
-    width: auto;
     margin-left: 0;
     margin-right: 0;
+    width: auto;
 }
 
 input[type="submit"],
@@ -163,8 +164,8 @@ button {
     border: 1px solid #787878;
     cursor: pointer;
     font-weight: 600;
-    padding: 5px;
     margin-right: 8px;
+    padding: 5px;
     width: auto;
 }
 
@@ -191,8 +192,8 @@ button {
 
 .field-validation-error {
     color: #e80c4d;
-    font-weight: bold;    
     font-size: 0.8em;
+    font-weight: bold;
     padding-left: 10px;
     position: absolute;
     top: 50%;
@@ -212,8 +213,8 @@ input[type="radio"].input-validation-error {
 }
 
 .ctor {
-    font-weight: bold;
     font-size: 1.4em;
+    font-weight: bold;
 }
 
 /********************
@@ -221,15 +222,14 @@ input[type="radio"].input-validation-error {
 ********************/
 
 @media only screen and (max-width: 850px) {
-
     .inline {
         display: block;
     }
 
     .field-validation-error {
         display: block;
-        position: inherit;
         padding-left: 0;
+        position: inherit;
     }
 
     .box-small {
@@ -241,7 +241,7 @@ input[type="radio"].input-validation-error {
         display: block;
     }
 
-    .left-corner, .right-corner  {
+    .left-corner, .right-corner {
         position: inherit;
     }
 
