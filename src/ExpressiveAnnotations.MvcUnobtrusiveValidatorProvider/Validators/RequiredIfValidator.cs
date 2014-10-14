@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -23,12 +24,12 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         /// <param name="metadata">The model metadata instance.</param>
         /// <param name="context">The controller context instance.</param>
         /// <param name="attribute">The expressive requirement attribute instance.</param>
-        /// <exception cref="System.InvalidOperationException"></exception>
+        /// <exception cref="System.ComponentModel.DataAnnotations.ValidationException"></exception>
         public RequiredIfValidator(ModelMetadata metadata, ControllerContext context, RequiredIfAttribute attribute)
             : base(metadata, context, attribute)
         {
             try
-            {
+            {                
                 AnnotatedField = string.Format("{0}.{1}", metadata.ContainerType.FullName, metadata.PropertyName).ToLowerInvariant(); // annotated field id
                 var attribId = string.Format("{0}.{1}", attribute.TypeId, AnnotatedField).ToLowerInvariant(); // global id used for cache
                 var fieldsId = string.Format("fields.{0}", attribId);
@@ -38,6 +39,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
 
                 if (FieldsMap == null && ConstsMap == null)
                 {
+                    // no cached data yet (application startup) => parse the expression for the first time to extract members and detect potetnial problems
                     var parser = new Parser();
                     parser.RegisterMethods();
                     parser.Parse(metadata.ContainerType, attribute.Expression);
@@ -49,18 +51,18 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
                     HttpContext.Current.Cache.Insert(fieldsId, FieldsMap);
                     HttpContext.Current.Cache.Insert(constsId, ConstsMap);
 
-                    attribute.Compile(metadata.ContainerType);
+                    attribute.Compile(metadata.ContainerType); // parse expression and cache result for later usage by attributes (optimization - more load at startup, but no further re-parsing)
                 }
 
-                Expression = attribute.Expression;
+                Expression = attribute.Expression; // expression will be pushed to JavaScript side to be processed by eval(), so it should be perfectly valid JavaScript code
                 FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);
                 AllowEmpty = attribute.AllowEmptyStrings;
             }
             catch (Exception e)
             {
-                throw new InvalidOperationException(string.Format(
-                    "Problem related to {0} attribute for {1} field with following expression specified: {2}",
-                    attribute.GetType().Name, metadata.PropertyName, attribute.Expression), e);
+                throw new ValidationException(
+                    string.Format("{0}: validation applied to {1} field failed.",
+                    GetType().Name, metadata.PropertyName), e);
             }
         }
 

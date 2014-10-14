@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -23,7 +24,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         /// <param name="metadata">The model metadata instance.</param>
         /// <param name="context">The controller context instance.</param>
         /// <param name="attribute">The expressive assertion attribute instance.</param>
-        /// <exception cref="System.InvalidOperationException"></exception>
+        /// <exception cref="System.ComponentModel.DataAnnotations.ValidationException"></exception>
         public AssertThatValidator(ModelMetadata metadata, ControllerContext context, AssertThatAttribute attribute)
             : base(metadata, context, attribute)
         {
@@ -52,14 +53,14 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
                     attribute.Compile(metadata.ContainerType);
                 }
 
-                Expression = attribute.Expression; // expression will be pushed to JavaScript side to be processed by eval(), so it should be perfectly valid JavaScript code
+                Expression = attribute.Expression;
                 FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);
             }
             catch (Exception e)
             {
-                throw new InvalidOperationException(string.Format(
-                    "Problem related to {0} attribute for {1} field with following expression specified: {2}",
-                    attribute.GetType().Name, metadata.PropertyName, attribute.Expression), e);
+                throw new ValidationException(
+                    string.Format("{0}: validation applied to {1} field failed.",
+                    GetType().Name, metadata.PropertyName), e);
             }
         }
 

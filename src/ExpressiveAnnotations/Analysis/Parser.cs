@@ -104,7 +104,7 @@ namespace ExpressiveAnnotations.Analysis
             }
             catch (ParseErrorException e)
             {
-                throw new InvalidOperationException(BuildParseError(e, expression), e);
+                throw new InvalidOperationException(BuildParseError(e, expression));
             }
             catch (Exception e)
             {

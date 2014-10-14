@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -107,6 +108,24 @@ namespace ExpressiveAnnotations
             {
                 return e.Types.Where(t => t != null);
             }
+        }
+
+        public static string GetMemberNameFromDisplayAttribute(this Type type, string displayName)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+            if (displayName == null)
+                throw new ArgumentNullException("displayName");
+            
+            // get member name from display attribute (if such an attribute exists) based on display name
+            var props = type.GetProperties()
+                .Where(p => p.GetCustomAttributes(false)
+                    .OfType<DisplayAttribute>()
+                    .Any(a => a.GetName() == displayName))
+                .Select(p => p.Name).ToList();
+
+            // if there is an ambiguity, return nothing
+            return props.Count() == 1 ? props.SingleOrDefault() : null;
         }
 
         public static string TrimStart(this string input, out int line, out int column)

@@ -105,24 +105,36 @@ namespace ExpressiveAnnotations.Attributes
         ///     An instance of the <see cref="T:System.ComponentModel.DataAnnotations.ValidationResult" /> class.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">validationContext;ValidationContext not provided.</exception>
+        /// <exception cref="System.ComponentModel.DataAnnotations.ValidationException"></exception>
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             if (validationContext == null)
                 throw new ArgumentNullException("validationContext", "ValidationContext not provided.");
 
-            var isEmpty = value is string && string.IsNullOrWhiteSpace((string) value);
-            if (value == null || (isEmpty && !AllowEmptyStrings))
+            var memberName = validationContext.MemberName // in case member name is a null (e.g. like in older MVC versions), try workaround - get member name using display attribute
+                             ?? validationContext.ObjectType.GetMemberNameFromDisplayAttribute(validationContext.DisplayName);
+            try
             {
-                if (CachedValidationFunc == null)
-                    CachedValidationFunc = Parser.Parse(validationContext.ObjectType, Expression);
+                var isEmpty = value is string && string.IsNullOrWhiteSpace((string) value);
+                if (value == null || (isEmpty && !AllowEmptyStrings))
+                {
+                    if (CachedValidationFunc == null)
+                        CachedValidationFunc = Parser.Parse(validationContext.ObjectType, Expression);
 
-                if (CachedValidationFunc(validationContext.ObjectInstance)) // check if the requirement condition is satisfied
-                    return new ValidationResult( // requirement confirmed => notify
-                        FormatErrorMessage(validationContext.DisplayName, Expression), 
-                        new[] {validationContext.MemberName});
+                    if (CachedValidationFunc(validationContext.ObjectInstance)) // check if the requirement condition is satisfied
+                        return new ValidationResult( // requirement confirmed => notify
+                            FormatErrorMessage(validationContext.DisplayName, Expression),
+                            new[] {memberName});
+                }
+
+                return ValidationResult.Success;
             }
-
-            return ValidationResult.Success;
+            catch (Exception e)
+            {
+                throw new ValidationException(
+                    string.Format("{0}: validation applied to {1} field failed.",
+                    GetType().Name, memberName), e);
+            }
         }
     }
 }
