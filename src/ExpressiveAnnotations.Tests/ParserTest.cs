@@ -371,7 +371,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    @"Parse error line 1, column 1:
+                    @"Parse error on line 1, column 1:
 ... Whoami(0) == 'utility method 0' ...
     ^--- Function 'Whoami' accepting 1 argument is ambiguous.",
                     e.Message);
@@ -386,7 +386,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    @"Parse error line 1, column 1:
+                    @"Parse error on line 1, column 1:
 ... Glue('a', 'b') == 'ab' ...
     ^--- Function 'Glue' accepting 2 arguments is ambiguous.",
                     e.Message);
@@ -404,7 +404,7 @@ namespace ExpressiveAnnotations.Tests
             catch (Exception e)
             {
                 Assert.AreEqual(
-                    @"Parse error line 1, column 1:
+                    @"Parse error on line 1, column 1:
 ... Whoami(0) == 'model method 0' ...
     ^--- Function 'Whoami' accepting 1 argument is ambiguous.",
                     e.Message);
@@ -430,7 +430,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    @"Parse error line 1, column 8:
+                    @"Parse error on line 1, column 8:
 ... '1', '2') == 'utility method 1 - 2' ...
     ^--- Function 'Whoami' 1st argument implicit conversion from 'System.String' to expected 'System.Int32' failed.",
                     e.Message);
@@ -445,7 +445,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    @"Parse error line 1, column 11:
+                    @"Parse error on line 1, column 11:
 ... 2) == 'utility method 1 - 2' ...
     ^--- Function 'Whoami' 2nd argument implicit conversion from 'System.Int32' to expected 'System.String' failed.",
                     e.Message);
@@ -488,7 +488,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    @"Parse error line 1, column 1:
+                    @"Parse error on line 1, column 1:
 ... Stability.High == 0 ...
     ^--- Enum 'Stability' is ambiguous, found following:
 'ExpressiveAnnotations.Tests.Utility+Stability',
@@ -512,7 +512,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    @"Parse error line 1, column 1:
+                    @"Parse error on line 1, column 1:
 ... NotMe == 0 ...
     ^--- Only public properties, constants and enums are accepted. Identifier 'NotMe' not known.",
                     e.Message);
@@ -549,6 +549,7 @@ namespace ExpressiveAnnotations.Tests
             parser.RegisterMethods();
 
             Assert.IsTrue(parser.Parse<object>("Now() > Today()").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("Date(1985, 2, 20) < Date(1985, 2, 20, 0, 0, 1)").Invoke(null));
 
             Assert.IsTrue(parser.Parse<object>("Length('0123') == 4").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("Length('    ') == 4").Invoke(null));
@@ -694,6 +695,7 @@ namespace ExpressiveAnnotations.Tests
         public void verify_various_parsing_errors()
         {
             var parser = new Parser();
+            parser.RegisterMethods();
             parser.AddFunction<int, int, int>("Max", (x, y) => Math.Max(x, y));
 
             try
@@ -705,7 +707,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    @"Parse error line 1, column 2:
+                    @"Parse error on line 1, column 2:
 ... ++ +1==2 ...
     ^--- Unexpected token: '++'.",
                     e.Message);
@@ -720,7 +722,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    @"Parse error line 1, column 6:
+                    @"Parse error on line 1, column 6:
 ... # false ...
     ^--- Invalid token.",
                     e.Message);
@@ -735,7 +737,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    @"Parse error line 1, column 7:
+                    @"Parse error on line 1, column 7:
 ... - 'abc' ...
     ^--- Operator '-' cannot be applied to operands of type 'System.String' and 'System.String'.",
                     e.Message);
@@ -750,7 +752,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    @"Parse error line 1, column 15:
+                    @"Parse error on line 1, column 15:
 ... - 'abc' > 0 ...
     ^--- Operator '-' cannot be applied to operands of type 'System.String' and 'System.String'.",
                     e.Message);
@@ -768,7 +770,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    @"Parse error line 2, column 15:
+                    @"Parse error on line 2, column 15:
 ... *'1.5' - 1) + 1)) * -2 ...
     ^--- Operator '*' cannot be applied to operands of type 'System.Int32' and 'System.String'.",
                     e.Message);
@@ -786,7 +788,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    @"Parse error line 3, column 9:
+                    @"Parse error on line 3, column 9:
 ... x/1 == 3.50 ...
     ^--- Only public properties, constants and enums are accepted. Identifier 'x' not known.",
                     e.Message);
@@ -801,7 +803,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    @"Parse error line 1, column 1:
+                    @"Parse error on line 1, column 1:
 ... WriteLine('hello') ...
     ^--- Function 'WriteLine' not known.",
                     e.Message);
@@ -816,7 +818,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    @"Parse error line 1, column 1:
+                    @"Parse error on line 1, column 1:
 ... Max(1.1) ...
     ^--- Function 'Max' accepting 1 argument not found.",
                     e.Message);
@@ -831,7 +833,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    @"Parse error line 1, column 1:
+                    @"Parse error on line 1, column 1:
 ... Max(1.1, 1.2, 'a') ...
     ^--- Function 'Max' accepting 3 arguments not found.",
                     e.Message);
@@ -848,9 +850,39 @@ namespace ExpressiveAnnotations.Tests
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
-                    @"Parse error line 2, column 14:
+                    @"Parse error on line 2, column 14:
 ... 'a')) == 1.1 ...
     ^--- Function 'Max' 2nd argument implicit conversion from 'System.String' to expected 'System.Int32' failed.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>("Now() && Today()").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 7:
+... && Today() ...
+    ^--- Operator '&&' cannot be applied to operands of type 'System.DateTime' and 'System.DateTime'.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>("'a' >= 'b'").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 5:
+... >= 'b' ...
+    ^--- Operator '>=' cannot be applied to operands of type 'System.String' and 'System.String'.",
                     e.Message);
             }
         }        

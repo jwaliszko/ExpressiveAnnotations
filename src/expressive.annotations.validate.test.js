@@ -231,6 +231,7 @@
         var m = ea.toolchain.methods;
 
         window.ok(m.Now() > m.Today());
+        window.ok(m.Date(1985, 2, 20) < m.Date(1985, 2, 20, 0, 0, 1));
 
         window.ok(m.Length('0123') == 4);
         window.ok(m.Length('    ') == 4);
