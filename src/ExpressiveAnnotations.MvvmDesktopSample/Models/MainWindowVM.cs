@@ -6,8 +6,8 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
     {
         public MainWindowVM()
         {
-            Query = new QueryVM();
-            Query.PropertyChanged += (sender, args) => OnPropertyChanged(() => Progress);
+            ValidationStateChanged += (sender, args) => OnPropertyChanged(() => Progress);
+            Query = new QueryVM();            
         }
 
         public QueryVM Query { get; set; }
@@ -16,10 +16,10 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
         {
             get
             {
-                var attribCount = Query.AnnotatedProperties.Count() + Query.ContactDetails.AnnotatedProperties.Count();
-                var errorsCount = Query.ValidationErrors.Count() + Query.ContactDetails.ValidationErrors.Count();
-                var passedCount = attribCount - errorsCount;
-                return (double) passedCount/attribCount;
+                var fieldsCount = AnnotatedProperties.Count();
+                var errorsCount = ValidationErrors.Count(x => x.Value.Any());
+                var passedCount = fieldsCount - errorsCount;
+                return (double) passedCount/fieldsCount;
             }
         }
     }
