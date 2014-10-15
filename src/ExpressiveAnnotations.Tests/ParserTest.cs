@@ -108,19 +108,20 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("!!!true == false").Invoke(null));
 
             Assert.IsTrue(parser.Parse<object>("true != !true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("!!true != !!!true").Invoke(null));
 
             Assert.IsTrue(parser.Parse<object>("true && true").Invoke(null));
             Assert.IsFalse(parser.Parse<object>("false && false").Invoke(null));
             Assert.IsFalse(parser.Parse<object>("true && false").Invoke(null));
-            Assert.IsFalse(parser.Parse<object>("false && true").Invoke(null));            
+            Assert.IsFalse(parser.Parse<object>("false && true").Invoke(null));
 
             Assert.IsTrue(parser.Parse<object>("true || true").Invoke(null));
             Assert.IsFalse(parser.Parse<object>("false || false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("true || false").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("false || true").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("false || true").Invoke(null));
 
             Assert.IsTrue(parser.Parse<object>("(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))").Invoke(null));            
+            Assert.IsTrue(parser.Parse<object>("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))").Invoke(null));
 
             Assert.IsTrue(parser.Parse<object>("0 == 0 && 1 < 2").Invoke(null));
 
