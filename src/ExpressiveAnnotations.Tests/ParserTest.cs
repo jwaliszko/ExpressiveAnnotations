@@ -107,18 +107,20 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("!!true == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("!!!true == false").Invoke(null));
 
+            Assert.IsTrue(parser.Parse<object>("true != !true").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("true && true").Invoke(null));
             Assert.IsFalse(parser.Parse<object>("false && false").Invoke(null));
             Assert.IsFalse(parser.Parse<object>("true && false").Invoke(null));
-            Assert.IsFalse(parser.Parse<object>("false && true").Invoke(null));
+            Assert.IsFalse(parser.Parse<object>("false && true").Invoke(null));            
 
             Assert.IsTrue(parser.Parse<object>("true || true").Invoke(null));
             Assert.IsFalse(parser.Parse<object>("false || false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("true || false").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("false || true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("false || true").Invoke(null));            
 
             Assert.IsTrue(parser.Parse<object>("(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false").Invoke(null));
-            Assert.IsTrue(parser.Parse<object>("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))").Invoke(null));            
 
             Assert.IsTrue(parser.Parse<object>("0 == 0 && 1 < 2").Invoke(null));
 
@@ -126,7 +128,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("0 >= 0").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("0 <= 0").Invoke(null));
 
-            Assert.IsTrue(parser.Parse<object>("0 == 0").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("0 == 0").Invoke(null));            
 
             Assert.IsFalse(parser.Parse<object>("0 == 1").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("-1 == -1").Invoke(null));
@@ -263,7 +265,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<Model>("Guid1 != Guid2").Invoke(model));
 
             const string expression =
-                @"Flag == true
+                @"Flag == !false
                       && (
                              (Text != 'hello world' && Date < SubModel.Date)
                              || (
@@ -883,6 +885,36 @@ namespace ExpressiveAnnotations.Tests
                     @"Parse error on line 1, column 5:
 ... >= 'b' ...
     ^--- Operator '>=' cannot be applied to operands of type 'System.String' and 'System.String'.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>("!'a'").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 1:
+... !'a' ...
+    ^--- Operator '!' cannot be applied to operand of type 'System.String'.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>("!! Today()").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 2:
+... ! Today() ...
+    ^--- Operator '!' cannot be applied to operand of type 'System.DateTime'.",
                     e.Message);
             }
         }        

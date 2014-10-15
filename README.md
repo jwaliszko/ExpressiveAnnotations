@@ -83,13 +83,13 @@ Implementation core is based on top-down recursive descent [logical expressions 
 ```
 expression => or-exp
 or-exp     => and-exp [ "||" or-exp ]
-and-exp    => not-exp [ "&&" and-exp ]
-not-exp    => rel-exp | "!" not-exp
-rel-exp    => add-exp [ rel-op add-exp ]
+and-exp    => rel-exp [ "&&" and-exp ]
+rel-exp    => not-exp [ rel-op not-exp ]
+not-exp    => add-exp | "!" not-exp
 add-exp    => mul-exp add-exp'
 add-exp'   => "+" add-exp | "-" add-exp
 mul-exp    => val mul-exp'
-mul-exp'   => "*" mul-exp | "/" mul-exp 
+mul-exp'   => "*" mul-exp | "/" mul-exp
 rel-op     => "==" | "!=" | ">" | ">=" | "<" | "<="
 val        => "null" | int | float | bool | string | func | "(" or-exp ")"
 ```
