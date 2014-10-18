@@ -22,6 +22,8 @@ If you'll be interested in comprehensive examples afterwards, take a look inside
 
 For the time being, to keep your ear to the ground, let's walk through few exemplary code snippets:
 ```C#
+using ExpressiveAnnotations.Attributes;
+
 [RequiredIf("GoAbroad == true")]
 public string PassportNumber { get; set; }
 ```
@@ -52,13 +54,39 @@ Finally, take a brief look at following construction:
                  )")]
 public string ReasonForTravel { get; set; }
 ```
-<sub>Notice: Expression is splitted into multiple lines because such a form is easier to comprehend.</sub>
 
-Restriction above is slightly more complex than its predecessors, but still can be quickly understood (reason for travel has to be provided if you plan to go abroad and: want to visit the same definite country twice, or have between 25 and 55 years).
+Restriction above is slightly more complex than its predecessors, but still can be quickly understood (reason for travel has to be provided if you plan to go abroad and: want to visit the same definite country twice, or are between 25 and 55 years old).
+
+###<a id="declarative-vs-imperative-programming---what-is-it-about">Declarative vs. imperative programming - what is it about?</a>
+
+With **declarative** programming you write logic that expresses *what* you want, but not necessarily *how* to achieve it. You declare your desired results, but not the necessarily step-by-step.
+
+In our case, this concept is materialized by attributes, e.g.
+```C#
+[RequiredIf("GoAbroad == true && NextCountry != 'Other' && NextCountry == Country",
+    ErrorMessage = "If you plan to travel abroad, why visit the same country twice?")]
+public string ReasonForTravel { get; set; }
+```
+With **imperative** programming you define the control flow of the computation which needs to be done. You tell the compiler what you want, exactly step by step.
+
+If we choose this way instead of model fields decoration, it has negative impact on the complexity of the code. Logic responsible for validation is now implemented somewhere else in our application, e.g. inside controllers actions instead of model class itself:
+```C#
+    if (!model.GoAbroad)
+        return View("Success");
+    if (model.NextCountry == "Other")
+        return View("Success");
+    if (model.NextCountry != model.Country)
+        return View("Success");
+    
+    ModelState.AddModelError("ReasonForTravel", 
+        "If you plan to travel abroad, why visit the same country twice?");
+    return View("Home", model);
+}
+```
 
 ###<a id="how-to-construct-conditional-validation-attributes">How to construct conditional validation attributes?</a>
 
-#####<a id="signatures">Signatures:</a>
+#####<a id="signatures">Signatures</a>
 
 ```
 RequiredIfAttribute(
@@ -77,7 +105,7 @@ AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should 
                     or whitespace strings.
 ```
 
-#####<a id="implementation">Implementation:</a>
+#####<a id="implementation">Implementation</a>
 
 Implementation core is based on top-down recursive descent [logical expressions parser](src/ExpressiveAnnotations/Analysis/Parser.cs), with a single token of lookahead ([LL(1)](http://en.wikipedia.org/wiki/LL_parser)), which runs on the following [EBNF-like](http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form) grammar:
 ```
@@ -95,38 +123,38 @@ val        => "null" | int | float | bool | string | func | "(" or-exp ")"
 ```
 Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar except for *int*, *float*, *bool*, *string* and *func*, which are assumed to be implicitly defined (*func* can be an enum value as well as constant, property or function name).
 
-Preserving the syntax defined by the grammar above, logical expressions can be built using following components:
+Logical expressions should be built according to the syntax defined by grammar, with the usage of following components:
 
 * binary operators: `||`, `&&`, `!`,
 * relational operators: `==`, `!=`,`<`, `<=`, `>`, `>=`,
 * arithmetic operators: `+`, `-`, `*`, `/`,	
 * brackets: `(`, `)`,
-* alphanumeric characters and whitespaces with the support of `,`, `.`, `_`, `'` and `"`, used to synthesize suitable literals:
+* alphanumeric characters with the support of `,`, `.`, `_`, `'` and whitespaces, used to synthesize suitable literals:
   * null literal: `null`, 
   * integer number literals, e.g. `123`, 
   * real number literals, e.g. `1.5` or `-0.3e-2`,
   * boolean literals: `true` and `false`,
-  * string literals: `'in single quotes'` (internal quote escape sequence: `\'`, `\n` character represents new line no matter the platform),
+  * string literals: `'in single quotes'` (internal quote escape sequence is `\'`, character representing new line no matter the platform is `\n`),
   * func literals:
       * property names, e.g. `SomeProperty`,
 	  * constants, e.g. `SomeType.CONST`,
       * enum values, e.g. `SomeEnumType.SomeValue`,
 	  * function invocations, e.g. `SomeFunction(...)`.
 
-Provided expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object. As a result of expression evaluation, boolean flag is returned, indicating that expression is true or false. 
+Specified expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object. As a result of expression evaluation, boolean flag is returned, indicating that expression is true or false. 
 
 When working with ASP.NET MVC stack, unobtrusive client-side validation mechanism is [additionally available](#what-about-the-support-of-aspnet-mvc-client-side-validation). Client receives unchanged expression string from server. Such an expression is then evaluated using JavaScript [`eval()` method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) within the context of reflected model object. Such a model, analogously to the server-side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
 
-#####<a id="traps">Traps:</a>
+#####<a id="traps">Traps</a>
 
-Attention needed when coping with `null` (discrepancies between C# and JavaScript), e.g.
+Attention is needed when coping with `null` because of discrepancies between C# and JavaScript, e.g.
 
 * `null + "text"` - in C# `"text"`, in JS `"nulltext"`,
 * `2 * null`      - in C# `null`  , in JS `0`,
 * `null > -1`     - in C# `false` , in JS `true`,
 * and more...
 
-#####<a id="built-in-functions">Built-in functions:</a>
+#####<a id="built-in-functions">Built-in functions</a>
 
 As already noted, there is an option to reinforce expressions with functions, e.g.
 ```C#
@@ -186,9 +214,38 @@ Toolchain functions available out of the box at server- and client-side:
 * `Guid Guid(string str)`
     * Initializes a new instance of the Guid structure by using the value represented by a specified string.
 
-###<a id="frequently-asked-questions">Frequently asked questions:</a>
+###<a id="what-about-the-support-of-aspnet-mvc-client-side-validation">What about the support of ASP.NET MVC client-side validation?</a>
 
-#####<a id="what-if-there-is-no-function-i-need">What if there is no function I need?</a>
+Client-side validation is fully supported. Enable it for your web project within the next few steps:
+
+1. Reference both assemblies to your project: core [**ExpressiveAnnotations.dll**](src/ExpressiveAnnotations) and subsidiary [**ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll**](src/ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider),
+2. In Global.asax register required validators (`IClientValidatable` interface is not directly implemented by the attributes, to avoid coupling of ExpressionAnnotations assembly with System.Web.Mvc dependency):
+
+    ```C#
+    using ExpressiveAnnotations.Attributes;
+    using ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators;
+
+    protected void Application_Start()
+    {
+        DataAnnotationsModelValidatorProvider.RegisterAdapter(
+            typeof (RequiredIfAttribute), typeof (RequiredIfValidator));
+        DataAnnotationsModelValidatorProvider.RegisterAdapter(
+            typeof (AssertThatAttribute), typeof (AssertThatValidator));
+    ```
+3. Include [**expressive.annotations.validate.js**](src/expressive.annotations.validate.js) script in your page (do not forget standard jQuery validation scripts):
+
+    ```JavaScript
+    <script src="/Scripts/jquery.validate.js"></script>
+    <script src="/Scripts/jquery.validate.unobtrusive.js"></script>
+    ...
+    <script src="/Scripts/expressive.annotations.validate.js"></script>
+    ```
+
+Alternatively, visit the [installation section](#installation).
+
+###<a id="frequently-asked-questions">Frequently asked questions</a>
+
+#####<a id="what-if-there-is-no-built---in-function-i-need">What if there is no built-in function I need?</a>
 
 Create it yourself. Any custom function defined within the model class scope at server-side is automatically recognized and can be used inside expressions, e.g.
 ```C#
@@ -242,60 +299,17 @@ Use `noConflict()` method. In case of naming collision return control of the `ea
     ea... // do something with original ea variable
 ```
 
-###<a id="declarative-vs-imperative-programming---what-is-it-about">Declarative vs. imperative programming - what is it about?</a>
+###<a id="installation">Installation</a>
 
-With **declarative** programming you write logic that expresses *what* you want, but not necessarily *how* to achieve it. You declare your desired results, but not the necessarily step-by-step.
+Simplest way is using the [NuGet](https://www.nuget.org) Package Manager Console:
 
-In our case, this concept is materialized by attributes, e.g.
-```C#
-[RequiredIf("GoAbroad == true && NextCountry != 'Other' && NextCountry == Country",
-    ErrorMessage = "If you plan to travel abroad, why visit the same country twice?")]
-public string ReasonForTravel { get; set; }
-```
-With **imperative** programming you define the control flow of the computation which needs to be done. You tell the compiler what you want, exactly step by step.
+* [complete package](https://www.nuget.org/packages/ExpressiveAnnotations) - both assemblies and the script included (allows [complete MVC validation](#what-about-the-support-of-aspnet-mvc-client-side-validation)):
 
-If we choose this way instead of model fields decoration, it has negative impact on the complexity of the code. Logic responsible for validation is now implemented somewhere else in our application, e.g. inside controllers actions instead of model class itself:
-```C#
-    if (!model.GoAbroad)
-        return View("Success");
-    if (model.NextCountry == "Other")
-        return View("Success");
-    if (model.NextCountry != model.Country)
-        return View("Success");
-    
-    ModelState.AddModelError("ReasonForTravel", 
-        "If you plan to travel abroad, why visit the same country twice?");
-    return View("Home", model);
-}
-```
+    ###`PM> Install-Package ExpressiveAnnotations`
 
-###<a id="what-about-the-support-of-aspnet-mvc-client-side-validation">What about the support of ASP.NET MVC client-side validation?</a>
+* [minimal package](https://www.nuget.org/packages/ExpressiveAnnotations.dll) - core assembly only (MVC-related client-side coating components excluded):
 
-Client-side validation is fully supported. Enable it for your web project within the next few steps:
-
-1. Reference both assemblies to your project: core [**ExpressiveAnnotations.dll**](src/ExpressiveAnnotations) and subsidiary [**ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll**](src/ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider),
-2. In Global.asax register required validators (`IClientValidatable` interface is not directly implemented by the attribute, to avoid coupling of ExpressionAnnotations assembly with System.Web.Mvc dependency):
-
-    ```C#
-    protected void Application_Start()
-    {
-        DataAnnotationsModelValidatorProvider.RegisterAdapter(
-            typeof (RequiredIfAttribute), typeof (RequiredIfValidator));
-        DataAnnotationsModelValidatorProvider.RegisterAdapter(
-            typeof (AssertThatAttribute), typeof (AssertThatValidator));
-    ```
-3. Include [**expressive.annotations.validate.js**](src/expressive.annotations.validate.js) scripts in your page (do not forget standard jQuery validation scripts):
-
-    ```JavaScript
-    <script src="/Scripts/jquery.validate.js"></script>
-    <script src="/Scripts/jquery.validate.unobtrusive.js"></script>
-    ...
-    <script src="/Scripts/expressive.annotations.validate.js"></script>
-    ```
-
-Alternatively, using the [NuGet](https://www.nuget.org/packages/ExpressiveAnnotations/) Package Manager Console:
-
-###`PM> Install-Package ExpressiveAnnotations`
+    ###`PM> Install-Package ExpressiveAnnotations.dll`
 
 ###<a id="contributors">Contributors</a>
 
