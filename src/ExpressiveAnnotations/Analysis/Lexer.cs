@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -118,11 +119,11 @@ namespace ExpressiveAnnotations.Analysis
                 case TokenType.NULL:
                     return null;
                 case TokenType.INT:
-                    return int.Parse(value);
+                    return int.Parse(value, CultureInfo.InvariantCulture);
                 case TokenType.FLOAT:
-                    return double.Parse(value); // by default, treat real numeric literals as 64-bit floating binary point values (as C# does, gives better precision than float)
-                case TokenType.BOOL:
-                    return bool.Parse(value);
+                    return double.Parse(value, CultureInfo.InvariantCulture); // By default, treat real numeric literals as 64-bit floating binary point values (as C#
+                case TokenType.BOOL:                                          // does, gives better precision than float). What's more, InvariantCulture means no matter
+                    return bool.Parse(value);                                 // the current culture, dot is always accepted in double literal to be succesfully parsed.
                 case TokenType.STRING:
                     return ParseStringLiteral(value);
                 default:

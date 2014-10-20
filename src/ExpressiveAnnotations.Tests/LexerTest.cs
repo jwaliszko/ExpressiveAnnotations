@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
+using System.Threading;
 using ExpressiveAnnotations.Analysis;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -174,6 +176,25 @@ namespace ExpressiveAnnotations.Tests
                 Assert.AreEqual(1, ctx.Line);
                 Assert.AreEqual(12, ctx.Column);
             }
+        }
+
+        [TestMethod]
+        public void verify_analysis_apathy_to_culture_settings()
+        {
+            var current = Thread.CurrentThread.CurrentCulture;
+
+            var lexer = new Lexer();
+            foreach (var temp in CultureInfo.GetCultures(CultureTypes.AllCultures))
+            {                
+                Thread.CurrentThread.CurrentCulture = temp;
+
+                // literals parsing should not vary across diverse cultures
+                var tkn = lexer.Analyze("0.1").First(); // e.g. double literal should be always written using dot in our expressions language, no matter the culture
+                Assert.AreEqual(TokenType.FLOAT, tkn.Type);
+                Assert.AreEqual(0.1, tkn.Value);
+            }
+
+            Thread.CurrentThread.CurrentCulture = current;
         }
 
         [TestMethod]
