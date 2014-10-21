@@ -3,6 +3,7 @@
  * Licensed MIT: http://opensource.org/licenses/MIT */
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using ExpressiveAnnotations.Analysis;
@@ -29,9 +30,10 @@ namespace ExpressiveAnnotations.Attributes
             
             Expression = expression;
             AllowEmptyStrings = false;
+            CachedValidationFuncs = new Dictionary<Type, Func<object, bool>>();
         }
 
-        private Func<object, bool> CachedValidationFunc { get; set; }
+        private Dictionary<Type, Func<object, bool>> CachedValidationFuncs { get; set; }
         private Parser Parser { get; set; }
 
         /// <summary>
@@ -76,11 +78,11 @@ namespace ExpressiveAnnotations.Attributes
         {
             if (force)
             {
-                CachedValidationFunc = Parser.Parse(validationContextType, Expression);
+                CachedValidationFuncs[validationContextType] = Parser.Parse(validationContextType, Expression);
                 return;
             }
-            if (CachedValidationFunc == null)
-                CachedValidationFunc = Parser.Parse(validationContextType, Expression);
+            if (!CachedValidationFuncs.ContainsKey(validationContextType))
+                CachedValidationFuncs[validationContextType] = Parser.Parse(validationContextType, Expression);
         }
 
         /// <summary>
@@ -118,10 +120,10 @@ namespace ExpressiveAnnotations.Attributes
                 var isEmpty = value is string && string.IsNullOrWhiteSpace((string) value);
                 if (value == null || (isEmpty && !AllowEmptyStrings))
                 {
-                    if (CachedValidationFunc == null)
-                        CachedValidationFunc = Parser.Parse(validationContext.ObjectType, Expression);
+                    if (!CachedValidationFuncs.ContainsKey(validationContext.ObjectType))
+                        CachedValidationFuncs[validationContext.ObjectType] = Parser.Parse(validationContext.ObjectType, Expression);
 
-                    if (CachedValidationFunc(validationContext.ObjectInstance)) // check if the requirement condition is satisfied
+                    if (CachedValidationFuncs[validationContext.ObjectType](validationContext.ObjectInstance)) // check if the requirement condition is satisfied
                         return new ValidationResult( // requirement confirmed => notify
                             FormatErrorMessage(validationContext.DisplayName, Expression),
                             new[] {memberName});

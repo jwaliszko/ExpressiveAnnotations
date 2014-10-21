@@ -52,8 +52,10 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AssertThatIssueDerivedClassesWithValidationOnBase.cs" />
     <Compile Include="AttribTest.cs" />
     <Compile Include="Helper.cs" />
+    <Compile Include="RequiredIfIssueDerivedClassesWithValidationOnBase.cs" />
     <Compile Include="LexerTest.cs" />
     <Compile Include="ParserTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
