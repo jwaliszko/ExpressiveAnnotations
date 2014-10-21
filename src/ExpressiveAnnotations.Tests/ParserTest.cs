@@ -1022,7 +1022,7 @@ namespace ExpressiveAnnotations.Tests
         {
             Yes,
             No,
-            Uncertain,
+            Uncertain
         }
     }
 }
