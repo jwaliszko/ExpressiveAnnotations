@@ -15,6 +15,8 @@ namespace ExpressiveAnnotations.Analysis
     /// </summary>
     public sealed class Lexer
     {
+        private readonly object _locker = new object();
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="Lexer" /> class.
         /// </summary>
@@ -69,19 +71,24 @@ namespace ExpressiveAnnotations.Analysis
         /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
         public IEnumerable<Token> Analyze(string expression)
         {
-            if (expression == null)
-                throw new ArgumentNullException("expression", "Expression not provided.");
+            lock (_locker)
+            {
+                if (expression == null)
+                    throw new ArgumentNullException("expression", "Expression not provided.");
 
-            Location = new Location(line: 1, column: 1);
-            Expression = expression;
+                Location = new Location(line: 1, column: 1);
+                Expression = expression;
 
-            var tokens = new List<Token>();
-            while (Next())
-                tokens.Add(Token);
+                var tokens = new List<Token>();
+                while (Next())
+                {
+                    tokens.Add(Token);
+                }
 
-            // once we've reached the end of the string, EOF token is returned - thus, parser's lookahead does not have to worry about running out of tokens
-            tokens.Add(new Token(TokenType.EOF, string.Empty, new Location(Location)));
-            return tokens;
+                // once we've reached the end of the string, EOF token is returned - thus, parser's lookahead does not have to worry about running out of tokens
+                tokens.Add(new Token(TokenType.EOF, string.Empty, new Location(Location)));
+                return tokens;
+            }
         }
 
         private bool Next()

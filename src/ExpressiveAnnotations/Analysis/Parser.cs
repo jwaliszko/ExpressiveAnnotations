@@ -30,6 +30,8 @@ namespace ExpressiveAnnotations.Analysis
     /// </summary>
     public sealed class Parser
     {
+        private readonly object _locker = new object();
+
         /// <summary>
         ///     Initializes a new instance of the <see cref="Parser" /> class.
         /// </summary>
@@ -59,24 +61,27 @@ namespace ExpressiveAnnotations.Analysis
         /// <exception cref="System.InvalidOperationException"></exception>
         public Func<Context, bool> Parse<Context>(string expression)
         {
-            try
+            lock (_locker)
             {
-                Clear();
-                ContextType = typeof (Context);
-                var param = Expression.Parameter(typeof (Context));
-                ContextExpression = param;
-                Tokenize(expression);
-                var expressionTree = ParseExpression();
-                var lambda = Expression.Lambda<Func<Context, bool>>(expressionTree, param);
-                return lambda.Compile();
-            }
-            catch (ParseErrorException e)
-            {
-                throw new InvalidOperationException(BuildParseError(e, expression), e);
-            }
-            catch (Exception e)
-            {
-                throw new InvalidOperationException(string.Format("Parse fatal error. {0}", e.Message), e);
+                try
+                {
+                    Clear();
+                    ContextType = typeof (Context);
+                    var param = Expression.Parameter(typeof (Context));
+                    ContextExpression = param;
+                    Tokenize(expression);
+                    var expressionTree = ParseExpression();
+                    var lambda = Expression.Lambda<Func<Context, bool>>(expressionTree, param);
+                    return lambda.Compile();
+                }
+                catch (ParseErrorException e)
+                {
+                    throw new InvalidOperationException(BuildParseError(e, expression), e);
+                }
+                catch (Exception e)
+                {
+                    throw new InvalidOperationException(string.Format("Parse fatal error. {0}", e.Message), e);
+                }
             }
         }
 
@@ -91,24 +96,27 @@ namespace ExpressiveAnnotations.Analysis
         /// <exception cref="System.InvalidOperationException"></exception>
         public Func<object, bool> Parse(Type context, string expression)
         {
-            try
+            lock (_locker)
             {
-                Clear();
-                ContextType = context;
-                var param = Expression.Parameter(typeof (object));
-                ContextExpression = Expression.Convert(param, context);
-                Tokenize(expression);
-                var expressionTree = ParseExpression();
-                var lambda = Expression.Lambda<Func<object, bool>>(expressionTree, param);
-                return lambda.Compile();
-            }
-            catch (ParseErrorException e)
-            {
-                throw new InvalidOperationException(BuildParseError(e, expression));
-            }
-            catch (Exception e)
-            {
-                throw new InvalidOperationException(string.Format("Parse fatal error. {0}", e.Message), e);
+                try
+                {
+                    Clear();
+                    ContextType = context;
+                    var param = Expression.Parameter(typeof (object));
+                    ContextExpression = Expression.Convert(param, context);
+                    Tokenize(expression);
+                    var expressionTree = ParseExpression();
+                    var lambda = Expression.Lambda<Func<object, bool>>(expressionTree, param);
+                    return lambda.Compile();
+                }
+                catch (ParseErrorException e)
+                {
+                    throw new InvalidOperationException(BuildParseError(e, expression));
+                }
+                catch (Exception e)
+                {
+                    throw new InvalidOperationException(string.Format("Parse fatal error. {0}", e.Message), e);
+                }
             }
         }
 

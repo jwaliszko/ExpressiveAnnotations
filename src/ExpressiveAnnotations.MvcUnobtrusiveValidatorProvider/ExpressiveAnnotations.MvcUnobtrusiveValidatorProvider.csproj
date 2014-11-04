@@ -32,15 +32,15 @@
     <DocumentationFile>bin\Release\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Net40|AnyCPU'">
-	<Optimize>true</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>..\bin\Release-Net40\</OutputPath>
-	<TargetFrameworkVersion>v4.0</TargetFrameworkVersion>    
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <DocumentationFile>..\bin\Release-Net40\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Net45|AnyCPU'">
-	<Optimize>true</Optimize>
+    <Optimize>true</Optimize>
     <OutputPath>..\bin\Release-Net45\</OutputPath>
-	<TargetFrameworkVersion>v4.5</TargetFrameworkVersion>    
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <DocumentationFile>..\bin\Release-Net45\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
@@ -66,6 +66,7 @@
     <Compile Include="Storage.cs" />
     <Compile Include="Validators\AssertThatValidator.cs" />
     <Compile Include="Helper.cs" />
+    <Compile Include="Validators\ExpressiveValidator.cs" />
     <Compile Include="Validators\RequiredIfValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
