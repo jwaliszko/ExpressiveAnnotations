@@ -10,19 +10,24 @@ using ExpressiveAnnotations.Analysis;
 
 namespace ExpressiveAnnotations.Attributes
 {
+    /// <summary>
+    ///     Base class for expressive validation attributes.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
     public abstract class ExpressiveAttribute : ValidationAttribute
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ExpressiveAttribute" /> class.
+        ///     Constructor for expressive validation attribute.
         /// </summary>
+        /// <param name="expression">The logical expression based on which specified condition is computed.</param>
         /// <param name="errorMessage">The error message to associate with a validation control.</param>
-        protected ExpressiveAttribute(string errorMessage)
+        protected ExpressiveAttribute(string expression, string errorMessage)
             : base(errorMessage)
         {
             Parser = new Parser();
             Parser.RegisterMethods();
 
+            Expression = expression;
             CachedValidationFuncs = new Dictionary<Type, Func<object, bool>>();
         }
 
@@ -30,7 +35,7 @@ namespace ExpressiveAnnotations.Attributes
         protected Parser Parser { get; set; }
 
         /// <summary>
-        ///     Gets or sets the logical expression based on which requirement condition is computed.
+        ///     Gets or sets the logical expression based on which specified condition is computed.
         /// </summary>
         public string Expression { get; set; }
 

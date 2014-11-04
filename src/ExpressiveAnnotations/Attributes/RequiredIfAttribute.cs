@@ -18,10 +18,9 @@ namespace ExpressiveAnnotations.Attributes
         /// </summary>
         /// <param name="expression">The logical expression based on which requirement condition is computed.</param>
         public RequiredIfAttribute(string expression)
-            : base(_defaultErrorMessage)
+            : base(expression, _defaultErrorMessage)
         {
             AllowEmptyStrings = false;
-            Expression = expression;
         }
 
         /// <summary>

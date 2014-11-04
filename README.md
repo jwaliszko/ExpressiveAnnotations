@@ -100,7 +100,7 @@ AssertThatAttribute(
                                     expression has to be satisfied, for such field to be 
                                     considered as valid.
 
-expression        - The logical expression based on which requirement condition is computed.
+expression        - The logical expression based on which specified condition is computed.
 AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should allow empty 
                     or whitespace strings.
 ```

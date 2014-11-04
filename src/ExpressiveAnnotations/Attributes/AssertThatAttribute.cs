@@ -17,11 +17,10 @@ namespace ExpressiveAnnotations.Attributes
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssertThatAttribute" /> class.
         /// </summary>
-        /// <param name="expression">The logical expression based on which requirement condition is computed.</param>
+        /// <param name="expression">The logical expression based on which assertion condition is computed.</param>
         public AssertThatAttribute(string expression)
-            : base(_defaultErrorMessage)
+            : base(expression, _defaultErrorMessage)
         {
-            Expression = expression;            
         }
 
         protected override ValidationResult IsValidInternal(object value, ValidationContext validationContext)

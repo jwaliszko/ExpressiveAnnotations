@@ -13,10 +13,21 @@ using ExpressiveAnnotations.Attributes;
 
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
 {
+    /// <summary>
+    ///     Base class for expressive model validators.
+    /// </summary>
+    /// <typeparam name="T">Any type derived from <see cref="ExpressiveAttribute" /> class.</typeparam>
     public abstract class ExpressiveValidator<T> : DataAnnotationsModelValidator<T> where T:ExpressiveAttribute
     {
         private readonly object _locker = new object();
 
+        /// <summary>
+        ///     Constructor for expressive model validator.
+        /// </summary>
+        /// <param name="metadata">The model metadata instance.</param>
+        /// <param name="context">The controller context instance.</param>
+        /// <param name="attribute">The expressive attribute instance.</param>
+        /// <exception cref="System.ComponentModel.DataAnnotations.ValidationException"></exception>
         protected ExpressiveValidator(ModelMetadata metadata, ControllerContext context, T attribute)
             : base(metadata, context, attribute)
         {
@@ -72,6 +83,14 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
             get { return FieldsMap == null && ConstsMap == null; }
         }
 
+        /// <summary>
+        ///     Creates suffix used when multiple annotations of the same type are used for a single field, for such annotations 
+        ///     to be distingueshed at client side.
+        /// </summary>
+        /// <returns>
+        ///     Single lowercase letter from latin alphabet or an empty string. Returned value is unique for each instance of the 
+        ///     same attribute type within current annotated field range.
+        /// </returns>
         protected string ValidTypeSuffix()
         {
             var count = Storage.Get<int>(AnnotatedField) + 1;
