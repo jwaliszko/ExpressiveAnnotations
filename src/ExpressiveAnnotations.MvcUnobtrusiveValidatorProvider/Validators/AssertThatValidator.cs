@@ -36,7 +36,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
             var rule = new ModelClientValidationRule
             {
                 ErrorMessage = FormattedErrorMessage,
-                ValidationType = string.Format("assertthat{0}", ValidTypeSuffix())
+                ValidationType = ProvideUniqueValidatorName("assertthat")
             };
 
             rule.ValidationParameters.Add("expression", Expression);

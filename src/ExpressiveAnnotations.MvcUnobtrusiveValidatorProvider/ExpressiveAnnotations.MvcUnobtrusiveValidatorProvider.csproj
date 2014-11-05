@@ -63,7 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assert.cs" />
-    <Compile Include="Storage.cs" />
+    <Compile Include="RequestStorage.cs" />
     <Compile Include="Validators\AssertThatValidator.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Validators\ExpressiveValidator.cs" />

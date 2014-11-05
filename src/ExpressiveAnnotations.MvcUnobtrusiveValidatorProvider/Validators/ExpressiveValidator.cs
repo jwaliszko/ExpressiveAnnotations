@@ -17,7 +17,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
     ///     Base class for expressive model validators.
     /// </summary>
     /// <typeparam name="T">Any type derived from <see cref="ExpressiveAttribute" /> class.</typeparam>
-    public abstract class ExpressiveValidator<T> : DataAnnotationsModelValidator<T> where T:ExpressiveAttribute
+    public abstract class ExpressiveValidator<T> : DataAnnotationsModelValidator<T> where T : ExpressiveAttribute
     {
         private readonly object _locker = new object();
 
@@ -33,12 +33,13 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         {
             try
             {
-                AnnotatedField = string.Format("{0}.{1}", metadata.ContainerType.FullName, metadata.PropertyName).ToLowerInvariant();
-                var attribId = string.Format("{0}.{1}", attribute.TypeId, AnnotatedField).ToLowerInvariant();
+                var annotatedField = string.Format("{0}.{1}", metadata.ContainerType.FullName, metadata.PropertyName).ToLowerInvariant();
+                var attribId = string.Format("{0}.{1}", attribute.TypeId, annotatedField).ToLowerInvariant();
                 var fieldsId = string.Format("fields.{0}", attribId);
                 var constsId = string.Format("consts.{0}", attribId);
                 FieldsMap = HttpRuntime.Cache.Get(fieldsId) as IDictionary<string, string>;
                 ConstsMap = HttpRuntime.Cache.Get(constsId) as IDictionary<string, object>;
+                FieldAttributeType = string.Format("{0}.{1}", typeof(T).FullName, annotatedField).ToLowerInvariant();
 
                 if (CacheEmpty)
                 {
@@ -73,30 +74,35 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
             }
         }
 
-        protected string Expression { get; set; }
-        protected string FormattedErrorMessage { get; set; }
-        protected IDictionary<string, string> FieldsMap { get; set; }
-        protected IDictionary<string, object> ConstsMap { get; set; }
-        protected string AnnotatedField { get; set; }
+        protected string Expression { get; private set; }
+        protected string FormattedErrorMessage { get; private set; }
+        protected IDictionary<string, string> FieldsMap { get; private set; }
+        protected IDictionary<string, object> ConstsMap { get; private set; }
+        protected string FieldAttributeType { get; private set; }
+
         protected bool CacheEmpty
         {
             get { return FieldsMap == null && ConstsMap == null; }
         }
 
+        protected string ProvideUniqueValidatorName(string baseName)
+        {
+            return string.Format("{0}{1}", baseName, AllocateSuffix());
+        }
+
         /// <summary>
-        ///     Creates suffix used when multiple annotations of the same type are used for a single field, for such annotations 
-        ///     to be distingueshed at client side.
+        ///     Provides unique suffix related to each attribute instance within current annotated field range 
+        ///     (required for multiple annotations to be distingueshed at client side).
         /// </summary>
         /// <returns>
-        ///     Single lowercase letter from latin alphabet or an empty string. Returned value is unique for each instance of the 
-        ///     same attribute type within current annotated field range.
+        ///     Single lowercase letter from latin alphabet or an empty string.
         /// </returns>
-        protected string ValidTypeSuffix()
+        private string AllocateSuffix()
         {
-            var count = Storage.Get<int>(AnnotatedField) + 1;
+            var count = RequestStorage.Get<int>(FieldAttributeType) + 1;
             Assert.AttribsQuantityAllowed(count);
 
-            Storage.Set(AnnotatedField, count);
+            RequestStorage.Set(FieldAttributeType, count);
             return count == 1 ? string.Empty : char.ConvertFromUtf32(95 + count);
         }
     }

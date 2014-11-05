@@ -9,9 +9,9 @@ using System.Web;
 namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
 {
     /// <summary>
-    ///     Stores arbitrary data for the current request.
+    ///     Stores arbitrary data for the current HTTP request.
     /// </summary>
-    internal class Storage
+    internal class RequestStorage
     {
         private static IDictionary Items
         {
@@ -19,8 +19,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             {
                 if (HttpContext.Current == null)
                     throw new ApplicationException("HttpContext not available.");
-                return HttpContext.Current.Items;
-            }
+                return HttpContext.Current.Items; // location that could be used throughtout the entire HTTP request lifetime
+            }                                     // (contrary to a session, this one exists only within the period of a single request).
         }
 
         public static T Get<T>(string key)
