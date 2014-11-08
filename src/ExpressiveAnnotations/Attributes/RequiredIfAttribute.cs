@@ -28,6 +28,15 @@ namespace ExpressiveAnnotations.Attributes
         /// </summary>
         public bool AllowEmptyStrings { get; set; }
 
+        /// <summary>
+        ///     Validates a specified value with respect to the associated validation attribute.
+        ///     Internally used by the <see cref="ExpressiveAttribute.IsValid(object,System.ComponentModel.DataAnnotations.ValidationContext)" /> method.
+        /// </summary>
+        /// <param name="value">The value to validate.</param>
+        /// <param name="validationContext">The validation context.</param>
+        /// <returns>
+        ///     An instance of the <see cref="T:System.ComponentModel.DataAnnotations.ValidationResult" /> class.
+        /// </returns>
         protected override ValidationResult IsValidInternal(object value, ValidationContext validationContext)
         {
             var isEmpty = value is string && string.IsNullOrWhiteSpace((string) value);

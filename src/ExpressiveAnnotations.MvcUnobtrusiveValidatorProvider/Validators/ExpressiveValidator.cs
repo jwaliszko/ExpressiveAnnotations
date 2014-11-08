@@ -74,36 +74,52 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
             }
         }
 
+        /// <summary>
+        ///     Gets the expression.
+        /// </summary>
         protected string Expression { get; private set; }
-        protected string FormattedErrorMessage { get; private set; }
-        protected IDictionary<string, string> FieldsMap { get; private set; }
-        protected IDictionary<string, object> ConstsMap { get; private set; }
-        protected string FieldAttributeType { get; private set; }
 
-        protected bool Cached
+        /// <summary>
+        ///     Gets the formatted error message.
+        /// </summary>
+        protected string FormattedErrorMessage { get; private set; }
+
+        /// <summary>
+        ///     Gets names and coarse types of properties extracted from specified expression within given context.
+        /// </summary>        
+        protected IDictionary<string, string> FieldsMap { get; private set; }
+
+        /// <summary>
+        ///     Gets names and values of constants extracted from specified expression within given context.
+        /// </summary>        
+        protected IDictionary<string, object> ConstsMap { get; private set; }
+
+        private string FieldAttributeType { get; set; }
+        
+        private bool Cached
         {
             get { return FieldsMap != null || ConstsMap != null; }
         }
 
+        /// <summary>
+        ///     Provides unique validation type within current annotated field range, when multiple annotations are used (required for client side).
+        /// </summary>
+        /// <param name="baseName">Base name.</param>
+        /// <returns>
+        ///     Unique validation type within current request.
+        /// </returns>
         protected string ProvideUniqueValidationType(string baseName)
         {
             return string.Format("{0}{1}", baseName, AllocateSuffix());
         }
 
-        /// <summary>
-        ///     Provides unique suffix related to each attribute instance within current annotated field range 
-        ///     (required for multiple annotations to be distingueshed at client side).
-        /// </summary>
-        /// <returns>
-        ///     Single lowercase letter from latin alphabet or an empty string.
-        /// </returns>
         private string AllocateSuffix()
         {
             var count = RequestStorage.Get<int>(FieldAttributeType) + 1;
             Assert.AttribsQuantityAllowed(count);
 
             RequestStorage.Set(FieldAttributeType, count);
-            return count == 1 ? string.Empty : char.ConvertFromUtf32(95 + count);
+            return count == 1 ? string.Empty : char.ConvertFromUtf32(95 + count); // single lowercase letter from latin alphabet or an empty string
         }
     }
 }

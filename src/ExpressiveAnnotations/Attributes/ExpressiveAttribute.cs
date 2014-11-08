@@ -31,14 +31,24 @@ namespace ExpressiveAnnotations.Attributes
             CachedValidationFuncs = new Dictionary<Type, Func<object, bool>>();
         }
 
-        protected Dictionary<Type, Func<object, bool>> CachedValidationFuncs { get; set; }
-        protected Parser Parser { get; set; }
+        /// <summary>
+        ///     Gets the cached validation funcs.
+        /// </summary>        
+        protected Dictionary<Type, Func<object, bool>> CachedValidationFuncs { get; private set; }
+
+        /// <summary>
+        ///     Gets the parser.
+        /// </summary>        
+        protected Parser Parser { get; private set; }
 
         /// <summary>
         ///     Gets or sets the logical expression based on which specified condition is computed.
         /// </summary>
         public string Expression { get; set; }
 
+        /// <summary>
+        ///     When implemented in a derived class, gets a unique identifier for this <see cref="T:System.Attribute" />.
+        /// </summary>
         public override object TypeId
         {
             /* From MSDN (msdn.microsoft.com/en-us/library/system.attribute.typeid.aspx, msdn.microsoft.com/en-us/library/6w3a7b50.aspx): 
@@ -91,13 +101,22 @@ namespace ExpressiveAnnotations.Attributes
             return string.Format(ErrorMessageString, displayName, expression);
         }
 
+        /// <summary>
+        ///     Validates a specified value with respect to the associated validation attribute.
+        ///     Internally used by the <see cref="ExpressiveAttribute.IsValid(object,System.ComponentModel.DataAnnotations.ValidationContext)" /> method.
+        /// </summary>
+        /// <param name="value">The value to validate.</param>
+        /// <param name="validationContext">The validation context.</param>
+        /// <returns>
+        ///     An instance of the <see cref="T:System.ComponentModel.DataAnnotations.ValidationResult" /> class.
+        /// </returns>
         protected abstract ValidationResult IsValidInternal(object value, ValidationContext validationContext);
 
         /// <summary>
-        ///     Validates a specified value with respect to the current validation attribute.
+        ///     Validates a specified value with respect to the associated validation attribute.
         /// </summary>
         /// <param name="value">The value to validate.</param>
-        /// <param name="validationContext">The context information about the validation operation.</param>
+        /// <param name="validationContext">The validation context.</param>
         /// <returns>
         ///     An instance of the <see cref="T:System.ComponentModel.DataAnnotations.ValidationResult" /> class.
         /// </returns>
