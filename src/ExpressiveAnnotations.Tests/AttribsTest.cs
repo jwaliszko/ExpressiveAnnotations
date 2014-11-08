@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using ExpressiveAnnotations.Attributes;
@@ -9,7 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace ExpressiveAnnotations.Tests
 {
     [TestClass]
-    public class AttribTest
+    public class AttribsTest
     {
         [TestMethod]
         public void verify_attributes_uniqueness()
@@ -64,6 +65,29 @@ namespace ExpressiveAnnotations.Tests
             Validator.TryValidateObject(secondDerived, secondContext, null, true);
             Validator.TryValidateObject(firstDerived, firstContext, null, true);
             Validator.TryValidateObject(secondDerived, secondContext, null, true);
+        }
+
+        [TestMethod]
+        public void verify_attributes_validation_caching()
+        {
+            const int testLoops = 10;
+            var model = new Model();
+            var context = new ValidationContext(model);
+
+            var nonCached = MeasureExecutionTime(() => Validator.TryValidateObject(model, context, null, true));
+            for (var i = 0; i < testLoops; i++)
+            {
+                var cached = MeasureExecutionTime(() => Validator.TryValidateObject(model, context, null, true));
+                Assert.IsTrue(nonCached > cached);
+            }
+        }
+
+        private long MeasureExecutionTime(Action action)
+        {
+            var stopwatch = Stopwatch.StartNew();
+            action();
+            stopwatch.Stop();
+            return stopwatch.ElapsedTicks;
         }
 
         public abstract class ModelBase

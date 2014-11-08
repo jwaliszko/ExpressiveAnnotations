@@ -34,7 +34,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
         public static void AttribsQuantityAllowed(int count)
         {
             if (count > 27)
-                throw new ApplicationException(
+                throw new InvalidOperationException(
                     "No more than 27 unique attributes of the same type can be applied for a single field or property.");
         }
     }

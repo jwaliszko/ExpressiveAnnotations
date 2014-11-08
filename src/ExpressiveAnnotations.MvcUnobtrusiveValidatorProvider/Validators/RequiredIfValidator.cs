@@ -39,7 +39,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
             var rule = new ModelClientValidationRule
             {
                 ErrorMessage = FormattedErrorMessage,
-                ValidationType = ProvideUniqueValidatorName("requiredif")
+                ValidationType = ProvideUniqueValidationType("requiredif")
             };
 
             rule.ValidationParameters.Add("expression", Expression);

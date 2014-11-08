@@ -13,11 +13,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvcWe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvvmDesktopSample", "ExpressiveAnnotations.MvvmDesktopSample\ExpressiveAnnotations.MvvmDesktopSample.csproj", "{94B9466A-3C9E-47A3-A300-6E45AAE763D7}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ExpressiveAnnotations.Scripts", "ExpressiveAnnotations.Scripts", "{5908C2CC-F987-4FCE-AFFA-17CC259EF970}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{5908C2CC-F987-4FCE-AFFA-17CC259EF970}"
 	ProjectSection(SolutionItems) = preProject
 		expressive.annotations.validate.js = expressive.annotations.validate.js
 		expressive.annotations.validate.test.js = expressive.annotations.validate.test.js
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Tests", "ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Tests\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Tests.csproj", "{46C5858F-76A5-4032-A4DA-5299CE51209B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{4FE56EA0-4550-4A07-A758-331B9CF470A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,8 +65,20 @@ Global
 		{94B9466A-3C9E-47A3-A300-6E45AAE763D7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{94B9466A-3C9E-47A3-A300-6E45AAE763D7}.Release-Net40|Any CPU.ActiveCfg = Release|Any CPU
 		{94B9466A-3C9E-47A3-A300-6E45AAE763D7}.Release-Net45|Any CPU.ActiveCfg = Release|Any CPU
+		{46C5858F-76A5-4032-A4DA-5299CE51209B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46C5858F-76A5-4032-A4DA-5299CE51209B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46C5858F-76A5-4032-A4DA-5299CE51209B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46C5858F-76A5-4032-A4DA-5299CE51209B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46C5858F-76A5-4032-A4DA-5299CE51209B}.Release-Net40|Any CPU.ActiveCfg = Release|Any CPU
+		{46C5858F-76A5-4032-A4DA-5299CE51209B}.Release-Net40|Any CPU.Build.0 = Release|Any CPU
+		{46C5858F-76A5-4032-A4DA-5299CE51209B}.Release-Net45|Any CPU.ActiveCfg = Release|Any CPU
+		{46C5858F-76A5-4032-A4DA-5299CE51209B}.Release-Net45|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{78E4B95D-B0C3-486E-8847-CA444EF5BB95} = {4FE56EA0-4550-4A07-A758-331B9CF470A1}
+		{94B9466A-3C9E-47A3-A300-6E45AAE763D7} = {4FE56EA0-4550-4A07-A758-331B9CF470A1}
 	EndGlobalSection
 EndGlobal

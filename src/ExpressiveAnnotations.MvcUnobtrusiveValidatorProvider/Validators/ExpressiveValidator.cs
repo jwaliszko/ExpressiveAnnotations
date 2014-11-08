@@ -41,11 +41,11 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
                 ConstsMap = HttpRuntime.Cache.Get(constsId) as IDictionary<string, object>;
                 FieldAttributeType = string.Format("{0}.{1}", typeof(T).FullName, annotatedField).ToLowerInvariant();
 
-                if (CacheEmpty)
+                if (!Cached)
                 {
                     lock (_locker)
                     {
-                        if (CacheEmpty)
+                        if (!Cached)
                         {
                             var parser = new Parser();
                             parser.RegisterMethods();
@@ -55,8 +55,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
                             ConstsMap = parser.GetConsts();
 
                             Assert.NoNamingCollisionsAtCorrespondingSegments(FieldsMap.Keys, ConstsMap.Keys);
-                            HttpContext.Current.Cache.Insert(fieldsId, FieldsMap);
-                            HttpContext.Current.Cache.Insert(constsId, ConstsMap);
+                            HttpRuntime.Cache.Insert(fieldsId, FieldsMap);
+                            HttpRuntime.Cache.Insert(constsId, ConstsMap);
 
                             attribute.Compile(metadata.ContainerType);
                         }
@@ -80,12 +80,12 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         protected IDictionary<string, object> ConstsMap { get; private set; }
         protected string FieldAttributeType { get; private set; }
 
-        protected bool CacheEmpty
+        protected bool Cached
         {
-            get { return FieldsMap == null && ConstsMap == null; }
+            get { return FieldsMap != null || ConstsMap != null; }
         }
 
-        protected string ProvideUniqueValidatorName(string baseName)
+        protected string ProvideUniqueValidationType(string baseName)
         {
             return string.Format("{0}{1}", baseName, AllocateSuffix());
         }

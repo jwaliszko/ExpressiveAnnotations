@@ -9,7 +9,7 @@ namespace ExpressiveAnnotations.Attributes
     /// <summary>
     ///     Validation attribute, executed for non-null annotated field, which indicates that assertion given in logical expression 
     ///     has to be satisfied, for such field to be considered as valid.
-    /// </summary>    
+    /// </summary>
     public sealed class AssertThatAttribute : ExpressiveAttribute
     {
         private const string _defaultErrorMessage = "Assertion for {0} field is not satisfied by the following logic: {1}.";
@@ -27,9 +27,7 @@ namespace ExpressiveAnnotations.Attributes
         {
             if (value != null)
             {
-                if (!CachedValidationFuncs.ContainsKey(validationContext.ObjectType))
-                    CachedValidationFuncs[validationContext.ObjectType] = Parser.Parse(validationContext.ObjectType, Expression);
-
+                Compile(validationContext.ObjectType);
                 if (!CachedValidationFuncs[validationContext.ObjectType](validationContext.ObjectInstance)) // check if the assertion condition is not satisfied
                     return new ValidationResult( // assertion not satisfied => notify
                         FormatErrorMessage(validationContext.DisplayName, Expression),

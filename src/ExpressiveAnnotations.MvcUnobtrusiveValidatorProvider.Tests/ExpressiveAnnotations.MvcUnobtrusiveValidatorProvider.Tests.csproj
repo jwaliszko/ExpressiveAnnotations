@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2DE111D5-E3A5-4FC8-8261-AA2DA743A3AD}</ProjectGuid>
+    <ProjectGuid>{46C5858F-76A5-4032-A4DA-5299CE51209B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ExpressiveAnnotations.Tests</RootNamespace>
-    <AssemblyName>ExpressiveAnnotations.Tests</AssemblyName>
+    <RootNamespace>ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Tests</RootNamespace>
+    <AssemblyName>ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -16,7 +16,6 @@
     <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
     <IsCodedUITest>False</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -41,6 +40,15 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.4.0.20710.0\lib\net40\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -55,12 +63,14 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="AttribsTest.cs" />
-    <Compile Include="LexerTest.cs" />
-    <Compile Include="ParserTest.cs" />
+    <Compile Include="ValidatorsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.csproj">
+      <Project>{1926a95d-19ee-451b-9da4-c3eaf555b15d}</Project>
+      <Name>ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ExpressiveAnnotations\ExpressiveAnnotations.csproj">
       <Project>{70dd327b-f37c-4291-9388-212aa541e970}</Project>
       <Name>ExpressiveAnnotations</Name>
@@ -98,10 +108,4 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-  <!-- Sign the release assembly if the environment variable is set -->
-  <PropertyGroup Condition="'$(Configuration)' != 'DEBUG' And '$(PRIVATE_KEY_FILE)' != ''">
-    <AssemblyOriginatorKeyFile>$(PRIVATE_KEY_FILE)</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <DelaySign>false</DelaySign>
-  </PropertyGroup>
 </Project>

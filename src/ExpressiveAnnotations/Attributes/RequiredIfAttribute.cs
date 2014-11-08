@@ -8,7 +8,7 @@ namespace ExpressiveAnnotations.Attributes
 {
     /// <summary>
     ///     Validation attribute which indicates that annotated field is required when computed result of given logical expression is true.
-    /// </summary>    
+    /// </summary>
     public sealed class RequiredIfAttribute : ExpressiveAttribute
     {
         private const string _defaultErrorMessage = "The {0} field is required by the following logic: {1}.";
@@ -33,9 +33,7 @@ namespace ExpressiveAnnotations.Attributes
             var isEmpty = value is string && string.IsNullOrWhiteSpace((string) value);
             if (value == null || (isEmpty && !AllowEmptyStrings))
             {
-                if (!CachedValidationFuncs.ContainsKey(validationContext.ObjectType))
-                    CachedValidationFuncs[validationContext.ObjectType] = Parser.Parse(validationContext.ObjectType, Expression);
-
+                Compile(validationContext.ObjectType);
                 if (CachedValidationFuncs[validationContext.ObjectType](validationContext.ObjectInstance)) // check if the requirement condition is satisfied
                     return new ValidationResult( // requirement confirmed => notify
                         FormatErrorMessage(validationContext.DisplayName, Expression),
