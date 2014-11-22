@@ -43,6 +43,8 @@
             // expann.addMethod... // do something with ExpressiveAnnotations
             // ea... // do something with original ea variable
 
+            ea.settings.instantValidation = true; // turn on entire form validation when any field activity is detected i.e. change, paste or keyup event
+
             @if ("pl" == lang)
             {
                 <text>
@@ -64,7 +66,7 @@
                 var when = from.getFullYear() + years;
                 from.setFullYear(when);
                 return from;
-            });
+            });            
         </script>
     }
 
@@ -74,7 +76,7 @@
                 $(this).hide();
                 $(this).parent().find('.code').toggle('slow');
             });
-            $(".date").datepicker($.datepicker.regional["@lang"]);
+            $('.date').datepicker($.datepicker.regional["@lang"]);            
         });
 
         $.datepicker.regional['pl'] = {

@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.validate.js - v2.2.3
+﻿/* expressive.annotations.validate.js - v2.2.4
  * Client-side component of ExpresiveAnnotations - annotation-based conditional validation library.
  * https://github.com/JaroslawWaliszko/ExpressiveAnnotations
  *
@@ -78,7 +78,7 @@
             guid: {
                 tryParse: function(value) {
                     if (typeHelper.isGuid(value)) {
-                        return value.toUpperCase();;
+                        return value.toUpperCase();
                     }
                     return { error: true, msg: 'Given value was not recognized as a valid guid - guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).' };
                 }
@@ -309,10 +309,21 @@
 
         annotations = ' abcdefghijklmnopqrstuvwxyz'.split(''), // suffixes for attributes annotating single field multiple times
 
+        binded = false,
+        detectAction = function(form) {
+            if (!binded) {
+                $(form).find('input, select, textarea').bind('change paste keyup', function () {
+                    $(form).valid();
+                });
+                binded = true;
+            }
+        },
+
         backup = window.ea, // map over the ea in case of overwrite
 
         api = {
             settings: {
+                instantValidation: false, // switch indicating whether entire form should be instantly validated when any field activity is detected i.e. change, paste or keyup event
                 parseDate: undefined // provide implementation to parse date in non-standard format
                                      // e.g., suppose DOM field date is given in dd/mm/yyyy format:
                                      // parseDate = function(str) { // input string is given as a raw value extracted from DOM element
@@ -348,6 +359,9 @@
             if (options.message) {
                 options.messages[adapter] = options.message;
             }
+            if (api.settings.instantValidation) {
+                detectAction(options.form);
+            }
         });
     });
 
@@ -364,6 +378,9 @@
             };
             if (options.message) {
                 options.messages[adapter] = options.message;
+            }
+            if (api.settings.instantValidation) {
+                detectAction(options.form);
             }
         });
     });
