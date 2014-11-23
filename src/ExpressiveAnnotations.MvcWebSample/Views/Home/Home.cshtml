@@ -76,7 +76,9 @@
                 $(this).hide();
                 $(this).parent().find('.code').toggle('slow');
             });
-            $('.date').datepicker($.datepicker.regional["@lang"]);            
+            $('.date').datepicker($.datepicker.regional["@lang"]).on('change', function () {
+                $('.date').valid();  // triggers the validation test on change (to avoid second click)
+            });;
         });
 
         $.datepicker.regional['pl'] = {

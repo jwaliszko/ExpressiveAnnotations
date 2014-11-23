@@ -5,6 +5,7 @@
 //debugger; // enable firebug (preferably, check 'on for all web pages' option) for the debugger to launch 
 (function($, window, ea) {
 
+    //equal( actual, expected [, message ] )
     window.module("type helper");
 
     test("verify_array_storage", function() {
@@ -17,19 +18,36 @@
     test("verify_array_sanatization", function() {
         var array = ["a"];
         ea.typeHelper.array.sanatize(["a"], "");
-        window.deepEqual(["a"], array);
+        window.deepEqual(array, ["a"]);
 
         array = ["a", "a"];
         ea.typeHelper.array.sanatize(array, "a");
-        window.deepEqual([], array);
+        window.deepEqual(array, []);
 
         array = ["a", "b"];
         ea.typeHelper.array.sanatize(array, "");
-        window.deepEqual(["a", "b"], array);
+        window.deepEqual(array, ["a", "b"]);
 
         array = ["a", "b", "c", "a", "b"];
         ea.typeHelper.array.sanatize(array, "b");
-        window.deepEqual(["a", "c", "a"], array);
+        window.deepEqual(array, ["a", "c", "a"]);
+    });
+
+    test("verify_object_keys_extraction", function() {
+        var assocArray = [];
+        assocArray["one"] = "lorem";
+        assocArray["two"] = "ipsum";
+        assocArray["three"] = "dolor";
+        var keys = ea.typeHelper.object.keys(assocArray);
+        window.deepEqual(keys, ["one", "two", "three"]);
+
+        var model = {
+            one: "lorem",
+            two: "ipsum",
+            three: "dolor"
+        };
+        keys = ea.typeHelper.object.keys(model);
+        window.deepEqual(keys, ["one", "two", "three"]);
     });
 
     test("verify_type_parsing", function() {
