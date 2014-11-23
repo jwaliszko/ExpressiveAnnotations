@@ -170,8 +170,8 @@ var
         },
         object: {
             keys: function(obj) {
-                var arr = [];
-                for (var key in obj) {
+                var key, arr = [];
+                for (key in obj) {
                     if (obj.hasOwnProperty(key)) {
                         arr.push(key);
                     }
