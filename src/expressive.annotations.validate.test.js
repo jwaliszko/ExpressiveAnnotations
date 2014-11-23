@@ -7,6 +7,31 @@
 
     window.module("type helper");
 
+    test("verify_array_storage", function() {
+        window.ok(ea.typeHelper.array.contains(["a"], "a"));
+        window.ok(ea.typeHelper.array.contains(["a", "b"], "a"));
+        window.ok(ea.typeHelper.array.contains(["a", "b"], "b"));
+        window.ok(!ea.typeHelper.array.contains(["a", "b"], "c"));
+    });
+
+    test("verify_array_sanatization", function() {
+        var array = ["a"];
+        ea.typeHelper.array.sanatize(["a"], "");
+        window.deepEqual(["a"], array);
+
+        array = ["a", "a"];
+        ea.typeHelper.array.sanatize(array, "a");
+        window.deepEqual([], array);
+
+        array = ["a", "b"];
+        ea.typeHelper.array.sanatize(array, "");
+        window.deepEqual(["a", "b"], array);
+
+        array = ["a", "b", "c", "a", "b"];
+        ea.typeHelper.array.sanatize(array, "b");
+        window.deepEqual(["a", "c", "a"], array);
+    });
+
     test("verify_type_parsing", function() {
         var result = ea.typeHelper.tryParse(undefined, "string");
         window.equal(result.error, true);
@@ -173,9 +198,9 @@
     window.module("model helper");
 
     test("verify_model_evaluation", function() {
-        var model = ea.modelHelper.deserializeObject(null, null, { "Number": 123, "Stability.High": 0 }, null);
+        var model = ea.modelHelper.deserializeObject(null, null, { "Number": 123, "Stability.High": 0 }, null);        
         with (model) {
-            window.ok(eval("IsNumber(Number) && Number - 23 == 100 && Stability.High == 0"));
+            window.ok(eval("Number - 23 == 100 && Stability.High == 0"));
         }
     });
 

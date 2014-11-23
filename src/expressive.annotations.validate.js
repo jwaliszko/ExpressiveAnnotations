@@ -7,7 +7,28 @@
 
 (function($, window) {
     var
+        backup = window.ea, // map over the ea in case of overwrite
+
         typeHelper = {
+            array: {
+                contains: function(arr, item) {
+                    var i = arr.length;
+                    while (i--) {
+                        if (arr[i] === item) {
+                            return true;
+                        }
+                    }
+                    return false;
+                },
+                sanatize: function(arr, item) {
+                    var i = arr.length;
+                    while (i--) {
+                        if (arr[i] === item) {
+                            arr.splice(i, 1);
+                        }
+                    }
+                }
+            },
             string: {
                 format: function(text, params) {
                     var i;
@@ -100,18 +121,18 @@
             },
             tryParse: function(value, type) {
                 switch (type) {
-                case 'datetime':
-                    return typeHelper.date.tryParse(value);
-                case 'numeric':
-                    return typeHelper.float.tryParse(value);
-                case 'string':
-                    return typeHelper.string.tryParse(value);
-                case 'bool':
-                    return typeHelper.bool.tryParse(value);
-                case 'guid':
-                    return typeHelper.guid.tryParse(value);
-                default:
-                    return { error: true, msg: typeHelper.string.format('Supported types: datetime, numeric, string, bool and guid. Invalid target type: {0}', type) };
+                    case 'datetime':
+                        return typeHelper.date.tryParse(value);
+                    case 'numeric':
+                        return typeHelper.float.tryParse(value);
+                    case 'string':
+                        return typeHelper.string.tryParse(value);
+                    case 'bool':
+                        return typeHelper.bool.tryParse(value);
+                    case 'guid':
+                        return typeHelper.guid.tryParse(value);
+                    default:
+                        return { error: true, msg: typeHelper.string.format('Supported types: datetime, numeric, string, bool and guid. Invalid target type: {0}', type) };
                 }
             }
         },
@@ -165,12 +186,15 @@
                     return [strA, strB, strC].join('');
                 });
                 this.addMethod("CompareOrdinal", function(strA, strB) {
-                    if (strA === strB)
+                    if (strA === strB) {
                         return 0;
-                    if (strA !== null && strB === null)
+                    }
+                    if (strA !== null && strB === null) {
                         return 1;
-                    if (strA === null && strB !== null)
+                    }
+                    if (strA === null && strB !== null) {
                         return -1;
+                    }
                     return strA > strB ? 1 : -1;
                 });
                 this.addMethod("CompareOrdinalIgnoreCase", function(strA, strB) {
@@ -236,44 +260,39 @@
             appendPrefix: function(value, prefix) {
                 return prefix + value;
             },
-            getPrefix: function(fieldName) {
-                return fieldName.substr(0, fieldName.lastIndexOf('.') + 1);
+            getPrefix: function(value) {
+                return value.substr(0, value.lastIndexOf('.') + 1);
             },
             extractValue: function(form, name, prefix, type) {
-                function getFieldValue(element) {
+                function getValue(element) {
                     var elementType = $(element).attr('type');
                     switch (elementType) {
-                    case 'checkbox':
-                        return $(element).is(':checked');
-                    case 'radio':
-                        return $(element).filter(':checked').val();
-                    default:
-                        return $(element).val();
+                        case 'checkbox':
+                            return $(element).is(':checked');
+                        case 'radio':
+                            return $(element).filter(':checked').val();
+                        default:
+                            return $(element).val();
                     }
                 }
-
-                var field, fieldValue, parsedValue;
-
+                var field, rawValue, parsedValue;
                 name = this.appendPrefix(name, prefix);
                 field = $(form).find(':input[name="' + name + '"]');
                 if (field.length === 0) {
                     throw typeHelper.string.format('DOM field {0} not found.', name);
                 }
-
-                fieldValue = getFieldValue(field);
-                if (fieldValue === undefined || fieldValue === null || fieldValue === '') { // field value not set
+                rawValue = getValue(field);
+                if (rawValue === undefined || rawValue === null || rawValue === '') { // field value not set
                     return null;
                 }
-
-                parsedValue = typeHelper.tryParse(fieldValue, type); // convert to required type
+                parsedValue = typeHelper.tryParse(rawValue, type); // convert to required type
                 if (parsedValue.error) {
                     throw typeHelper.string.format('DOM field {0} value conversion to {1} failed. {2}', name, type, parsedValue.msg);
                 }
-
                 return parsedValue;
             },
             deserializeObject: function(form, fieldsMap, constsMap, prefix) {
-                function buildFieldInternal(fieldName, fieldValue, object) {
+                function buildField(fieldName, fieldValue, object) {
                     var props, parent, i;
                     props = fieldName.split('.');
                     parent = object;
@@ -287,39 +306,66 @@
                     fieldName = props[props.length - 1];
                     parent[fieldName] = fieldValue;
                 }
-
                 var o = {}, name, type, value;
                 for (name in fieldsMap) {
                     if (fieldsMap.hasOwnProperty(name)) {
                         type = fieldsMap[name];
                         value = this.extractValue(form, name, prefix, type);
-                        buildFieldInternal(name, value, o);
+                        buildField(name, value, o);
                     }
                 }
                 for (name in constsMap) {
                     if (constsMap.hasOwnProperty(name)) {
                         value = constsMap[name];
-                        buildFieldInternal(name, value, o);
+                        buildField(name, value, o);
                     }
-                }
-                toolchain.registerMethods(o);
+                }                
                 return o;
             }
         },
 
-        annotations = ' abcdefghijklmnopqrstuvwxyz'.split(''), // suffixes for attributes annotating single field multiple times
-
-        binded = false,
-        detectAction = function(form) {
-            if (!binded) {
-                $(form).find('input, select, textarea').bind('change paste keyup', function () {
-                    $(form).valid();
-                });
-                binded = true;
+        validationHelper = {
+            referencesMap: [],
+            collectReferences: function(fields, refField, prefix) {
+                var i, name;
+                for (i = 0; i < fields.length; i++) {
+                    name = modelHelper.appendPrefix(fields[i], prefix);
+                    if (name !== refField) {
+                        this.referencesMap[name] = this.referencesMap[name] || [];
+                        if (!typeHelper.array.contains(this.referencesMap[name], refField)) {
+                            this.referencesMap[name].push(refField);
+                        }
+                    }
+                }
+            },
+            validateReferences: function(name, form) {
+                var i, field, referencedFields;
+                referencedFields = this.referencesMap[name];
+                if (referencedFields !== undefined && referencedFields !== null) {
+                    i = referencedFields.length;
+                    while (i--) {
+                        field = $(form).find(':input[name="' + referencedFields[i] + '"]');
+                        if (field.length !== 0) {
+                            field.valid();
+                        }
+                    }
+                }
+            },
+            binded: false,
+            detectAction: function(form) {
+                if (!this.binded) {
+                    $(form).find('input, select, textarea').bind('change paste keyup', function() {
+                        if (api.settings.instantValidation) {
+                            $(form).valid(); // validate entire form
+                            return;
+                        }
+                        var field = $(this).attr('name');
+                        validationHelper.validateReferences(field, form); // validate referenced fields only
+                    });
+                    this.binded = true;
+                }
             }
-        },
-
-        backup = window.ea, // map over the ea in case of overwrite
+        },           
 
         api = {
             settings: {
@@ -344,24 +390,26 @@
                 modelHelper: modelHelper,
                 toolchain: toolchain
             }
-        };
+        },
 
-    $.each(annotations, function(idx, val) { // should be optimized in terms of memory consumption (redundant handlers shouldn't be generated, there needs to be exactly as many handlers as there are unique annotations)
+        annotations = ' abcdefghijklmnopqrstuvwxyz'.split(''); // suffixes for attributes annotating single field multiple times
+
+    $.each(annotations, function(idx, val) { // should be optimized in terms of memory consumption (redundant handlers shouldn't be generated, it would be ideal to have exactly as many handlers as there are unique annotations)
         var adapter = 'assertthat' + $.trim(val);
         $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsmap', 'constsmap'], function(options) {
             options.rules[adapter] = {
                 prefix: modelHelper.getPrefix(options.element.name),
                 form: options.form,
                 expression: options.params.expression,
-                fieldsmap: $.parseJSON(options.params.fieldsmap),
-                constsmap: $.parseJSON(options.params.constsmap),
+                fieldsMap: $.parseJSON(options.params.fieldsmap),
+                constsMap: $.parseJSON(options.params.constsmap)
             };
             if (options.message) {
                 options.messages[adapter] = options.message;
             }
-            if (api.settings.instantValidation) {
-                detectAction(options.form);
-            }
+            var rules = options.rules[adapter];
+            validationHelper.detectAction(options.form);
+            validationHelper.collectReferences(Object.keys(rules.fieldsMap), options.element.name, rules.prefix);
         });
     });
 
@@ -372,16 +420,16 @@
                 prefix: modelHelper.getPrefix(options.element.name),
                 form: options.form,
                 expression: options.params.expression,
-                fieldsmap: $.parseJSON(options.params.fieldsmap),
-                constsmap: $.parseJSON(options.params.constsmap),
-                allowempty: $.parseJSON(options.params.allowempty)
+                fieldsMap: $.parseJSON(options.params.fieldsmap),
+                constsMap: $.parseJSON(options.params.constsmap),
+                allowEmpty: $.parseJSON(options.params.allowempty)
             };
             if (options.message) {
                 options.messages[adapter] = options.message;
             }
-            if (api.settings.instantValidation) {
-                detectAction(options.form);
-            }
+            var rules = options.rules[adapter];
+            validationHelper.detectAction(options.form);
+            validationHelper.collectReferences(Object.keys(rules.fieldsMap), options.element.name, rules.prefix);
         });
     });
 
@@ -390,7 +438,8 @@
         $.validator.addMethod(method, function(value, element, params) {
             value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
             if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
-                var model = modelHelper.deserializeObject(params.form, params.fieldsmap, params.constsmap, params.prefix);
+                var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.prefix);
+                toolchain.registerMethods(model);
                 with (model) {
                     if (!eval(params.expression)) { // check if the assertion condition is not satisfied
                         return false; // assertion not satisfied => notify
@@ -406,8 +455,9 @@
         $.validator.addMethod(method, function(value, element, params) {
             value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value;
             if (value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
-                || (!/\S/.test(value) && !params.allowempty)) {
-                var model = modelHelper.deserializeObject(params.form, params.fieldsmap, params.constsmap, params.prefix);
+                || (!/\S/.test(value) && !params.allowEmpty)) {
+                var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.prefix);
+                toolchain.registerMethods(model);
                 with (model) {
                     if (eval(params.expression)) {
                         return false;
