@@ -158,14 +158,6 @@ var
                     }
                 }
                 return false;
-            },
-            sanatize: function(arr, item) {
-                var i = arr.length;
-                while (i--) {
-                    if (arr[i] === item) {
-                        arr.splice(i, 1);
-                    }
-                }
             }
         },
         object: {
@@ -404,7 +396,7 @@ var
 
     annotations = ' abcdefghijklmnopqrstuvwxyz'; // suffixes for attributes annotating single field multiple times
 
-    $.each(annotations.split(''), function() { // should be optimized in terms of memory consumption (redundant handlers shouldn't be generated, it would be ideal to have exactly as many handlers as there are unique annotations)
+    $.each(annotations.split(''), function() { // it would be ideal to have exactly as many handlers as there are unique annotations, but the number of annotations isn't known untill DOM is ready
         var adapter = 'assertthat' + $.trim(this);
         $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsmap', 'constsmap'], function(options) {
             options.rules[adapter] = {
@@ -478,11 +470,13 @@ var
         }, '');
     });
 
-    api.___6BE7863DC1DB4AFAA61BB53FF97FE169 = { // for testing
+    // for testing only (section to be removed in release code)
+    api.___6BE7863DC1DB4AFAA61BB53FF97FE169 = {
         typeHelper: typeHelper,
         modelHelper: modelHelper,
         toolchain: toolchain
     };
+    // --------------------------------------------------------
 
     window.ea = api; // expose some tiny api to the ea global object
 

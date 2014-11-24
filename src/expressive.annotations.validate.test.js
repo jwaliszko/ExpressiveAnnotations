@@ -15,24 +15,6 @@
         window.ok(!ea.typeHelper.array.contains(["a", "b"], "c"));
     });
 
-    test("verify_array_sanatization", function() {
-        var array = ["a"];
-        ea.typeHelper.array.sanatize(["a"], "");
-        window.deepEqual(array, ["a"]);
-
-        array = ["a", "a"];
-        ea.typeHelper.array.sanatize(array, "a");
-        window.deepEqual(array, []);
-
-        array = ["a", "b"];
-        ea.typeHelper.array.sanatize(array, "");
-        window.deepEqual(array, ["a", "b"]);
-
-        array = ["a", "b", "c", "a", "b"];
-        ea.typeHelper.array.sanatize(array, "b");
-        window.deepEqual(array, ["a", "c", "a"]);
-    });
-
     test("verify_object_keys_extraction", function() {
         var assocArray = [];
         assocArray["one"] = "lorem";
@@ -88,8 +70,8 @@
         actual = ea.typeHelper.tryParse("11/08/2014", "datetime");
         window.ok(actual == expected);
 
-        window.ea.settings.parseDate = function(str) { // simulate broken parsing logic
-            return NaN;
+        window.ea.settings.parseDate = function(str) {
+            return NaN; // simulate broken parsing logic
         };
         var result = ea.typeHelper.tryParse("11/08/2014", "datetime");
         window.equal(result.error, true);
