@@ -298,9 +298,6 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
-  <PropertyGroup>
-    <PreBuildEvent>$(SolutionDir)packages\nuget.exe install "$(ProjectDir)packages.config" -o "$(SolutionDir)packages"</PreBuildEvent>
-  </PropertyGroup>
   <Target Name="CopyLinkedContentFiles" BeforeTargets="Build">
     <Copy SourceFiles="%(Content.Identity)" 
           DestinationFiles="%(Content.Link)" 
