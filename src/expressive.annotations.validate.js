@@ -219,8 +219,8 @@ var
         },
         float: {
             tryParse: function(value) {
-                function isNumber(n) {
-                    return !isNaN(parseFloat(n)) && isFinite(n);
+                function isNumber(n) {                    
+                    return typeHelper.isNumeric(parseFloat(n)) && isFinite(n);
                 }
 
                 if (isNumber(value)) {
@@ -235,12 +235,17 @@ var
                     return value.getTime();
                 }
                 if (typeHelper.isString(value)) {
+                    var millisec;
                     if (typeof api.settings.parseDate === 'function') {
-                        return api.settings.parseDate(value); // custom parsing of date string given in non-standard format
+                        millisec = api.settings.parseDate(value); // custom parsing of date string given in non-standard format
+                        if (typeHelper.isNumeric(millisec)) {
+                            return millisec;
+                        }
+                        return { error: true, msg: 'Custom date parsing is broken - number of milliseconds since January 1, 1970, 00:00:00 UTC expected to be returned.' };
                     }
-                    var milisec = Date.parse(value); // default parsing of string representing an RFC 2822 or ISO 8601 date
-                    if (!/Invalid|NaN/.test(milisec)) {
-                        return milisec;
+                    millisec = Date.parse(value); // default parsing of string representing an RFC 2822 or ISO 8601 date
+                    if (typeHelper.isNumeric(millisec)) {
+                        return millisec;
                     }
                 }
                 return { error: true, msg: 'Given value was not recognized as a valid RFC 2822 or ISO 8601 date.' };

@@ -2,13 +2,13 @@
 /// <reference path="./packages/jQuery.Validation.1.10.0/Content/Scripts/jquery.validate.js" />
 /// <reference path="./packages/Microsoft.jQuery.Unobtrusive.Validation.3.1.1/Content/Scripts/jquery.validate.unobtrusive.js" />
 /// <reference path="./expressive.annotations.validate.js" />
-//debugger; // enable firebug (preferably, check 'on for all web pages' option) for the debugger to launch 
-(function($, window, ea) {
 
-    //equal( actual, expected [, message ] )
+(function($, window, ea) {    
+    // equal( actual, expected [, message ] )
     window.module("type helper");
 
     test("verify_array_storage", function() {
+        // debugger; // enable firebug (preferably, check 'on for all web pages' option) for the debugger to launch
         window.ok(ea.typeHelper.array.contains(["a"], "a"));
         window.ok(ea.typeHelper.array.contains(["a", "b"], "a"));
         window.ok(ea.typeHelper.array.contains(["a", "b"], "b"));
@@ -87,6 +87,14 @@
         };
         actual = ea.typeHelper.tryParse("11/08/2014", "datetime");
         window.ok(actual == expected);
+
+        window.ea.settings.parseDate = function(str) { // simulate broken parsing logic
+            return NaN;
+        };
+        var result = ea.typeHelper.tryParse("11/08/2014", "datetime");
+        window.equal(result.error, true);
+        window.equal(result.msg, "Custom date parsing is broken - number of milliseconds since January 1, 1970, 00:00:00 UTC expected to be returned.");
+
         window.ea.settings.parseDate = undefined; // reset state for further tests
     });
 
