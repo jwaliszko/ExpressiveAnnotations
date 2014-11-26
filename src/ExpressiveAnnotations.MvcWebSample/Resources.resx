@@ -235,7 +235,7 @@
     <value>Phone number should contain from 9 to 15 digits.</value>
   </data>
   <data name="ReasonForLongTravel" xml:space="preserve">
-    <value>Reason for such a long travel</value>
+    <value>Reasons for such a long travel</value>
   </data>
   <data name="ReasonForLongTravelRequired" xml:space="preserve">
     <value>If you plan to stay abroad longer than one month from now, write down your reasons.</value>

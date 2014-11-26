@@ -20,7 +20,7 @@
         <pre class="action">[show attribute]</pre>
         <div>
             @Html.LabelFor(model => model.Age, new { @class = "inline prefix" })
-            @Html.DropDownListFor(x => x.Age, new SelectList(Model.Years, null))
+            @Html.DropDownListFor(model => model.Age, new SelectList(Model.Years, null))
             @Html.ValidationMessageFor(model => model.Age)
         </div>
     </li>
@@ -39,18 +39,18 @@
     <li>
         <div>
             @Html.LabelFor(model => model.Country, new { @class = "inline prefix" })
-            @Html.DropDownListFor(x => x.Country, new SelectList(Model.Countries, "Value", "Text"))
+            @Html.DropDownListFor(model => model.Country, new SelectList(Model.Countries, "Value", "Text"))
             @Html.ValidationMessageFor(model => model.Country)
         </div>
     </li>
     <li>
         <div>
             @Html.LabelFor(model => model.NextCountry, new { @class = "inline prefix" })
-            @Html.DropDownListFor(x => x.NextCountry, new SelectList(Model.Countries, "Value", "Text"))
+            @Html.DropDownListFor(model => model.NextCountry, new SelectList(Model.Countries, "Value", "Text"))
             @Html.ValidationMessageFor(model => model.NextCountry)
         </div>
     </li>
-    <li>
+    <li>        
         <pre class="code">
 [RequiredIf(@@"GoAbroad == true
               && (
@@ -67,7 +67,7 @@
         </div>
     </li>
     <li>
-        @Html.EditorFor(x => x.LatestSuggestedReturnDate)   @*hidden backing field storing date in RFC 2822 or ISO 8601 format*@
+        @Html.EditorFor(x => x.LatestSuggestedReturnDate, "ISO8601Date")   @*hidden backing field storing date in RFC 2822 or ISO 8601 format*@
         <pre class="code">
 [RequiredIf("GoAbroad == true")]
 [AssertThat("ReturnDate >= Today()")]
@@ -76,7 +76,7 @@
         <pre class="action">[show attribute]</pre>
         <div>
             @Html.LabelFor(model => model.ReturnDate, new { @class = "inline prefix" })
-            @Html.TextBoxFor(x => x.ReturnDate, new { @class = "date", @placeholder = Resources.SelectDate }) @Resources.LatestSuggestedReturnDate: @Model.LatestSuggestedReturnDate.ToString(lang == "pl" ? "yyyy-MM-dd" : "MM/dd/yyyy")
+            @Html.TextBoxFor(model => model.ReturnDate, new { @class = "date", @placeholder = Resources.SelectDate }) @Resources.LatestSuggestedReturnDate: @Model.LatestSuggestedReturnDate.ToString(lang == "pl" ? "yyyy-MM-dd" : "MM/dd/yyyy")
             @Html.ValidationMessageFor(model => model.ReturnDate)
         </div>
     </li>
@@ -87,7 +87,7 @@
         <pre class="action">[show attribute]</pre>
         <div>
             @Html.LabelFor(model => model.ReasonForLongTravel, new { @class = "inline prefix" })
-            @Html.TextAreaFor(x => x.ReasonForLongTravel)
+            @Html.TextAreaFor(model => model.ReasonForLongTravel)
             @Html.ValidationMessageFor(model => model.ReasonForLongTravel)
         </div>
     </li>
@@ -98,7 +98,7 @@
         <pre class="action">[show attribute]</pre>
         <div>
             @Html.LabelFor(model => model.PoliticalStability, new { @class = "inline prefix" })
-            @Html.EnumDropDownListFor(x => x.PoliticalStability)
+            @Html.EnumDropDownListFor(model => model.PoliticalStability)
             @Html.ValidationMessageFor(model => model.PoliticalStability)
         </div>
     </li>
@@ -123,7 +123,7 @@
             @foreach (var item in Model.Sports)
             {
                 <div class="inline">
-                    @Html.RadioButtonFor(m => m.SportType, item.Value) <label class="radio">@item.Text</label>
+                    @Html.RadioButtonFor(model => model.SportType, item.Value) <label class="radio">@item.Text</label>
                 </div>
             }
             @Html.ValidationMessageFor(model => model.SportType)
@@ -172,13 +172,12 @@
     </li>
     <li>
         <pre class="code">
-[AssertThat(@@"FlightId != Guid('00000000-0000-0000-0000-000000000000')
-              && FlightId != Guid('11111111-1111-1111-1111-111111111111')")]
+[AssertThat("FlightId != Guid('00000000-0000-0000-0000-000000000000')")]
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>
             @Html.LabelFor(model => model.FlightId, new { @class = "inline prefix" })
-            @Html.EditorFor(model => model.FlightId)
+            @Html.DropDownListFor(model => model.FlightId, new SelectList(Model.Flights, "Value", "Text"))
             @Html.ValidationMessageFor(model => model.FlightId)
         </div>
     </li>

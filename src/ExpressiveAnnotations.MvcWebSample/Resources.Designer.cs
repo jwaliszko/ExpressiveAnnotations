@@ -412,7 +412,7 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Reason for such a long travel.
+        ///   Looks up a localized string similar to Reasons for such a long travel.
         /// </summary>
         public static string ReasonForLongTravel {
             get {

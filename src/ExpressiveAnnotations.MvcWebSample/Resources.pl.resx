@@ -235,13 +235,13 @@
     <value>Numer telefonu powinien zawierać od 9 do 15 cyfr.</value>
   </data>
   <data name="ReasonForLongTravel" xml:space="preserve">
-    <value>Powód długiej podróży</value>
+    <value>Powody długiej podróży</value>
   </data>
   <data name="ReasonForLongTravelRequired" xml:space="preserve">
     <value>Jeśli planujesz przebywać za granicą dłużej niż miesiąc, podaj powody.</value>
   </data>
   <data name="ReasonForTravel" xml:space="preserve">
-    <value>Podowy podróży</value>
+    <value>Powody podróży</value>
   </data>
   <data name="ReasonForTravelRequired" xml:space="preserve">
     <value>Jeśli planujesz wyjechać za granicę i jesteś w wieku 25-55 lat lub planujesz odwiedzić dwukrotnie ten sam obcy kraj, podaj powody.</value>
