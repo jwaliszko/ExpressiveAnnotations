@@ -72,6 +72,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             get { return new int?[] {null}.Concat(Enumerable.Range(15, 82).Select(x => (int?) x)); }
         }
 
+        [UIHint("IntArray")]
         public int[] EarlyYears
         {
             get { return new[] { 15, 16, 17 }; }
@@ -162,7 +163,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public bool? ImmediateContact { get; set; }
 
         [AssertThat(@"FlightId != Guid('00000000-0000-0000-0000-000000000000') || GoAbroad == false",
-            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "FlightIdentifierInvalid")]        
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FlightIdentifierInvalid")]        
         [Display(ResourceType = typeof (Resources), Name = "FlightId")]
         public Guid FlightId { get; set; }
 

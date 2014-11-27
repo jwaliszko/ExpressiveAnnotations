@@ -51,7 +51,7 @@
         </div>
     </li>
     <li>
-        @Html.EditorFor(model => model.EarlyYears, "IntArray")
+        @Html.DisplayFor(model => model.EarlyYears) @*hidden backing field storing JSON array of ints (IntArray template pointed by UIHint attrib)*@
         <pre class="code">
 [RequiredIf(@@"GoAbroad == true
               && (
@@ -69,7 +69,7 @@
         </div>
     </li>
     <li>
-        @Html.EditorFor(x => x.LatestSuggestedReturnDate, "ISO8601Date")   @*hidden backing field storing date in RFC 2822 or ISO 8601 format*@
+        @Html.DisplayFor(x => x.LatestSuggestedReturnDate) @*hidden backing field storing date in RFC 2822 or ISO 8601 format (ISO8601Date template pointed by UIHint attrib)*@
         <pre class="code">
 [RequiredIf("GoAbroad == true")]
 [AssertThat("ReturnDate >= Today()")]

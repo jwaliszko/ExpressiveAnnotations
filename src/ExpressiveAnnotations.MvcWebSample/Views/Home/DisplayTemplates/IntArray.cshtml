@@ -1,3 +1,4 @@
 ﻿@using Newtonsoft.Json
 @model int[]
+
 @Html.Hidden("", JsonConvert.SerializeObject(Model))
