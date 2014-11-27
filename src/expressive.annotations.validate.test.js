@@ -55,7 +55,7 @@
 
         result = ea.typeHelper.tryParse("", "secret");
         window.equal(result.error, true);
-        window.equal(result.msg, "Supported types: datetime, numeric, string, bool and guid. Invalid target type: secret");
+        window.equal(result.msg, "Given value was not recognized as valid JSON. SyntaxError: JSON.parse: unexpected end of data at line 1 column 1 of the JSON data");
     });
 
     test("verify_non_standard_date_format_parsing", function() {

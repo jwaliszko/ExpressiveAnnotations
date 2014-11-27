@@ -67,6 +67,9 @@
                 from.setFullYear(when);
                 return from;
             });
+            ea.addMethod("ArrayContains", function(value, array) {
+                return $.inArray(value, array) >= 0;
+            });
         </script>
     }
 

@@ -50,13 +50,15 @@
             @Html.ValidationMessageFor(model => model.NextCountry)
         </div>
     </li>
-    <li>        
+    <li>
+        @Html.EditorFor(model => model.EarlyYears, "IntArray")
         <pre class="code">
 [RequiredIf(@@"GoAbroad == true
               && (
                      (NextCountry != 'Other' && NextCountry == Country)
                      || (Age > 24 && Age &le; 55)
                  )")]
+[RequiredIf("ArrayContains(Age, EarlyYears)")]
 [AssertThat(@@"ReasonForTravel != 'John\'s cat named ""\\\'""\n (Backslash Quote)' && ReasonForTravel != SIMONS_CAT")]
 </pre>
         <pre class="action">[show attribute]</pre>
@@ -172,7 +174,7 @@
     </li>
     <li>
         <pre class="code">
-[AssertThat("FlightId != Guid('00000000-0000-0000-0000-000000000000')")]
+[AssertThat("FlightId != Guid('00000000-0000-0000-0000-000000000000') || GoAbroad == false")]
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>

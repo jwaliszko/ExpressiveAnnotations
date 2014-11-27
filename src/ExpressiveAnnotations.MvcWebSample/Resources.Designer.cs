@@ -448,6 +448,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to If you are under 18, give us a reason of your travel no matter where you go..
+        /// </summary>
+        public static string ReasonForTravelRequiredForYouth {
+            get {
+                return ResourceManager.GetString("ReasonForTravelRequiredForYouth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Return date.
         /// </summary>
         public static string ReturnDate {

@@ -72,6 +72,11 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             get { return new int?[] {null}.Concat(Enumerable.Range(15, 82).Select(x => (int?) x)); }
         }
 
+        public int[] EarlyYears
+        {
+            get { return new[] { 15, 16, 17 }; }
+        }
+
         [Display(ResourceType = typeof (Resources), Name = "GoAbroad")]
         public bool GoAbroad { get; set; }
 
@@ -97,7 +102,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
                              (NextCountry != 'Other' && NextCountry == Country)
                              || (Age > 24 && Age <= 55)
                          )",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ReasonForTravelRequired")]        
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ReasonForTravelRequired")]
+        [RequiredIf("ArrayContains(Age, EarlyYears)",
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ReasonForTravelRequiredForYouth")]
         [AssertThat(@"ReasonForTravel != 'John\'s cat named ""\\\'""\n (Backslash Quote)' && ReasonForTravel != SIMONS_CAT",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "SecretAnswerDetected")]
         [Display(ResourceType = typeof (Resources), Name = "ReasonForTravel")]
@@ -169,11 +176,16 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
                                                                 * interpret backslash control characters anymore - they lose any special significance for it (one thing to remember is 
                                                                 * usage of "" for quote escape sequence: http://msdn.microsoft.com/en-us/library/aa691090(v=vs.71).aspx).
                                                                 */
-        }     
+        }        
 
         public DateTime AddYears(DateTime from, int years)
         {
             return from.AddYears(years);
+        }
+
+        public bool ArrayContains(int? value, int[] array)
+        {
+            return value != null && array.Contains((int)value);
         }
     }
 }

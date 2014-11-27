@@ -246,6 +246,9 @@
   <data name="ReasonForTravelRequired" xml:space="preserve">
     <value>If you plan to go abroad and you are between 25 and 55 or plan to visit the same foreign country twice, write down your reasons.</value>
   </data>
+  <data name="ReasonForTravelRequiredForYouth" xml:space="preserve">
+    <value>If you are under 18, give us a reason of your travel no matter where you go.</value>
+  </data>
   <data name="ReturnDate" xml:space="preserve">
     <value>Return date</value>
   </data>

@@ -279,7 +279,11 @@ var
                 case 'guid':
                     return typeHelper.guid.tryParse(value);
                 default:
-                    return { error: true, msg: typeHelper.string.format('Supported types: datetime, numeric, string, bool and guid. Invalid target type: {0}', type) };
+                    try {
+                        return JSON.parse(value);
+                    } catch (ex) {
+                        return { error: true, msg: 'Given value was not recognized as valid JSON. ' + ex };
+                    }
             }
         }
     },
