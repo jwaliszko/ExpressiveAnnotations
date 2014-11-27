@@ -12,6 +12,7 @@ var
     api = { // to be accesssed from outer scope
         settings: {
             instantValidation: false, // switch indicating whether entire form should be instantly validated when any field activity is detected i.e. change, paste or keyup event
+            parseObject: undefined, // if you'd like to represent a fields data in any other form than a default json (not recommended), it is the place for any custom deserializer
             parseDate: undefined // provide implementation to parse date in non-standard format
                                  // e.g., suppose DOM field date is given in dd/mm/yyyy format:
                                  // parseDate = function(str) { // input string is given as a raw value extracted from DOM element
@@ -169,6 +170,13 @@ var
                     }
                 }
                 return arr;
+            },
+            tryParse: function(value) {
+                try {
+                    return $.parseJSON(value);
+                } catch (ex) {
+                    return { error: true, msg: 'Given value was not recognized as a valid JSON. ' + ex };
+                }
             }
         },
         string: {
@@ -279,11 +287,7 @@ var
                 case 'guid':
                     return typeHelper.guid.tryParse(value);
                 default:
-                    try {
-                        return JSON.parse(value);
-                    } catch (ex) {
-                        return { error: true, msg: 'Given value was not recognized as valid JSON. ' + ex };
-                    }
+                    return typeof api.settings.parseObject === 'function' ? api.settings.parseObject(value) : typeHelper.object.tryParse(value);
             }
         }
     },
@@ -315,7 +319,7 @@ var
             if (rawValue === undefined || rawValue === null || rawValue === '') { // field value not set
                 return null;
             }
-            parsedValue = typeHelper.tryParse(rawValue, type); // convert to required type
+            parsedValue = typeHelper.tryParse(rawValue, type); // convert field value to required type
             if (parsedValue.error) {
                 throw typeHelper.string.format('DOM field {0} value conversion to {1} failed. {2}', name, type, parsedValue.msg);
             }

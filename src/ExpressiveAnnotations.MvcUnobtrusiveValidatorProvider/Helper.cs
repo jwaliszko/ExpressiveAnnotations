@@ -24,7 +24,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             if (type.IsGuid())
                 return "guid";
 
-            return "complex";
+            return "object";
         }
 
         public static string ToJson(this object data)

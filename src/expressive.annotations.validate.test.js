@@ -53,9 +53,9 @@
         window.equal(result.error, true);
         window.equal(result.msg, "Given value was not recognized as a valid guid - guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).");
 
-        result = ea.typeHelper.tryParse("", "secret");
+        result = ea.typeHelper.tryParse("{", "object");
         window.equal(result.error, true);
-        window.equal(result.msg, "Given value was not recognized as valid JSON. SyntaxError: JSON.parse: unexpected end of data at line 1 column 1 of the JSON data");
+        window.equal(result.msg, "Given value was not recognized as a valid JSON. SyntaxError: JSON.parse: end of data while reading object contents at line 1 column 2 of the JSON data");
     });
 
     test("verify_non_standard_date_format_parsing", function() {
@@ -78,6 +78,19 @@
         window.equal(result.msg, "Custom date parsing is broken - number of milliseconds since January 1, 1970, 00:00:00 UTC expected to be returned.");
 
         window.ea.settings.parseDate = undefined; // reset state for further tests
+    });
+
+    test("verify_non_standard_object_format_parsing", function() {
+        var expected = $.parseXML("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>");
+        var actual = ea.typeHelper.tryParse("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object");
+        window.notDeepEqual(actual, expected); // standard json parse fails
+        window.ea.settings.parseObject = function(str) {
+            return $.parseXML(str);
+        };
+        actual = ea.typeHelper.tryParse("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object");
+        window.deepEqual(actual, expected);
+
+        window.ea.settings.parseObject = undefined; // reset state for further tests
     });
 
     test("verify_string_formatting", function() {
@@ -174,6 +187,15 @@
         var result = ea.typeHelper.guid.tryParse("");
         window.equal(result.error, true);
         window.equal(result.msg, "Given value was not recognized as a valid guid - guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).");
+    });
+
+    test("verify_object_parsing", function() {
+        var jsonString = '{"Val":"a","Arr":[1,2]}';
+        window.deepEqual(ea.typeHelper.object.tryParse(jsonString), $.parseJSON(jsonString));
+
+        var result = ea.typeHelper.object.tryParse("{");
+        window.equal(result.error, true);
+        window.equal(result.msg, "Given value was not recognized as a valid JSON. SyntaxError: JSON.parse: end of data while reading object contents at line 1 column 2 of the JSON data");
     });
 
     test("verify_numeric_recognition", function() {
