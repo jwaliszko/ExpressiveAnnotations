@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.validate.js - v2.3.0
+﻿/* expressive.annotations.validate.js - v2.4.0
  * Client-side component of ExpresiveAnnotations - annotation-based conditional validation library.
  * https://github.com/JaroslawWaliszko/ExpressiveAnnotations
  *
@@ -10,9 +10,11 @@ var
     backup = window.ea, // map over the ea in case of overwrite
 
     api = { // to be accesssed from outer scope
-        settings: {            
-            parseObject: undefined, // if you'd like to represent a fields data in any other form than a default json (not recommended), it is the place for any custom deserializer
-            parseDate: undefined // provide implementation to parse date in non-standard format
+        settings: {
+            dependencyTriggers: 'change paste keyup', // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names)
+                                                      // for which fields directly dependent on referenced DOM field are validated
+            parseObject: undefined, // provide custom deserialization for objects when stored in non-json format
+            parseDate: undefined // provide custom parsing mechanism for dates when stored in non-standard format
                                  // e.g., suppose DOM field date is given in dd/mm/yyyy format:
                                  // parseDate = function(str) { // input string is given as a raw value extracted from DOM element
                                  //     var arr = str.split('/'); return new Date(arr[2], arr[1] - 1, arr[0]).getTime(); // return milliseconds since January 1, 1970, 00:00:00 UTC
@@ -385,7 +387,7 @@ var
             if (referencedFields !== undefined && referencedFields !== null) {
                 i = referencedFields.length;
                 while (i--) {
-                    field = $(form).find(':input[name="' + referencedFields[i] + '"]');
+                    field = $(form).find(':input[data-val][name="' + referencedFields[i] + '"]');
                     if (field.length !== 0) {
                         field.valid();
                     }
@@ -393,9 +395,9 @@ var
             }
         },
         binded: false,
-        bindAction: function(form) {
+        bindFields: function(form) {
             if (!this.binded) {
-                $(form).find('input, select, textarea').bind('change paste keyup', function() {                    
+                $(form).find('input, select, textarea').bind(api.settings.dependencyTriggers, function() {
                     var field = $(this).attr('name');
                     validationHelper.validateReferences(field, form); // validate referenced fields only
                 });
@@ -420,7 +422,7 @@ var
                 options.messages[adapter] = options.message;
             }
             var rules = options.rules[adapter];
-            validationHelper.bindAction(options.form);
+            validationHelper.bindFields(options.form);
             validationHelper.collectReferences(typeHelper.object.keys(rules.fieldsMap), options.element.name, rules.prefix);
         });
     });
@@ -440,7 +442,7 @@ var
                 options.messages[adapter] = options.message;
             }
             var rules = options.rules[adapter];
-            validationHelper.bindAction(options.form);
+            validationHelper.bindFields(options.form);
             validationHelper.collectReferences(typeHelper.object.keys(rules.fieldsMap), options.element.name, rules.prefix);
         });
     });
