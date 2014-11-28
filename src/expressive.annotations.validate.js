@@ -10,8 +10,7 @@ var
     backup = window.ea, // map over the ea in case of overwrite
 
     api = { // to be accesssed from outer scope
-        settings: {
-            instantValidation: false, // switch indicating whether entire form should be instantly validated when any field activity is detected i.e. change, paste or keyup event
+        settings: {            
             parseObject: undefined, // if you'd like to represent a fields data in any other form than a default json (not recommended), it is the place for any custom deserializer
             parseDate: undefined // provide implementation to parse date in non-standard format
                                  // e.g., suppose DOM field date is given in dd/mm/yyyy format:
@@ -172,6 +171,13 @@ var
                 return arr;
             },
             tryParse: function(value) {
+                if (typeof api.settings.parseObject === 'function') {
+                    try {
+                        return api.settings.parseObject(value);
+                    } catch (ex) {
+                        return { error: true, msg: 'Custom object parsing is broken. ' + ex };
+                    }
+                }
                 try {
                     return $.parseJSON(value);
                 } catch (ex) {
@@ -287,7 +293,7 @@ var
                 case 'guid':
                     return typeHelper.guid.tryParse(value);
                 default:
-                    return typeof api.settings.parseObject === 'function' ? api.settings.parseObject(value) : typeHelper.object.tryParse(value);
+                    return typeHelper.object.tryParse(value);
             }
         }
     },
@@ -387,13 +393,9 @@ var
             }
         },
         binded: false,
-        detectAction: function(form) {
+        bindAction: function(form) {
             if (!this.binded) {
-                $(form).find('input, select, textarea').bind('change paste keyup', function() {
-                    if (api.settings.instantValidation) {
-                        $(form).valid(); // validate entire form
-                        return;
-                    }
+                $(form).find('input, select, textarea').bind('change paste keyup', function() {                    
                     var field = $(this).attr('name');
                     validationHelper.validateReferences(field, form); // validate referenced fields only
                 });
@@ -418,7 +420,7 @@ var
                 options.messages[adapter] = options.message;
             }
             var rules = options.rules[adapter];
-            validationHelper.detectAction(options.form);
+            validationHelper.bindAction(options.form);
             validationHelper.collectReferences(typeHelper.object.keys(rules.fieldsMap), options.element.name, rules.prefix);
         });
     });
@@ -438,7 +440,7 @@ var
                 options.messages[adapter] = options.message;
             }
             var rules = options.rules[adapter];
-            validationHelper.detectAction(options.form);
+            validationHelper.bindAction(options.form);
             validationHelper.collectReferences(typeHelper.object.keys(rules.fieldsMap), options.element.name, rules.prefix);
         });
     });
@@ -446,7 +448,7 @@ var
     $.each(annotations.split(''), function() {
         var method = 'assertthat' + $.trim(this);
         $.validator.addMethod(method, function(value, element, params) {
-            value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
+            value = element.type === 'checkbox' ? element.checked : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
             if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
                 var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.prefix);
                 toolchain.registerMethods(model);
@@ -463,7 +465,7 @@ var
     $.each(annotations.split(''), function() {
         var method = 'requiredif' + $.trim(this);
         $.validator.addMethod(method, function(value, element, params) {
-            value = $(element).attr('type') === 'checkbox' ? $(element).is(':checked') : value;
+            value = element.type === 'checkbox' ? element.checked : value;
             if (value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
                 || (!/\S/.test(value) && !params.allowEmpty)) {
                 var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.prefix);
