@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations", "ExpressiveAnnotations\ExpressiveAnnotations.csproj", "{70DD327B-F37C-4291-9388-212AA541E970}"
 EndProject
@@ -70,9 +70,7 @@ Global
 		{46C5858F-76A5-4032-A4DA-5299CE51209B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46C5858F-76A5-4032-A4DA-5299CE51209B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{46C5858F-76A5-4032-A4DA-5299CE51209B}.Release-Net40|Any CPU.ActiveCfg = Release|Any CPU
-		{46C5858F-76A5-4032-A4DA-5299CE51209B}.Release-Net40|Any CPU.Build.0 = Release|Any CPU
 		{46C5858F-76A5-4032-A4DA-5299CE51209B}.Release-Net45|Any CPU.ActiveCfg = Release|Any CPU
-		{46C5858F-76A5-4032-A4DA-5299CE51209B}.Release-Net45|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
