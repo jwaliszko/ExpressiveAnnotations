@@ -3,6 +3,7 @@
  * Licensed MIT: http://opensource.org/licenses/MIT */
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using Newtonsoft.Json;
@@ -27,6 +28,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
             return "object";
         }
 
+        [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")] // code that deals with disposables should be consistent (and classes should be resilient to multiple Dispose() calls)
         public static string ToJson(this object data)
         {
             var stringBuilder = new StringBuilder();

@@ -2,11 +2,14 @@
  * Copyright (c) 2014 Jaroslaw Waliszko
  * Licensed MIT: http://opensource.org/licenses/MIT */
 
+using System;
+
 namespace ExpressiveAnnotations.Analysis
 {
     /// <summary>
     ///     Contains the location information related to some arbitrary data within associated text block.
     /// </summary>
+    [Serializable]
     public class Location
     {
         /// <summary>

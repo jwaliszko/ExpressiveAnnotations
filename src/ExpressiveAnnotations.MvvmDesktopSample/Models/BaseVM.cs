@@ -61,7 +61,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
 
         public string Error
         {
-            get { throw new NotImplementedException(); }
+            get { return null; }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
