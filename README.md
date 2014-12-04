@@ -4,6 +4,26 @@
 
 ExpressiveAnnotations is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given `RequiredIf` and `AssertThat` attributes allow to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more condensed, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
 
+###Table of contents
+ - [What is the context behind this implementation?](#what-is-the-context-behind-this-implementation)
+ - [RequiredIf vs. AssertThat - where is the difference?](#requiredif-vs-assertthat---where-is-the-difference)
+ - [What are brief examples of usage?](#what-are-brief-examples-of-usage)
+ - [Declarative vs. imperative programming - what is it about?](#declarative-vs-imperative-programming---what-is-it-about)
+ - [How to construct conditional validation attributes?](#how-to-construct-conditional-validation-attributes)
+   - [Signatures](#signatures)
+   - [Implementation](#implementation)
+   - [Traps](#traps)
+   - [Built-in functions](#built-in-functions)
+ - [What about the support of ASP.NET MVC client-side validation?](#what-about-the-support-of-aspnet-mvc-client-side-validation)
+ - [Frequently asked questions](#frequently-asked-questions)
+   - [What if there is no built-in function I need?](#what-if-there-is-no-built-in-function-i-need)
+   - [How to cope with dates given in non-standard formats?](#how-to-cope-with-dates-given-in-non-standard-formats)
+   - [What if ea variable is already used by another library?](#what-if-ea-variable-is-already-used-by-another-library)
+   - [How to control frequency of dependent fields validation?](#how-to-control-frequency-of-dependent-fields-validation)
+ - [Installation](#installation)
+ - [Contributors](#contributors)
+ - [License](#license)
+
 ###<a id="what-is-the-context-behind-this-implementation">What is the context behind this implementation?</a>
 
 There are number of cases where the concept of metadata is used for justified reasons. Attributes are one of the ways to associate complementary information with existing data. Such annotations may also define the correctness of data. Declarative validation when [compared](#declarative-vs-imperative-programming---what-is-it-about) to imperative approach seems to be more convenient in many cases. Clean, compact code - all validation logic defined within the model scope. Simple to write, obvious to read.
@@ -34,7 +54,7 @@ Simple enough, let's move to another variation:
 [AssertThat("ReturnDate >= Today()")]
 public DateTime? ReturnDate { get; set; }
 ```
-By the usage of this attribute type, we are not validating field requirement as before - its value is allowed to be null this time. Nevertheless, if some value is already given, provided restriction needs to be satisfied (return date needs to be greater than or equal to the date returned by [`Today()` built-in function](#built-in-functions)). 
+By the usage of this attribute type, we are not validating field requirement as before - its value is allowed to be null this time. Nevertheless, if some value is already given, provided restriction needs to be satisfied (return date needs to be greater than or equal to the date returned by [`Today()`](#built-in-functions) built-in function).
 
 As shown below, both types of attributes may be combined (moreover, the same type can be applied multiple times for a single field):
 ```C#
@@ -143,7 +163,7 @@ Logical expressions should be built according to the syntax defined by grammar, 
 
 Specified expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object. As a result of expression evaluation, boolean flag is returned, indicating that expression is true or false. 
 
-When working with ASP.NET MVC stack, unobtrusive client-side validation mechanism is [additionally available](#what-about-the-support-of-aspnet-mvc-client-side-validation). Client receives unchanged expression string from server. Such an expression is then evaluated using JavaScript [`eval()` method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) within the context of reflected model object. Such a model, analogously to the server-side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
+When working with ASP.NET MVC stack, unobtrusive client-side validation mechanism is [additionally available](#what-about-the-support-of-aspnet-mvc-client-side-validation). Client receives unchanged expression string from server. Such an expression is then evaluated using JavaScript [`eval()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) method within the context of reflected model object. Such a model, analogously to the server-side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
 
 #####<a id="traps">Traps</a>
 
@@ -245,7 +265,7 @@ Alternatively, visit the [installation section](#installation).
 
 ###<a id="frequently-asked-questions">Frequently asked questions</a>
 
-#####<a id="what-if-there-is-no-built---in-function-i-need">What if there is no built-in function I need?</a>
+#####<a id="what-if-there-is-no-built-in-function-i-need">What if there is no built-in function I need?</a>
 
 Create it yourself. Any custom function defined within the model class scope at server-side is automatically recognized and can be used inside expressions, e.g.
 ```C#
@@ -297,6 +317,17 @@ Use `noConflict()` method. In case of naming collision return control of the `ea
     var expann = ea.noConflict();
     expann.addMethod... // do something with ExpressiveAnnotations
     ea... // do something with original ea variable
+```
+
+#####<a id="how-to-control-frequency-of-dependent-fields-validation">How to control frequency of dependent fields validation?</a>
+
+When a field value is modified, validation results for some other fields, directly dependent on currenty modified one, may be affected. To control the frequency of when dependent fields validation is triggered, change default `ea.settings.dependencyTriggers` settings. It is a string containing one or more DOM field event types (such as *change*, *keyup* or custom event names), associated with currently modified field, for which fields directly dependent on are validated.
+Default settings value is *'change paste keyup'* (for more information check `eventType` parameter of jQuery [`bind()`](http://api.jquery.com/bind/) method).
+```JavaScript
+<script src="another.js"></script>
+<script src="expressive.annotations.validate.js"></script>
+<script>
+    ea.settings.dependencyTriggers = 'change'; // disable some excessive activity if you wish and, e.g. trigger dependent fields validation only when current field "change" event is fired
 ```
 
 ###<a id="installation">Installation</a>
