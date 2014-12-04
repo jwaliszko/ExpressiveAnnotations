@@ -6,7 +6,7 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
 
 ###Table of contents
  - [What is the context behind this implementation?](#what-is-the-context-behind-this-implementation)
- - [RequiredIf vs. AssertThat - where is the difference?](#requiredif-vs-assertthat---where-is-the-difference)
+ - [*RequiredIf* vs. *AssertThat* - where is the difference?](#requiredif-vs-assertthat---where-is-the-difference)
  - [What are brief examples of usage?](#what-are-brief-examples-of-usage)
  - [Declarative vs. imperative programming - what is it about?](#declarative-vs-imperative-programming---what-is-it-about)
  - [How to construct conditional validation attributes?](#how-to-construct-conditional-validation-attributes)
@@ -18,7 +18,7 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
  - [Frequently asked questions](#frequently-asked-questions)
    - [What if there is no built-in function I need?](#what-if-there-is-no-built-in-function-i-need)
    - [How to cope with dates given in non-standard formats?](#how-to-cope-with-dates-given-in-non-standard-formats)
-   - [What if ea variable is already used by another library?](#what-if-ea-variable-is-already-used-by-another-library)
+   - [What if *ea* variable is already used by another library?](#what-if-ea-variable-is-already-used-by-another-library)
    - [How to control frequency of dependent fields validation?](#how-to-control-frequency-of-dependent-fields-validation)
  - [Installation](#installation)
  - [Contributors](#contributors)
@@ -28,7 +28,7 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
 
 There are number of cases where the concept of metadata is used for justified reasons. Attributes are one of the ways to associate complementary information with existing data. Such annotations may also define the correctness of data. Declarative validation when [compared](#declarative-vs-imperative-programming---what-is-it-about) to imperative approach seems to be more convenient in many cases. Clean, compact code - all validation logic defined within the model scope. Simple to write, obvious to read.
 
-###<a id="requiredif-vs-assertthat---where-is-the-difference">RequiredIf vs. AssertThat - where is the difference?</a>
+###<a id="requiredif-vs-assertthat---where-is-the-difference">*RequiredIf* vs. *AssertThat* - where is the difference?</a>
 
 * `RequiredIf` - if value is not yet provided, check whether it is required (annotated field is required to be non-null, when given condition is satisfied),
 * `AssertThat` - if value is already provided, check whether the condition is met (non-null annotated field is considered as valid, when given condition is satisfied).
@@ -54,7 +54,7 @@ Simple enough, let's move to another variation:
 [AssertThat("ReturnDate >= Today()")]
 public DateTime? ReturnDate { get; set; }
 ```
-By the usage of this attribute type, we are not validating field requirement as before - its value is allowed to be null this time. Nevertheless, if some value is already given, provided restriction needs to be satisfied (return date needs to be greater than or equal to the date returned by [`Today()`](#built-in-functions) built-in function).
+By the usage of this attribute type, we are not validating field requirement as before - its value is allowed to be null this time. Nevertheless, if some value is already given, provided restriction needs to be satisfied (return date needs to be greater than or equal to the date returned by `Today()` [built-in function](#built-in-functions)).
 
 As shown below, both types of attributes may be combined (moreover, the same type can be applied multiple times for a single field):
 ```C#
@@ -307,7 +307,7 @@ When some non-standard format needs to be handled, simply override the default b
     }
 ```
 
-#####<a id="what-if-ea-variable-is-already-used-by-another-library">What if ea variable is already used by another library?</a>
+#####<a id="what-if-ea-variable-is-already-used-by-another-library">What if *ea* variable is already used by another library?</a>
 
 Use `noConflict()` method. In case of naming collision return control of the `ea` variable back to its origins. Old references of `ea` are saved during ExpressiveAnnotations initialization - `noConflict()` simply restores them:
 ```JavaScript
@@ -324,10 +324,8 @@ Use `noConflict()` method. In case of naming collision return control of the `ea
 When a field value is modified, validation results for some other fields, directly dependent on currenty modified one, may be affected. To control the frequency of when dependent fields validation is triggered, change default `ea.settings.dependencyTriggers` settings. It is a string containing one or more DOM field event types (such as *change*, *keyup* or custom event names), associated with currently modified field, for which fields directly dependent on are validated.
 Default settings value is *'change paste keyup'* (for more information check `eventType` parameter of jQuery [`bind()`](http://api.jquery.com/bind/) method).
 ```JavaScript
-<script src="another.js"></script>
-<script src="expressive.annotations.validate.js"></script>
 <script>
-    ea.settings.dependencyTriggers = 'change'; // disable some excessive activity if you wish and, e.g. trigger dependent fields validation only when current field "change" event is fired
+    ea.settings.dependencyTriggers = 'change'; // mute some excessive activity if you wish
 ```
 
 ###<a id="installation">Installation</a>
