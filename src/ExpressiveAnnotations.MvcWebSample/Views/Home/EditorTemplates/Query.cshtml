@@ -20,7 +20,7 @@
         <pre class="action">[show attribute]</pre>
         <div>
             @Html.LabelFor(model => model.Age, new { @class = "inline prefix" })
-            @Html.DropDownListFor(model => model.Age, new SelectList(Model.Years, null))
+            @Html.DropDownListFor(model => model.Age, new SelectList(Model.Years, null), string.Empty)
             @Html.ValidationMessageFor(model => model.Age)
         </div>
     </li>
@@ -39,14 +39,14 @@
     <li>
         <div>
             @Html.LabelFor(model => model.Country, new { @class = "inline prefix" })
-            @Html.DropDownListFor(model => model.Country, new SelectList(Model.Countries, "Value", "Text"))
+            @Html.DropDownListFor(model => model.Country, Model.Countries)
             @Html.ValidationMessageFor(model => model.Country)
         </div>
     </li>
     <li>
         <div>
             @Html.LabelFor(model => model.NextCountry, new { @class = "inline prefix" })
-            @Html.DropDownListFor(model => model.NextCountry, new SelectList(Model.Countries, "Value", "Text"))
+            @Html.DropDownListFor(model => model.NextCountry, Model.Countries)
             @Html.ValidationMessageFor(model => model.NextCountry)
         </div>
     </li>
@@ -168,7 +168,7 @@
         <pre class="action">[show attribute]</pre>
         <div>
             @Html.LabelFor(model => model.ImmediateContact, new { @class = "inline prefix" })
-            @Html.DropDownListFor(model => model.ImmediateContact, new SelectList(Model.Answers, "Value", "Text"))
+            @Html.DropDownListFor(model => model.ImmediateContact, Model.Answers)
             @Html.ValidationMessageFor(model => model.ImmediateContact)
         </div>
     </li>
@@ -179,7 +179,7 @@
         <pre class="action">[show attribute]</pre>
         <div>
             @Html.LabelFor(model => model.FlightId, new { @class = "inline prefix" })
-            @Html.DropDownListFor(model => model.FlightId, new SelectList(Model.Flights, "Value", "Text"))
+            @Html.DropDownListFor(model => model.FlightId, Model.Flights)
             @Html.ValidationMessageFor(model => model.FlightId)
         </div>
     </li>

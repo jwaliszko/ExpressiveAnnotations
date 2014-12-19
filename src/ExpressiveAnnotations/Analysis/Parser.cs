@@ -361,7 +361,16 @@ namespace ExpressiveAnnotations.Analysis
                         string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, arg1.Type, arg2.Type),
                         oper.Location);
 
+            var type1 = arg1.Type;
+            var type2 = arg2.Type;
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
+
+            if (oper.Type == TokenType.EQ || oper.Type == TokenType.NEQ)
+                if (arg1.Type != arg2.Type && !arg1.Type.IsObject() && !arg2.Type.IsObject())
+                    throw new ParseErrorException(
+                        string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, type1, type2),
+                        oper.Location);
+
             switch (oper.Type)
             {
                 case TokenType.LT:

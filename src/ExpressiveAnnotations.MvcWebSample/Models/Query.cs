@@ -62,25 +62,25 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
                     new SelectListItem {Text = string.Empty, Value = Guid.Empty.ToString()},
                     new SelectListItem {Text = "58776d02-7028-4299-81f5-db234c44b294", Value = "58776d02-7028-4299-81f5-db234c44b294"},
                     new SelectListItem {Text = "8b7ee575-eeaa-441c-811f-db6eaacc7115", Value = "8b7ee575-eeaa-441c-811f-db6eaacc7115"},
-                    new SelectListItem {Text = "6b403167-5792-4871-bdf3-cdce8e9b90c0", Value = "6b403167-5792-4871-bdf3-cdce8e9b90c0"},                    
+                    new SelectListItem {Text = "6b403167-5792-4871-bdf3-cdce8e9b90c0", Value = "6b403167-5792-4871-bdf3-cdce8e9b90c0"}
                 };
             }
         }
 
         public IEnumerable<int?> Years
         {
-            get { return new int?[] {null}.Concat(Enumerable.Range(15, 82).Select(x => (int?) x)); }
+            get { return Enumerable.Range(15, 82).Cast<int?>(); }
         }
 
         [UIHint("IntArray")]
         public int[] EarlyYears
         {
-            get { return new[] { 15, 16, 17 }; }
+            get { return new[] {15, 16, 17}; }
         }
 
         [Display(ResourceType = typeof (Resources), Name = "GoAbroad")]
         public bool GoAbroad { get; set; }
-
+        
         [Required(ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldRequired")]
         [Display(ResourceType = typeof (Resources), Name = "Age")]
         public int? Age { get; set; }

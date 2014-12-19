@@ -87,6 +87,14 @@ namespace ExpressiveAnnotations
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Nullable<>);
         }
 
+        public static bool IsObject(this Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            return typeof (object) == type;
+        }
+
         public static Type ToNullable(this Type type)
         {
             if (type == null)

@@ -918,6 +918,68 @@ namespace ExpressiveAnnotations.Tests
     ^--- Operator '!' cannot be applied to operand of type 'System.DateTime'.",
                     e.Message);
             }
+
+            try
+            {
+                parser.Parse<object>("0 == '0'").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 3:
+... == '0' ...
+    ^--- Operator '==' cannot be applied to operands of type 'System.Int32' and 'System.String'.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>("0.1 != '0'").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 5:
+... != '0' ...
+    ^--- Operator '!=' cannot be applied to operands of type 'System.Double' and 'System.String'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model { Date = new DateTime(2014, 1, 1) };
+                parser.Parse<Model>("Date == 0").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... == 0 ...
+    ^--- Operator '==' cannot be applied to operands of type 'System.DateTime' and 'System.Int32'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model {Date = new DateTime(2014, 1, 1)};
+                parser.Parse<Model>("Date != '0'").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... != '0' ...
+    ^--- Operator '!=' cannot be applied to operands of type 'System.DateTime' and 'System.String'.",
+                    e.Message);
+            }
         }        
 
         private class Model
