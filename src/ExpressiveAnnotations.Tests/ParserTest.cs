@@ -128,9 +128,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsFalse(parser.Parse<object>("0 != 0").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("0 >= 0").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("0 <= 0").Invoke(null));
-
-            Assert.IsTrue(parser.Parse<object>("0 == 0").Invoke(null));            
-
+            Assert.IsTrue(parser.Parse<object>("0 == 0").Invoke(null));
             Assert.IsFalse(parser.Parse<object>("0 == 1").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("-1 == -1").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("0 != 1").Invoke(null));
@@ -144,6 +142,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("2 - 1 > 0").Invoke(null));
 
             Assert.IsTrue(parser.Parse<object>("null == null").Invoke(null));
+            Assert.IsFalse(parser.Parse<object>("null != null").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("'' == ''").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("' ' == ' '").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("' ' != '  '").Invoke(null));
@@ -190,9 +189,11 @@ namespace ExpressiveAnnotations.Tests
         [TestMethod]
         public void verify_logic_with_context()
         {
+            var now = DateTime.Now;
             var model = new Model
             {
-                Date = DateTime.Now,
+                NDate = now,
+                Date = now,
                 Number = 0,
                 Flag = true,
                 Text = "hello world",
@@ -209,7 +210,8 @@ namespace ExpressiveAnnotations.Tests
                 Guid2 = Guid.Empty,
                 SubModel = new Model
                 {
-                    Date = DateTime.Now.AddDays(1),
+                    NDate = now.AddDays(1),
+                    Date = now.AddDays(1),
                     Number = 1,
                     Flag = false,
                     Text = " hello world ",
@@ -249,7 +251,8 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsFalse(parser.Parse<Model>("SubModel.Flag && true").Invoke(model));
 
             Assert.IsTrue(parser.Parse<Model>("Number < SubModel.Number").Invoke(model));
-
+            Assert.IsTrue(parser.Parse<Model>("Date <= NDate").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("NDate != null").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("SubModel.Date < NextWeek()").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("IncNumber(0) == SubModel.Number").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("IncNumber(Number) == SubModel.Number").Invoke(model));
@@ -264,6 +267,10 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<Model>("Guid1 != Guid('00000000-0000-0000-0000-000000000000')").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("Guid2 == Guid('00000000-0000-0000-0000-000000000000')").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("Guid1 != Guid2").Invoke(model));
+
+            var subModel = new Model();
+            var newModel = new Model {SubModel = subModel, SubModelObject = subModel};
+            Assert.IsTrue(parser.Parse<Model>("SubModel == SubModelObject").Invoke(newModel));
 
             const string expression =
                 @"Flag == !false
@@ -951,7 +958,22 @@ namespace ExpressiveAnnotations.Tests
 
             try
             {
-                var model = new Model { Date = new DateTime(2014, 1, 1) };
+                parser.Parse<object>("'asd' > null").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 7:
+... > null ...
+    ^--- Operator '>' cannot be applied to operands of type 'System.String' and 'null'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
                 parser.Parse<Model>("Date == 0").Invoke(model);
                 Assert.Fail();
             }
@@ -967,8 +989,8 @@ namespace ExpressiveAnnotations.Tests
 
             try
             {
-                var model = new Model {Date = new DateTime(2014, 1, 1)};
-                parser.Parse<Model>("Date != '0'").Invoke(model);
+                var model = new Model();
+                parser.Parse<Model>("Date != 'asd'").Invoke(model);
                 Assert.Fail();
             }
             catch (Exception e)
@@ -976,18 +998,148 @@ namespace ExpressiveAnnotations.Tests
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
                     @"Parse error on line 1, column 6:
-... != '0' ...
+... != 'asd' ...
     ^--- Operator '!=' cannot be applied to operands of type 'System.DateTime' and 'System.String'.",
                     e.Message);
             }
-        }        
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("Date > 0").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... > 0 ...
+    ^--- Operator '>' cannot be applied to operands of type 'System.DateTime' and 'System.Int32'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("Date > null").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... > null ...
+    ^--- Operator '>' cannot be applied to operands of type 'System.DateTime' and 'null'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("Date > SubModelObject").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... > SubModelObject ...
+    ^--- Operator '>' cannot be applied to operands of type 'System.DateTime' and 'System.Object'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();                
+                parser.Parse<Model>("NDate > SubModelObject").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 7:
+... > SubModelObject ...
+    ^--- Operator '>' cannot be applied to operands of type 'System.Nullable`1[System.DateTime]' and 'System.Object'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("NDate > null").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 7:
+... > null ...
+    ^--- Operator '>' cannot be applied to operands of type 'System.Nullable`1[System.DateTime]' and 'null'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("NDate != 'asd'").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 7:
+... != 'asd' ...
+    ^--- Operator '!=' cannot be applied to operands of type 'System.Nullable`1[System.DateTime]' and 'System.String'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var bag = new Bag {Lexer = new Lexer(), Parser = new Parser()};
+                parser.Parse<Bag>("Lexer != Parser").Invoke(bag);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 7:
+... != Parser ...
+    ^--- Operator '!=' cannot be applied to operands of type 'ExpressiveAnnotations.Analysis.Lexer' and 'ExpressiveAnnotations.Analysis.Parser'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("SubModelObject > SubModelObject").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 16:
+... > SubModelObject ...
+    ^--- Operator '>' cannot be applied to operands of type 'System.Object' and 'System.Object'.",
+                    e.Message);
+            }
+        }
 
         private class Model
         {
             public const string Const = "inside";
 
+            public object SubModelObject { get; set; }
             public Model SubModel { get; set; }
 
+            public DateTime? NDate { get; set; }
             public DateTime Date { get; set; }
             public int? Number { get; set; }
             public bool Flag { get; set; }
@@ -1078,6 +1230,12 @@ namespace ExpressiveAnnotations.Tests
             }
 
             public Carriage Vehicle { get; set; }
+        }
+
+        public class Bag
+        {
+            public Parser Parser { get; set; }
+            public Lexer Lexer { get; set; }
         }
 
         private enum YesNo

@@ -351,25 +351,39 @@ namespace ExpressiveAnnotations.Analysis
             var arg1 = ParseNotExp();
             if (!new[] {TokenType.LT, TokenType.LE, TokenType.GT, TokenType.GE, TokenType.EQ, TokenType.NEQ}.Contains(PeekType()))
                 return arg1;
-            var oper = PeekToken();            
+            var oper = PeekToken();
             ReadToken();
             var arg2 = ParseNotExp();
 
             if (oper.Type != TokenType.EQ && oper.Type != TokenType.NEQ)
-                if ((!arg1.Type.IsNumeric() || !arg2.Type.IsNumeric()) && (!arg1.Type.IsDateTime() || !arg2.Type.IsDateTime()))                
+            {
+                if (!arg1.IsNull() && arg2.IsNull())
+                    throw new ParseErrorException(
+                        string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and 'null'.", oper.Value, arg1.Type),
+                        oper.Location);
+                if (arg1.IsNull() && !arg2.IsNull())
+                    throw new ParseErrorException(
+                        string.Format("Operator '{0}' cannot be applied to operands of type 'null' and '{1}'.", oper.Value, arg1.Type),
+                        oper.Location);
+                if (!(arg1.Type.IsNumeric() && arg2.Type.IsNumeric()) && !(arg1.Type.IsDateTime() && arg2.Type.IsDateTime()))
                     throw new ParseErrorException(
                         string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, arg1.Type, arg2.Type),
                         oper.Location);
+            }
 
             var type1 = arg1.Type;
             var type2 = arg2.Type;
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
 
             if (oper.Type == TokenType.EQ || oper.Type == TokenType.NEQ)
-                if (arg1.Type != arg2.Type && !arg1.Type.IsObject() && !arg2.Type.IsObject())
+            {
+                if (arg1.Type != arg2.Type
+                    && !arg1.IsNull() && !arg2.IsNull()
+                    && !arg1.Type.IsObject() && !arg2.Type.IsObject())
                     throw new ParseErrorException(
                         string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, type1, type2),
                         oper.Location);
+            }
 
             switch (oper.Type)
             {

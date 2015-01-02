@@ -30,10 +30,13 @@ namespace ExpressiveAnnotations
                     : Expression.Convert(oute2, typeof (double));
 
             // non-nullable operand is converted to nullable if necessary, and the lifted-to-nullable form of the comparison is used (C# rule, which is currently not followed by expression trees)
-            if (oute1.Type.IsNullable() && !oute2.Type.IsNullable())
-                oute2 = Expression.Convert(oute2, oute1.Type);
-            else if (!oute1.Type.IsNullable() && oute2.Type.IsNullable())
-                oute1 = Expression.Convert(oute1, oute2.Type);
+            if (oute1.Type.UnderlyingType() == oute2.Type.UnderlyingType())
+            {
+                if (oute1.Type.IsNullable() && !oute2.Type.IsNullable())
+                    oute2 = Expression.Convert(oute2, oute1.Type);
+                else if (!oute1.Type.IsNullable() && oute2.Type.IsNullable())
+                    oute1 = Expression.Convert(oute1, oute2.Type);
+            }
         }
 
         public static bool IsDateTime(this Type type)
@@ -95,12 +98,20 @@ namespace ExpressiveAnnotations
             return typeof (object) == type;
         }
 
-        public static Type ToNullable(this Type type)
+        public static bool IsNull(this Expression expr)
+        {
+            if (expr == null)
+                throw new ArgumentNullException("expr");
+
+            return "null".Equals(expr.ToString());
+        }
+
+        public static Type UnderlyingType(this Type type)
         {
             if (type == null)
                 throw new ArgumentNullException("type");
 
-            return typeof (Nullable<>).MakeGenericType(type);
+            return type.IsNullable() ? Nullable.GetUnderlyingType(type) : type;
         }
 
         public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
