@@ -755,6 +755,96 @@ namespace ExpressiveAnnotations.Tests
 
             try
             {
+                parser.Parse<object>("0 + null").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 3:
+... + null ...
+    ^--- Operator '+' cannot be applied to operands of type 'System.Int32' and 'null'.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>("0 / null").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 3:
+... / null ...
+    ^--- Operator '/' cannot be applied to operands of type 'System.Int32' and 'null'.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>("true && null").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... && null ...
+    ^--- Operator '&&' cannot be applied to operands of type 'System.Boolean' and 'null'.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>("true || null").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... || null ...
+    ^--- Operator '||' cannot be applied to operands of type 'System.Boolean' and 'null'.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>("!null").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 1:
+... !null ...
+    ^--- Operator '!' cannot be applied to operand of type 'null'.",
+                    e.Message);
+            }
+
+            try
+            {
+                parser.Parse<object>("'abc' * 'abc'").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 7:
+... * 'abc' ...
+    ^--- Operator '*' cannot be applied to operands of type 'System.String' and 'System.String'.",
+                    e.Message);
+            }
+
+            try
+            {
                 parser.Parse<object>("1 + 2 + 'abc' - 'abc' > 0").Invoke(null);
                 Assert.Fail();
             }
@@ -972,6 +1062,22 @@ namespace ExpressiveAnnotations.Tests
             }
 
             try
+            {                
+                var model = new Model();
+                parser.Parse<Model>("Date + Date != null").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... + Date != null ...
+    ^--- Operator '+' cannot be applied to operands of type 'System.DateTime' and 'System.DateTime'.",
+                    e.Message);
+            }
+
+            try
             {
                 var model = new Model();
                 parser.Parse<Model>("Date == 0").Invoke(model);
@@ -1128,6 +1234,86 @@ namespace ExpressiveAnnotations.Tests
                     @"Parse error on line 1, column 16:
 ... > SubModelObject ...
     ^--- Operator '>' cannot be applied to operands of type 'System.Object' and 'System.Object'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("null > null").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... > null ...
+    ^--- Operator '>' cannot be applied to operands of type 'null' and 'null'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("null + null").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... + null ...
+    ^--- Operator '+' cannot be applied to operands of type 'null' and 'null'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("null / null").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... / null ...
+    ^--- Operator '/' cannot be applied to operands of type 'null' and 'null'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("null && null").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... && null ...
+    ^--- Operator '&&' cannot be applied to operands of type 'null' and 'null'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("null || null").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... || null ...
+    ^--- Operator '||' cannot be applied to operands of type 'null' and 'null'.",
                     e.Message);
             }
         }

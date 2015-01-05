@@ -321,6 +321,7 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken();
             var arg2 = ParseOrExp();
 
+            AssertArgsNotNull(arg1, arg2, oper);
             if (!arg1.Type.IsBool() || !arg2.Type.IsBool())
                 throw new ParseErrorException(
                     string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, arg1.Type, arg2.Type),
@@ -338,6 +339,7 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken();
             var arg2 = ParseAndExp();
 
+            AssertArgsNotNull(arg1, arg2, oper);
             if (!arg1.Type.IsBool() || !arg2.Type.IsBool())
                 throw new ParseErrorException(
                     string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, arg1.Type, arg2.Type),
@@ -357,14 +359,7 @@ namespace ExpressiveAnnotations.Analysis
 
             if (oper.Type != TokenType.EQ && oper.Type != TokenType.NEQ)
             {
-                if (!arg1.IsNull() && arg2.IsNull())
-                    throw new ParseErrorException(
-                        string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and 'null'.", oper.Value, arg1.Type),
-                        oper.Location);
-                if (arg1.IsNull() && !arg2.IsNull())
-                    throw new ParseErrorException(
-                        string.Format("Operator '{0}' cannot be applied to operands of type 'null' and '{1}'.", oper.Value, arg1.Type),
-                        oper.Location);
+                AssertArgsNotNull(arg1, arg2, oper);
                 if (!(arg1.Type.IsNumeric() && arg2.Type.IsNumeric()) && !(arg1.Type.IsDateTime() && arg2.Type.IsDateTime()))
                     throw new ParseErrorException(
                         string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, arg1.Type, arg2.Type),
@@ -412,6 +407,10 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken();
             var arg = ParseNotExp(); // allow multiple negations
 
+            if (arg.IsNull())
+                throw new ParseErrorException(
+                    string.Format("Operator '{0}' cannot be applied to operand of type 'null'.", oper.Value),
+                    oper.Location);            
             if (!arg.Type.IsBool())
                 throw new ParseErrorException(
                     string.Format("Operator '{0}' cannot be applied to operand of type '{1}'.", oper.Value, arg.Type),
@@ -435,7 +434,7 @@ namespace ExpressiveAnnotations.Analysis
         {
             if (!new[] {TokenType.ADD, TokenType.SUB}.Contains(PeekType()))
                 return arg1;
-            var oper = PeekToken();            
+            var oper = PeekToken();
             ReadToken();
             var sign = UnifySign();
             var arg2 = ParseMulExp();
@@ -443,6 +442,12 @@ namespace ExpressiveAnnotations.Analysis
             if (sign == TokenType.SUB)
                 arg2 = InverseNumber(arg2);
 
+            if(!arg1.Type.IsString() && !arg2.Type.IsString())
+                AssertArgsNotNull(arg1, arg2, oper);
+            if ((!arg1.Type.IsString() && !arg1.Type.IsNumeric() && !arg1.IsNull()) || (!arg2.Type.IsString() && !arg2.Type.IsNumeric() && !arg2.IsNull()))
+                throw new ParseErrorException(
+                    string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, arg1.Type, arg2.Type),
+                    oper.Location);
             if (oper.Type == TokenType.SUB)
                 if (arg1.Type.IsString() || arg2.Type.IsString())
                     throw new ParseErrorException(
@@ -454,7 +459,7 @@ namespace ExpressiveAnnotations.Analysis
             {
                 case TokenType.ADD:
                     return ParseAddExpInternal(
-                        (arg1.Type == typeof (string) || arg2.Type == typeof (string))
+                        (arg1.Type.IsString() || arg2.Type.IsString())
                             ? Expression.Add(
                                 Expression.Convert(arg1, typeof (object)),
                                 Expression.Convert(arg2, typeof (object)),
@@ -491,9 +496,12 @@ namespace ExpressiveAnnotations.Analysis
                 arg2 = InverseNumber(arg2);
 
             if (!arg1.Type.IsNumeric() || !arg2.Type.IsNumeric())
+            {
+                AssertArgsNotNull(arg1, arg2, oper);
                 throw new ParseErrorException(
                     string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, arg1.Type, arg2.Type),
                     oper.Location);
+            }
 
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
             switch (oper.Type)
@@ -809,6 +817,22 @@ namespace ExpressiveAnnotations.Analysis
                 throw new ParseErrorException(
                     string.Format("Incorrect number of arguments provided. Function '{0}' expects {1}, not {2}.", funcName, expected, actual),
                     null);
+        }
+
+        private void AssertArgsNotNull(Expression arg1, Expression arg2, Token oper)
+        {
+            if (arg1.IsNull() && arg2.IsNull())
+                throw new ParseErrorException(
+                    string.Format("Operator '{0}' cannot be applied to operands of type 'null' and 'null'.", oper.Value),
+                    oper.Location);
+            if (!arg1.IsNull() && arg2.IsNull())
+                throw new ParseErrorException(
+                    string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and 'null'.", oper.Value, arg1.Type),
+                    oper.Location);
+            if (arg1.IsNull() && !arg2.IsNull())
+                throw new ParseErrorException(
+                    string.Format("Operator '{0}' cannot be applied to operands of type 'null' and '{1}'.", oper.Value, arg2.Type),
+                    oper.Location);
         }
 
         private Expression ConvertArgument(Expression arg, Type type, string funcName, int argIdx, Location argPos)
