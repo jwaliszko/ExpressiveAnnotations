@@ -357,24 +357,32 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken();
             var arg2 = ParseNotExp();
 
-            if (oper.Type != TokenType.EQ && oper.Type != TokenType.NEQ)
-            {
-                AssertArgsNotNull(arg1, arg2, oper);
-                if (!(arg1.Type.IsNumeric() && arg2.Type.IsNumeric()) && !(arg1.Type.IsDateTime() && arg2.Type.IsDateTime()))
-                    throw new ParseErrorException(
-                        string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, arg1.Type, arg2.Type),
-                        oper.Location);
-            }
-
             var type1 = arg1.Type;
             var type2 = arg2.Type;
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
 
             if (oper.Type == TokenType.EQ || oper.Type == TokenType.NEQ)
             {
+                if (type1.IsNonNullableValueType() && arg2.IsNull())
+                    throw new ParseErrorException(
+                        string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and 'null'.", oper.Value, type1),
+                        oper.Location);
+                if (arg1.IsNull() && type2.IsNonNullableValueType())
+                    throw new ParseErrorException(
+                        string.Format("Operator '{0}' cannot be applied to operands of type 'null' and '{1}'.", oper.Value, type2),
+                        oper.Location);
+
                 if (arg1.Type != arg2.Type
                     && !arg1.IsNull() && !arg2.IsNull()
                     && !arg1.Type.IsObject() && !arg2.Type.IsObject())
+                    throw new ParseErrorException(
+                        string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, type1, type2),
+                        oper.Location);
+            }
+            else
+            {
+                AssertArgsNotNull(arg1, arg2, oper);
+                if (!(arg1.Type.IsNumeric() && arg2.Type.IsNumeric()) && !(arg1.Type.IsDateTime() && arg2.Type.IsDateTime()))
                     throw new ParseErrorException(
                         string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, type1, type2),
                         oper.Location);
@@ -793,6 +801,42 @@ namespace ExpressiveAnnotations.Analysis
                     : ConvertArgument(arg, param.ParameterType, methodInfo.Name, i + 1, pos));
             }
             return Expression.Call(contextExpression, methodInfo, convertedArgs);
+        }        
+
+        private Expression ConvertArgument(Expression arg, Type type, string funcName, int argIdx, Location argPos)
+        {
+            try
+            {
+                return Expression.Convert(arg, type);
+            }
+            catch
+            {
+                throw new ParseErrorException(
+                    string.Format("Function '{0}' {1} argument implicit conversion from '{2}' to expected '{3}' failed.", funcName, argIdx.ToOrdinal(), arg.Type, type),
+                    argPos);
+            }
+        }
+
+        private TokenType UnifySign()
+        {
+            var operators = new List<TokenType>();
+            while (true)
+            {
+                if (!new[] {TokenType.ADD, TokenType.SUB}.Contains(PeekType()))
+                    return operators.Count(x => x.Equals(TokenType.SUB))%2 == 1
+                        ? TokenType.SUB
+                        : TokenType.ADD;
+
+                operators.Add(PeekType());
+                ReadToken();
+            }
+        }
+
+        private Expression InverseNumber(Expression arg)
+        {
+            Expression zero = Expression.Constant(0);
+            Helper.MakeTypesCompatible(zero, arg, out zero, out arg);
+            return Expression.Subtract(zero, arg);
         }
 
         private void AssertMethodNameExistence(string name, Location funcPos)
@@ -833,42 +877,6 @@ namespace ExpressiveAnnotations.Analysis
                 throw new ParseErrorException(
                     string.Format("Operator '{0}' cannot be applied to operands of type 'null' and '{1}'.", oper.Value, arg2.Type),
                     oper.Location);
-        }
-
-        private Expression ConvertArgument(Expression arg, Type type, string funcName, int argIdx, Location argPos)
-        {
-            try
-            {
-                return Expression.Convert(arg, type);
-            }
-            catch
-            {
-                throw new ParseErrorException(
-                    string.Format("Function '{0}' {1} argument implicit conversion from '{2}' to expected '{3}' failed.", funcName, argIdx.ToOrdinal(), arg.Type, type),
-                    argPos);
-            }
-        }
-
-        private TokenType UnifySign()
-        {
-            var operators = new List<TokenType>();
-            while (true)
-            {
-                if (!new[] {TokenType.ADD, TokenType.SUB}.Contains(PeekType()))
-                    return operators.Count(x => x.Equals(TokenType.SUB))%2 == 1
-                        ? TokenType.SUB
-                        : TokenType.ADD;
-
-                operators.Add(PeekType());
-                ReadToken();
-            }
-        }
-
-        private Expression InverseNumber(Expression arg)
-        {
-            Expression zero = Expression.Constant(0);
-            Helper.MakeTypesCompatible(zero, arg, out zero, out arg);
-            return Expression.Subtract(zero, arg);
         }
     }
 }

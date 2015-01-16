@@ -131,11 +131,12 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             }
         }
 
-        [RequiredIf(@"GoAbroad == true
-                      && (
-                             (NextCountry != 'Other' && NextCountry == Country)
-                             || (Age > 24 && Age <= 55)
-                         )")]
+        [RequiredIf(@"
+GoAbroad == true
+&& (
+        (NextCountry != 'Other' && NextCountry == Country)
+        || (Age > 24 && Age <= 55)
+    )")]
         [AssertThat(@"ReasonForTravel != 'John\'s cat named ""\\\'""\n (Backslash Quote)' && ReasonForTravel != SIMONS_CAT")]
         public string ReasonForTravel
         {
@@ -184,11 +185,12 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             }
         }
 
-        [AssertThat(@"(
-                          AwareOfTheRisks == true
-                          && (PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain)
-                      ) 
-                      || PoliticalStability == null || PoliticalStability == Stability.High")]
+        [AssertThat(@"
+(
+    AwareOfTheRisks == true
+    && (PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain)
+) 
+|| PoliticalStability == null || PoliticalStability == Stability.High")]
         public bool AwareOfTheRisks
         {
             get { return _awareOfTheRisks; }
@@ -243,8 +245,9 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             }
         }
 
-        [AssertThat(@"FlightId != Guid('00000000-0000-0000-0000-000000000000')
-                      && FlightId != Guid('11111111-1111-1111-1111-111111111111')")]
+        [AssertThat(@"
+FlightId != Guid('00000000-0000-0000-0000-000000000000')
+&& FlightId != Guid('11111111-1111-1111-1111-111111111111')")]
         public Guid? FlightId
         {
             get { return _flightId; }

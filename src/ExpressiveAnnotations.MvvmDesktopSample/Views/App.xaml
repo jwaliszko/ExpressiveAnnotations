@@ -34,6 +34,15 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style TargetType="{x:Type CheckBox}">
+            <Setter Property="Margin" Value="2" />
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip"
+                            Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
 
         <!-- Flat ComboBox, https://gist.github.com/hansmaad/9187633 -->
         <SolidColorBrush x:Key="ComboBoxNormalBorderBrush" Color="#e3e9ef" />

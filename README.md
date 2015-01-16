@@ -6,7 +6,7 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
 
 ###Table of contents
  - [What is the context behind this implementation?](#what-is-the-context-behind-this-implementation)
- - [*RequiredIf* vs. *AssertThat* - where is the difference?](#requiredif-vs-assertthat---where-is-the-difference)
+ - [RequiredIf vs. AssertThat - where is the difference?](#requiredif-vs-assertthat---where-is-the-difference)
  - [What are brief examples of usage?](#what-are-brief-examples-of-usage)
  - [Declarative vs. imperative programming - what is it about?](#declarative-vs-imperative-programming---what-is-it-about)
  - [How to construct conditional validation attributes?](#how-to-construct-conditional-validation-attributes)
@@ -28,7 +28,7 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
 
 There are number of cases where the concept of metadata is used for justified reasons. Attributes are one of the ways to associate complementary information with existing data. Such annotations may also define the correctness of data. Declarative validation when [compared](#declarative-vs-imperative-programming---what-is-it-about) to imperative approach seems to be more convenient in many cases. Clean, compact code - all validation logic defined within the model scope. Simple to write, obvious to read.
 
-###<a id="requiredif-vs-assertthat---where-is-the-difference">*RequiredIf* vs. *AssertThat* - where is the difference?</a>
+###<a id="requiredif-vs-assertthat---where-is-the-difference">RequiredIf vs. AssertThat - where is the difference?</a>
 
 * `RequiredIf` - if value is not yet provided, check whether it is required (annotated field is required to be non-null, when given condition is satisfied),
 * `AssertThat` - if value is already provided, check whether the condition is met (non-null annotated field is considered as valid, when given condition is satisfied).
@@ -252,7 +252,7 @@ Client-side validation is fully supported. Enable it for your web project within
         DataAnnotationsModelValidatorProvider.RegisterAdapter(
             typeof (AssertThatAttribute), typeof (AssertThatValidator));
     ```
-3. Include [**expressive.annotations.validate.js**](src/expressive.annotations.validate.js) script in your page (do not forget standard jQuery validation scripts):
+3. Include [**expressive.annotations.validate.js**](src/expressive.annotations.validate.js) script in your page (it should be included in bundle below jQuery validation files):
 
     ```JavaScript
     <script src="/Scripts/jquery.validate.js"></script>
@@ -272,7 +272,7 @@ Create it yourself. Any custom function defined within the model class scope at 
 class Model
 {
     public bool IsBloodType(string group) 
-    { 
+    {
         return Regex.IsMatch(group, @"^(A|B|AB|0)[\+-]$");
     }
 
@@ -298,9 +298,9 @@ When some non-standard format needs to be handled, simply override the default b
 ```JavaScript
 <script>
     ea.settings.parseDate = function(str) {
-        if (!/^\d{2}\/\d{2}\/\d{4}$/.test(str)) // in case str format is not dd/mm/yyyy...
+        if (!/^\d{2}\/\d{2}\/\d{4}$/.test(str)) { // in case str format is not dd/mm/yyyy...
             return Date.parse(str); // ...default date parser is used
-
+        }
         var arr = str.split('/');
         var date = new Date(arr[2], arr[1] - 1, arr[0]);
         return date.getTime(); // return milliseconds since January 1, 1970, 00:00:00 UTC
@@ -322,7 +322,7 @@ Use `noConflict()` method. In case of naming collision return control of the `ea
 #####<a id="how-to-control-frequency-of-dependent-fields-validation">How to control frequency of dependent fields validation?</a>
 
 When a field value is modified, validation results for some other fields, directly dependent on currenty modified one, may be affected. To control the frequency of when dependent fields validation is triggered, change default `ea.settings.dependencyTriggers` settings. It is a string containing one or more DOM field event types (such as *change*, *keyup* or custom event names), associated with currently modified field, for which fields directly dependent on are validated.
-Default settings value is *'change paste keyup'* (for more information check `eventType` parameter of jQuery [`bind()`](http://api.jquery.com/bind/) method).
+Default settings value is *'change paste keyup'* (for more information check `eventType` parameter of jQuery [`bind()`](http://api.jquery.com/bind) method).
 ```JavaScript
 <script>
     ea.settings.dependencyTriggers = 'change'; // mute some excessive activity if you wish

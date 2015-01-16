@@ -41,22 +41,34 @@ namespace ExpressiveAnnotations
 
         public static bool IsDateTime(this Type type)
         {
-            return type != null && (type == typeof (DateTime) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsDateTime()));
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            return type == typeof (DateTime) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsDateTime());
         }
 
         public static bool IsBool(this Type type)
         {
-            return type != null && (type == typeof (bool) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsBool()));
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            return type == typeof (bool) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsBool());
         }
 
         public static bool IsGuid(this Type type)
         {
-            return type != null && (type == typeof (Guid) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsGuid()));
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            return type == typeof (Guid) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsGuid());
         }
 
         public static bool IsString(this Type type)
         {
-            return type != null && type == typeof (string);
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            return type == typeof (string);
         }
 
         public static bool IsNumeric(this Type type)
@@ -98,6 +110,14 @@ namespace ExpressiveAnnotations
             return typeof (object) == type;
         }
 
+        public static bool IsNonNullableValueType(this Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            return !type.IsNullable() && type.IsValueType;
+        }
+
         public static bool IsNull(this Expression expr)
         {
             if (expr == null)
@@ -112,7 +132,7 @@ namespace ExpressiveAnnotations
                 throw new ArgumentNullException("type");
 
             return type.IsNullable() ? Nullable.GetUnderlyingType(type) : type;
-        }
+        }        
 
         public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
         {

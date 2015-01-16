@@ -96,13 +96,13 @@
 
         <StackPanel Grid.Row="10" Grid.Column="1" Orientation="Horizontal">
             <RadioButton Content="None" GroupName="Sport"
-                         IsChecked="{Binding Path=SportType, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged,
+                         IsChecked="{Binding Path=SportType, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged,
                                     Converter={StaticResource boolConverter}, ConverterParameter=None}" />
             <RadioButton Content="Normal" GroupName="Sport"
-                         IsChecked="{Binding Path=SportType, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged,
+                         IsChecked="{Binding Path=SportType, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged,
                                     Converter={StaticResource boolConverter}, ConverterParameter=Normal}" />
             <RadioButton Content="Extreme" GroupName="Sport"
-                         IsChecked="{Binding Path=SportType, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged,
+                         IsChecked="{Binding Path=SportType, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged,
                                     Converter={StaticResource boolConverter}, ConverterParameter=Extreme}" />
         </StackPanel>
 
@@ -116,7 +116,7 @@
 
         <StackPanel Grid.Row="13" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
             <RadioButton GroupName="Contact" Content="I agree for contact"
-                         IsChecked="{Binding Path=AgreeForContact, Mode=TwoWay, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged,
+                         IsChecked="{Binding Path=AgreeForContact, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged,
                                     Converter={StaticResource boolConverter}, ConverterParameter=True}" />
             <RadioButton GroupName="Contact" Content="I do not agree for contact"
                          IsChecked="{Binding Path=AgreeForContact,

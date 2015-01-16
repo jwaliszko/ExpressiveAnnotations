@@ -222,6 +222,8 @@ namespace ExpressiveAnnotations.Tests
             var parser = new Parser();
             parser.RegisterMethods();
 
+            Assert.IsTrue(parser.Parse(model.GetType(), "Number < 1").Invoke(model));
+            Assert.IsTrue(parser.Parse(model.GetType(), "Number == 0").Invoke(model));
             Assert.IsTrue(parser.Parse(model.GetType(), "Number != null").Invoke(model));
             Assert.IsTrue(parser.Parse(model.GetType(), "SubModel.Number / 2 == 0.5").Invoke(model));
 
@@ -1314,6 +1316,22 @@ namespace ExpressiveAnnotations.Tests
                     @"Parse error on line 1, column 6:
 ... || null ...
     ^--- Operator '||' cannot be applied to operands of type 'null' and 'null'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("null == 0").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... == 0 ...
+    ^--- Operator '==' cannot be applied to operands of type 'null' and 'System.Int32'.",
                     e.Message);
             }
         }

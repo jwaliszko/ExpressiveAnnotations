@@ -54,7 +54,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
                             FieldsMap = parser.GetFields().ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value));
                             ConstsMap = parser.GetConsts();
 
-                            Assert.NoNamingCollisionsAtCorrespondingSegments(FieldsMap.Keys, ConstsMap.Keys);
+                            AssertNoNamingCollisionsAtCorrespondingSegments();
                             HttpRuntime.Cache.Insert(fieldsId, FieldsMap);
                             HttpRuntime.Cache.Insert(constsId, ConstsMap);
 
@@ -69,8 +69,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
             catch (Exception e)
             {
                 throw new ValidationException(
-                    string.Format("{0}: validation applied to {1} field failed.",
-                        GetType().Name, metadata.PropertyName), e);
+                    string.Format("{0}: validation applied to {1} field failed.", GetType().Name, metadata.PropertyName), 
+                    e);
             }
         }
 
@@ -116,10 +116,37 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         private string AllocateSuffix()
         {
             var count = RequestStorage.Get<int>(FieldAttributeType) + 1;
-            Assert.AttribsQuantityAllowed(count);
+            AssertAttribsQuantityAllowed(count);
 
             RequestStorage.Set(FieldAttributeType, count);
             return count == 1 ? string.Empty : char.ConvertFromUtf32(95 + count); // single lowercase letter from latin alphabet or an empty string
+        }
+
+        private void AssertNoNamingCollisionsAtCorrespondingSegments()
+        {
+            var segmentsA = FieldsMap.Keys.Select(x => x.Split('.')).ToList();
+            var segmentsB = ConstsMap.Keys.Select(x => x.Split('.')).ToList();
+
+            foreach (var segA in segmentsA)
+            {
+                foreach (var segB in segmentsB)
+                {
+                    var boundary = new[] {segA.Count(), segB.Count()}.Min();
+                    for (var i = 0; i < boundary; i++)
+                    {
+                        if (segA[i] == segB[i])
+                            throw new InvalidOperationException(
+                                string.Format("Any naming collisions cannot be accepted at client side - {0} part at level {1} is ambiguous.", segA[i], i));
+                    }
+                }
+            }
+        }
+
+        private void AssertAttribsQuantityAllowed(int count)
+        {
+            if (count > 27)
+                throw new InvalidOperationException(
+                    "No more than 27 unique attributes of the same type can be applied for a single field or property.");
         }
     }
 }
