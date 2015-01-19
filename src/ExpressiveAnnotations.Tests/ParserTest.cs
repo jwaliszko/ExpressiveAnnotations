@@ -286,7 +286,8 @@ namespace ExpressiveAnnotations.Tests
             var func = parser.Parse(model.GetType(), expression);
             Assert.IsTrue(func(model));
 
-            var parsedFields = parser.GetFields();
+            parser.GetFields()["Flag"] = null; // try to mess up with internal fields - original data should not be affected
+            var parsedFields = parser.GetFields();            
             var expectedFields = new Dictionary<string, Type>
             {
                 {"Flag", typeof (bool)},
@@ -302,7 +303,8 @@ namespace ExpressiveAnnotations.Tests
                     key => parsedFields.ContainsKey(key) &&
                            EqualityComparer<Type>.Default.Equals(expectedFields[key], parsedFields[key])));
 
-            var parsedConsts = parser.GetConsts();
+            parser.GetConsts()["Const"] = null; // try to mess up with internal fields - original data should not be affected
+            var parsedConsts = parser.GetConsts();            
             var expectedConsts = new Dictionary<string, object>
             {
                 {"Utility.Stability.High", Utility.Stability.High},
@@ -1334,6 +1336,38 @@ namespace ExpressiveAnnotations.Tests
     ^--- Operator '==' cannot be applied to operands of type 'null' and 'System.Int32'.",
                     e.Message);
             }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("null < 0").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... < 0 ...
+    ^--- Operator '<' cannot be applied to operands of type 'null' and 'System.Int32'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("Cash == null").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... == null ...
+    ^--- Operator '==' cannot be applied to operands of type 'System.Decimal' and 'null'.",
+                    e.Message);
+            }
         }
 
         private class Model
@@ -1348,6 +1382,7 @@ namespace ExpressiveAnnotations.Tests
             public int? Number { get; set; }
             public bool Flag { get; set; }
             public string Text { get; set; }
+            public decimal Cash { get; set; }
             public Utility.Stability? PoliticalStability { get; set; }
 
             public SbyteEnum? SbyteNumber { get; set; }

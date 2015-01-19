@@ -35,6 +35,7 @@ namespace ExpressiveAnnotations.Analysis
         /// <summary>
         ///     Initializes a new instance of the <see cref="Parser" /> class.
         /// </summary>
+        /// <remarks> Type is thread safe. </remarks>
         public Parser()
         {
             Fields = new Dictionary<string, Type>();
@@ -128,9 +129,7 @@ namespace ExpressiveAnnotations.Analysis
         /// <param name="func">Function lambda.</param>
         public void AddFunction<Result>(string name, Expression<Func<Result>> func)
         {
-            if (!Functions.ContainsKey(name))
-                Functions[name] = new List<LambdaExpression>();
-            Functions[name].Add(func);
+            PersistFunction(name, func);
         }
 
         /// <summary>
@@ -142,9 +141,7 @@ namespace ExpressiveAnnotations.Analysis
         /// <param name="func">Function lambda.</param>
         public void AddFunction<Arg1, Result>(string name, Expression<Func<Arg1, Result>> func)
         {
-            if (!Functions.ContainsKey(name))
-                Functions[name] = new List<LambdaExpression>();
-            Functions[name].Add(func);
+            PersistFunction(name, func);
         }
 
         /// <summary>
@@ -157,9 +154,7 @@ namespace ExpressiveAnnotations.Analysis
         /// <param name="func">Function lambda.</param>
         public void AddFunction<Arg1, Arg2, Result>(string name, Expression<Func<Arg1, Arg2, Result>> func)
         {
-            if (!Functions.ContainsKey(name))
-                Functions[name] = new List<LambdaExpression>();
-            Functions[name].Add(func);
+            PersistFunction(name, func);
         }
 
         /// <summary>
@@ -173,9 +168,7 @@ namespace ExpressiveAnnotations.Analysis
         /// <param name="func">Function lambda.</param>
         public void AddFunction<Arg1, Arg2, Arg3, Result>(string name, Expression<Func<Arg1, Arg2, Arg3, Result>> func)
         {
-            if (!Functions.ContainsKey(name))
-                Functions[name] = new List<LambdaExpression>();
-            Functions[name].Add(func);
+            PersistFunction(name, func);
         }
 
         /// <summary>
@@ -190,9 +183,7 @@ namespace ExpressiveAnnotations.Analysis
         /// <param name="func">Function lambda.</param>
         public void AddFunction<Arg1, Arg2, Arg3, Arg4, Result>(string name, Expression<Func<Arg1, Arg2, Arg3, Arg4, Result>> func)
         {
-            if (!Functions.ContainsKey(name))
-                Functions[name] = new List<LambdaExpression>();
-            Functions[name].Add(func);
+            PersistFunction(name, func);
         }
 
         /// <summary>
@@ -208,9 +199,7 @@ namespace ExpressiveAnnotations.Analysis
         /// <param name="func">Function lambda.</param>
         public void AddFunction<Arg1, Arg2, Arg3, Arg4, Arg5, Result>(string name, Expression<Func<Arg1, Arg2, Arg3, Arg4, Arg5, Result>> func)
         {
-            if (!Functions.ContainsKey(name))
-                Functions[name] = new List<LambdaExpression>();
-            Functions[name].Add(func);
+            PersistFunction(name, func);
         }
 
         /// <summary>
@@ -227,9 +216,7 @@ namespace ExpressiveAnnotations.Analysis
         /// <param name="func">Function lambda.</param>
         public void AddFunction<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Result>(string name, Expression<Func<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Result>> func)
         {
-            if (!Functions.ContainsKey(name))
-                Functions[name] = new List<LambdaExpression>();
-            Functions[name].Add(func);
+            PersistFunction(name, func);
         }
 
         /// <summary>
@@ -240,7 +227,7 @@ namespace ExpressiveAnnotations.Analysis
         /// </returns>
         public IDictionary<string, Type> GetFields()
         {
-            return Fields;
+            return Fields.ToDictionary(x => x.Key, x => x.Value);
         }
 
         /// <summary>
@@ -251,7 +238,17 @@ namespace ExpressiveAnnotations.Analysis
         /// </returns>
         public IDictionary<string, object> GetConsts()
         {
-            return Consts;
+            return Consts.ToDictionary(x => x.Key, x => x.Value); // shallow clone is fair enough
+        }
+
+        private void PersistFunction(string name, LambdaExpression func)
+        {
+            lock (_locker)
+            {
+                if (!Functions.ContainsKey(name))
+                    Functions[name] = new List<LambdaExpression>();
+                Functions[name].Add(func);
+            }
         }
 
         private void Clear()
@@ -381,7 +378,7 @@ namespace ExpressiveAnnotations.Analysis
             }
             else
             {
-                AssertArgsNotNull(arg1, arg2, oper);
+                AssertArgsNotNull(arg1, type1, arg2, type2, oper);
                 if (!(arg1.Type.IsNumeric() && arg2.Type.IsNumeric()) && !(arg1.Type.IsDateTime() && arg2.Type.IsDateTime()))
                     throw new ParseErrorException(
                         string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, type1, type2),
@@ -865,17 +862,22 @@ namespace ExpressiveAnnotations.Analysis
 
         private void AssertArgsNotNull(Expression arg1, Expression arg2, Token oper)
         {
+            AssertArgsNotNull(arg1, arg1.Type, arg2, arg2.Type, oper);
+        }
+
+        private void AssertArgsNotNull(Expression arg1, Type type1, Expression arg2, Type type2, Token oper)
+        {
             if (arg1.IsNull() && arg2.IsNull())
                 throw new ParseErrorException(
                     string.Format("Operator '{0}' cannot be applied to operands of type 'null' and 'null'.", oper.Value),
                     oper.Location);
             if (!arg1.IsNull() && arg2.IsNull())
                 throw new ParseErrorException(
-                    string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and 'null'.", oper.Value, arg1.Type),
+                    string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and 'null'.", oper.Value, type1),
                     oper.Location);
             if (arg1.IsNull() && !arg2.IsNull())
                 throw new ParseErrorException(
-                    string.Format("Operator '{0}' cannot be applied to operands of type 'null' and '{1}'.", oper.Value, arg2.Type),
+                    string.Format("Operator '{0}' cannot be applied to operands of type 'null' and '{1}'.", oper.Value, type2),
                     oper.Location);
         }
     }

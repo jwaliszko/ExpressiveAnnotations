@@ -13,6 +13,7 @@ namespace ExpressiveAnnotations.Analysis
     /// <summary>
     ///     Performs the lexical analysis of a specified logical expression.
     /// </summary>
+    /// <remarks> Type is thread safe. </remarks>
     public sealed class Lexer
     {
         private readonly object _locker = new object();
