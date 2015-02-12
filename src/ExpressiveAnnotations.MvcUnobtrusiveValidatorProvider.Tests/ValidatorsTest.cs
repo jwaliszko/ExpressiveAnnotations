@@ -113,6 +113,43 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Tests
         }
 
         [TestMethod]
+        public void possible_naming_colission_at_client_side_are_detected()
+        {
+            // A.B.C = 0    {"A":{"B":{"C":0}}}
+            // A.D = true   {"A":{"D":true}}
+            // can be merged into: {"A":{"B":{"C":0},"D":true}}
+
+            // A.B.C = 0    {"A":{"B":{"C":0}}}
+            // A.B = true   {"A":{"B":true}}
+            // cannot be merged at 1st level - B object would be overwritten
+
+            string name;
+            int level;
+            Assert.IsFalse(Helper.SegmentsCollide(new string[0], new string[0], out name, out level));
+            Assert.IsFalse(Helper.SegmentsCollide(new[] {"A"}, new string[0], out name, out level));
+            Assert.IsFalse(Helper.SegmentsCollide(new string[0], new[] {"A"}, out name, out level));
+            Assert.IsFalse(Helper.SegmentsCollide(new[] {"A"}, new[] {"B"}, out name, out level));
+            Assert.IsFalse(Helper.SegmentsCollide(new[] {"A.A"}, new[] {"A.B"}, out name, out level));
+            Assert.IsFalse(Helper.SegmentsCollide(new[] {"A.B.C"}, new[] {"A.B.D"}, out name, out level));
+            Assert.IsFalse(Helper.SegmentsCollide(new[] {"A.B.C", "A.B.E"}, new[] {"B.B", "B.C", "B.E"}, out name, out level));
+
+            Assert.AreEqual(null, name);
+            Assert.AreEqual(level, -1);
+
+            Assert.IsTrue(Helper.SegmentsCollide(new[] {"A"}, new[] {"A"}, out name, out level));
+            Assert.AreEqual("A", name);
+            Assert.AreEqual(level, 0);
+
+            Assert.IsTrue(Helper.SegmentsCollide(new[] {"A.B"}, new[] {"A.B"}, out name, out level));
+            Assert.AreEqual("B", name);
+            Assert.AreEqual(level, 1);
+
+            Assert.IsTrue(Helper.SegmentsCollide(new[] {"A.B.C"}, new[] {"A.B"}, out name, out level));
+            Assert.AreEqual("B", name);
+            Assert.AreEqual(level, 1);
+        }
+
+        [TestMethod]
         public void verify_validators_caching()
         {
             const int testLoops = 10;

@@ -3,8 +3,10 @@
  * Licensed MIT: http://opensource.org/licenses/MIT */
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 
@@ -39,6 +41,39 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
                 jsonSerializer.Serialize(jsonTextWriter, data);
                 return stringBuilder.ToString();
             }
+        }
+
+        public static bool SegmentsCollide(IEnumerable<string> listA, IEnumerable<string>listB, out string name, out int level)
+        {
+            name = null;
+            level = -1;
+
+            var segmentsA = listA.Select(x => x.Split('.')).ToList();
+            var segmentsB = listB.Select(x => x.Split('.')).ToList();            
+
+            foreach (var segA in segmentsA)
+            {
+                foreach (var segB in segmentsB)
+                {
+                    var equal = true;
+                    var boundary = new[] {segA.Count(), segB.Count()}.Min() - 1;
+                    for (var i = 0; i <= boundary; i++)
+                    {
+                        if (segA[i] != segB[i])
+                        {
+                            equal = false;
+                            break;
+                        }
+                    }
+                    if (equal)
+                    {
+                        name = segA[boundary];
+                        level = boundary;
+                        return true;
+                    }                    
+                }
+            }
+            return false;
         }
     }
 }

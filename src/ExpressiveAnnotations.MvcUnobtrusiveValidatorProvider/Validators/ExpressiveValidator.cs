@@ -95,14 +95,14 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
         protected IDictionary<string, object> ConstsMap { get; private set; }
 
         private string FieldAttributeType { get; set; }
-        
+
         private bool Cached
         {
             get { return FieldsMap != null || ConstsMap != null; }
         }
 
         /// <summary>
-        ///     Provides unique validation type within current annotated field range, when multiple annotations are used (required for client side).
+        ///     Provides unique validation type within current annotated field range, when multiple annotations are used (required for client-side).
         /// </summary>
         /// <param name="baseName">Base name.</param>
         /// <returns>
@@ -124,29 +124,19 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
 
         private void AssertNoNamingCollisionsAtCorrespondingSegments()
         {
-            var segmentsA = FieldsMap.Keys.Select(x => x.Split('.')).ToList();
-            var segmentsB = ConstsMap.Keys.Select(x => x.Split('.')).ToList();
-
-            foreach (var segA in segmentsA)
-            {
-                foreach (var segB in segmentsB)
-                {
-                    var boundary = new[] {segA.Count(), segB.Count()}.Min();
-                    for (var i = 0; i < boundary; i++)
-                    {
-                        if (segA[i] == segB[i])
-                            throw new InvalidOperationException(
-                                string.Format("Any naming collisions cannot be accepted at client side - {0} part at level {1} is ambiguous.", segA[i], i));
-                    }
-                }
-            }
+            string name;
+            int level;
+            if (Helper.SegmentsCollide(FieldsMap.Keys, ConstsMap.Keys, out name, out level))
+                throw new InvalidOperationException(
+                    string.Format("Naming collisions cannot be accepted by client-side - {0} part at level {1} is ambiguous.", name, level));
         }
 
         private void AssertAttribsQuantityAllowed(int count)
         {
-            if (count > 27)
+            const int max = 27;
+            if (count > max)
                 throw new InvalidOperationException(
-                    "No more than 27 unique attributes of the same type can be applied for a single field or property.");
+                    string.Format("No more than {0} unique attributes of the same type can be applied for a single field or property.", max));
         }
     }
 }
