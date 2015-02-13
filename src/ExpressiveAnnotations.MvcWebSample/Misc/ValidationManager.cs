@@ -23,13 +23,13 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
 
         public string Load(HttpContextBase httpContext)
         {
-            var value = GetValueFromCookie(httpContext);
-            if (value != null) 
-                return value;
+            var type = GetValueFromCookie(httpContext);
+            if (type != null)
+                return type;
 
-            value = "client";
-            SetValueToCookie(value, httpContext);
-            return value;
+            type = "client";
+            SetValueToCookie(type, httpContext);
+            return type;
         }
 
         private string GetValueFromCookie(HttpContextBase httpContext)
