@@ -15,7 +15,7 @@
 }
 
 .date {
-    width: 85px;
+    width: 85px !important;
 }
 
 .action {
@@ -51,6 +51,12 @@ select {
     .box-small div {
         text-align: right;
         width: 100%;
+    }
+
+    .box-small input[type="checkbox"] {
+        margin: 0;
+        margin-bottom: -1px;
+        vertical-align: bottom;
     }
 
 .left-corner {
@@ -121,7 +127,7 @@ label {
     vertical-align: baseline;
 }
 
-.inline, .radio {
+.inline, .radio, .cbox {
     display: inline-block;
     vertical-align: top;
 }
@@ -236,7 +242,6 @@ input[type="radio"].input-validation-error {
         display: none;
     }
 
-
     .box, fieldset {
         display: block;
     }
@@ -248,4 +253,12 @@ input[type="radio"].input-validation-error {
     .right-corner {
         float: right;
     }
+}
+
+/********************
+*   Browser fixes   *
+********************/
+
+.chrome input[type="text"] {
+    width: 210px;
 }

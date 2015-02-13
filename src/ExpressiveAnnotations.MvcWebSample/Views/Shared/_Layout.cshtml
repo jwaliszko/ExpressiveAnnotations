@@ -1,16 +1,23 @@
 ﻿@using System.Threading
 <!DOCTYPE html>
 
-@{ var lang = Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName; }
+@{
+    var lang = Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName;
+    var browser = Request.Browser.Browser.ToLowerInvariant();
+}
 
 <html lang="@lang">
     <head>
         <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+        <meta name="author" content="Jaroslaw Waliszko, https://github.com/JaroslawWaliszko/ExpressiveAnnotations" />
+        <meta name="copyright" content="Copyright (c) 2014 Jaroslaw Waliszko" />
+
         <title>ExpressiveAnnotations</title>
         @Styles.Render("~/Content/css")
         @Styles.Render("~/Content/themes/base/css")
     </head>
-    <body>
+    <body class="@browser">
         <div id="body">
             <section class="content-wrapper">
                 @RenderBody()

@@ -123,6 +123,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Misc\Extensions.cs" />
+    <Compile Include="Misc\TriggersManager.cs" />
     <Compile Include="Misc\ValidationManager.cs" />
     <Compile Include="Misc\CultureManager.cs" />
     <Compile Include="Models\Contact.cs" />

@@ -3,22 +3,22 @@ using System.Web;
 
 namespace ExpressiveAnnotations.MvcWebSample.Misc
 {
-    public class ValidationManager
+    public class TriggersManager
     {
-        private static readonly ValidationManager _instance = new ValidationManager();
+        private static readonly TriggersManager _instance = new TriggersManager();
 
-        private ValidationManager()
+        private TriggersManager()
         {
         }
 
-        public static ValidationManager Instance
+        public static TriggersManager Instance
         {
             get { return _instance; }
         }
 
-        public void Save(string type, HttpContextBase httpContext)
+        public void Save(string events, HttpContextBase httpContext)
         {
-            SetValueToCookie(type, httpContext);
+            SetValueToCookie(events, httpContext);
         }
 
         public string Load(HttpContextBase httpContext)
@@ -27,20 +27,20 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
             if (value != null) 
                 return value;
 
-            value = "client";
+            value = "change paste keyup";
             SetValueToCookie(value, httpContext);
             return value;
         }
 
         private string GetValueFromCookie(HttpContextBase httpContext)
         {
-            var cookie = httpContext.Request.Cookies.Get("expressiv.mvcwebsample.validation");
+            var cookie = httpContext.Request.Cookies.Get("expressiv.mvcwebsample.triggers");
             return cookie != null ? cookie.Value : null;
         }
 
-        private void SetValueToCookie(string type, HttpContextBase httpContext)
+        private void SetValueToCookie(string events, HttpContextBase httpContext)
         {
-            var cookie = new HttpCookie("expressiv.mvcwebsample.validation", type) {Expires = DateTime.Now.AddMonths(1)};
+            var cookie = new HttpCookie("expressiv.mvcwebsample.triggers", events) {Expires = DateTime.Now.AddMonths(1)};
             httpContext.Response.SetCookie(cookie);
         }
     }

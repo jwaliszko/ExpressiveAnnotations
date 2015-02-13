@@ -20,27 +20,27 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
         public void Save(string lang, HttpContextBase httpContext)
         {
             var culture = CultureInfo.CreateSpecificCulture(lang);
-            SetCultureToCookie(culture, httpContext);
+            SetValueToCookie(culture, httpContext);
         }
 
         public CultureInfo Load(HttpContextBase httpContext)
         {
-            var culture = GetCultureFromCookie(httpContext);
-            if (culture == null)
-            {
-                culture = CultureInfo.CreateSpecificCulture("en"); // force default culture to be "en"
-                SetCultureToCookie(culture, httpContext);
-            }
+            var culture = GetValueFromCookie(httpContext);
+            if (culture != null) 
+                return culture;
+
+            culture = CultureInfo.CreateSpecificCulture("en"); // force default culture to be "en"
+            SetValueToCookie(culture, httpContext);
             return culture;
         }
 
-        private CultureInfo GetCultureFromCookie(HttpContextBase httpContext)
+        private CultureInfo GetValueFromCookie(HttpContextBase httpContext)
         {
             var cookie = httpContext.Request.Cookies.Get("expressiv.mvcwebsample.culture");
             return cookie != null ? CultureInfo.CreateSpecificCulture(cookie.Value) : null;
         }
 
-        private void SetCultureToCookie(CultureInfo culture, HttpContextBase httpContext)
+        private void SetValueToCookie(CultureInfo culture, HttpContextBase httpContext)
         {
             var cookie = new HttpCookie("expressiv.mvcwebsample.culture", culture.Name) { Expires = DateTime.Now.AddMonths(1) };
             httpContext.Response.SetCookie(cookie);

@@ -9,7 +9,7 @@
     <li>
         <div>
             @Html.CheckBoxFor(model => model.GoAbroad)
-            @Html.LabelFor(model => model.GoAbroad, new { @class = "inline" })
+            @Html.LabelFor(model => model.GoAbroad, new { @class = "cbox" })
             @Html.ValidationMessageFor(model => model.GoAbroad)
         </div>
     </li>
@@ -115,7 +115,7 @@
         <pre class="action">[show attribute]</pre>
         <div>
             @Html.CheckBoxFor(model => model.AwareOfTheRisks)
-            @Html.LabelFor(model => model.AwareOfTheRisks, new { @class = "inline" })
+            @Html.LabelFor(model => model.AwareOfTheRisks, new { @class = "cbox" })
             @Html.ValidationMessageFor(model => model.AwareOfTheRisks)
         </div>
     </li>

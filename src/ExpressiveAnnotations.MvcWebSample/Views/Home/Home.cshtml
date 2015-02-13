@@ -1,7 +1,11 @@
 ﻿@using System.Threading
 @model ExpressiveAnnotations.MvcWebSample.Models.Query
 
-@{ var lang = Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName; }
+@{
+    var lang = Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName;
+    var client = "client".Equals(ViewBag.Validation);
+    var triggers = ViewBag.Triggers;
+}
 
 <div class="box">
     <div class="left-corner">
@@ -33,7 +37,7 @@
 }
 
 @section Scripts {
-    @if ("client".Equals(ViewBag.Validation))
+    @if (client)
     {
         @Scripts.Render("~/bundles/jqueryval")
         @Scripts.Render("~/bundles/expressive") // load expressive.annotations.validate.js
@@ -41,9 +45,20 @@
         <script>
             // var expann = ea.noConflict(); // in case of naming collision, return control of the ea variable back to its origins (old references of ea are saved during ExpressiveAnnotations initialization; noConflict() restores them)
             // expann.addMethod... // do something with ExpressiveAnnotations
-            // ea... // do something with original ea variable            
+            // ea... // do something with original ea variable
 
-            // ea.settings.dependencyTriggers = 'change'; // disable some excessive activity if you wish, and e.g. trigger dependent fields validation only when field "change" event is fired
+            var triggers = '@triggers';
+            ea.settings.dependencyTriggers = /\S/.test(triggers) ? triggers : undefined; // if not explicitly provided, default setup is: 'change paste keyup'
+            $(document).ready(function() {
+                $('#triggers input[type="checkbox"]').on('click', function() {
+                    // disable some excessive activity if you wish, and e.g. trigger dependent fields validation only when field 'change' event is fired
+                    // when all triggers are disabled, validation will be fired on form submit attempt only
+                    var triggers = $('#triggers input[type="checkbox"]:checked').map(function() {
+                        return $(this).attr('data-val');
+                    }).toArray();
+                    window.location.href = '/System/SetTriggers?events=' + triggers.join(' ') + '&returnUrl=/';
+                });
+            });
 
             @if ("pl" == lang)
             {
@@ -83,7 +98,8 @@
                 if (typeof $('.date').valid == 'function') { // safety check if our demo project is not set to server side validation only (no jquery.validate.js loaded)
                     $('.date').valid(); // triggers the validation test on change (to avoid second click)
                 }
-            });;
+            });
+            $('#triggers input[type=checkbox]').attr("disabled", @Json.Encode(!client));
         });
 
         $.datepicker.regional['pl'] = {

@@ -16,5 +16,11 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
             ValidationManager.Instance.Save(type, HttpContext);
             return Redirect(returnUrl);
         }
+
+        public ActionResult SetTriggers(string events, string returnUrl)
+        {
+            TriggersManager.Instance.Save(events, HttpContext);
+            return Redirect(returnUrl);
+        }
     }
 }
