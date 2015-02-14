@@ -24,13 +24,22 @@ This package contains 3 components: ExpressiveAnnotations.dll core annotations a
     </metadata>
     <files>
         <file src="bin\expressive.annotations.validate.js" target="content\Scripts\expressive.annotations.validate.js" />
+		
         <file src="bin\Release-Net40\ExpressiveAnnotations.dll" target="lib\net40\ExpressiveAnnotations.dll" />
+		<file src="bin\Release-Net40\ExpressiveAnnotations.pdb" target="lib\net40\ExpressiveAnnotations.pdb" />
+		<file src="bin\Release-Net40\ExpressiveAnnotations.xml" target="lib\net40\ExpressiveAnnotations.xml" />		
         <file src="bin\Release-Net40\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll" target="lib\net40\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll" />
-        <file src="bin\Release-Net40\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.xml" target="lib\net40\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.xml" />
-        <file src="bin\Release-Net40\ExpressiveAnnotations.xml" target="lib\net40\ExpressiveAnnotations.xml" />
+		<file src="bin\Release-Net40\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.pdb" target="lib\net40\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.pdb" />
+        <file src="bin\Release-Net40\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.xml" target="lib\net40\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.xml" />        
+		
         <file src="bin\Release-Net45\ExpressiveAnnotations.dll" target="lib\net45\ExpressiveAnnotations.dll" />
+		<file src="bin\Release-Net45\ExpressiveAnnotations.pdb" target="lib\net45\ExpressiveAnnotations.pdb" />
+		<file src="bin\Release-Net45\ExpressiveAnnotations.xml" target="lib\net45\ExpressiveAnnotations.xml" />
         <file src="bin\Release-Net45\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll" target="lib\net45\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll" />
-        <file src="bin\Release-Net45\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.xml" target="lib\net45\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.xml" />
-        <file src="bin\Release-Net45\ExpressiveAnnotations.xml" target="lib\net45\ExpressiveAnnotations.xml" />
+		<file src="bin\Release-Net45\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.pdb" target="lib\net45\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.pdb" />
+        <file src="bin\Release-Net45\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.xml" target="lib\net45\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.xml" />        
+		
+		<file src="ExpressiveAnnotations\**\*.cs" target="src\ExpressiveAnnotations" exclude="ExpressiveAnnotations\obj\**" />
+		<file src="ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider\**\*.cs" target="src\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider" exclude="ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider\obj\**" />
     </files>
 </package>

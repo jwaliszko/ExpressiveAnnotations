@@ -29,19 +29,21 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\ExpressiveAnnotations.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\ExpressiveAnnotations.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Net40|AnyCPU'">
+    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\bin\Release-Net40\</OutputPath>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <DocumentationFile>..\bin\Release-Net40\ExpressiveAnnotations.XML</DocumentationFile>
+    <DocumentationFile>..\bin\Release-Net40\ExpressiveAnnotations.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Net45|AnyCPU'">
+    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\bin\Release-Net45\</OutputPath>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <DocumentationFile>..\bin\Release-Net45\ExpressiveAnnotations.XML</DocumentationFile>
+    <DocumentationFile>..\bin\Release-Net45\ExpressiveAnnotations.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
