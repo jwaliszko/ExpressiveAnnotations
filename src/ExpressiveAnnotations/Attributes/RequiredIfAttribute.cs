@@ -11,7 +11,7 @@ namespace ExpressiveAnnotations.Attributes
     /// </summary>
     public sealed class RequiredIfAttribute : ExpressiveAttribute
     {
-        private const string _defaultErrorMessage = "The {0} field is required by the following logic: {1}.";
+        private const string _defaultErrorMessage = "The {0} field is required by the following logic: {1}";
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="RequiredIfAttribute" /> class.

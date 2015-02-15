@@ -127,7 +127,7 @@
     <value>You have to authorize us to contact you.</value>
   </data>
   <data name="AssertionNotSatisfied" xml:space="preserve">
-    <value>Assertion for {0} field is not satisfied by the following logic: {1}.</value>
+    <value>Assertion for {0} field is not satisfied by the following logic: {1}</value>
   </data>
   <data name="AwareOfTheRisks" xml:space="preserve">
     <value>I am aware of the possible risks</value>
@@ -163,7 +163,7 @@
     <value>Extreme</value>
   </data>
   <data name="FieldConditionallyRequired" xml:space="preserve">
-    <value>The {0} field is required by the following logic: {1}.</value>
+    <value>The {0} field is required by the following logic: {1}</value>
   </data>
   <data name="FieldRequired" xml:space="preserve">
     <value>The {0} field is required.</value>

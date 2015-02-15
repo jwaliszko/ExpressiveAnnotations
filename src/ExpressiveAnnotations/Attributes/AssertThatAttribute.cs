@@ -12,7 +12,7 @@ namespace ExpressiveAnnotations.Attributes
     /// </summary>
     public sealed class AssertThatAttribute : ExpressiveAttribute
     {
-        private const string _defaultErrorMessage = "Assertion for {0} field is not satisfied by the following logic: {1}.";
+        private const string _defaultErrorMessage = "Assertion for {0} field is not satisfied by the following logic: {1}";
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="AssertThatAttribute" /> class.

@@ -19,7 +19,7 @@
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
-    @Html.ValidationSummary(true)
+    @Html.ValidationSummary(true) @*show/hide validation summary block*@ 
 
     <div class="message-success">@(ViewBag.Success ?? Html.Raw("&nbsp;"))</div>
 
