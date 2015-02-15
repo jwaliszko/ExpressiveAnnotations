@@ -18,6 +18,7 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
    - [How to cope with dates given in non-standard formats?](#how-to-cope-with-dates-given-in-non-standard-formats)
    - [What if *ea* variable is already used by another library?](#what-if-ea-variable-is-already-used-by-another-library)
    - [How to control frequency of dependent fields validation?](#how-to-control-frequency-of-dependent-fields-validation)
+   - [What if my question is not covered by FAQ section?](#what-if-my-question-is-not-covered-by-faq-section)
  - [Installation](#installation)
  - [Contributors](#contributors)
  - [License](#license)
@@ -159,7 +160,7 @@ Logical expressions should be built according to the syntax defined by grammar, 
       * enum values, e.g. `SomeEnumType.SomeValue`,
 	  * function invocations, e.g. `SomeFunction(...)`.
 
-Specified expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object. As a result of expression evaluation, boolean flag is returned, indicating that expression is true or false. 
+Specified expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object. As a result of expression evaluation, boolean flag is returned, indicating that expression is true or false.
 
 When working with ASP.NET MVC stack, unobtrusive client-side validation mechanism is [additionally available](#what-about-the-support-of-aspnet-mvc-client-side-validation). Client receives unchanged expression string from server. Such an expression is then evaluated using JavaScript [`eval()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) method within the context of reflected model object. Such a model, analogously to the server-side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
 
@@ -320,12 +321,17 @@ Use `noConflict()` method. In case of naming collision return control of the `ea
 #####<a id="how-to-control-frequency-of-dependent-fields-validation">How to control frequency of dependent fields validation?</a>
 
 When a field value is modified, validation results for some other fields, directly dependent on currenty modified one, may be affected. To control the frequency of when dependent fields validation is triggered, change default `ea.settings.dependencyTriggers` settings. It is a string containing one or more DOM field event types (such as *change*, *keyup* or custom event names), associated with currently modified field, for which fields directly dependent on are validated.
+
 Default value is *'change paste keyup'* (for more information check `eventType` parameter of jQuery [`bind()`](http://api.jquery.com/bind) method). If you want to turn this feature off entirely, set it to *undefined* (validation will be fired on form submit attempt only).
 ```JavaScript
 <script>
     ea.settings.dependencyTriggers = 'change'; // mute some excessive activity if you wish,
                                                // or turn it off entirely (set to undefined)
 ```
+
+#####<a id="what-if-my-question-is-not-covered-by-faq-section">What if my question is not covered by FAQ section?</a>
+
+If you're searching for an answer to some other problem, not mentioned in this document, before posting new question on GitHub try to browse through [already posted issues](../../issues?q=label%3Aquestion) labelled by *question* tag, or possibly [have a look at stackoverflow](http://stackoverflow.com/search?q=expressiveannotations).
 
 ###<a id="installation">Installation</a>
 
@@ -341,7 +347,7 @@ Simplest way is using the [NuGet](https://www.nuget.org) Package Manager Console
 
 ###<a id="contributors">Contributors</a>
 
-[GitHub Users](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/graphs/contributors)
+[GitHub Users](../../graphs/contributors)
 
 Special thanks to Szymon Malczak
 
