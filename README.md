@@ -1,5 +1,8 @@
 ﻿#<a id="expressiveannotations-annotation-based-conditional-validation">ExpressiveAnnotations<sup><sup><sup>[annotation-based conditional validation]</sup></sup></sup></a>
 
+[![Build status](https://img.shields.io/appveyor/ci/JaroslawWaliszko/ExpressiveAnnotations.svg)](https://ci.appveyor.com/project/JaroslawWaliszko/ExpressiveAnnotations)
+[![Release](https://img.shields.io/github/release/JaroslawWaliszko/ExpressiveAnnotations.svg)](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/releases/latest)
+
 ExpressiveAnnotations is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given `RequiredIf` and `AssertThat` attributes allow to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more condensed, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
 
 ###Table of contents
@@ -331,7 +334,7 @@ Default value is *'change paste keyup'* (for more information check `eventType` 
 
 #####<a id="what-if-my-question-is-not-covered-by-faq-section">What if my question is not covered by FAQ section?</a>
 
-If you're searching for an answer to some other problem, not mentioned in this document, before posting new question on GitHub try to browse through [already posted issues](../../issues?q=label%3Aquestion) labelled by *question* tag, or possibly [have a look at stackoverflow](http://stackoverflow.com/search?q=expressiveannotations).
+If you're searching for an answer to some other problem, not mentioned in this document, before posting new question on GitHub try to browse through [already posted issues](../../issues?q=label%3Aquestion) labelled by *question* tag, or possibly [have a look at Stack Overflow](http://stackoverflow.com/search?q=expressiveannotations).
 
 ###<a id="installation">Installation</a>
 
@@ -339,9 +342,13 @@ Simplest way is using the [NuGet](https://www.nuget.org) Package Manager Console
 
 * [complete package](https://www.nuget.org/packages/ExpressiveAnnotations) - both assemblies and the script included (allows [complete MVC validation](#what-about-the-support-of-aspnet-mvc-client-side-validation)):
 
+    [![NuGet complete](https://img.shields.io/nuget/dt/ExpressiveAnnotations.svg)](http://nuget.org/packages/ExpressiveAnnotations)
+
     ###`PM> Install-Package ExpressiveAnnotations`
 
 * [minimal package](https://www.nuget.org/packages/ExpressiveAnnotations.dll) - core assembly only (MVC-related client-side coating components excluded):
+
+    [![NuGet minimal](https://img.shields.io/nuget/dt/ExpressiveAnnotations.dll.svg)](http://nuget.org/packages/ExpressiveAnnotations.dll)
 
     ###`PM> Install-Package ExpressiveAnnotations.dll`
 
