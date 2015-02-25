@@ -319,6 +319,20 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
+        public void verify_logic_with_derived_context()
+        {
+            var parser = new Parser();
+            var firstDerived = new FirstDerived {Value = true};
+            var secondDerived = new SecondDerived {Value = true};
+
+            Assert.IsTrue(parser.Parse(firstDerived.GetType(), "Value").Invoke(firstDerived));
+            Assert.IsTrue(parser.Parse(secondDerived.GetType(), "Value").Invoke(secondDerived));
+
+            Assert.IsTrue(parser.Parse(typeof(ModelBase), "Value").Invoke(firstDerived));
+            Assert.IsTrue(parser.Parse(typeof(ModelBase), "Value").Invoke(secondDerived));
+        }
+
+        [TestMethod]
         public void verify_non_bool_expression_failure()
         {
             var parser = new Parser();
@@ -1483,5 +1497,13 @@ namespace ExpressiveAnnotations.Tests
             No,
             Uncertain
         }
+
+        private abstract class ModelBase
+        {
+            public bool Value { get; set; }
+        }
+
+        private class FirstDerived : ModelBase { }
+        private class SecondDerived : ModelBase { }
     }
 }

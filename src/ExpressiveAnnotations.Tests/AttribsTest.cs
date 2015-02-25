@@ -115,7 +115,7 @@ namespace ExpressiveAnnotations.Tests
             return stopwatch.ElapsedTicks;
         }
 
-        public abstract class ModelBase
+        private abstract class ModelBase
         {
             [RequiredIf("Value2")]
             [AssertThat("Value2")]
@@ -124,8 +124,8 @@ namespace ExpressiveAnnotations.Tests
             public bool Value2 { get; set; }
         }
 
-        public class FirstDerived : ModelBase { }
-        public class SecondDerived : ModelBase { }
+        private class FirstDerived : ModelBase { }
+        private class SecondDerived : ModelBase { }
 
         private class Model
         {
