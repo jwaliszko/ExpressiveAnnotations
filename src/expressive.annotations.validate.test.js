@@ -252,10 +252,20 @@
 
     window.module("model helper");
 
-    test("verify_model_evaluation", function() {
-        var model = ea.modelHelper.deserializeObject(null, null, { "Number": 123, "Stability.High": 0 }, null);        
+    test("verify_expression_evaluation", function () {
+        var model = {
+            Number: 123,
+            Stability: {
+                High: 0
+            }
+        }
+        var deserizedModel = ea.modelHelper.deserializeObject(null, null, { "Number": 123, "Stability.High": 0 }, null);
+        window.deepEqual(deserizedModel, model, 'model deserialized properly based on given consts map');
+
+        var expression = "Number - 23 == 100 && Stability.High == 0";
+        var result = ea.modelHelper.ctxEval(expression, model);
         with (model) {
-            window.ok(eval("Number - 23 == 100 && Stability.High == 0"), "sample model deserialized and evaluated correctly");
+            window.ok(eval(expression) === result === true, "expression evaluated correctly within given model context");
         }
     });
 

@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.validate.js - v2.4.0
+﻿/* expressive.annotations.validate.js - v2.4.1
  * Client-side component of ExpresiveAnnotations - annotation-based conditional validation library.
  * https://github.com/JaroslawWaliszko/ExpressiveAnnotations
  *
@@ -6,6 +6,7 @@
  * Licensed MIT: http://opensource.org/licenses/MIT */
 
 (function($, window) {
+    'use strict';
 var
     backup = window.ea, // map over the ea in case of overwrite
 
@@ -364,6 +365,10 @@ var
                 }
             }
             return model;
+        },
+        ctxEval: function (exp, ctx) { // evaluates expression in the scope of context object
+            return (new Function('expression', 'context', 'with(context){return eval(expression)}'))(exp, ctx); // function constructor used on purpose (a hack), for 'with' statement not to collide with strict mode, which
+                                                                                                                // is applied to entire module scope (BTW 'use strict'; pragma intentionally not put to function constructor)
         }
     },
 
@@ -454,10 +459,8 @@ var
             if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
                 var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.prefix);
                 toolchain.registerMethods(model);
-                with (model) {
-                    if (!eval(params.expression)) { // check if the assertion condition is not satisfied
-                        return false; // assertion not satisfied => notify
-                    }
+                if (!modelHelper.ctxEval(params.expression, model)) { // check if the assertion condition is not satisfied
+                    return false; // assertion not satisfied => notify
                 }
             }
             return true;
@@ -472,10 +475,8 @@ var
                 || (!/\S/.test(value) && !params.allowEmpty)) {
                 var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.prefix);
                 toolchain.registerMethods(model);
-                with (model) {
-                    if (eval(params.expression)) {
-                        return false;
-                    }
+                if (modelHelper.ctxEval(params.expression, model)) { // check if the requirement condition is satisfied
+                    return false; // requirement confirmed => notify
                 }
             }
             return true;
