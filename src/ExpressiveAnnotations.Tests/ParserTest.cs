@@ -521,7 +521,7 @@ namespace ExpressiveAnnotations.Tests
         {
             var parser = new Parser();
 
-            // Ensure that this doesn't consider Dog and HotDog types to be ambiguous
+            // Ensure that this doesn't consider Dog and HotDog enums to be ambiguous
             Assert.IsTrue(parser.Parse<object>("Dog.Collie == 0").Invoke(null));
 
             try
