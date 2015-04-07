@@ -26,6 +26,20 @@ namespace ExpressiveAnnotations.Tests
         Unknown
     }
 
+    public enum Dog
+    {
+        Collie,
+        Spaniel,
+        Terrier
+    }
+
+    public enum HotDog
+    {
+        Beef,
+        Pork,
+        Other
+    }
+
     public enum SbyteEnum : sbyte
     {
         First = 1,
@@ -506,6 +520,9 @@ namespace ExpressiveAnnotations.Tests
         public void verify_enumeration_ambiguity()
         {
             var parser = new Parser();
+
+            // Ensure that this doesn't consider Dog and HotDog types to be ambiguous
+            Assert.IsTrue(parser.Parse<object>("Dog.Collie == 0").Invoke(null));
 
             try
             {
