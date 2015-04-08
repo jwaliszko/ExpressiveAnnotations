@@ -657,7 +657,7 @@ namespace ExpressiveAnnotations.Analysis
                 var enumTypeName = string.Join(".", parts.Take(parts.Count() - 1).ToList());
                 var enumTypes = AppDomain.CurrentDomain.GetAssemblies()
                     .SelectMany(a => a.GetLoadableTypes())
-                    .Where(t => t.IsEnum && t.FullName.Replace("+", ".").EndsWith(enumTypeName))
+                    .Where(t => t.IsEnum && string.Concat(".", t.FullName.Replace("+", ".")).EndsWith(string.Concat(".", enumTypeName)))
                     .ToList();
 
                 if (enumTypes.Count() > 1)
