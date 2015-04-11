@@ -17,6 +17,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{5908
 	ProjectSection(SolutionItems) = preProject
 		expressive.annotations.validate.js = expressive.annotations.validate.js
 		expressive.annotations.validate.test.js = expressive.annotations.validate.test.js
+		qunit-1.18.0.css = qunit-1.18.0.css
+		qunit-1.18.0.js = qunit-1.18.0.js
+		test.html = test.html
+	EndProjectSection
+	ProjectSection(FolderStartupServices) = postProject
+		{82A7F48D-3B50-4B1E-B82E-3ADA8210C358} = {82A7F48D-3B50-4B1E-B82E-3ADA8210C358}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Tests", "ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Tests\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Tests.csproj", "{46C5858F-76A5-4032-A4DA-5299CE51209B}"
