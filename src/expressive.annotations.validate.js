@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.validate.js - v2.4.1
+﻿/* expressive.annotations.validate.js - v2.4.2
  * Client-side component of ExpresiveAnnotations - annotation-based conditional validation library.
  * https://github.com/JaroslawWaliszko/ExpressiveAnnotations
  *
@@ -366,7 +366,7 @@ var
             }
             return model;
         },
-        ctxEval: function (exp, ctx) { // evaluates expression in the scope of context object
+        ctxEval: function(exp, ctx) { // evaluates expression in the scope of context object
             return (new Function('expression', 'context', 'with(context){return eval(expression)}'))(exp, ctx); // function constructor used on purpose (a hack), for 'with' statement not to collide with strict mode, which
                                                                                                                 // is applied to entire module scope (BTW 'use strict'; pragma intentionally not put to function constructor)
         }
@@ -402,7 +402,13 @@ var
         binded: false,
         bindFields: function(form) {
             if (!this.binded) {
-                $(form).find('input, select, textarea').bind(api.settings.dependencyTriggers, function() {
+                var namespacedEvents = [];
+                $.each(api.settings.dependencyTriggers.split(/\s+/), function(idx, event) {
+                    if (/\S/.test(event)) {
+                        namespacedEvents.push(event + '.expressive.annotations');
+                    }
+                });
+                $(form).find('input, select, textarea').on(namespacedEvents.join(' '), function () {
                     var field = $(this).attr('name');
                     validationHelper.validateReferences(field, form); // validate referenced fields only
                 });
