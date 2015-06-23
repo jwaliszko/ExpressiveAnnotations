@@ -483,7 +483,7 @@ namespace ExpressiveAnnotations.Analysis
             {
                 case TokenType.ADD:
                     return ParseAddExpInternal(
-                        (type1.IsString() || type2.IsString())
+                        (arg1.Type.IsString() || arg2.Type.IsString())
                             ? Expression.Add(
                                 Expression.Convert(arg1, typeof (object)),
                                 Expression.Convert(arg2, typeof (object)),

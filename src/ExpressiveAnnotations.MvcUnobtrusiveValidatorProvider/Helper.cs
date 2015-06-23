@@ -16,6 +16,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
     {
         public static string GetCoarseType(Type type)
         {
+            if (type.IsTimeSpan())
+                return "timespan";
             if (type.IsDateTime())
                 return "datetime";
             if (type.IsNumeric())

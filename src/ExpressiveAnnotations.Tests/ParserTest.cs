@@ -266,7 +266,7 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.IsFalse(parser.Parse<Model>("SubModel.Flag").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("!SubModel.Flag").Invoke(model));
-            Assert.IsFalse(parser.Parse<Model>("SubModel.Flag && true").Invoke(model));            
+            Assert.IsFalse(parser.Parse<Model>("SubModel.Flag && true").Invoke(model));
 
             Assert.IsTrue(parser.Parse<Model>("Number < SubModel.Number").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("Date <= NDate").Invoke(model));

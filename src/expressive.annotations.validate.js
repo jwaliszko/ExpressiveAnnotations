@@ -56,17 +56,18 @@ var
             }
         },
         initialize: function() {
-            this.addMethod("Now", function() {
-                return new Date(Date.now());
+            this.addMethod("Now", function() { // return milliseconds
+                return Date.now();
             });
-            this.addMethod("Today", function() {
-                return new Date(this.Now().setHours(0, 0, 0, 0));
+            this.addMethod("Today", function() { // return milliseconds
+                var now = new Date(this.Now());
+                return new Date(now.setHours(0, 0, 0, 0)).getTime();
             });
-            this.addMethod("Date", function(year, month, day) { // months are 1-based
-                return new Date(year, month - 1, day);
+            this.addMethod("Date", function(year, month, day) { // months are 1-based, return milliseconds
+                return new Date(year, month - 1, day).getTime();
             });
-            this.addMethod("Date", function(year, month, day, hour, minute, second) { // months are 1-based
-                return new Date(year, month - 1, day, hour, minute, second);
+            this.addMethod("Date", function(year, month, day, hour, minute, second) { // months are 1-based, return milliseconds
+                return new Date(year, month - 1, day, hour, minute, second).getTime();
             });
             this.addMethod("Length", function(str) {
                 return str !== null && str !== undefined ? str.length : 0;
@@ -238,10 +239,34 @@ var
                 return { error: true, msg: 'Given value was not recognized as a valid float.' };
             }
         },
+        timespan: {
+            tryParse: function(value) {
+                if (typeHelper.isTimeSpan(value)) {
+                    var DAY = 2, HOUR = 3, MINUTE = 4, SECOND = 5, MILLISECOND = 6;
+                    var match = /(\-)?(?:(\d*)\.)?(\d+)\:(\d+)(?:\:(\d+)\.?(\d{3})?)?/.exec(value);
+                    var sign = (match[1] === '-') ? -1 : 1;
+                    var d = {                    
+                        days: typeHelper.float.tryParse(match[DAY] || 0) * sign,
+                        hours: typeHelper.float.tryParse(match[HOUR] || 0) * sign,
+                        minutes: typeHelper.float.tryParse(match[MINUTE] || 0) * sign,
+                        seconds: typeHelper.float.tryParse(match[SECOND] || 0) * sign,
+                        milliseconds: typeHelper.float.tryParse(match[MILLISECOND] || 0) * sign
+                    };
+
+                    var millisec = d.milliseconds +
+                        d.seconds * 1e3 + // 1000
+                        d.minutes * 6e4 + // 1000 * 60
+                        d.hours * 36e5 + // 1000 * 60 * 60
+                        d.days * 864e5; // 1000 * 60 * 60 * 24
+                    return millisec;
+                }
+                return { error: true, msg: 'Given value was not recognized as a valid .NET style time span string.' };
+            }
+        },
         date: {
             tryParse: function(value) {
                 if (typeHelper.isDate(value)) {
-                    return value.getTime();
+                    return value.getTime(); // return the time value in milliseconds
                 }
                 if (typeHelper.isString(value)) {
                     var millisec;
@@ -268,6 +293,9 @@ var
                 return { error: true, msg: 'Given value was not recognized as a valid guid - guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).' };
             }
         },
+        isTimeSpan: function(value) {
+            return /^(\-)?(?:(\d*)\.)?(\d+)\:(\d+)(?:\:(\d+)\.?(\d{3})?)?$/i.test(value); // regex for recognition of .NET style time span string, taken from moment.js v2.9.0
+        },
         isNumeric: function(value) {
             return typeof value === 'number' && !isNaN(value);
         },
@@ -285,6 +313,8 @@ var
         },
         tryParse: function(value, type) {
             switch (type) {
+                case 'timespan':
+                    return typeHelper.timespan.tryParse(value);
                 case 'datetime':
                     return typeHelper.date.tryParse(value);
                 case 'numeric':
