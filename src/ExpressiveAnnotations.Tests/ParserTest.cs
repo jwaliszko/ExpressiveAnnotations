@@ -208,6 +208,8 @@ namespace ExpressiveAnnotations.Tests
             {
                 NDate = now,
                 Date = now,
+                NSpan = now - new DateTime(1999, 1, 1),
+                Span = new TimeSpan(0),
                 Number = 0,
                 Flag = true,
                 Text = "hello world",
@@ -264,14 +266,22 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.IsFalse(parser.Parse<Model>("SubModel.Flag").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("!SubModel.Flag").Invoke(model));
-            Assert.IsFalse(parser.Parse<Model>("SubModel.Flag && true").Invoke(model));
+            Assert.IsFalse(parser.Parse<Model>("SubModel.Flag && true").Invoke(model));            
 
             Assert.IsTrue(parser.Parse<Model>("Number < SubModel.Number").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("Date <= NDate").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("NDate != null").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Span <= NSpan").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("NSpan != null").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("SubModel.Date < NextWeek()").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("IncNumber(0) == SubModel.Number").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("IncNumber(Number) == SubModel.Number").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Today() - Today() == Span").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Today() - Today() == Date - Date").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Today() - Today() == Span - Span").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Today() - Today() == NSpan - NSpan").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Span + NSpan == NSpan + Span").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Now() - Span > Date - NSpan").Invoke(model));            
 
             Assert.IsTrue(parser.Parse<Model>("DecNumber(SubModel.Number) == Number").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("DecNumber(Number) == 0").Invoke(model.SubModel));
@@ -283,6 +293,11 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<Model>("Guid1 != Guid('00000000-0000-0000-0000-000000000000')").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("Guid2 == Guid('00000000-0000-0000-0000-000000000000')").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("Guid1 != Guid2").Invoke(model));
+
+            model.NDate = null;
+            model.NSpan = null;
+            Assert.IsTrue(parser.Parse<Model>("NDate == null && Date != NDate").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("NSpan == null && Span != NSpan").Invoke(model));
 
             var subModel = new Model();
             var newModel = new Model {SubModel = subModel, SubModelObject = subModel};
@@ -1099,7 +1114,7 @@ namespace ExpressiveAnnotations.Tests
             try
             {                
                 var model = new Model();
-                parser.Parse<Model>("Date + Date != null").Invoke(model);
+                parser.Parse<Model>("Date + Date").Invoke(model);
                 Assert.Fail();
             }
             catch (Exception e)
@@ -1107,8 +1122,40 @@ namespace ExpressiveAnnotations.Tests
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
                     @"Parse error on line 1, column 6:
-... + Date != null ...
+... + Date ...
     ^--- Operator '+' cannot be applied to operands of type 'System.DateTime' and 'System.DateTime'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("NDate + NDate").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 7:
+... + NDate ...
+    ^--- Operator '+' cannot be applied to operands of type 'System.Nullable`1[System.DateTime]' and 'System.Nullable`1[System.DateTime]'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("Date + NDate").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... + NDate ...
+    ^--- Operator '+' cannot be applied to operands of type 'System.DateTime' and 'System.Nullable`1[System.DateTime]'.",
                     e.Message);
             }
 
@@ -1307,6 +1354,38 @@ namespace ExpressiveAnnotations.Tests
             try
             {
                 var model = new Model();
+                parser.Parse<Model>("null - null").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... - null ...
+    ^--- Operator '-' cannot be applied to operands of type 'null' and 'null'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("'asd' - null").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 7:
+... - null ...
+    ^--- Operator '-' cannot be applied to operands of type 'System.String' and 'null'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
                 parser.Parse<Model>("null / null").Invoke(model);
                 Assert.Fail();
             }
@@ -1399,6 +1478,70 @@ namespace ExpressiveAnnotations.Tests
     ^--- Operator '==' cannot be applied to operands of type 'System.Decimal' and 'null'.",
                     e.Message);
             }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("Date + 0").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... + 0 ...
+    ^--- Operator '+' cannot be applied to operands of type 'System.DateTime' and 'System.Int32'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("NDate - 0").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 7:
+... - 0 ...
+    ^--- Operator '-' cannot be applied to operands of type 'System.Nullable`1[System.DateTime]' and 'System.Int32'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("Span + 0").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 6:
+... + 0 ...
+    ^--- Operator '+' cannot be applied to operands of type 'System.TimeSpan' and 'System.Int32'.",
+                    e.Message);
+            }
+
+            try
+            {
+                var model = new Model();
+                parser.Parse<Model>("NSpan - 0").Invoke(model);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 7:
+... - 0 ...
+    ^--- Operator '-' cannot be applied to operands of type 'System.Nullable`1[System.TimeSpan]' and 'System.Int32'.",
+                    e.Message);
+            }
         }
 
         private class Model
@@ -1410,6 +1553,8 @@ namespace ExpressiveAnnotations.Tests
 
             public DateTime? NDate { get; set; }
             public DateTime Date { get; set; }
+            public TimeSpan? NSpan { get; set; }
+            public TimeSpan Span { get; set; }
             public int? Number { get; set; }
             public bool Flag { get; set; }
             public string Text { get; set; }

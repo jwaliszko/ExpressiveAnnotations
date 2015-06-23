@@ -37,6 +37,15 @@ namespace ExpressiveAnnotations
                 else if (!oute1.Type.IsNullable() && oute2.Type.IsNullable())
                     oute1 = Expression.Convert(oute1, oute2.Type);
             }
+
+            // make DateTime and TimeSpan compatible (also do not care when first argument is TimeSpan and second DateTime because it is not allowed)
+            if (oute1.Type.IsDateTime() && oute2.Type.IsTimeSpan())
+            {
+                if (oute1.Type.IsNullable() && !oute2.Type.IsNullable())
+                    oute2 = Expression.Convert(oute2, typeof (TimeSpan?));
+                else if (!oute1.Type.IsNullable() && oute2.Type.IsNullable())
+                    oute1 = Expression.Convert(oute1, typeof (DateTime?));
+            }
         }
 
         public static bool IsDateTime(this Type type)
@@ -45,6 +54,14 @@ namespace ExpressiveAnnotations
                 throw new ArgumentNullException("type");
 
             return type == typeof (DateTime) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsDateTime());
+        }
+
+        public static bool IsTimeSpan(this Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+
+            return type == typeof(TimeSpan) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsTimeSpan());
         }
 
         public static bool IsBool(this Type type)
@@ -118,7 +135,7 @@ namespace ExpressiveAnnotations
             return !type.IsNullable() && type.IsValueType;
         }
 
-        public static bool IsNull(this Expression expr)
+        public static bool IsNullLiteral(this Expression expr)
         {
             if (expr == null)
                 throw new ArgumentNullException("expr");

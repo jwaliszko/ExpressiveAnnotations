@@ -318,7 +318,7 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken();
             var arg2 = ParseOrExp();
 
-            AssertArgsNotNull(arg1, arg2, oper);
+            AssertArgsNotNullLiterals(arg1, arg2, oper);
             if (!arg1.Type.IsBool() || !arg2.Type.IsBool())
                 throw new ParseErrorException(
                     string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, arg1.Type, arg2.Type),
@@ -336,7 +336,7 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken();
             var arg2 = ParseAndExp();
 
-            AssertArgsNotNull(arg1, arg2, oper);
+            AssertArgsNotNullLiterals(arg1, arg2, oper);
             if (!arg1.Type.IsBool() || !arg2.Type.IsBool())
                 throw new ParseErrorException(
                     string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, arg1.Type, arg2.Type),
@@ -360,17 +360,17 @@ namespace ExpressiveAnnotations.Analysis
 
             if (oper.Type == TokenType.EQ || oper.Type == TokenType.NEQ)
             {
-                if (type1.IsNonNullableValueType() && arg2.IsNull())
+                if (type1.IsNonNullableValueType() && arg2.IsNullLiteral())
                     throw new ParseErrorException(
                         string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and 'null'.", oper.Value, type1),
                         oper.Location);
-                if (arg1.IsNull() && type2.IsNonNullableValueType())
+                if (arg1.IsNullLiteral() && type2.IsNonNullableValueType())
                     throw new ParseErrorException(
                         string.Format("Operator '{0}' cannot be applied to operands of type 'null' and '{1}'.", oper.Value, type2),
                         oper.Location);
 
                 if (arg1.Type != arg2.Type
-                    && !arg1.IsNull() && !arg2.IsNull()
+                    && !arg1.IsNullLiteral() && !arg2.IsNullLiteral()
                     && !arg1.Type.IsObject() && !arg2.Type.IsObject())
                     throw new ParseErrorException(
                         string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, type1, type2),
@@ -378,11 +378,13 @@ namespace ExpressiveAnnotations.Analysis
             }
             else
             {
-                AssertArgsNotNull(arg1, type1, arg2, type2, oper);
-                if (!(arg1.Type.IsNumeric() && arg2.Type.IsNumeric()) && !(arg1.Type.IsDateTime() && arg2.Type.IsDateTime()))
+                AssertArgsNotNullLiterals(arg1, type1, arg2, type2, oper);
+                if (!(arg1.Type.IsNumeric() && arg2.Type.IsNumeric()) 
+                    && !(arg1.Type.IsDateTime() && arg2.Type.IsDateTime()) 
+                    && !(arg1.Type.IsTimeSpan() && arg2.Type.IsTimeSpan()))
                     throw new ParseErrorException(
                         string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, type1, type2),
-                        oper.Location);
+                        oper.Location);                
             }
 
             switch (oper.Type)
@@ -412,7 +414,7 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken();
             var arg = ParseNotExp(); // allow multiple negations
 
-            if (arg.IsNull())
+            if (arg.IsNullLiteral())
                 throw new ParseErrorException(
                     string.Format("Operator '{0}' cannot be applied to operand of type 'null'.", oper.Value),
                     oper.Location);            
@@ -447,24 +449,41 @@ namespace ExpressiveAnnotations.Analysis
             if (sign == TokenType.SUB)
                 arg2 = InverseNumber(arg2);
 
-            if(!arg1.Type.IsString() && !arg2.Type.IsString())
-                AssertArgsNotNull(arg1, arg2, oper);
-            if ((!arg1.Type.IsString() && !arg1.Type.IsNumeric() && !arg1.IsNull()) || (!arg2.Type.IsString() && !arg2.Type.IsNumeric() && !arg2.IsNull()))
-                throw new ParseErrorException(
-                    string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, arg1.Type, arg2.Type),
-                    oper.Location);
-            if (oper.Type == TokenType.SUB)
-                if (arg1.Type.IsString() || arg2.Type.IsString())
-                    throw new ParseErrorException(
-                        string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, arg1.Type, arg2.Type),
-                        oper.Location);
-
+            var type1 = arg1.Type;
+            var type2 = arg2.Type;
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
+            
+            if (!arg1.Type.IsString() && !arg2.Type.IsString())
+            {
+                AssertArgsNotNullLiterals(arg1, type1, arg2, type2, oper);
+                if (!(arg1.Type.IsNumeric() && arg2.Type.IsNumeric()) 
+                    && !(arg1.Type.IsDateTime() && arg2.Type.IsDateTime()) 
+                    && !(arg1.Type.IsTimeSpan() && arg2.Type.IsTimeSpan()) 
+                    && !(arg1.Type.IsDateTime() && arg2.Type.IsTimeSpan()))
+                    throw new ParseErrorException(
+                        string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, type1, type2),
+                        oper.Location);
+            }
+
+            if (oper.Type == TokenType.ADD)
+                if (arg1.Type.IsDateTime() && arg2.Type.IsDateTime())
+                    throw new ParseErrorException(
+                        string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, type1, type2),
+                        oper.Location);
+            if (oper.Type == TokenType.SUB)
+            {
+                AssertArgsNotNullLiterals(arg1, type1, arg2, type2, oper);
+                if (arg1.Type.IsString() && arg2.Type.IsString())
+                    throw new ParseErrorException(
+                        string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, type1, type2),
+                        oper.Location);
+            }
+
             switch (oper.Type)
             {
                 case TokenType.ADD:
                     return ParseAddExpInternal(
-                        (arg1.Type.IsString() || arg2.Type.IsString())
+                        (type1.IsString() || type2.IsString())
                             ? Expression.Add(
                                 Expression.Convert(arg1, typeof (object)),
                                 Expression.Convert(arg2, typeof (object)),
@@ -502,7 +521,7 @@ namespace ExpressiveAnnotations.Analysis
 
             if (!arg1.Type.IsNumeric() || !arg2.Type.IsNumeric())
             {
-                AssertArgsNotNull(arg1, arg2, oper);
+                AssertArgsNotNullLiterals(arg1, arg2, oper);
                 throw new ParseErrorException(
                     string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and '{2}'.", oper.Value, arg1.Type, arg2.Type),
                     oper.Location);
@@ -860,22 +879,22 @@ namespace ExpressiveAnnotations.Analysis
                     null);
         }
 
-        private void AssertArgsNotNull(Expression arg1, Expression arg2, Token oper)
+        private void AssertArgsNotNullLiterals(Expression arg1, Expression arg2, Token oper)
         {
-            AssertArgsNotNull(arg1, arg1.Type, arg2, arg2.Type, oper);
+            AssertArgsNotNullLiterals(arg1, arg1.Type, arg2, arg2.Type, oper);
         }
 
-        private void AssertArgsNotNull(Expression arg1, Type type1, Expression arg2, Type type2, Token oper)
+        private void AssertArgsNotNullLiterals(Expression arg1, Type type1, Expression arg2, Type type2, Token oper)
         {
-            if (arg1.IsNull() && arg2.IsNull())
+            if (arg1.IsNullLiteral() && arg2.IsNullLiteral())
                 throw new ParseErrorException(
                     string.Format("Operator '{0}' cannot be applied to operands of type 'null' and 'null'.", oper.Value),
                     oper.Location);
-            if (!arg1.IsNull() && arg2.IsNull())
+            if (!arg1.IsNullLiteral() && arg2.IsNullLiteral())
                 throw new ParseErrorException(
                     string.Format("Operator '{0}' cannot be applied to operands of type '{1}' and 'null'.", oper.Value, type1),
                     oper.Location);
-            if (arg1.IsNull() && !arg2.IsNull())
+            if (arg1.IsNullLiteral() && !arg2.IsNullLiteral())
                 throw new ParseErrorException(
                     string.Format("Operator '{0}' cannot be applied to operands of type 'null' and '{1}'.", oper.Value, type2),
                     oper.Location);
