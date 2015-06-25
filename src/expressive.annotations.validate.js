@@ -245,14 +245,13 @@ var
                     var DAY = 2, HOUR = 3, MINUTE = 4, SECOND = 5, MILLISECOND = 6;
                     var match = /(\-)?(?:(\d*)\.)?(\d+)\:(\d+)(?:\:(\d+)\.?(\d{3})?)?/.exec(value);
                     var sign = (match[1] === '-') ? -1 : 1;
-                    var d = {                    
+                    var d = {
                         days: typeHelper.float.tryParse(match[DAY] || 0) * sign,
                         hours: typeHelper.float.tryParse(match[HOUR] || 0) * sign,
                         minutes: typeHelper.float.tryParse(match[MINUTE] || 0) * sign,
                         seconds: typeHelper.float.tryParse(match[SECOND] || 0) * sign,
                         milliseconds: typeHelper.float.tryParse(match[MILLISECOND] || 0) * sign
                     };
-
                     var millisec = d.milliseconds +
                         d.seconds * 1e3 + // 1000
                         d.minutes * 6e4 + // 1000 * 60
@@ -260,7 +259,7 @@ var
                         d.days * 864e5; // 1000 * 60 * 60 * 24
                     return millisec;
                 }
-                return { error: true, msg: 'Given value was not recognized as a valid .NET style time span string.' };
+                return { error: true, msg: 'Given value was not recognized as a valid .NET style timespan string.' };
             }
         },
         date: {
@@ -294,7 +293,7 @@ var
             }
         },
         isTimeSpan: function(value) {
-            return /^(\-)?(?:(\d*)\.)?(\d+)\:(\d+)(?:\:(\d+)\.?(\d{3})?)?$/i.test(value); // regex for recognition of .NET style time span string, taken from moment.js v2.9.0
+            return /(\-)?(?:(\d*)\.)?(\d+)\:(\d+)(?:\:(\d+)\.?(\d{3})?)?/.test(value); // regex for recognition of .NET style timespan string, taken from moment.js v2.9.0
         },
         isNumeric: function(value) {
             return typeof value === 'number' && !isNaN(value);
@@ -438,7 +437,7 @@ var
                         namespacedEvents.push(event + '.expressive.annotations');
                     }
                 });
-                $(form).find('input, select, textarea').on(namespacedEvents.join(' '), function () {
+                $(form).find('input, select, textarea').on(namespacedEvents.join(' '), function() {
                     var field = $(this).attr('name');
                     validationHelper.validateReferences(field, form); // validate referenced fields only
                 });

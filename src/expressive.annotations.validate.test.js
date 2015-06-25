@@ -39,6 +39,18 @@
         qunit.deepEqual(keys, ["one", "two", "three"], "names of object properties properly extracted");
     });
 
+    qunit.test("verify_string_formatting", function() {
+        qunit.equal(eapriv.typeHelper.string.format("{0}", "a"), "a", "string.format({0}, 'a') succeed");
+        qunit.equal(eapriv.typeHelper.string.format("{0}{1}", "a", "b"), "ab", "string.format({0}{1}, 'a', 'b') succeed");
+        qunit.equal(eapriv.typeHelper.string.format("{0}{0}", "a", "b"), "aa", "string.format({0}{0}, 'a', 'b') succeed");
+        qunit.equal(eapriv.typeHelper.string.format("{0}{0}", "a"), "aa", "string.format({0}{0}, 'a') succeed");
+
+        qunit.equal(eapriv.typeHelper.string.format("{0}", ["a"]), "a", "string.format({0}, ['a']) succeed");
+        qunit.equal(eapriv.typeHelper.string.format("{0}{1}", ["a", "b"]), "ab", "string.format({0}{1}, ['a', 'b']) succeed");
+        qunit.equal(eapriv.typeHelper.string.format("{0}{0}", ["a", "b"]), "aa", "string.format({0}{0}, ['a', 'b']) succeed");
+        qunit.equal(eapriv.typeHelper.string.format("{0}{0}", ["a"]), "aa", "string.format({0}{0}, ['a']) succeed");
+    });
+
     qunit.test("verify_type_parsing", function() {
         var result = eapriv.typeHelper.tryParse(undefined, "string");
         qunit.ok(result.error, "broken string parsing error thrown");
@@ -56,12 +68,16 @@
         qunit.ok(result.error, "broken datetime parsing error thrown");
         qunit.equal(result.msg, "Given value was not recognized as a valid RFC 2822 or ISO 8601 date.", "broken datetime parsing error message thrown");
 
+        result = eapriv.typeHelper.tryParse("", "timespan");
+        qunit.ok(result.error, "broken timespan parsing error thrown");
+        qunit.equal(result.msg, "Given value was not recognized as a valid .NET style timespan string.", "broken timespan parsing error message thrown");
+
         result = eapriv.typeHelper.tryParse("", "guid");
         qunit.ok(result.error, "broken guid parsing error thrown");
         qunit.equal(result.msg, "Given value was not recognized as a valid guid - guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).", "broken guid parsing error message thrown");
 
         result = eapriv.typeHelper.tryParse("{", "object");
-        qunit.ok(result.error, "broken json string to object parse error thrown");        
+        qunit.ok(result.error, "broken json string to object parse error thrown");
         var expected = "Given value was not recognized as a valid JSON.";
         var actual = result.msg.substring(0, expected.length);
         qunit.equal(actual, expected); // compare only explicitly defined piece of the full message (further part is engine related)
@@ -103,18 +119,6 @@
         // because deep and not deep equality fails because of some security issue, only brief equality comparison is done
         qunit.ok(!actual.error, "XML parse success");
         qunit.equal(actual.contentType, expected.contentType, "overriden parseObject properly handles non-json format");
-    });
-
-    qunit.test("verify_string_formatting", function() {
-        qunit.equal(eapriv.typeHelper.string.format("{0}", "a"), "a", "string.format({0}, 'a') succeed");
-        qunit.equal(eapriv.typeHelper.string.format("{0}{1}", "a", "b"), "ab", "string.format({0}{1}, 'a', 'b') succeed");
-        qunit.equal(eapriv.typeHelper.string.format("{0}{0}", "a", "b"), "aa", "string.format({0}{0}, 'a', 'b') succeed");
-        qunit.equal(eapriv.typeHelper.string.format("{0}{0}", "a"), "aa", "string.format({0}{0}, 'a') succeed");
-
-        qunit.equal(eapriv.typeHelper.string.format("{0}", ["a"]), "a", "string.format({0}, ['a']) succeed");
-        qunit.equal(eapriv.typeHelper.string.format("{0}{1}", ["a", "b"]), "ab", "string.format({0}{1}, ['a', 'b']) succeed");
-        qunit.equal(eapriv.typeHelper.string.format("{0}{0}", ["a", "b"]), "aa", "string.format({0}{0}, ['a', 'b']) succeed");
-        qunit.equal(eapriv.typeHelper.string.format("{0}{0}", ["a"]), "aa", "string.format({0}{0}, ['a']) succeed");
     });
 
     qunit.test("verify_string_parsing", function() {
@@ -194,19 +198,32 @@
         qunit.equal(result.msg, "Given value was not recognized as a valid RFC 2822 or ISO 8601 date.", "empty string to date parse error message thrown");
     });
 
+    qunit.test("verify_timespan_parsing", function() {
+        qunit.equal(eapriv.typeHelper.timespan.tryParse("1.02:03:04.9999999"), 999 + 4 * 1000 + 3 * 60 * 1000 + 2 * 60 * 60 * 1000 + 1 * 24 * 60 * 60 * 1000, "serialized .NET timespan string with days parse succeed");
+        qunit.equal(eapriv.typeHelper.timespan.tryParse("01:02:03.9999999"), 999 + 3 * 1000 + 2 * 60 * 1000 + 1 * 60 * 60 * 1000, "serialized .NET timespan string without days parse succeed");
+        qunit.equal(eapriv.typeHelper.timespan.tryParse("01:02:03"), 3 * 1000 + 2 * 60 * 1000 + 1 * 60 * 60 * 1000, "serialized .NET timespan string without days or milliseconds parse succeed");
+        qunit.equal(eapriv.typeHelper.timespan.tryParse("1.02:03:04"), 4 * 1000 + 3 * 60 * 1000 + 2 * 60 * 60 * 1000 + 1 * 24 * 60 * 60 * 1000, "serialized .NET timespan string without milliseconds parse succeed");
+        qunit.equal(eapriv.typeHelper.timespan.tryParse("10675199.02:48:05.4775807"), 477 + 5 * 1000 + 48 * 60 * 1000 + 2 * 60 * 60 * 1000 + 10675199 * 24 * 60 * 60 * 1000, "serialized .NET timespan string max value parse succeed");
+        qunit.equal(eapriv.typeHelper.timespan.tryParse("-10675199.02:48:05.4775808"), 0 - 477 - 5 * 1000 - 48 * 60 * 1000 - 2 * 60 * 60 * 1000 - 10675199 * 24 * 60 * 60 * 1000, "serialized .NET timespan string min value parse succeed");
+
+        var result = eapriv.typeHelper.timespan.tryParse("");
+        qunit.ok(result.error, "empty string to timespan parse error thrown");
+        qunit.equal(result.msg, "Given value was not recognized as a valid .NET style timespan string.", "empty string to timespan parse error message thrown");
+    });
+
     qunit.test("verify_guid_parsing", function() {
-        qunit.equal(eapriv.typeHelper.guid.tryParse("a1111111-1111-1111-1111-111111111111"), "A1111111-1111-1111-1111-111111111111");
+        qunit.equal(eapriv.typeHelper.guid.tryParse("a1111111-1111-1111-1111-111111111111"), "A1111111-1111-1111-1111-111111111111", "guid string parse succeed, case insensitivity confirmed");
 
         var result = eapriv.typeHelper.guid.tryParse("");
         qunit.ok(result.error, "empty string to guid parse error thrown");
         qunit.equal(result.msg, "Given value was not recognized as a valid guid - guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).", "empty string to guid parse error message thrown");
     });
 
-    qunit.test("verify_object_parsing", function () {
+    qunit.test("verify_object_parsing", function() {
         var jsonString = '{"Val":"a","Arr":[1,2]}';
         qunit.deepEqual(eapriv.typeHelper.object.tryParse(jsonString), $.parseJSON(jsonString));
 
-        var result = eapriv.typeHelper.object.tryParse("{");        
+        var result = eapriv.typeHelper.object.tryParse("{");
         qunit.ok(result.error, "broken json string to object parse error thrown");
         var expected = "Given value was not recognized as a valid JSON.";
         var actual = result.msg.substring(0, expected.length);
@@ -227,6 +244,17 @@
 
         qunit.ok(!eapriv.typeHelper.isDate("Wed, 09 Aug 1995 00:00:00 GMT"), "date string not recognized as date");
         qunit.ok(!eapriv.typeHelper.isDate(807926400000), "float (ticks number) not recognized as date");
+    });
+
+    qunit.test("verify_timespan_type_recognition", function() {
+        qunit.ok(eapriv.typeHelper.isTimeSpan("1.02:03:04.9999999"), "serialized .NET timespan string with days recognized");
+        qunit.ok(eapriv.typeHelper.isTimeSpan("01:02:03.9999999"), "serialized .NET timespan string without days recognized");
+        qunit.ok(eapriv.typeHelper.isTimeSpan("01:02:03"), "serialized .NET timespan string without days or milliseconds recognized");
+        qunit.ok(eapriv.typeHelper.isTimeSpan("1.02:03:04"), "serialized .NET timespan string without milliseconds recognized");
+        qunit.ok(eapriv.typeHelper.isTimeSpan("10675199.02:48:05.4775807"), "serialized .NET timespan string max value recognized");
+        qunit.ok(eapriv.typeHelper.isTimeSpan("-10675199.02:48:05.4775808"), "serialized .NET timespan string min value recognized");
+
+        qunit.ok(!eapriv.typeHelper.isTimeSpan(""), "incorrect timespan string detected");
     });
 
     qunit.test("verify_string_type_recognition", function() {
@@ -256,7 +284,7 @@
         qunit.ok(!eapriv.typeHelper.isBool(undefined), "undefined not recognized as bool");
     });
 
-    qunit.test("verify_guid_string_recognition", function () {
+    qunit.test("verify_guid_string_recognition", function() {
         qunit.ok(eapriv.typeHelper.isGuid("541422A6-FEAD-4CD9-8466-5419AA63DBE1"), "uppercased guid string recognized as guid");
         qunit.ok(eapriv.typeHelper.isGuid("541422a6-fead-4cd9-8466-5419aa63dbe1"), "lowercased guid string recognized as guid");
 
@@ -266,7 +294,7 @@
 
     qunit.module("model helper");
 
-    qunit.test("verify_expression_evaluation", function () {
+    qunit.test("verify_expression_evaluation", function() {
         var model = {
             Number: 123,
             Stability: {
