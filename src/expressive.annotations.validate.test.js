@@ -187,15 +187,22 @@
 
     qunit.test("verify_date_parsing", function() {
         var now = Date.now();
-        qunit.equal(eapriv.typeHelper.date.tryParse(new Date(now)), new Date(now).getTime(), "date object to date parse succeed");
+        qunit.equal(eapriv.typeHelper.date.tryParse(new Date(now)), now, "date object to date parse succeed");
         qunit.equal(eapriv.typeHelper.date.tryParse("Aug 9, 1995"), new Date("Aug 9, 1995").getTime(), "casual date string to date parse succeed");
         qunit.equal(eapriv.typeHelper.date.tryParse("Wed, 09 Aug 1995 00:00:00 GMT"), 807926400000, "ISO date string to date parse succeed");
         qunit.equal(eapriv.typeHelper.date.tryParse("Thu, 01 Jan 1970 00:00:00 GMT"), 0, "Jan 1st, 1970 ISO date string to date parse succeed");
         qunit.equal(eapriv.typeHelper.date.tryParse("Thu, 01 Jan 1970 00:00:00 GMT-0400"), 14400000, "4h shift to Jan 1st, 1970 ISO date string to date parse succeed");
 
+        qunit.ok(eapriv.typeHelper.isNumeric(eapriv.typeHelper.date.tryParse(new Date())), "datetime parsing returns number (of milliseconds)");
+        qunit.ok(eapriv.typeHelper.isNumeric(eapriv.typeHelper.date.tryParse("Aug 9, 1995")), "datetime parsing returns number (of milliseconds)");
+
         var result = eapriv.typeHelper.date.tryParse("");
         qunit.ok(result.error, "empty string to date parse error thrown");
         qunit.equal(result.msg, "Given value was not recognized as a valid RFC 2822 or ISO 8601 date.", "empty string to date parse error message thrown");
+
+        result = eapriv.typeHelper.date.tryParse(1997);
+        qunit.ok(result.error, "integer to date parse error thrown");
+        qunit.equal(result.msg, "Given value was not recognized as a valid RFC 2822 or ISO 8601 date.", "integer to date parse error message thrown");
     });
 
     qunit.test("verify_timespan_parsing", function() {
@@ -206,9 +213,15 @@
         qunit.equal(eapriv.typeHelper.timespan.tryParse("10675199.02:48:05.4775807"), 477 + 5 * 1000 + 48 * 60 * 1000 + 2 * 60 * 60 * 1000 + 10675199 * 24 * 60 * 60 * 1000, "serialized .NET timespan string max value parse succeed");
         qunit.equal(eapriv.typeHelper.timespan.tryParse("-10675199.02:48:05.4775808"), 0 - 477 - 5 * 1000 - 48 * 60 * 1000 - 2 * 60 * 60 * 1000 - 10675199 * 24 * 60 * 60 * 1000, "serialized .NET timespan string min value parse succeed");
 
+        qunit.ok(eapriv.typeHelper.isNumeric(eapriv.typeHelper.timespan.tryParse("1.02:03:04.9999999")), "serialized .NET timespan string parsing returns number (of milliseconds)");
+
         var result = eapriv.typeHelper.timespan.tryParse("");
         qunit.ok(result.error, "empty string to timespan parse error thrown");
         qunit.equal(result.msg, "Given value was not recognized as a valid .NET style timespan string.", "empty string to timespan parse error message thrown");
+
+        result = eapriv.typeHelper.timespan.tryParse(1997);
+        qunit.ok(result.error, "integer to timespan parse error thrown");
+        qunit.equal(result.msg, "Given value was not recognized as a valid .NET style timespan string.", "integer to timespan parse error message thrown");
     });
 
     qunit.test("verify_guid_parsing", function() {
@@ -361,6 +374,11 @@
         var o = {};
         eapriv.toolchain.registerMethods(o);
         var m = eapriv.toolchain.methods;
+
+        qunit.ok(eapriv.typeHelper.isNumeric(m.Now()), "Now() returns number (of milliseconds)");
+        qunit.ok(eapriv.typeHelper.isNumeric(m.Today()), "Today() returns number (of milliseconds)");
+        qunit.ok(eapriv.typeHelper.isNumeric(m.Date(1985, 2, 20)), "Date(y, M, d) returns number (of milliseconds)");
+        qunit.ok(eapriv.typeHelper.isNumeric(m.Date(1985, 2, 20, 0, 0, 1)), "Date(y, M, d, h, m, s) returns number (of milliseconds)");
 
         qunit.ok(m.Now() > m.Today());
         qunit.ok(m.Date(1985, 2, 20) < m.Date(1985, 2, 20, 0, 0, 1));
