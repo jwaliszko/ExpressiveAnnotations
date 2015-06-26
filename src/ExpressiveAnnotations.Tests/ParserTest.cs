@@ -611,6 +611,10 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("Now() > Today()").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("Date(1985, 2, 20) < Date(1985, 2, 20, 0, 0, 1)").Invoke(null));
 
+            Assert.IsTrue(parser.Parse<object>("TimeSpan(1, 0, 0, 0) > TimeSpan(0, 1, 0, 0)").Invoke(null));
+            //Assert.IsTrue(parser.Parse<object>("(TimeSpan(0, 0, 0, 0)).TotalMilliseconds == 0").Invoke(null)); // foo().Prop - to be supported?
+            //Assert.IsTrue(parser.Parse<object>("(TimeSpan(1, 2, 3, 4)).TotalMilliseconds == 4 * 1000 + 3 * 60 * 1000 + 2 * 60 * 60 * 1000 + 1 * 24 * 60 * 60 * 1000").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("Length('0123') == 4").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("Length('    ') == 4").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("Length(null) == 0").Invoke(null));

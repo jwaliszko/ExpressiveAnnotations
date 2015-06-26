@@ -23,6 +23,7 @@ namespace ExpressiveAnnotations.Attributes
             parser.AddFunction("Today", () => DateTime.Today);
             parser.AddFunction<int, int, int, DateTime>("Date", (year, month, day) => new DateTime(year, month, day));
             parser.AddFunction<int, int, int, int, int, int, DateTime>("Date", (year, month, day, hour, minute, second) => new DateTime(year, month, day, hour, minute, second));
+            parser.AddFunction<int, int, int, int, TimeSpan>("TimeSpan", (days, hours, minutes, seconds) => new TimeSpan(days, hours, minutes, seconds));
             parser.AddFunction<string, int>("Length", str => str != null ? str.Length : 0);
             parser.AddFunction<string, string>("Trim", str => str != null ? str.Trim() : null);
             parser.AddFunction<string, string, string>("Concat", (strA, strB) => string.Concat(strA, strB));

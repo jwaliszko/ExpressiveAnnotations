@@ -57,17 +57,19 @@ var
         },
         initialize: function() {
             this.addMethod("Now", function() { // return milliseconds
-                return Date.now();
+                return Date.now(); // now() is faster than new Date().getTime()
             });
             this.addMethod("Today", function() { // return milliseconds
-                var now = new Date(this.Now());
-                return new Date(now.setHours(0, 0, 0, 0)).getTime();
+                return new Date(new Date().setHours(0, 0, 0, 0)).getTime();
             });
             this.addMethod("Date", function(year, month, day) { // months are 1-based, return milliseconds
                 return new Date(year, month - 1, day).getTime();
             });
             this.addMethod("Date", function(year, month, day, hour, minute, second) { // months are 1-based, return milliseconds
                 return new Date(year, month - 1, day, hour, minute, second).getTime();
+            });
+            this.addMethod("TimeSpan", function(days, hours, minutes, seconds) { // return milliseconds
+                return seconds * 1e3 + minutes * 6e4 + hours * 36e5 + days * 864e5;
             });
             this.addMethod("Length", function(str) {
                 return str !== null && str !== undefined ? str.length : 0;

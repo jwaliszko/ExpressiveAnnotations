@@ -365,6 +365,10 @@
         qunit.ok(m.Now() > m.Today());
         qunit.ok(m.Date(1985, 2, 20) < m.Date(1985, 2, 20, 0, 0, 1));
 
+        qunit.ok(m.TimeSpan(1, 0, 0, 0) > m.TimeSpan(0, 1, 0, 0));
+        qunit.equal(m.TimeSpan(0, 0, 0, 0), 0);
+        qunit.equal(m.TimeSpan(1, 2, 3, 4), 4 * 1000 + 3 * 60 * 1000 + 2 * 60 * 60 * 1000 + 1 * 24 * 60 * 60 * 1000);
+
         qunit.equal(m.Length('0123'), 4);
         qunit.equal(m.Length('    '), 4);
         qunit.equal(m.Length(null), 0);

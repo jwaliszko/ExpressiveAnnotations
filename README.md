@@ -1,13 +1,16 @@
-﻿#<a id="expressiveannotations-annotation-based-conditional-validation">ExpressiveAnnotations<sup><sup><sup>[annotation-based conditional validation]</sup></sup></sup></a>
+﻿![logo](logo.png)
+
+#<a id="expressiveannotations-annotation-based-conditional-validation">ExpressiveAnnotations<sup><sup><sup>[annotation-based conditional validation]</sup></sup></sup></a>
 
 [![Build status](https://img.shields.io/appveyor/ci/JaroslawWaliszko/ExpressiveAnnotations.svg)](https://ci.appveyor.com/project/JaroslawWaliszko/ExpressiveAnnotations)
 [![Release](https://img.shields.io/github/release/JaroslawWaliszko/ExpressiveAnnotations.svg)](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/releases/latest)
+[![License](http://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 
 ExpressiveAnnotations is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given `RequiredIf` and `AssertThat` attributes allow to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more condensed, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
 
 ###Table of contents
  - [What is the context behind this implementation?](#what-is-the-context-behind-this-implementation)
- - [RequiredIf vs. AssertThat - where is the difference?](#requiredif-vs-assertthat---where-is-the-difference)
+ - [`RequiredIf` vs. `AssertThat` - where is the difference?](#requiredif-vs-assertthat---where-is-the-difference)
  - [What are brief examples of usage?](#what-are-brief-examples-of-usage)
  - [Declarative vs. imperative programming - what is it about?](#declarative-vs-imperative-programming---what-is-it-about)
  - [How to construct conditional validation attributes?](#how-to-construct-conditional-validation-attributes)
@@ -19,7 +22,7 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
  - [Frequently asked questions](#frequently-asked-questions)
    - [What if there is no built-in function I need?](#what-if-there-is-no-built-in-function-i-need)
    - [How to cope with dates given in non-standard formats?](#how-to-cope-with-dates-given-in-non-standard-formats)
-   - [What if *ea* variable is already used by another library?](#what-if-ea-variable-is-already-used-by-another-library)
+   - [What if `ea` variable is already used by another library?](#what-if-ea-variable-is-already-used-by-another-library)
    - [How to control frequency of dependent fields validation?](#how-to-control-frequency-of-dependent-fields-validation)
    - [What if my question is not covered by FAQ section?](#what-if-my-question-is-not-covered-by-faq-section)
  - [Installation](#installation)
@@ -30,7 +33,7 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
 
 There are number of cases where the concept of metadata is used for justified reasons. Attributes are one of the ways to associate complementary information with existing data. Such annotations may also define the correctness of data. Declarative validation when [compared](#declarative-vs-imperative-programming---what-is-it-about) to imperative approach seems to be more convenient in many cases. Clean, compact code - all validation logic defined within the model scope. Simple to write, obvious to read.
 
-###<a id="requiredif-vs-assertthat---where-is-the-difference">RequiredIf vs. AssertThat - where is the difference?</a>
+###<a id="requiredif-vs-assertthat---where-is-the-difference">`RequiredIf` vs. `AssertThat` - where is the difference?</a>
 
 * `RequiredIf` - if value is not yet provided, check whether it is required (annotated field is required to be non-null, when given condition is satisfied),
 * `AssertThat` - if value is already provided, check whether the condition is met (non-null annotated field is considered as valid, when given condition is satisfied).
@@ -169,7 +172,7 @@ When working with ASP.NET MVC stack, unobtrusive client-side validation mechanis
 
 #####<a id="traps">Traps</a>
 
-Attention is needed when coping with `null` because of discrepancies between C# and JavaScript, e.g.
+Attention needed when dealing with `null` - there are discrepancies between C# and JavaScript, e.g.
 
 * `null + "text"` - in C# `"text"`, in JS `"nulltext"`,
 * `2 * null`      - in C# `null`  , in JS `0`,
@@ -186,13 +189,15 @@ public string CodeName { get; set; }
 Toolchain functions available out of the box at server- and client-side:
 
 * `DateTime Now()`
-    * Gets the current local date and time.
+    * Gets the current local date and time (client-side returns the number of milliseconds since January 1, 1970, 00:00:00 UTC).
 * `DateTime Today()`
-    * Gets the current date with the time component set to 00:00:00.
+    * Gets the current date with the time component set to 00:00:00 (client-side returns the number of milliseconds since January 1, 1970, 00:00:00 UTC).
 * `DateTime Date(int year, int month, int day)`
-    * Initializes a new date to a specified year, month (months are 1-based), and day, with the time component set to 00:00:00.
+    * Initializes a new date to a specified year, month (months are 1-based), and day, with the time component set to 00:00:00 (client-side returns the number of milliseconds since January 1, 1970, 00:00:00 UTC).
 * `DateTime Date(int year, int month, int day, int hour, int minute, int second)`
-    * Initializes a new date to a specified year, month (months are 1-based), day, hour, minute, and second.
+    * Initializes a new date to a specified year, month (months are 1-based), day, hour, minute, and second (client-side returns the number of milliseconds since January 1, 1970, 00:00:00 UTC).
+* `TimeSpan TimeSpan(int days, int hours, int minutes, int seconds)`
+    * Initializes a new time period according to specified days, hours, minutes, and seconds (client-side period is expressed in milliseconds).
 * `int Length(str)`
     * Gets the number of characters in a specified string (null-safe).
 * `string Trim(string str)`
@@ -309,7 +314,7 @@ When some non-standard format needs to be handled, simply override the default b
     }
 ```
 
-#####<a id="what-if-ea-variable-is-already-used-by-another-library">What if *ea* variable is already used by another library?</a>
+#####<a id="what-if-ea-variable-is-already-used-by-another-library">What if `ea` variable is already used by another library?</a>
 
 Use `noConflict()` method. In case of naming collision return control of the `ea` variable back to its origins. Old references of `ea` are saved during ExpressiveAnnotations initialization - `noConflict()` simply restores them:
 ```JavaScript
@@ -334,7 +339,7 @@ Default value is *'change paste keyup'* (for more information check `eventType` 
 
 #####<a id="what-if-my-question-is-not-covered-by-faq-section">What if my question is not covered by FAQ section?</a>
 
-If you're searching for an answer to some other problem, not mentioned in this document, before posting new question on GitHub try to browse through [already posted issues](../../issues?q=label%3Aquestion) labelled by *question* tag, or possibly [have a look at Stack Overflow](http://stackoverflow.com/search?q=expressiveannotations).
+If you're searching for an answer to some other problem, not covered by this document, try to browse through [already posted issues](../../issues?q=label%3Aquestion) labelled by *question* tag, or possibly have a look [at Stack Overflow](http://stackoverflow.com/search?q=expressiveannotations).
 
 ###<a id="installation">Installation</a>
 

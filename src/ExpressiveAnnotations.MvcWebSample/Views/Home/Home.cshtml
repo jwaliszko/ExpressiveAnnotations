@@ -78,9 +78,10 @@
                 return /^(A|B|AB|0)[\+-]$/.test(group);
             });
             ea.addMethod('AddYears', function(from, years) {
-                var when = from.getFullYear() + years;
-                from.setFullYear(when);
-                return from;
+                from = new Date(from); // preprocessed datetime arguments passed to functions are given milliseconds
+                var to = from.getFullYear() + years;
+                from.setFullYear(to);
+                return from.getTime();
             });
             ea.addMethod("ArrayContains", function(value, array) {
                 return $.inArray(value, array) >= 0;
