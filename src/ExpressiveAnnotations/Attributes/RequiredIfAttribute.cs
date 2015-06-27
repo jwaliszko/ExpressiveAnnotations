@@ -24,7 +24,7 @@ namespace ExpressiveAnnotations.Attributes
         }
 
         /// <summary>
-        ///     Gets or sets a flag indicating whether the attribute should allow empty or whitespace strings.
+        ///     Gets or sets a flag indicating whether the attribute should allow empty or whitespace strings. <c>false</c> by default.
         /// </summary>
         public bool AllowEmptyStrings { get; set; }
 

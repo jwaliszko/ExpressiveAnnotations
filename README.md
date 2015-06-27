@@ -116,18 +116,24 @@ If we choose this way instead of model fields decoration, it has negative impact
 ```
 RequiredIfAttribute(
     string expression,
-    [bool AllowEmptyStrings] ...) - Validation attribute which indicates that annotated 
+    [bool AllowEmptyStrings], 
+	[int Priority]           ...) - Validation attribute which indicates that annotated 
                                     field is required when computed result of given logical 
                                     expression is true.
 AssertThatAttribute(
-    string expression ...)        - Validation attribute, executed for non-null annotated 
+    string expression,
+	[int Priority]           ...) - Validation attribute, executed for non-null annotated 
                                     field, which indicates that assertion given in logical 
                                     expression has to be satisfied, for such field to be 
                                     considered as valid.
 
 expression        - The logical expression based on which specified condition is computed.
 AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should allow empty 
-                    or whitespace strings.
+                    or whitespace strings. False by default.
+Priority          - Gets or sets the hint, available for any concerned external components, 
+                    indicating the order in which this attribute should be executed among 
+                    others of its kind, i.e. ExpressiveAttribute. Value is optional and not
+					set by default, which means that execution order seems to be irrelevant.
 ```
 
 #####<a id="implementation">Implementation</a>
@@ -245,7 +251,7 @@ Toolchain functions available out of the box at server- and client-side:
 
 Client-side validation is fully supported. Enable it for your web project within the next few steps:
 
-1. Reference both assemblies to your project: core [**ExpressiveAnnotations.dll**](src/ExpressiveAnnotations) and subsidiary [**ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll**](src/ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider),
+1. Reference both assemblies to your project: core [**ExpressiveAnnotations.dll**](src/ExpressiveAnnotations) and subsidiary [**ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll**](src/ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider).
 2. In Global.asax register required validators (`IClientValidatable` interface is not directly implemented by the attributes, to avoid coupling of ExpressionAnnotations assembly with System.Web.Mvc dependency):
 
     ```C#
@@ -259,6 +265,19 @@ Client-side validation is fully supported. Enable it for your web project within
         DataAnnotationsModelValidatorProvider.RegisterAdapter(
             typeof (AssertThatAttribute), typeof (AssertThatValidator));
     ```
+	Alternatively, use predefined `ExpressiveAnnotationsModelValidatorProvider`:
+	```C#
+	using ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider;
+	
+    protected void Application_Start()
+    {
+	    ModelValidatorProviders.Providers.Remove(
+            ModelValidatorProviders.Providers
+		        .FirstOrDefault(x => x is DataAnnotationsModelValidatorProvider));
+        ModelValidatorProviders.Providers.Add(
+	        new ExpressiveAnnotationsModelValidatorProvider());
+	```
+	Besides the fact that this provider automatically registers adapters for expressive validation attributes, it additionally respects their procesing priorities when validation is performed (i.e. the [`Priority`](#signatures) property actually means something in practice).
 3. Include [**expressive.annotations.validate.js**](src/expressive.annotations.validate.js) script in your page (it should be included in bundle below jQuery validation files):
 
     ```JavaScript
@@ -268,7 +287,7 @@ Client-side validation is fully supported. Enable it for your web project within
     <script src="/Scripts/expressive.annotations.validate.js"></script>
     ```
 
-Alternatively, visit the [installation section](#installation).
+For supplementary reading visit the [installation section](#installation).
 
 ###<a id="frequently-asked-questions">Frequently asked questions</a>
 

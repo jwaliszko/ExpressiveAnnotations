@@ -116,8 +116,10 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 
         [RequiredIf("GoAbroad == true",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]
-        [AssertThat("ReturnDate >= Today()",
+        [AssertThat("ReturnDate >= Today()", Priority = 1, // to be invoked firstly
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FutureDateRequired")]
+        [AssertThat("ReturnDate >= Today() + WeekPeriod", Priority = 2, // to be invoked secondly
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "MoreThanAWeekRequired")]
         [AssertThat("ReturnDate < AddYears(Today(), 1)",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "NoMoreThanAYear")]
         [Display(ResourceType = typeof (Resources), Name = "ReturnDate")]
@@ -187,6 +189,11 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public bool ArrayContains(int? value, int[] array)
         {
             return value != null && array.Contains((int)value);
+        }
+
+        public TimeSpan WeekPeriod
+        {
+            get { return new TimeSpan(7, 0, 0, 0); }
         }
     }
 }

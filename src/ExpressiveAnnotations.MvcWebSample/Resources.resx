@@ -201,6 +201,9 @@
   <data name="Low" xml:space="preserve">
     <value>Low</value>
   </data>
+  <data name="MoreThanAWeekRequired" xml:space="preserve">
+    <value>The period of stay should be at least a week.</value>
+  </data>
   <data name="NextCountry" xml:space="preserve">
     <value>Next country</value>
   </data>
@@ -208,7 +211,7 @@
     <value>No</value>
   </data>
   <data name="NoMoreThanAYear" xml:space="preserve">
-    <value>The period of stay should be less than one year.</value>
+    <value>The period of stay should be less than a year.</value>
   </data>
   <data name="None" xml:space="preserve">
     <value>None</value>

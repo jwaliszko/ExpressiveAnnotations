@@ -69,10 +69,11 @@
         </div>
     </li>
     <li>
-        @Html.DisplayFor(x => x.LatestSuggestedReturnDate) @*hidden backing field storing date in RFC 2822 or ISO 8601 format (ISO8601Date template pointed by UIHint attrib)*@
+        @Html.HiddenFor(model => model.WeekPeriod) @*hidden backing field for WeekPeriod value to be extracted from*@
         <pre class="code">
 [RequiredIf("GoAbroad == true")]
-[AssertThat("ReturnDate >= Today()")]
+[AssertThat("ReturnDate >= Today()", Priority = 1)]
+[AssertThat("ReturnDate >= Today() + WeekPeriod", Priority = 2)]
 [AssertThat("ReturnDate < AddYears(Today(), 1)")]
 </pre>
         <pre class="action">[show attribute]</pre>
@@ -83,6 +84,7 @@
         </div>
     </li>
     <li>
+        @Html.DisplayFor(x => x.LatestSuggestedReturnDate) @*hidden backing field storing date in RFC 2822 or ISO 8601 format (ISO8601Date template pointed by UIHint attrib)*@
         <pre class="code">
 [RequiredIf("GoAbroad == true && ReturnDate > LatestSuggestedReturnDate")]
 </pre>

@@ -201,6 +201,9 @@
   <data name="Low" xml:space="preserve">
     <value>Niska</value>
   </data>
+  <data name="MoreThanAWeekRequired" xml:space="preserve">
+    <value>Minimalny okres pobytu wynosi tydzień.</value>
+  </data>
   <data name="NextCountry" xml:space="preserve">
     <value>Następny kraj</value>
   </data>
@@ -208,7 +211,7 @@
     <value>Nie</value>
   </data>
   <data name="NoMoreThanAYear" xml:space="preserve">
-    <value>Maksymalny okres pobytu wynosi jeden rok.</value>
+    <value>Maksymalny okres pobytu wynosi rok.</value>
   </data>
   <data name="None" xml:space="preserve">
     <value>Brak</value>

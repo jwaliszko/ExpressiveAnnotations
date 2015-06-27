@@ -1,9 +1,11 @@
-﻿using System.Web;
+﻿using System.Linq;
+using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 using ExpressiveAnnotations.Attributes;
+using ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider;
 using ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators;
 
 namespace ExpressiveAnnotations.MvcWebSample
@@ -14,10 +16,15 @@ namespace ExpressiveAnnotations.MvcWebSample
     {
         protected void Application_Start()
         {
-            DataAnnotationsModelValidatorProvider.RegisterAdapter(
-                typeof (RequiredIfAttribute), typeof (RequiredIfValidator));
-            DataAnnotationsModelValidatorProvider.RegisterAdapter(
-                typeof (AssertThatAttribute), typeof (AssertThatValidator));
+            //DataAnnotationsModelValidatorProvider.RegisterAdapter( // if ea validation provider is used, adapters registration is done there (therefore manual registration is redundant here)
+            //    typeof (RequiredIfAttribute), typeof (RequiredIfValidator));
+            //DataAnnotationsModelValidatorProvider.RegisterAdapter(
+            //    typeof (AssertThatAttribute), typeof (AssertThatValidator));
+
+            ModelValidatorProviders.Providers.Remove(
+                ModelValidatorProviders.Providers.FirstOrDefault(x => x is DataAnnotationsModelValidatorProvider));
+            ModelValidatorProviders.Providers.Add(new ExpressiveAnnotationsModelValidatorProvider()); // ea validation provider added here
+                                                                                                      // it automatically registers adapters for expressive validation attributes and respects their procesing priorities when validation is performed
 
             AreaRegistration.RegisterAllAreas();
 

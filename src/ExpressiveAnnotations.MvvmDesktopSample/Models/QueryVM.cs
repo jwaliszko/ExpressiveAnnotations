@@ -152,6 +152,7 @@ GoAbroad == true
 
         [RequiredIf("GoAbroad == true")]
         [AssertThat("ReturnDate >= Today()")]
+        [AssertThat("ReturnDate >= Today() + WeekPeriod")]
         [AssertThat("ReturnDate < AddYears(Today(), 1)")]
         public DateTime? ReturnDate
         {
@@ -296,6 +297,11 @@ FlightId != Guid('00000000-0000-0000-0000-000000000000')
         public DateTime AddYears(DateTime from, int years)
         {
             return from.AddYears(years);
+        }
+
+        public TimeSpan WeekPeriod
+        {
+            get { return new TimeSpan(7, 0, 0, 0); }
         }
     }
 }

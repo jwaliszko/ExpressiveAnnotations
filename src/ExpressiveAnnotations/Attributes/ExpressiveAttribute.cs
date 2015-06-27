@@ -16,6 +16,8 @@ namespace ExpressiveAnnotations.Attributes
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = true)]
     public abstract class ExpressiveAttribute : ValidationAttribute
     {
+        private int? _priority;
+
         /// <summary>
         ///     Constructor for expressive validation attribute.
         /// </summary>
@@ -33,7 +35,7 @@ namespace ExpressiveAnnotations.Attributes
 
         /// <summary>
         ///     Gets the cached validation funcs.
-        /// </summary>        
+        /// </summary>
         protected Dictionary<Type, Func<object, bool>> CachedValidationFuncs { get; private set; }
 
         /// <summary>
@@ -45,6 +47,30 @@ namespace ExpressiveAnnotations.Attributes
         ///     Gets or sets the logical expression based on which specified condition is computed.
         /// </summary>
         public string Expression { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the hint, available for any concerned external components, indicating the order in which this attribute should be 
+        ///     executed among others of its kind, i.e. <see cref="ExpressiveAttribute" />. Value is optional and not set by default, which 
+        ///     means that execution order seems to be irrelevant.
+        ///     <para>
+        ///         Consumers must use the <see cref="GetPriority" /> method to retrieve the value, as this property getter will throw an 
+        ///         exception if the value has not been set.
+        ///     </para>
+        /// </summary>
+        /// <exception cref="System.InvalidOperationException">
+        ///     If the getter of this property is invoked when the value has not been explicitly set using the setter.
+        /// </exception> 
+        public int Priority
+        {
+            get
+            {
+                if (!_priority.HasValue)
+                    throw new InvalidOperationException(
+                        String.Format("The {0} property has not been set. Use the {1} method to get the value.", "Priority", "GetPriority"));
+                return _priority.Value;
+            }
+            set { _priority = value; }
+        }
 
         /// <summary>
         ///     When implemented in a derived class, gets a unique identifier for this <see cref="T:System.Attribute" />.
@@ -70,6 +96,41 @@ namespace ExpressiveAnnotations.Attributes
                                                                                                                             *     - returning new object - it is too much, instances would be always different, 
                                                                                                                             *     - returning hash code based on expression - can lead to collisions (infinitely many strings can't be mapped injectively into any finite set - best unique identifier for string is the string itself) 
                                                                                                                             */
+        }
+
+        /// <summary>
+        ///     Determines whether the specified <see cref="System.Object" />, is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The <see cref="System.Object" /> to compare with this instance.</param>
+        /// <returns>
+        ///     <c>true</c> if the specified <see cref="System.Object" /> is equal to this instance; otherwise, <c>false</c>.
+        /// </returns>
+        public override bool Equals(object obj)
+        {
+            var attrib = obj as ExpressiveAttribute;
+            return attrib != null && TypeId.Equals(attrib.TypeId);
+        }
+
+        /// <summary>
+        ///     Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        ///     A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
+        public override int GetHashCode()
+        {
+            return TypeId.GetHashCode();
+        }
+
+        /// <summary>
+        ///     Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <returns>
+        ///     A <see cref="System.String" /> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return TypeId.ToString();
         }
 
         /// <summary>
@@ -99,6 +160,20 @@ namespace ExpressiveAnnotations.Attributes
         public string FormatErrorMessage(string displayName, string expression)
         {
             return string.Format(ErrorMessageString, displayName, expression);
+        }
+
+        /// <summary>
+        ///     Gets the value of <see cref="Priority" /> if it has been set, or <c>null</c>.
+        /// </summary>
+        /// <returns>
+        ///     When <see cref="Priority" /> has been set returns the value of that property.
+        ///     <para>
+        ///         When <see cref="Priority" /> has not been set returns <c>null</c>.
+        ///     </para>
+        /// </returns>
+        public int? GetPriority()
+        {
+            return _priority;
         }
 
         /// <summary>
