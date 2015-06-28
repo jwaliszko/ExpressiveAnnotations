@@ -277,7 +277,7 @@ Client-side validation is fully supported. Enable it for your web project within
         ModelValidatorProviders.Providers.Add(
 	        new ExpressiveAnnotationsModelValidatorProvider());
 	```
-	Besides the fact that this provider automatically registers adapters for expressive validation attributes, it additionally respects their procesing priorities when validation is performed (i.e. the [`Priority`](#signatures) property actually means something in practice).
+	Despite the fact this provider automatically registers adapters for expressive validation attributes, it additionally respects their procesing priorities when validation is performed (i.e. the [`Priority`](#signatures) property actually means something in practice).
 3. Include [**expressive.annotations.validate.js**](src/expressive.annotations.validate.js) script in your page (it should be included in bundle below jQuery validation files):
 
     ```JavaScript

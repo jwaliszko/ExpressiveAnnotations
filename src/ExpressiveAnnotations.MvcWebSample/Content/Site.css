@@ -253,6 +253,10 @@ input[type="radio"].input-validation-error {
     .right-corner {
         float: right;
     }
+
+    .prefix {
+        width: 440px;
+    }
 }
 
 /********************

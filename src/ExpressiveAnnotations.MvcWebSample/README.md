@@ -1,3 +1,3 @@
-﻿#####Example of model validation in ASP.NET MVC using conditional data annotations.
-
-<img src="screenshot.png" />
+﻿####Sample application illustrating model validation in ASP.NET MVC using conditional data annotations.
+-
+![screenshot](screenshot.png "screenshot")
