@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 
-namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
+namespace ExpressiveAnnotations.MvcUnobtrusive
 {
     internal static class Helper
     {

@@ -237,7 +237,7 @@
     <Content Include="Views\Home\Home.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.csproj">
+    <ProjectReference Include="..\ExpressiveAnnotations.MvcUnobtrusive\ExpressiveAnnotations.MvcUnobtrusive.csproj">
       <Project>{1926a95d-19ee-451b-9da4-c3eaf555b15d}</Project>
       <Name>ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider</Name>
     </ProjectReference>

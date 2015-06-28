@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Attributes;
 
-namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
+namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
 {
     /// <summary>
     ///     Model validator for <see cref="RequiredIfAttribute" />.

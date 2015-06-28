@@ -11,7 +11,7 @@ using System.Web.Mvc;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
 
-namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators
+namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
 {
     /// <summary>
     ///     Base class for expressive model validators.

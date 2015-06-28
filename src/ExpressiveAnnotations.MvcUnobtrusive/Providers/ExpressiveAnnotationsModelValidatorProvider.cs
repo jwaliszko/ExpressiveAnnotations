@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Attributes;
-using ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators;
+using ExpressiveAnnotations.MvcUnobtrusive.Validators;
 
-namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
+namespace ExpressiveAnnotations.MvcUnobtrusive.Providers
 {
     /// <summary>
     ///     Validator provider which automatically registers adapters for expressive validation attributes 

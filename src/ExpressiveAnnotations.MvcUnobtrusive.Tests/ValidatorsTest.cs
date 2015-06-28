@@ -7,13 +7,13 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using ExpressiveAnnotations.Attributes;
-using ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators;
+using ExpressiveAnnotations.MvcUnobtrusive.Validators;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Tests
+namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
 {
     [TestClass]
     public class ValidatorsTest

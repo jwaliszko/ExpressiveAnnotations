@@ -5,8 +5,8 @@ using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 using ExpressiveAnnotations.Attributes;
-using ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider;
-using ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators;
+using ExpressiveAnnotations.MvcUnobtrusive.Providers;
+using ExpressiveAnnotations.MvcUnobtrusive.Validators;
 
 namespace ExpressiveAnnotations.MvcWebSample
 {

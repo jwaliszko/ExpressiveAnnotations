@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations", "Ex
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.Tests", "ExpressiveAnnotations.Tests\ExpressiveAnnotations.Tests.csproj", "{2DE111D5-E3A5-4FC8-8261-AA2DA743A3AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider", "ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.csproj", "{1926A95D-19EE-451B-9DA4-C3EAF555B15D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvcUnobtrusive", "ExpressiveAnnotations.MvcUnobtrusive\ExpressiveAnnotations.MvcUnobtrusive.csproj", "{1926A95D-19EE-451B-9DA4-C3EAF555B15D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvcWebSample", "ExpressiveAnnotations.MvcWebSample\ExpressiveAnnotations.MvcWebSample.csproj", "{78E4B95D-B0C3-486E-8847-CA444EF5BB95}"
 EndProject
@@ -25,7 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{5908
 		{82A7F48D-3B50-4B1E-B82E-3ADA8210C358} = {82A7F48D-3B50-4B1E-B82E-3ADA8210C358}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Tests", "ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Tests\ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Tests.csproj", "{46C5858F-76A5-4032-A4DA-5299CE51209B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvcUnobtrusive.Tests", "ExpressiveAnnotations.MvcUnobtrusive.Tests\ExpressiveAnnotations.MvcUnobtrusive.Tests.csproj", "{46C5858F-76A5-4032-A4DA-5299CE51209B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{4FE56EA0-4550-4A07-A758-331B9CF470A1}"
 EndProject

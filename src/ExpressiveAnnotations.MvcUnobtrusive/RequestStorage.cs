@@ -6,7 +6,7 @@ using System;
 using System.Collections;
 using System.Web;
 
-namespace ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider
+namespace ExpressiveAnnotations.MvcUnobtrusive
 {
     /// <summary>
     ///     Stores arbitrary data for the current HTTP request.

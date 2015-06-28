@@ -251,12 +251,12 @@ Toolchain functions available out of the box at server- and client-side:
 
 Client-side validation is fully supported. Enable it for your web project within the next few steps:
 
-1. Reference both assemblies to your project: core [**ExpressiveAnnotations.dll**](src/ExpressiveAnnotations) and subsidiary [**ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.dll**](src/ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider).
+1. Reference both assemblies to your project: core [**ExpressiveAnnotations.dll**](src/ExpressiveAnnotations) and subsidiary [**ExpressiveAnnotations.MvcUnobtrusive.dll**](src/ExpressiveAnnotations.MvcUnobtrusive).
 2. In Global.asax register required validators (`IClientValidatable` interface is not directly implemented by the attributes, to avoid coupling of ExpressionAnnotations assembly with System.Web.Mvc dependency):
 
     ```C#
     using ExpressiveAnnotations.Attributes;
-    using ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider.Validators;
+    using ExpressiveAnnotations.MvcUnobtrusive.Validators;
 
     protected void Application_Start()
     {
@@ -267,7 +267,7 @@ Client-side validation is fully supported. Enable it for your web project within
     ```
 	Alternatively, use predefined `ExpressiveAnnotationsModelValidatorProvider`:
 	```C#
-	using ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider;
+	using ExpressiveAnnotations.MvcUnobtrusive.Providers;
 	
     protected void Application_Start()
     {
