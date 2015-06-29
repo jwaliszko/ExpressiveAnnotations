@@ -28,6 +28,9 @@ namespace ExpressiveAnnotations.Analysis
     /// <summary>
     ///     Performs the syntactic analysis of a specified logical expression within given context.
     /// </summary>
+    /// <remarks>
+    ///     Type is thread safe.
+    /// </remarks>
     public sealed class Parser
     {
         private readonly object _locker = new object();
@@ -35,7 +38,6 @@ namespace ExpressiveAnnotations.Analysis
         /// <summary>
         ///     Initializes a new instance of the <see cref="Parser" /> class.
         /// </summary>
-        /// <remarks> Type is thread safe. </remarks>
         public Parser()
         {
             Fields = new Dictionary<string, Type>();

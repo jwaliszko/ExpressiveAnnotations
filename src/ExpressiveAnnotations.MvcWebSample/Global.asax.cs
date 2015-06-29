@@ -24,7 +24,7 @@ namespace ExpressiveAnnotations.MvcWebSample
             ModelValidatorProviders.Providers.Remove(
                 ModelValidatorProviders.Providers.FirstOrDefault(x => x is DataAnnotationsModelValidatorProvider));
             ModelValidatorProviders.Providers.Add(new ExpressiveAnnotationsModelValidatorProvider()); // ea validation provider added here
-                                                                                                      // it automatically registers adapters for expressive validation attributes and respects their procesing priorities when validation is performed
+                                                                                                      // it automatically registers adapters for expressive validation attributes and respects their processing priorities when validation is performed
 
             AreaRegistration.RegisterAllAreas();
 

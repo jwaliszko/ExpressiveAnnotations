@@ -8,6 +8,9 @@ namespace ExpressiveAnnotations.Analysis
 {
     /// <summary>
     ///     Contains the location information related to some arbitrary data within associated text block.
+    ///     <para>
+    ///         Used for pointing exact parsing error location in specified expression.
+    ///     </para>
     /// </summary>
     [Serializable]
     public class Location

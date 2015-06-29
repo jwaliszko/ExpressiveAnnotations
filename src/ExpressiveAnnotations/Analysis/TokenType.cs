@@ -10,127 +10,127 @@ namespace ExpressiveAnnotations.Analysis
     public enum TokenType
     {
         /// <summary>
-        ///     Logical conjunction.
+        ///     Logical conjunction (i.e. &amp;&amp;).
         /// </summary>
         AND,
 
         /// <summary>
-        ///     Logical disjunction.
+        ///     Logical disjunction (i.e. ||).
         /// </summary>
         OR,
 
         /// <summary>
-        ///     Logical negation.
+        ///     Logical negation (i.e. !).
         /// </summary>
         NOT,
 
         /// <summary>
-        ///     Greater than or equal to.
+        ///     Greater than or equal to (i.e. &gt;=).
         /// </summary>
         GE,
 
         /// <summary>
-        ///     Less than or equal to.
+        ///     Less than or equal to (i.e. &lt;=).
         /// </summary>
         LE,
 
         /// <summary>
-        ///     Greater than.
+        ///     Greater than (i.e. &gt;).
         /// </summary>
         GT,
 
         /// <summary>
-        ///     Less than.
+        ///     Less than (i.e. &lt;).
         /// </summary>
         LT,
 
         /// <summary>
-        ///     Equal to.
+        ///     Equal to (i.e. ==).
         /// </summary>
         EQ,
 
         /// <summary>
-        ///     Not equal to.
+        ///     Not equal to (i.e. !=).
         /// </summary>
         NEQ,
 
         /// <summary>
-        ///     Addition.
+        ///     Addition (i.e. +).
         /// </summary>
         ADD,
 
         /// <summary>
-        ///     Subtraction.
+        ///     Subtraction (i.e. -).
         /// </summary>
         SUB,
 
         /// <summary>
-        ///     Multiplication.
+        ///     Multiplication (i.e. *).
         /// </summary>
         MUL,
 
         /// <summary>
-        ///     Division.
+        ///     Division (i.e. /).
         /// </summary>
         DIV,
 
         /// <summary>
-        ///     Prefix/postfix inc(++).
+        ///     Prefix/postfix inc (i.e. ++).
         /// </summary>
         INC,
 
         /// <summary>
-        ///     Prefix/postfix dec(--).
+        ///     Prefix/postfix dec (i.e. --).
         /// </summary>
         DEC,
 
         /// <summary>
-        ///     Left bracket.
+        ///     Left bracket (i.e. ().
         /// </summary>
         LEFT_BRACKET,
 
         /// <summary>
-        ///     Right bracket.
+        ///     Right bracket (i.e. )).
         /// </summary>
         RIGHT_BRACKET,
 
         /// <summary>
-        ///     Comma.
+        ///     Comma (i.e. ,).
         /// </summary>
         COMMA,
 
         /// <summary>
-        ///     NULL.
+        ///     NULL (i.e. null).
         /// </summary>
         NULL,
 
         /// <summary>
-        ///     Integer value.
+        ///     Integer value (e.g. 123).
         /// </summary>
         INT,
 
         /// <summary>
-        ///     Boolean value.
+        ///     Boolean value (i.e. true, false).
         /// </summary>
         BOOL,
 
         /// <summary>
-        ///     Float value.
+        ///     Float value (e.g. 1.5, -0.3e-2).
         /// </summary>
         FLOAT,
 
         /// <summary>
-        ///     String.
+        ///     String (e.g. 'in single quotes').
         /// </summary>
         STRING,
 
         /// <summary>
-        ///     Function.
+        ///     Function (i.e. SomeProperty, SomeType.CONST, SomeEnumType.SomeValue, SomeFunction(...)).
         /// </summary>
         FUNC,
 
         /// <summary>
-        ///     EOF.
+        ///     End of expression.
         /// </summary>
         EOF
     }

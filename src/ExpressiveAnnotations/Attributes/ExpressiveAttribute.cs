@@ -50,13 +50,18 @@ namespace ExpressiveAnnotations.Attributes
 
         /// <summary>
         ///     Gets or sets the hint, available for any concerned external components, indicating the order in which this attribute should be 
-        ///     executed among others of its kind, i.e. <see cref="ExpressiveAttribute" />. Value is optional and not set by default, which 
-        ///     means that execution order seems to be irrelevant.
+        ///     executed among others of its kind, i.e. <see cref="ExpressiveAttribute" />.
         ///     <para>
         ///         Consumers must use the <see cref="GetPriority" /> method to retrieve the value, as this property getter will throw an 
         ///         exception if the value has not been set.
         ///     </para>
         /// </summary>
+        /// <remarks>
+        ///     Value is optional and not set by default, which means that execution order is undefined.
+        ///     <para>
+        ///         Lowest value means highest priority.
+        ///     </para>
+        /// </remarks>
         /// <exception cref="System.InvalidOperationException">
         ///     If the getter of this property is invoked when the value has not been explicitly set using the setter.
         /// </exception> 

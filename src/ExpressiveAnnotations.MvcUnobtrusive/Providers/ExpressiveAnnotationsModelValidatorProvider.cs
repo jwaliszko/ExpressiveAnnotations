@@ -12,9 +12,13 @@ using ExpressiveAnnotations.MvcUnobtrusive.Validators;
 namespace ExpressiveAnnotations.MvcUnobtrusive.Providers
 {
     /// <summary>
-    ///     Validator provider which automatically registers adapters for expressive validation attributes 
-    ///     and additionally respects their processing priorities (if provided) when validation is executed.
+    ///     Data annotations validator provider which automatically registers adapters for expressive validation attributes, i.e. <see cref="ExpressiveAttribute" />, 
+    ///     and additionally respects their processing priorities (if <see cref="ExpressiveAttribute.Priority" /> is specified) when validation is executed.
     /// </summary>
+    /// <remarks>
+    ///     Attributes with highest priority (lowest value) will be processed in first place. Attributes without explicitly proivided priorities will be processed later, 
+    ///     without any specific order.
+    /// </remarks>
     public class ExpressiveAnnotationsModelValidatorProvider : DataAnnotationsModelValidatorProvider
     {
         /// <summary>

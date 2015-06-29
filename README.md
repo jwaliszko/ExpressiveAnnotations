@@ -133,14 +133,14 @@ AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should 
 Priority          - Gets or sets the hint, available for any concerned external components, 
                     indicating the order in which this attribute should be executed among 
                     others of its kind, i.e. ExpressiveAttribute. Value is optional and not
-					set by default, which means that execution order seems to be irrelevant.
+					set by default, which means that execution order is undefined.
 ```
 
-Full API documentation *(probably not useful at all since the note above covers almost exhaustively what is actually needed to work with EA)* generated with [Sandcastle](https://sandcastle.codeplex.com/) (with the support of by [SHFB](http://shfb.codeplex.com/)), can be downloaded in the form of compiled HTML help file from [here](doc/api/) (only C# side, not JS there...).
+Full API documentation *(probably not useful at all, since the note above covers almost exhaustively what is actually needed to work with EA)* generated with [Sandcastle](https://sandcastle.codeplex.com/) (with the support of [SHFB](http://shfb.codeplex.com/)), can be downloaded in the form of compiled HTML help file from [here](doc/api/api.chm?raw=true) (only C# API, no JavaScript there).
 
 #####<a id="implementation">Implementation</a>
 
-Implementation core is based on top-down recursive descent [logical expressions parser](src/ExpressiveAnnotations/Analysis/Parser.cs), with a single token of lookahead ([LL(1)](http://en.wikipedia.org/wiki/LL_parser)), which runs on the following [EBNF-like](http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form) grammar:
+Implementation core is based on top-down recursive descent [logical expressions parser](src/ExpressiveAnnotations/Analysis/Parser.cs), with a single token of lookahead ([LL(1)](http://en.wikipedia.org/wiki/LL_parser)), which runs on the following [EBNF-like](http://en.wikipedia.org/wiki/Extended_Backus–Naur_Form) grammar:
 ```
 expression => or-exp
 or-exp     => and-exp [ "||" or-exp ]
@@ -279,7 +279,7 @@ Client-side validation is fully supported. Enable it for your web project within
         ModelValidatorProviders.Providers.Add(
 	        new ExpressiveAnnotationsModelValidatorProvider());
 	```
-	Despite the fact this provider automatically registers adapters for expressive validation attributes, it additionally respects their procesing priorities when validation is performed (i.e. the [`Priority`](#signatures) property actually means something in practice).
+	Despite the fact this provider automatically registers adapters for expressive validation attributes, it additionally respects their processing priorities when validation is performed (i.e. the [`Priority`](#signatures) property actually means something in practice).
 3. Include [**expressive.annotations.validate.js**](src/expressive.annotations.validate.js) script in your page (it should be included in bundle below jQuery validation files):
 
     ```JavaScript
