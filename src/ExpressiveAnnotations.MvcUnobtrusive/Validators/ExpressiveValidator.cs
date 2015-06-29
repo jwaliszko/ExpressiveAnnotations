@@ -14,7 +14,7 @@ using ExpressiveAnnotations.Attributes;
 namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
 {
     /// <summary>
-    ///     Base class for expressive model validators.
+    ///     Base class for expressive validators.
     /// </summary>
     /// <typeparam name="T">Any type derived from <see cref="ExpressiveAttribute" /> class.</typeparam>
     public abstract class ExpressiveValidator<T> : DataAnnotationsModelValidator<T> where T : ExpressiveAttribute

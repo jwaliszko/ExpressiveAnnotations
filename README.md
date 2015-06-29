@@ -136,6 +136,8 @@ Priority          - Gets or sets the hint, available for any concerned external 
 					set by default, which means that execution order seems to be irrelevant.
 ```
 
+Full API documentation *(probably not useful at all since the note above covers almost exhaustively what is actually needed to work with EA)* generated with [Sandcastle](https://sandcastle.codeplex.com/) (with the support of by [SHFB](http://shfb.codeplex.com/)), can be downloaded in the form of compiled HTML help file from [here](doc/api/) (only C# side, not JS there...).
+
 #####<a id="implementation">Implementation</a>
 
 Implementation core is based on top-down recursive descent [logical expressions parser](src/ExpressiveAnnotations/Analysis/Parser.cs), with a single token of lookahead ([LL(1)](http://en.wikipedia.org/wiki/LL_parser)), which runs on the following [EBNF-like](http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form) grammar:

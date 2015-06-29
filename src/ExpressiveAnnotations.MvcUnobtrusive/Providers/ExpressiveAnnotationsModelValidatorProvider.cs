@@ -17,12 +17,24 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Providers
     /// </summary>
     public class ExpressiveAnnotationsModelValidatorProvider : DataAnnotationsModelValidatorProvider
     {
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="ExpressiveAnnotationsModelValidatorProvider"/> class.
+        /// </summary>
         public ExpressiveAnnotationsModelValidatorProvider()
         {
             RegisterAdapter(typeof(RequiredIfAttribute), typeof(RequiredIfValidator));
             RegisterAdapter(typeof(AssertThatAttribute), typeof(AssertThatValidator));
         }
 
+        /// <summary>
+        ///     Gets a list of validators.
+        /// </summary>
+        /// <param name="metadata">The metadata.</param>
+        /// <param name="context">The context.</param>
+        /// <param name="attributes">The list of validation attributes.</param>
+        /// <returns>
+        ///     A list of validators.
+        /// </returns>
         protected override IEnumerable<ModelValidator> GetValidators(ModelMetadata metadata, ControllerContext context, IEnumerable<Attribute> attributes)
         {
             var allAttribs = attributes.ToList();
