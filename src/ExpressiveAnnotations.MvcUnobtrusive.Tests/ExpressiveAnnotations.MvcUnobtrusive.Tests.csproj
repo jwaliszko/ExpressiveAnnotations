@@ -73,7 +73,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ExpressiveAnnotations.MvcUnobtrusive\ExpressiveAnnotations.MvcUnobtrusive.csproj">
       <Project>{1926a95d-19ee-451b-9da4-c3eaf555b15d}</Project>
-      <Name>ExpressiveAnnotations.MvcUnobtrusiveValidatorProvider</Name>
+      <Name>ExpressiveAnnotations.MvcUnobtrusive</Name>
     </ProjectReference>
     <ProjectReference Include="..\ExpressiveAnnotations\ExpressiveAnnotations.csproj">
       <Project>{70dd327b-f37c-4291-9388-212aa541e970}</Project>
