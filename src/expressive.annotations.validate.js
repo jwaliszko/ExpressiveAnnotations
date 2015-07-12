@@ -433,16 +433,18 @@ var
         binded: false,
         bindFields: function(form) {
             if (!this.binded) {
-                var namespacedEvents = [];
-                $.each(api.settings.dependencyTriggers.split(/\s+/), function(idx, event) {
-                    if (/\S/.test(event)) {
-                        namespacedEvents.push(event + '.expressive.annotations');
-                    }
-                });
-                $(form).find('input, select, textarea').on(namespacedEvents.join(' '), function() {
-                    var field = $(this).attr('name');
-                    validationHelper.validateReferences(field, form); // validate referenced fields only
-                });
+                if (api.settings.dependencyTriggers !== undefined && api.settings.dependencyTriggers !== null) {
+                    var namespacedEvents = [];
+                    $.each(api.settings.dependencyTriggers.split(/\s+/), function(idx, event) {
+                        if (/\S/.test(event)) {
+                            namespacedEvents.push(event + '.expressive.annotations');
+                        }
+                    });
+                    $(form).find('input, select, textarea').on(namespacedEvents.join(' '), function() {
+                        var field = $(this).attr('name');
+                        validationHelper.validateReferences(field, form); // validate referenced fields only
+                    });
+                }
                 this.binded = true;
             }
         }
