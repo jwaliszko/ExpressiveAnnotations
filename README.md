@@ -351,7 +351,7 @@ Use `noConflict()` method. In case of naming collision return control of the `ea
 
 When a field value is modified, validation results for some other fields, directly dependent on currenty modified one, may be affected. To control the frequency of when dependent fields validation is triggered, change default `ea.settings.dependencyTriggers` settings. It is a string containing one or more DOM field event types (such as *change*, *keyup* or custom event names), associated with currently modified field, for which fields directly dependent on are validated.
 
-Default value is *'change paste keyup'* (for more information check `eventType` parameter of jQuery [`bind()`](http://api.jquery.com/bind) method). If you want to turn this feature off entirely, set it to *undefined* (validation will be fired on form submit attempt only).
+Default value is *'change keyup'* (for more information check `eventType` parameter of jQuery [`bind()`](http://api.jquery.com/bind) method). If you want to turn this feature off entirely, set it to *undefined* (validation will be fired on form submit attempt only).
 ```JavaScript
 <script>
     ea.settings.dependencyTriggers = 'change'; // mute some excessive activity if you wish,

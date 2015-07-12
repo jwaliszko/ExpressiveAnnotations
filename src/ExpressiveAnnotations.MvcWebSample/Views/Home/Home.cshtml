@@ -48,15 +48,21 @@
             // ea... // do something with original ea variable
 
             var triggers = '@triggers';
-            ea.settings.dependencyTriggers = /\S/.test(triggers) ? triggers : undefined; // if not explicitly provided, default setup is: 'change paste keyup'
+            ea.settings.dependencyTriggers = /\S/.test(triggers) ? triggers : undefined; // if not explicitly provided, default setup is: 'change keyup'
             $(document).ready(function() {
                 $('#triggers input[type="checkbox"]').on('click', function() {
-                    // disable some excessive activity if you wish, and e.g. trigger dependent fields validation only when field 'change' event is fired
-                    // when all triggers are disabled, validation will be fired on form submit attempt only
+                    // disable some excessive activity if you wish, and e.g. trigger dependent fields validation only when field 'change' event is fired -
+                    // - when all triggers are disabled, validation will be fired on form submit attempt only
                     var triggers = $('#triggers input[type="checkbox"]:checked').map(function() {
                         return $(this).attr('data-val');
                     }).toArray();
                     window.location.href = '/System/SetTriggers?events=' + triggers.join(' ') + '&returnUrl=/';
+                });
+                $(document).on('paste', function(e) {
+                    e = $.extend({}, e, { type: 'afterpaste' }); // define custom event 'afterpaste', which fires slightly after 'paste' event is invoked - this tiny delay is necessary for the field value to become ready for being collected
+                    window.setTimeout(function() {               // ('paste' event itself is to early, because fires before field value is actually modified, so its new content value cannot be accessed from within this event)
+                        $(e.target).trigger(e.type);
+                    }, 50);
                 });
             });
 

@@ -27,7 +27,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
             if (events != null)
                 return events;
 
-            events = "change paste keyup";
+            events = "change afterpaste keyup";
             SetValueToCookie(events, httpContext);
             return events;
         }

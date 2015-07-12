@@ -12,8 +12,8 @@ var
 
     api = { // to be accesssed from outer scope
         settings: {
-            dependencyTriggers: 'change paste keyup', // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names)
-                                                      // for which fields directly dependent on referenced DOM field are validated
+            dependencyTriggers: 'change keyup', // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names)
+                                                // for which fields directly dependent on referenced DOM field are validated
             parseObject: undefined, // provide custom deserialization for objects when stored in non-json format
             parseDate: undefined // provide custom parsing mechanism for dates when stored in non-standard format
                                  // e.g., suppose DOM field date is given in dd/mm/yyyy format:

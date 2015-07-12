@@ -10,6 +10,6 @@
 <div id="triggers">
     <a href="https://github.com/JaroslawWaliszko/ExpressiveAnnotations#how-to-control-frequency-of-dependent-fields-validation">dependency validation triggers</a>:
     <input type="checkbox" id="changeTrigger" data-val="change" @(ViewBag.Triggers.Contains("change") ? Html.Raw("checked=\"checked\"") : Html.Raw("")) /> change
-    <input type="checkbox" id="pasteTrigger"  data-val="paste"  @(ViewBag.Triggers.Contains("paste")  ? Html.Raw("checked=\"checked\"") : Html.Raw("")) /> paste
+    <input type="checkbox" id="pasteTrigger"  data-val="afterpaste"  @(ViewBag.Triggers.Contains("afterpaste") ? Html.Raw("checked=\"checked\"") : Html.Raw("")) /> paste
     <input type="checkbox" id="keyupTrigger"  data-val="keyup"  @(ViewBag.Triggers.Contains("keyup")  ? Html.Raw("checked=\"checked\"") : Html.Raw("")) /> keyup
 </div>
