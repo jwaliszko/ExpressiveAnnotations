@@ -4,6 +4,7 @@
 
 using System;
 using System.Runtime.Serialization;
+using System.Security;
 using System.Security.Permissions;
 
 namespace ExpressiveAnnotations.Analysis
@@ -37,6 +38,7 @@ namespace ExpressiveAnnotations.Analysis
         /// </summary>
         public Location Location { get; private set; }
 
+        [SecurityCritical]
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)] // deny creating an object of this type from a data that wasn't created by this serialization code 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
