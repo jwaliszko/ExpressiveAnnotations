@@ -202,7 +202,7 @@ button {
     font-weight: bold;
     padding-left: 10px;
     position: absolute;
-    top: 50%;
+    top: 10%;
 }
 
 .input-validation-error {

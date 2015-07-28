@@ -263,7 +263,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Home\DisplayTemplates\ISO8601Date.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\ISO8601Date.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Home\EditorTemplates\Query.cshtml" />
@@ -272,7 +272,7 @@
     <Content Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\Home\DisplayTemplates\IntArray.cshtml" />
+    <Content Include="Views\Shared\DisplayTemplates\IntArray.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
