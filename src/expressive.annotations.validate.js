@@ -12,6 +12,7 @@ var
 
     api = { // to be accesssed from outer scope
         settings: {
+            debug: false, // output debug messages to the web console (should be disabled for release code)
             dependencyTriggers: 'change keyup', // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names) for which fields directly dependent on referenced DOM field are validated
             parseValue: function(value, type, defaultParseCallback) { // provide custom deserialization for values according to certain types they represents,
                 return defaultParseCallback(value, type);             // e.g. for objects when stored in non-json format or dates when stored in non-standard format (not proper for Date.parse(dateString)),
@@ -254,8 +255,8 @@ var
                     var millisec = d.milliseconds +
                         d.seconds * 1e3 + // 1000
                         d.minutes * 6e4 + // 1000 * 60
-                        d.hours * 36e5 + // 1000 * 60 * 60
-                        d.days * 864e5; // 1000 * 60 * 60 * 24
+                        d.hours * 36e5 +  // 1000 * 60 * 60
+                        d.days * 864e5;   // 1000 * 60 * 60 * 24
                     return millisec;
                 }
                 return { error: true, msg: 'Given value was not recognized as a valid .NET style timespan string.' };
@@ -330,10 +331,16 @@ var
                 var elementType = $(element).attr('type');
                 switch (elementType) {
                     case 'checkbox':
+                        if (field.length > 2) {
+                            logger.warn(typeHelper.string.format('DOM field {0} found {1} times. EA picked first for further processing.', name, field.length));
+                        }
                         return $(element).is(':checked');
                     case 'radio':
                         return $(element).filter(':checked').val();
                     default:
+                        if (field.length > 1) {
+                            logger.warn(typeHelper.string.format('DOM field {0} found {1} times. EA picked first for further processing.', name, field.length));
+                        }
                         return $(element).val();
                 }
             }
@@ -348,7 +355,7 @@ var
             if (rawValue === undefined || rawValue === null || rawValue === '') { // field value not set
                 return null;
             }
-            parsedValue = ea.settings.parseValue(rawValue, type, typeHelper.tryParse); // convert field value to required type
+            parsedValue = api.settings.parseValue(rawValue, type, typeHelper.tryParse); // convert field value to required type
             if (parsedValue.error) {
                 throw typeHelper.string.format('DOM field {0} value conversion to {1} failed. {2}', name, type, parsedValue.msg);
             }
@@ -410,6 +417,7 @@ var
             var i, field, referencedFields;
             referencedFields = this.referencesMap[name];
             if (referencedFields !== undefined && referencedFields !== null) {
+                logger.dump('validation started for ' + name + ' dependencies (' + referencedFields.join(', ') + ')');
                 i = referencedFields.length;
                 while (i--) {
                     field = $(form).find(':input[data-val][name="' + referencedFields[i] + '"]');
@@ -429,13 +437,25 @@ var
                             namespacedEvents.push(event + '.expressive.annotations');
                         }
                     });
-                    $(form).find('input, select, textarea').on(namespacedEvents.join(' '), function() {
+                    $(form).find('input, select, textarea').on(namespacedEvents.join(' '), function (event) {
                         var field = $(this).attr('name');
+                        logger.dump(event.type + ' dependency validation trigger handled');
                         validationHelper.validateReferences(field, form); // validate referenced fields only
                     });
                 }
                 this.binded = true;
             }
+        }
+    },
+
+    logger = {
+        dump: function(message) {
+            if (api.settings.debug && console && typeof console.log === 'function')
+                console.log(message);
+        },
+        warn: function(message) {
+            if (api.settings.debug && console && typeof console.warn === 'function')
+                console.warn(message);
         }
     },
 
@@ -487,6 +507,7 @@ var
             if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
                 var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.prefix);
                 toolchain.registerMethods(model);
+                logger.dump('expression:\n' + params.expression + '\nexecuted for ' + element.name + ' field, within following model object context (methods hidden):\n' + JSON.stringify(model, null, 4));
                 if (!modelHelper.ctxEval(params.expression, model)) { // check if the assertion condition is not satisfied
                     return false; // assertion not satisfied => notify
                 }
@@ -503,6 +524,7 @@ var
                 || (!/\S/.test(value) && !params.allowEmpty)) {
                 var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.prefix);
                 toolchain.registerMethods(model);
+                logger.dump('expression:\n' + params.expression + '\nexecuted for ' + element.name + ' field, within following model object context (methods hidden):\n' + JSON.stringify(model, null, 4));
                 if (modelHelper.ctxEval(params.expression, model)) { // check if the requirement condition is satisfied
                     return false; // requirement confirmed => notify
                 }

@@ -36,6 +36,15 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
             return htmlHelper.DropDownListFor(expression, items, htmlAttributes);
         }
 
+        public static bool IsDebug(this HtmlHelper htmlHelper)
+        {
+#if DEBUG
+            return true;
+#else
+            return false;
+#endif
+        }
+
         private static string GetEnumDisplayText<TEnum>(TEnum value)
         {
             var field = value.GetType().GetField(value.ToString());
