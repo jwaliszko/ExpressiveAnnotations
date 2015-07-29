@@ -69,13 +69,18 @@
             @if ("pl" == lang)
             {
                 <text>
-                    ea.settings.parseDate = function(str) { // override default date parsing mechanism (to deal with yyyy-mm-dd format)
-                        if (!/^\d{4}-\d{2}-\d{2}$/.test(str)) { // in case the str does not have the desired format...
-                            return Date.parse(str); // ...default date parser is used
+                    ea.settings.parseValue = function(value, type, defaultParseCallback) { // override default parsing mechanism...
+                        switch (type) {
+                            case 'datetime': // ...for datetime type to deal with yyyy-mm-dd format
+                                if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) { // in case the value does not have the desired format...
+                                    return Date.parse(value); // ...default date parser is used
+                                }
+                                var arr = value.split('-');
+                                var date = new Date(arr[0], arr[1] - 1, arr[2]); // months are 0-based
+                                return date.getTime(); // return milliseconds
+                            default:
+                                return defaultParseCallback(value, type); // for other types run the built-in logic
                         }
-                        var arr = str.split('-');
-                        var date = new Date(arr[0], arr[1] - 1, arr[2]); // months are 0-based
-                        return date.getTime(); // return milliseconds
                     }
                 </text>
             }

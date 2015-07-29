@@ -29,7 +29,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive
             if (type.IsGuid())
                 return "guid";
 
-            return "object";
+            type = type.IsNullable() ? Nullable.GetUnderlyingType(type) : type;
+            return type.Name.ToLowerInvariant();
         }
 
         [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")] // code that deals with disposables should be consistent (and classes should be resilient to multiple Dispose() calls)

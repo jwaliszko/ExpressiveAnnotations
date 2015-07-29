@@ -8,8 +8,9 @@
     // equal( actual, expected [, message ] )
 
     qunit.testDone(function() { // reset state for further tests
-        ea.settings.parseDate = undefined;
-        ea.settings.parseObject = undefined;
+        ea.settings.parseValue = function(value, type, defaultParseCallback) {
+            return defaultParseCallback(value, type);
+        }
     });
 
     qunit.module("type helper");
@@ -85,40 +86,44 @@
 
     qunit.test("verify_non_standard_date_format_parsing", function() {
         var expected = new Date("August, 11 2014").getTime();
-        var actual = eapriv.typeHelper.tryParse("11/08/2014", "datetime");
+        var actual = ea.settings.parseValue("11/08/2014", "datetime", eapriv.typeHelper.tryParse);
         qunit.notEqual(actual, expected, "default date parse fails to understand non-standard dd/mm/yyyy format");
-        ea.settings.parseDate = function(str) {
-            var arr = str.split('/');
-            var date = new Date(arr[2], arr[1] - 1, arr[0]);
-            return date.getTime();
-        };
-        actual = eapriv.typeHelper.tryParse("11/08/2014", "datetime");
-        qunit.equal(actual, expected, "overriden parseDate properly handles non-standard dd/mm/yyyy format");
 
-        ea.settings.parseDate = function() {
-            return NaN; // simulate broken parsing logic
-        };
-        var result = eapriv.typeHelper.tryParse("11/08/2014", "datetime");
-        qunit.ok(result.error, "overriden parseDate error thrown");
-        qunit.equal(result.msg, "Custom date parsing is broken - number of milliseconds since January 1, 1970, 00:00:00 UTC expected to be returned.", "overriden parseDate error message thrown");
+        ea.settings.parseValue = function(value, type, defaultParseCallback) {
+            switch (type) {
+                case 'datetime':
+                    var arr = value.split('/');
+                    var date = new Date(arr[2], arr[1] - 1, arr[0]);
+                    return date.getTime();
+                default:
+                    return defaultParseCallback(value, type);
+            }
+        }
+        actual = ea.settings.parseValue("11/08/2014", "datetime", eapriv.typeHelper.tryParse);
+        qunit.equal(actual, expected, "overriden parseValue properly handles non-standard dd/mm/yyyy format");
     });
 
     qunit.test("verify_non_standard_object_format_parsing", function() {        
-        var result = eapriv.typeHelper.tryParse("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object");
+        var result = ea.settings.parseValue("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object", eapriv.typeHelper.tryParse);
         qunit.ok(result.error, "default object parse fails to understand non-json format");
         var expected = "Given value was not recognized as a valid JSON.";
         var actual = result.msg.substring(0, expected.length);
         qunit.equal(actual, expected); // compare only explicitly defined piece of the full message (further part is engine related)
 
-        ea.settings.parseObject = function(str) {
-            return $.parseXML(str);
-        };
+        ea.settings.parseValue = function(value, type, defaultParseCallback) {
+            switch (type) {
+                case 'object':
+                    return $.parseXML(value);
+                default:
+                    return defaultParseCallback(value, type);
+            }
+        }
         expected = $.parseXML("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>");
-        actual = eapriv.typeHelper.tryParse("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object");
+        actual = ea.settings.parseValue("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object", eapriv.typeHelper.tryParse);
 
-        // because deep and not deep equality fails because of some security issue, only brief equality comparison is done
+        // deep and not deep equality fails because of some security issue, only brief equality comparison is done
         qunit.ok(!actual.error, "XML parse success");
-        qunit.equal(actual.contentType, expected.contentType, "overriden parseObject properly handles non-json format");
+        qunit.equal(actual.contentType, expected.contentType, "overriden parseValue properly handles non-json format");
     });
 
     qunit.test("verify_string_parsing", function() {

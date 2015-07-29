@@ -12,14 +12,18 @@ var
 
     api = { // to be accesssed from outer scope
         settings: {
-            dependencyTriggers: 'change keyup', // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names)
-                                                // for which fields directly dependent on referenced DOM field are validated
-            parseObject: undefined, // provide custom deserialization for objects when stored in non-json format
-            parseDate: undefined // provide custom parsing mechanism for dates when stored in non-standard format
-                                 // e.g., suppose DOM field date is given in dd/mm/yyyy format:
-                                 // parseDate = function(str) { // input string is given as a raw value extracted from DOM element
-                                 //     var arr = str.split('/'); return new Date(arr[2], arr[1] - 1, arr[0]).getTime(); // return milliseconds since January 1, 1970, 00:00:00 UTC
-                                 // }
+            dependencyTriggers: 'change keyup', // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names) for which fields directly dependent on referenced DOM field are validated
+            parseValue: function(value, type, defaultParseCallback) { // provide custom deserialization for values according to certain types they represents,
+                return defaultParseCallback(value, type);             // e.g. for objects when stored in non-json format or dates when stored in non-standard format (not proper for Date.parse(dateString)),
+            }                                                         // i.e. suppose DOM field date string is given in dd/mm/yyyy format:
+                                                                      // parseValue = function(value, type, defaultParseCallback) { // value string is given as a raw value extracted from DOM element
+                                                                      //     switch (type) {
+                                                                      //         case 'datetime': 
+                                                                      //             var arr = value.split('/'); return new Date(arr[2], arr[1] - 1, arr[0]).getTime(); // return milliseconds since January 1, 1970, 00:00:00 UTC
+                                                                      //         default:
+                                                                      //             return defaultParseCallback(value, type); // for other types run the built-in logic
+                                                                      //     }
+                                                                      // }
         },
         addMethod: function(name, func) {
             toolchain.addMethod(name, func);
@@ -177,13 +181,6 @@ var
                 return arr;
             },
             tryParse: function(value) {
-                if (typeof api.settings.parseObject === 'function') {
-                    try {
-                        return api.settings.parseObject(value);
-                    } catch (ex) {
-                        return { error: true, msg: 'Custom object parsing is broken. ' + ex };
-                    }
-                }
                 try {
                     return $.parseJSON(value);
                 } catch (ex) {
@@ -270,15 +267,7 @@ var
                     return value.getTime(); // return the time value in milliseconds
                 }
                 if (typeHelper.isString(value)) {
-                    var millisec;
-                    if (typeof api.settings.parseDate === 'function') {
-                        millisec = api.settings.parseDate(value); // custom parsing of date string given in non-standard format
-                        if (typeHelper.isNumeric(millisec)) {
-                            return millisec;
-                        }
-                        return { error: true, msg: 'Custom date parsing is broken - number of milliseconds since January 1, 1970, 00:00:00 UTC expected to be returned.' };
-                    }
-                    millisec = Date.parse(value); // default parsing of string representing an RFC 2822 or ISO 8601 date
+                    var millisec = Date.parse(value); // default parsing of string representing an RFC 2822 or ISO 8601 date
                     if (typeHelper.isNumeric(millisec)) {
                         return millisec;
                     }
@@ -359,7 +348,7 @@ var
             if (rawValue === undefined || rawValue === null || rawValue === '') { // field value not set
                 return null;
             }
-            parsedValue = typeHelper.tryParse(rawValue, type); // convert field value to required type
+            parsedValue = ea.settings.parseValue(rawValue, type, typeHelper.tryParse); // convert field value to required type
             if (parsedValue.error) {
                 throw typeHelper.string.format('DOM field {0} value conversion to {1} failed. {2}', name, type, parsedValue.msg);
             }
