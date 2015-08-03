@@ -37,6 +37,17 @@ var
         }
     },
 
+    logger = {
+        dump: function(message) {
+            if (api.settings.debug && console && typeof console.log === 'function')
+                console.log(message);
+        },
+        warn: function(message) {
+            if (api.settings.debug && console && typeof console.warn === 'function')
+                console.warn(message);
+        }
+    },
+
     toolchain = {
         methods: {},
         addMethod: function(name, func) { // add multiple function signatures to methods object (methods overloading, based only on numbers of arguments)
@@ -61,34 +72,34 @@ var
             }
         },
         initialize: function() {
-            this.addMethod("Now", function() { // return milliseconds
+            this.addMethod('Now', function() { // return milliseconds
                 return Date.now(); // now() is faster than new Date().getTime()
             });
-            this.addMethod("Today", function() { // return milliseconds
+            this.addMethod('Today', function() { // return milliseconds
                 return new Date(new Date().setHours(0, 0, 0, 0)).getTime();
             });
-            this.addMethod("Date", function(year, month, day) { // months are 1-based, return milliseconds
+            this.addMethod('Date', function(year, month, day) { // months are 1-based, return milliseconds
                 return new Date(year, month - 1, day).getTime();
             });
-            this.addMethod("Date", function(year, month, day, hour, minute, second) { // months are 1-based, return milliseconds
+            this.addMethod('Date', function(year, month, day, hour, minute, second) { // months are 1-based, return milliseconds
                 return new Date(year, month - 1, day, hour, minute, second).getTime();
             });
-            this.addMethod("TimeSpan", function(days, hours, minutes, seconds) { // return milliseconds
+            this.addMethod('TimeSpan', function(days, hours, minutes, seconds) { // return milliseconds
                 return seconds * 1e3 + minutes * 6e4 + hours * 36e5 + days * 864e5;
             });
-            this.addMethod("Length", function(str) {
+            this.addMethod('Length', function(str) {
                 return str !== null && str !== undefined ? str.length : 0;
             });
-            this.addMethod("Trim", function(str) {
+            this.addMethod('Trim', function(str) {
                 return str !== null && str !== undefined ? $.trim(str) : null;
             });
-            this.addMethod("Concat", function(strA, strB) {
+            this.addMethod('Concat', function(strA, strB) {
                 return [strA, strB].join('');
             });
-            this.addMethod("Concat", function(strA, strB, strC) {
+            this.addMethod('Concat', function(strA, strB, strC) {
                 return [strA, strB, strC].join('');
             });
-            this.addMethod("CompareOrdinal", function(strA, strB) {
+            this.addMethod('CompareOrdinal', function(strA, strB) {
                 if (strA === strB) {
                     return 0;
                 }
@@ -100,56 +111,56 @@ var
                 }
                 return strA > strB ? 1 : -1;
             });
-            this.addMethod("CompareOrdinalIgnoreCase", function(strA, strB) {
+            this.addMethod('CompareOrdinalIgnoreCase', function(strA, strB) {
                 strA = (strA !== null && strA !== undefined) ? strA.toLowerCase() : null;
                 strB = (strB !== null && strB !== undefined) ? strB.toLowerCase() : null;
                 return this.CompareOrdinal(strA, strB);
             });
-            this.addMethod("StartsWith", function(str, prefix) {
+            this.addMethod('StartsWith', function(str, prefix) {
                 return str !== null && str !== undefined && prefix !== null && prefix !== undefined && str.slice(0, prefix.length) === prefix;
             });
-            this.addMethod("StartsWithIgnoreCase", function(str, prefix) {
+            this.addMethod('StartsWithIgnoreCase', function(str, prefix) {
                 str = (str !== null && str !== undefined) ? str.toLowerCase() : null;
                 prefix = (prefix !== null && prefix !== undefined) ? prefix.toLowerCase() : null;
                 return this.StartsWith(str, prefix);
             });
-            this.addMethod("EndsWith", function(str, suffix) {
+            this.addMethod('EndsWith', function(str, suffix) {
                 return str !== null && str !== undefined && suffix !== null && suffix !== undefined && str.slice(-suffix.length) === suffix;
             });
-            this.addMethod("EndsWithIgnoreCase", function(str, suffix) {
+            this.addMethod('EndsWithIgnoreCase', function(str, suffix) {
                 str = (str !== null && str !== undefined) ? str.toLowerCase() : null;
                 suffix = (suffix !== null && suffix !== undefined) ? suffix.toLowerCase() : null;
                 return this.EndsWith(str, suffix);
             });
-            this.addMethod("Contains", function(str, substr) {
+            this.addMethod('Contains', function(str, substr) {
                 return str !== null && str !== undefined && substr !== null && substr !== undefined && str.indexOf(substr) > -1;
             });
-            this.addMethod("ContainsIgnoreCase", function(str, substr) {
+            this.addMethod('ContainsIgnoreCase', function(str, substr) {
                 str = (str !== null && str !== undefined) ? str.toLowerCase() : null;
                 substr = (substr !== null && substr !== undefined) ? substr.toLowerCase() : null;
                 return this.Contains(str, substr);
             });
-            this.addMethod("IsNullOrWhiteSpace", function(str) {
+            this.addMethod('IsNullOrWhiteSpace', function(str) {
                 return str === null || !/\S/.test(str);
             });
-            this.addMethod("IsDigitChain", function(str) {
+            this.addMethod('IsDigitChain', function(str) {
                 return /^\d+$/.test(str);
             });
-            this.addMethod("IsNumber", function(str) {
+            this.addMethod('IsNumber', function(str) {
                 return /^[\+-]?\d*\.?\d+(?:[eE][\+-]?\d+)?$/.test(str);
             });
-            this.addMethod("IsEmail", function(str) {
+            this.addMethod('IsEmail', function(str) {
                 // taken from HTML5 specification: http://www.w3.org/TR/html5/forms.html#e-mail-state-(type=email)
                 return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(str);
             });
-            this.addMethod("IsUrl", function(str) {
+            this.addMethod('IsUrl', function(str) {
                 // contributed by Diego Perini: https://gist.github.com/dperini/729294 (https://mathiasbynens.be/demo/url-regex)
                 return /^(?:(?:https?|ftp):\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/i.test(str);
             });
-            this.addMethod("IsRegexMatch", function(str, regex) {
+            this.addMethod('IsRegexMatch', function(str, regex) {
                 return str !== null && str !== undefined && regex !== null && regex !== undefined && new RegExp(regex).test(str);
             });
-            this.addMethod("Guid", function(str) {
+            this.addMethod('Guid', function(str) {
                 var guid = typeHelper.guid.tryParse(str);
                 if (guid.error) {
                     throw guid.msg;
@@ -191,15 +202,19 @@ var
         },
         string: {
             format: function(text, params) {
-                var i;
+                var i, param;
                 if (params instanceof Array) {
                     for (i = 0; i < params.length; i++) {
-                        text = text.replace(new RegExp('\\{' + i + '\\}', 'gm'), params[i]);
+                        param = params[i];
+                        param = typeof param === 'object' || param instanceof Object ? JSON.stringify(param, null, 4) : param;
+                        text = text.replace(new RegExp('\\{' + i + '\\}', 'gm'), param.replace(/\$/g, '$$$$')); // escape $ sign for string.replace
                     }
                     return text;
                 }
                 for (i = 0; i < arguments.length - 1; i++) {
-                    text = text.replace(new RegExp('\\{' + i + '\\}', 'gm'), arguments[i + 1]);
+                    param = arguments[i + 1];
+                    param = typeof param === 'object' || param instanceof Object ? JSON.stringify(param, null, 4) : param;
+                    text = text.replace(new RegExp('\\{' + i + '\\}', 'gm'), param.replace(/\$/g, '$$$$'));
                 }
                 return text;
             },
@@ -227,9 +242,9 @@ var
                 return { error: true, msg: 'Given value was not recognized as a valid boolean.' };
             }
         },
-        float: {
+        number: {
             tryParse: function(value) {
-                function isNumber(n) {                    
+                function isNumber(n) {
                     return typeHelper.isNumeric(parseFloat(n)) && isFinite(n);
                 }
 
@@ -246,11 +261,11 @@ var
                     var match = /(\-)?(?:(\d*)\.)?(\d+)\:(\d+)(?:\:(\d+)\.?(\d{3})?)?/.exec(value);
                     var sign = (match[1] === '-') ? -1 : 1;
                     var d = {
-                        days: typeHelper.float.tryParse(match[DAY] || 0) * sign,
-                        hours: typeHelper.float.tryParse(match[HOUR] || 0) * sign,
-                        minutes: typeHelper.float.tryParse(match[MINUTE] || 0) * sign,
-                        seconds: typeHelper.float.tryParse(match[SECOND] || 0) * sign,
-                        milliseconds: typeHelper.float.tryParse(match[MILLISECOND] || 0) * sign
+                        days: typeHelper.number.tryParse(match[DAY] || 0) * sign,
+                        hours: typeHelper.number.tryParse(match[HOUR] || 0) * sign,
+                        minutes: typeHelper.number.tryParse(match[MINUTE] || 0) * sign,
+                        seconds: typeHelper.number.tryParse(match[SECOND] || 0) * sign,
+                        milliseconds: typeHelper.number.tryParse(match[MILLISECOND] || 0) * sign
                     };
                     var millisec = d.milliseconds +
                         d.seconds * 1e3 + // 1000
@@ -309,7 +324,7 @@ var
                 case 'datetime':
                     return typeHelper.date.tryParse(value);
                 case 'numeric':
-                    return typeHelper.float.tryParse(value);
+                    return typeHelper.number.tryParse(value);
                 case 'string':
                     return typeHelper.string.tryParse(value);
                 case 'bool':
@@ -332,14 +347,14 @@ var
                 switch (elementType) {
                     case 'checkbox':
                         if (field.length > 2) {
-                            logger.warn(typeHelper.string.format('DOM field {0} found {1} times. EA picked first for further processing.', name, field.length));
+                            logger.warn(typeHelper.string.format('DOM field {0} found {1} times - ambiguity introduced.', name, field.length));
                         }
                         return $(element).is(':checked');
                     case 'radio':
                         return $(element).filter(':checked').val();
                     default:
                         if (field.length > 1) {
-                            logger.warn(typeHelper.string.format('DOM field {0} found {1} times. EA picked first for further processing.', name, field.length));
+                            logger.warn(typeHelper.string.format('DOM field {0} found {1} times - ambiguity introduced.', name, field.length));
                         }
                         return $(element).val();
                 }
@@ -347,7 +362,7 @@ var
 
             var field, rawValue, parsedValue;
             name = prefix + name;
-            field = $(form).find(':input[name="' + name + '"]');
+            field = $(form).find(typeHelper.string.format(':input[name="{0}"]', name));
             if (field.length === 0) {
                 throw typeHelper.string.format('DOM field {0} not found.', name);
             }
@@ -417,14 +432,16 @@ var
             var i, field, referencedFields;
             referencedFields = this.referencesMap[name];
             if (referencedFields !== undefined && referencedFields !== null) {
-                logger.dump('validation started for ' + name + ' dependencies (' + referencedFields.join(', ') + ')');
+                logger.dump(typeHelper.string.format('Validation triggered for following {0} dependencies: {1}.', name, referencedFields.join(', ')));
                 i = referencedFields.length;
                 while (i--) {
-                    field = $(form).find(':input[data-val][name="' + referencedFields[i] + '"]');
+                    field = $(form).find(typeHelper.string.format(':input[data-val][name="{0}"]', referencedFields[i]));
                     if (field.length !== 0) {
                         field.valid();
                     }
                 }
+            } else {
+                logger.dump(typeHelper.string.format('No dependencies of {0} field detected.', name));
             }
         },
         binded: false,
@@ -434,12 +451,12 @@ var
                     var namespacedEvents = [];
                     $.each(api.settings.dependencyTriggers.split(/\s+/), function(idx, event) {
                         if (/\S/.test(event)) {
-                            namespacedEvents.push(event + '.expressive.annotations');
+                            namespacedEvents.push(typeHelper.string.format('{0}.expressive.annotations', event));
                         }
                     });
-                    $(form).find('input, select, textarea').on(namespacedEvents.join(' '), function (event) {
+                    $(form).find('input, select, textarea').on(namespacedEvents.join(' '), function(event) {
                         var field = $(this).attr('name');
-                        logger.dump(event.type + ' dependency validation trigger handled');
+                        logger.dump(typeHelper.string.format('Dependency validation trigger - {0} event, handled.', event.type));
                         validationHelper.validateReferences(field, form); // validate referenced fields only
                     });
                 }
@@ -448,21 +465,10 @@ var
         }
     },
 
-    logger = {
-        dump: function(message) {
-            if (api.settings.debug && console && typeof console.log === 'function')
-                console.log(message);
-        },
-        warn: function(message) {
-            if (api.settings.debug && console && typeof console.warn === 'function')
-                console.warn(message);
-        }
-    },
-
     annotations = ' abcdefghijklmnopqrstuvwxyz'; // suffixes for attributes annotating single field multiple times
 
     $.each(annotations.split(''), function() { // it would be ideal to have exactly as many handlers as there are unique annotations, but the number of annotations isn't known untill DOM is ready
-        var adapter = 'assertthat' + $.trim(this);
+        var adapter = typeHelper.string.format('assertthat{0}', $.trim(this));
         $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsmap', 'constsmap'], function(options) {
             options.rules[adapter] = {
                 prefix: modelHelper.getPrefix(options.element.name),
@@ -481,7 +487,7 @@ var
     });
 
     $.each(annotations.split(''), function() {
-        var adapter = 'requiredif' + $.trim(this);
+        var adapter = typeHelper.string.format('requiredif{0}', $.trim(this));
         $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsmap', 'constsmap', 'allowempty'], function(options) {
             options.rules[adapter] = {
                 prefix: modelHelper.getPrefix(options.element.name),
@@ -501,13 +507,13 @@ var
     });
 
     $.each(annotations.split(''), function() {
-        var method = 'assertthat' + $.trim(this);
+        var method = typeHelper.string.format('assertthat{0}', $.trim(this));
         $.validator.addMethod(method, function(value, element, params) {
             value = element.type === 'checkbox' ? element.checked : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
             if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
                 var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.prefix);
                 toolchain.registerMethods(model);
-                logger.dump('expression:\n' + params.expression + '\nexecuted for ' + element.name + ' field, within following model object context (methods hidden):\n' + JSON.stringify(model, null, 4));
+                logger.dump(typeHelper.string.format('AssertThat expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
                 if (!modelHelper.ctxEval(params.expression, model)) { // check if the assertion condition is not satisfied
                     return false; // assertion not satisfied => notify
                 }
@@ -517,14 +523,14 @@ var
     });
 
     $.each(annotations.split(''), function() {
-        var method = 'requiredif' + $.trim(this);
+        var method = typeHelper.string.format('requiredif{0}', $.trim(this));
         $.validator.addMethod(method, function(value, element, params) {
             value = element.type === 'checkbox' ? element.checked : value;
             if (value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
                 || (!/\S/.test(value) && !params.allowEmpty)) {
                 var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.prefix);
                 toolchain.registerMethods(model);
-                logger.dump('expression:\n' + params.expression + '\nexecuted for ' + element.name + ' field, within following model object context (methods hidden):\n' + JSON.stringify(model, null, 4));
+                logger.dump(typeHelper.string.format('RequiredIf expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
                 if (modelHelper.ctxEval(params.expression, model)) { // check if the requirement condition is satisfied
                     return false; // requirement confirmed => notify
                 }

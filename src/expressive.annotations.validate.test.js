@@ -150,44 +150,44 @@
         qunit.equal(result.msg, "Given value was not recognized as a valid boolean.", "random string to bool parse error message thrown");
     });
 
-    qunit.test("verify_float_parsing", function() {
+    qunit.test("verify_number_parsing", function() {
         // integer literals
-        qunit.equal(eapriv.typeHelper.float.tryParse("-1"), -1, "negative integer string to float parse succeed");
-        qunit.equal(eapriv.typeHelper.float.tryParse("0"), 0, "zero string to float parse succeed");
-        qunit.equal(eapriv.typeHelper.float.tryParse("1"), 1, "positive integer string to float parse succeed");
-        qunit.equal(eapriv.typeHelper.float.tryParse(-1), -1, "negative integer number to float parse succeed");
-        qunit.equal(eapriv.typeHelper.float.tryParse(0), 0, "zero integer number to float parse succeed");
-        qunit.equal(eapriv.typeHelper.float.tryParse(1), 1, "positive integer number to float parse succeed");
-        qunit.equal(eapriv.typeHelper.float.tryParse(0xFF), 255, "hexadecimal integer literal to float parse succeed");
+        qunit.equal(eapriv.typeHelper.number.tryParse("-1"), -1, "negative integer string to float parse succeed");
+        qunit.equal(eapriv.typeHelper.number.tryParse("0"), 0, "zero string to float parse succeed");
+        qunit.equal(eapriv.typeHelper.number.tryParse("1"), 1, "positive integer string to float parse succeed");
+        qunit.equal(eapriv.typeHelper.number.tryParse(-1), -1, "negative integer number to float parse succeed");
+        qunit.equal(eapriv.typeHelper.number.tryParse(0), 0, "zero integer number to float parse succeed");
+        qunit.equal(eapriv.typeHelper.number.tryParse(1), 1, "positive integer number to float parse succeed");
+        qunit.equal(eapriv.typeHelper.number.tryParse(0xFF), 255, "hexadecimal integer literal to float parse succeed");
 
         // floating-point literals
-        qunit.equal(eapriv.typeHelper.float.tryParse("-1.1"), -1.1, "negative floating point string to float parse succeed");
-        qunit.equal(eapriv.typeHelper.float.tryParse("1.1"), 1.1, "positive floating point string to float parse succeed");
-        qunit.equal(eapriv.typeHelper.float.tryParse(-1.1), -1.1, "negative floating point number to float parse succeed");
-        qunit.equal(eapriv.typeHelper.float.tryParse(1.1), 1.1, "positive floating point number to float parse succeed");
-        qunit.equal(eapriv.typeHelper.float.tryParse("314e-2"), 3.14, "exponential notation string to float parse succeed");
-        qunit.equal(eapriv.typeHelper.float.tryParse(314e-2), 3.14, "exponential notation number to float parse succeed");
+        qunit.equal(eapriv.typeHelper.number.tryParse("-1.1"), -1.1, "negative floating point string to float parse succeed");
+        qunit.equal(eapriv.typeHelper.number.tryParse("1.1"), 1.1, "positive floating point string to float parse succeed");
+        qunit.equal(eapriv.typeHelper.number.tryParse(-1.1), -1.1, "negative floating point number to float parse succeed");
+        qunit.equal(eapriv.typeHelper.number.tryParse(1.1), 1.1, "positive floating point number to float parse succeed");
+        qunit.equal(eapriv.typeHelper.number.tryParse("314e-2"), 3.14, "exponential notation string to float parse succeed");
+        qunit.equal(eapriv.typeHelper.number.tryParse(314e-2), 3.14, "exponential notation number to float parse succeed");
 
         // non-numeric values
-        var result = eapriv.typeHelper.float.tryParse(""); // empty string
+        var result = eapriv.typeHelper.number.tryParse(""); // empty string
         qunit.ok(result.error, "empty string to float parse error thrown");
         qunit.equal(result.msg, "Given value was not recognized as a valid float.", "empty string to float parse error message thrown");
 
-        qunit.ok(eapriv.typeHelper.float.tryParse(" ").error, "whitespace character to float parse error thrown");
-        qunit.ok(eapriv.typeHelper.float.tryParse("\t").error, "tab character to float parse error thrown");
-        qunit.ok(eapriv.typeHelper.float.tryParse("asd").error, "non-numeric character string to float parse error thrown");
-        qunit.ok(eapriv.typeHelper.float.tryParse("true").error, "boolean true to float parse error thrown");
-        qunit.ok(eapriv.typeHelper.float.tryParse("false").error, "boolean false to float parse error thrown");
-        qunit.ok(eapriv.typeHelper.float.tryParse("asd123").error, "number with preceding non-numeric characters to float parse error thrown");
-        qunit.ok(eapriv.typeHelper.float.tryParse("123asd").error, "number with trailling non-numeric characters to float parse error thrown");
-        qunit.ok(eapriv.typeHelper.float.tryParse(undefined).error, "undefined value to float parse error thrown");
-        qunit.ok(eapriv.typeHelper.float.tryParse(null).error, "null value to float parse error thrown");
-        qunit.ok(eapriv.typeHelper.float.tryParse(NaN).error, "NaN value to float parse error thrown");
-        qunit.ok(eapriv.typeHelper.float.tryParse(Infinity).error, "Infinity primitive to float parse error thrown");
-        qunit.ok(eapriv.typeHelper.float.tryParse(+Infinity).error, "positive Infinity to float parse error thrown");
-        qunit.ok(eapriv.typeHelper.float.tryParse(-Infinity).error, "negative Infinity to float parse error thrown");
-        qunit.ok(eapriv.typeHelper.float.tryParse(new Date(Date.now())).error, "date object to float parse error thrown");
-        qunit.ok(eapriv.typeHelper.float.tryParse({}).error, "empty object to float parse error thrown");
+        qunit.ok(eapriv.typeHelper.number.tryParse(" ").error, "whitespace character to float parse error thrown");
+        qunit.ok(eapriv.typeHelper.number.tryParse("\t").error, "tab character to float parse error thrown");
+        qunit.ok(eapriv.typeHelper.number.tryParse("asd").error, "non-numeric character string to float parse error thrown");
+        qunit.ok(eapriv.typeHelper.number.tryParse("true").error, "boolean true to float parse error thrown");
+        qunit.ok(eapriv.typeHelper.number.tryParse("false").error, "boolean false to float parse error thrown");
+        qunit.ok(eapriv.typeHelper.number.tryParse("asd123").error, "number with preceding non-numeric characters to float parse error thrown");
+        qunit.ok(eapriv.typeHelper.number.tryParse("123asd").error, "number with trailling non-numeric characters to float parse error thrown");
+        qunit.ok(eapriv.typeHelper.number.tryParse(undefined).error, "undefined value to float parse error thrown");
+        qunit.ok(eapriv.typeHelper.number.tryParse(null).error, "null value to float parse error thrown");
+        qunit.ok(eapriv.typeHelper.number.tryParse(NaN).error, "NaN value to float parse error thrown");
+        qunit.ok(eapriv.typeHelper.number.tryParse(Infinity).error, "Infinity primitive to float parse error thrown");
+        qunit.ok(eapriv.typeHelper.number.tryParse(+Infinity).error, "positive Infinity to float parse error thrown");
+        qunit.ok(eapriv.typeHelper.number.tryParse(-Infinity).error, "negative Infinity to float parse error thrown");
+        qunit.ok(eapriv.typeHelper.number.tryParse(new Date(Date.now())).error, "date object to float parse error thrown");
+        qunit.ok(eapriv.typeHelper.number.tryParse({}).error, "empty object to float parse error thrown");
     });
 
     qunit.test("verify_date_parsing", function() {
