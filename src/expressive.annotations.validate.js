@@ -17,7 +17,7 @@ var
             parseValue: function(value, type, defaultParseCallback) { // provide custom deserialization for values according to certain types they represents,
                 return defaultParseCallback(value, type);             // e.g. for objects when stored in non-json format or dates when stored in non-standard format (not proper for Date.parse(dateString)),
             }                                                         // i.e. suppose DOM field date string is given in dd/mm/yyyy format:
-                                                                      // parseValue = function(value, type, defaultParseCallback) { // value string is given as a raw value extracted from DOM element
+                                                                      // parseValue = function(value, type, defaultParseCallback) { // value string is given as a raw data extracted from DOM element
                                                                       //     switch (type) {
                                                                       //         case 'datetime': 
                                                                       //             var arr = value.split('/'); return new Date(arr[2], arr[1] - 1, arr[0]).getTime(); // return milliseconds since January 1, 1970, 00:00:00 UTC
@@ -202,19 +202,24 @@ var
         },
         string: {
             format: function(text, params) {
-                var i, param;
+                function makeParam(value) {
+                    value = typeHelper.isObject(value) ? JSON.stringify(value, null, 4): value;
+                    value = typeHelper.isString(value) ? value.replace(/\$/g, '$$$$'): value; // escape $ sign for string.replace()
+                    return value;
+                }
+                function applyParam(text, param) {
+                    return text.replace(new RegExp('\\{' + i + '\\}', 'gm'), param);
+                }
+
+                var i;
                 if (params instanceof Array) {
                     for (i = 0; i < params.length; i++) {
-                        param = params[i];
-                        param = typeof param === 'object' || param instanceof Object ? JSON.stringify(param, null, 4) : param;
-                        text = text.replace(new RegExp('\\{' + i + '\\}', 'gm'), param.replace(/\$/g, '$$$$')); // escape $ sign for string.replace
+                        text = applyParam(text, makeParam(params[i]));
                     }
                     return text;
                 }
                 for (i = 0; i < arguments.length - 1; i++) {
-                    param = arguments[i + 1];
-                    param = typeof param === 'object' || param instanceof Object ? JSON.stringify(param, null, 4) : param;
-                    text = text.replace(new RegExp('\\{' + i + '\\}', 'gm'), param.replace(/\$/g, '$$$$'));
+                    text = applyParam(text, makeParam(arguments[i +1]));
                 }
                 return text;
             },
@@ -308,6 +313,9 @@ var
         isDate: function(value) {
             return value instanceof Date;
         },
+        isObject: function(value) {
+            return typeof value === 'object' || value instanceof Object;
+        },
         isString: function(value) {
             return typeof value === 'string' || value instanceof String;
         },
@@ -347,14 +355,14 @@ var
                 switch (elementType) {
                     case 'checkbox':
                         if (field.length > 2) {
-                            logger.warn(typeHelper.string.format('DOM field {0} found {1} times - ambiguity introduced.', name, field.length));
+                            logger.warn(typeHelper.string.format('DOM field {0} is ambiguous.', name));
                         }
                         return $(element).is(':checked');
                     case 'radio':
                         return $(element).filter(':checked').val();
                     default:
                         if (field.length > 1) {
-                            logger.warn(typeHelper.string.format('DOM field {0} found {1} times - ambiguity introduced.', name, field.length));
+                            logger.warn(typeHelper.string.format('DOM field {0} is ambiguous.', name));
                         }
                         return $(element).val();
                 }
