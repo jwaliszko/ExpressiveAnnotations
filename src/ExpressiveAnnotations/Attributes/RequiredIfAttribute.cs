@@ -9,7 +9,7 @@ namespace ExpressiveAnnotations.Attributes
     /// <summary>
     ///     Validation attribute which indicates that annotated field is required when computed result of given logical expression is true.
     /// </summary>
-    public sealed class RequiredIfAttribute : ExpressiveAttribute
+    public class RequiredIfAttribute : ExpressiveAttribute
     {
         private const string _defaultErrorMessage = "The {0} field is required by the following logic: {1}";
 
