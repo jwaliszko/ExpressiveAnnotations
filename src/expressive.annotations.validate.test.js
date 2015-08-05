@@ -7,11 +7,8 @@
 (function($, qunit, ea, eapriv) {
     // equal( actual, expected [, message ] )
 
-    qunit.testDone(function() { // reset state for further tests
-        ea.settings.parseValue = function(value, type, defaultParseCallback) {
-            return defaultParseCallback(value, type);
-        }
-    });
+    // qunit.testDone(function() { // reset state for further tests if needed
+    // });
 
     qunit.module("type helper");
 
@@ -90,44 +87,34 @@
 
     qunit.test("verify_non_standard_date_format_parsing", function() {
         var expected = new Date("August, 11 2014").getTime();
-        var actual = ea.settings.parseValue("11/08/2014", "datetime", eapriv.typeHelper.tryParse);
+        var actual = eapriv.typeHelper.tryParse("11/08/2014", "datetime", undefined);
         qunit.notEqual(actual, expected, "default date parse fails to understand non-standard dd/mm/yyyy format");
 
-        ea.settings.parseValue = function(value, type, defaultParseCallback) {
-            switch (type) {
-                case 'datetime':
-                    var arr = value.split('/');
-                    var date = new Date(arr[2], arr[1] - 1, arr[0]);
-                    return date.getTime();
-                default:
-                    return defaultParseCallback(value, type);
-            }
-        }
-        actual = ea.settings.parseValue("11/08/2014", "datetime", eapriv.typeHelper.tryParse);
-        qunit.equal(actual, expected, "overriden parseValue properly handles non-standard dd/mm/yyyy format");
+        ea.addValueParser("nonStandard", function(value) {
+            var arr = value.split('/');
+            var date = new Date(arr[2], arr[1] - 1, arr[0]);
+            return date.getTime();
+        });
+        actual = eapriv.typeHelper.tryParse("11/08/2014", "datetime", "nonStandard");
+        qunit.equal(actual, expected, "custom value parser properly handles non-standard dd/mm/yyyy format");
     });
 
     qunit.test("verify_non_standard_object_format_parsing", function() {        
-        var result = ea.settings.parseValue("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object", eapriv.typeHelper.tryParse);
+        var result = eapriv.typeHelper.tryParse("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object", undefined);
         qunit.ok(result.error, "default object parse fails to understand non-json format");
         var expected = "Given value was not recognized as a valid JSON.";
         var actual = result.msg.substring(0, expected.length);
         qunit.equal(actual, expected); // compare only explicitly defined piece of the full message (further part is engine related)
 
-        ea.settings.parseValue = function(value, type, defaultParseCallback) {
-            switch (type) {
-                case 'object':
-                    return $.parseXML(value);
-                default:
-                    return defaultParseCallback(value, type);
-            }
-        }
+        ea.addValueParser("xml", function(value) {
+            return $.parseXML(value);
+        });
         expected = $.parseXML("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>");
-        actual = ea.settings.parseValue("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object", eapriv.typeHelper.tryParse);
+        actual = eapriv.typeHelper.tryParse("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object", "xml");
 
         // deep and not deep equality fails because of some security issue, only brief equality comparison is done
         qunit.ok(!actual.error, "XML parse success");
-        qunit.equal(actual.contentType, expected.contentType, "overriden parseValue properly handles non-json format");
+        qunit.equal(actual.contentType, expected.contentType, "custom value parser properly handles non-json format");
     });
 
     qunit.test("verify_string_parsing", function() {

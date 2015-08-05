@@ -71,24 +71,14 @@
                 });
             });
 
-            @if ("pl" == lang)
-            {
-                <text>
-                    ea.settings.parseValue = function(value, type, defaultParseCallback) { // override default parsing mechanism...
-                        switch (type) {
-                            case 'datetime': // ...for datetime type to deal with yyyy-mm-dd format
-                                if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) { // in case the value does not have the desired format...
-                                    return Date.parse(value); // ...default date parser is used
-                                }
-                                var arr = value.split('-');
-                                var date = new Date(arr[0], arr[1] - 1, arr[2]); // months are 0-based
-                                return date.getTime(); // return milliseconds
-                            default:
-                                return defaultParseCallback(value, type); // for other types run the built-in logic
-                        }
-                    }
-                </text>
-            }
+            ea.addValueParser('NonStandardDateParser', function(value) { // override default datetime parsing mechanism to deal with yyyy-mm-dd format
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) { // in case the value does not have non-standard format (here, when language set to english)...
+                    return Date.parse(value); // ...try to go with standard way (default date parser used)
+                }
+                var arr = value.split('-');
+                var date = new Date(arr[0], arr[1] - 1, arr[2]); // months are 0-based
+                return date.getTime(); // return milliseconds
+            });
 
             ea.addMethod('IsBloodType', function(group) {
                 return /^(A|B|AB|0)[\+-]$/.test(group);

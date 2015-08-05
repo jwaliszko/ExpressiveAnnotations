@@ -13,22 +13,21 @@ var
     api = { // to be accesssed from outer scope
         settings: {
             debug: false, // output debug messages to the web console (should be disabled for release code)
-            dependencyTriggers: 'change keyup', // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names) for which fields directly dependent on referenced DOM field are validated
-            parseValue: function(value, type, defaultParseCallback) { // provide custom deserialization for values according to certain types they represents,
-                return defaultParseCallback(value, type);             // e.g. for objects when stored in non-json format or dates when stored in non-standard format (not proper for Date.parse(dateString)),
-            }                                                         // i.e. suppose DOM field date string is given in dd/mm/yyyy format:
-                                                                      // parseValue = function(value, type, defaultParseCallback) { // value string is given as a raw data extracted from DOM element
-                                                                      //     switch (type) {
-                                                                      //         case 'datetime': 
-                                                                      //             var arr = value.split('/'); return new Date(arr[2], arr[1] - 1, arr[0]).getTime(); // return milliseconds since January 1, 1970, 00:00:00 UTC
-                                                                      //         default:
-                                                                      //             return defaultParseCallback(value, type); // for other types run the built-in logic
-                                                                      //     }
-                                                                      // }
+            dependencyTriggers: 'change keyup' // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names) for which fields directly dependent on referenced DOM field are validated
         },
-        addMethod: function(name, func) {
-            toolchain.addMethod(name, func);
-        },
+        addMethod: function(name, func) {    // provide custom function to be accessible for expression,
+            toolchain.addMethod(name, func); // e.g. if server-side uses following attribute: [AssertThat("IsBloodType(BloodType)")], where IsBloodType() is a custom method available at C# side, 
+        },                                   // its client-side equivalet, mainly function of the same signature (name and the number of parameters), must be also provided, i.e.
+                                             // ea.addMethod('IsBloodType', function(group) {
+                                             //     return /^(A|B|AB|0)[\+-]$/.test(group);
+                                             // });
+        addValueParser: function(name, func) {     // provide custom deserialization method for values according to certain types they represents,
+            typeHelper.addValueParser(name, func); // e.g. for objects when stored in non-json format or dates when stored in non-standard format (not proper for Date.parse(dateString)),
+        },                                         // i.e. suppose DOM field date string is given in dd/mm/yyyy format:
+                                                   // ea.addValueParser('dateparser', function(value){ // value string is given as a raw data extracted from DOM element                                                    
+                                                   //     var arr = value.split('/'); return new Date(arr[2], arr[1] - 1, arr[0]).getTime(); // return milliseconds since January 1, 1970, 00:00:00 UTC
+                                                   // });
+                                                   // finally, multiple parsers can be registered at once when, separated by whitespace, are provided to name parameter, i.e. ea.addValueParser('p1 p2', ...
         noConflict: function() {
             if (window.ea === this) {
                 window.ea = backup;
@@ -171,6 +170,14 @@ var
     },
 
     typeHelper = {
+        parsers: {},
+        addValueParser: function(name, func) {
+            $.each(name.split(/\s+/), function(idx, parser) {
+                if (/\S/.test(parser)) {
+                    typeHelper.parsers[parser] = func;
+                }
+            });
+        },
         array: {
             contains: function(arr, item) {
                 var i = arr.length;
@@ -325,8 +332,15 @@ var
         isGuid: function(value) {
             return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value); // basic check
         },
-        tryParse: function(value, type) {
-            switch (type) {
+        tryParse: function(value, type, parser) {
+            var parseValue = typeHelper.parsers[parser]; // custom parsing lookup
+            if (typeof parseValue === 'function') {
+                return parseValue(value);
+            }
+            if (parser !== undefined) {
+                logger.warn(typeHelper.string.format('Custom value parser {0} not found. Consider registration with ea.addValueParser() or remove redundant attribute.', parser));
+            }
+            switch (type) { // custom parser not provided - built-in type-detection logic runs instead
                 case 'timespan':
                     return typeHelper.timespan.tryParse(value);
                 case 'datetime':
@@ -349,7 +363,7 @@ var
         getPrefix: function(value) {
             return value.substr(0, value.lastIndexOf('.') + 1);
         },
-        extractValue: function(form, name, prefix, type) {
+        extractValue: function(form, name, prefix, type, parser) {
             function getValue(element) {
                 var elementType = $(element).attr('type');
                 switch (elementType) {
@@ -378,13 +392,13 @@ var
             if (rawValue === undefined || rawValue === null || rawValue === '') { // field value not set
                 return null;
             }
-            parsedValue = api.settings.parseValue(rawValue, type, typeHelper.tryParse); // convert field value to required type
+            parsedValue = typeHelper.tryParse(rawValue, type, parser); // convert field value to required type
             if (parsedValue.error) {
                 throw typeHelper.string.format('DOM field {0} value conversion to {1} failed. {2}', name, type, parsedValue.msg);
             }
             return parsedValue;
         },
-        deserializeObject: function(form, fieldsMap, constsMap, prefix) {
+        deserializeObject: function(form, fieldsMap, constsMap, parsersMap, prefix) {
             function buildField(fieldName, fieldValue, object) {
                 var props, parent, i;
                 props = fieldName.split('.');
@@ -400,11 +414,12 @@ var
                 parent[fieldName] = fieldValue;
             }
 
-            var model = {}, name, type, value;
+            var model = {}, name, type, value, parser;
             for (name in fieldsMap) {
                 if (fieldsMap.hasOwnProperty(name)) {
                     type = fieldsMap[name];
-                    value = this.extractValue(form, name, prefix, type);
+                    parser = parsersMap[name];
+                    value = this.extractValue(form, name, prefix, type, parser);
                     buildField(name, value, model);
                 }
             }
@@ -477,13 +492,14 @@ var
 
     $.each(annotations.split(''), function() { // it would be ideal to have exactly as many handlers as there are unique annotations, but the number of annotations isn't known untill DOM is ready
         var adapter = typeHelper.string.format('assertthat{0}', $.trim(this));
-        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsmap', 'constsmap'], function(options) {
+        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsmap', 'constsmap', 'parsersmap'], function(options) {
             options.rules[adapter] = {
                 prefix: modelHelper.getPrefix(options.element.name),
                 form: options.form,
                 expression: options.params.expression,
                 fieldsMap: $.parseJSON(options.params.fieldsmap),
-                constsMap: $.parseJSON(options.params.constsmap)
+                constsMap: $.parseJSON(options.params.constsmap),
+                parsersMap: $.parseJSON(options.params.parsersmap)
             };
             if (options.message) {
                 options.messages[adapter] = options.message;
@@ -496,13 +512,14 @@ var
 
     $.each(annotations.split(''), function() {
         var adapter = typeHelper.string.format('requiredif{0}', $.trim(this));
-        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsmap', 'constsmap', 'allowempty'], function(options) {
+        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsmap', 'constsmap', 'parsersmap', 'allowempty'], function(options) {
             options.rules[adapter] = {
                 prefix: modelHelper.getPrefix(options.element.name),
                 form: options.form,
                 expression: options.params.expression,
                 fieldsMap: $.parseJSON(options.params.fieldsmap),
                 constsMap: $.parseJSON(options.params.constsmap),
+                parsersMap: $.parseJSON(options.params.parsersmap),
                 allowEmpty: $.parseJSON(options.params.allowempty)
             };
             if (options.message) {
@@ -519,7 +536,7 @@ var
         $.validator.addMethod(method, function(value, element, params) {
             value = element.type === 'checkbox' ? element.checked : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
             if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
-                var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.prefix);
+                var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
                 toolchain.registerMethods(model);
                 logger.dump(typeHelper.string.format('AssertThat expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
                 if (!modelHelper.ctxEval(params.expression, model)) { // check if the assertion condition is not satisfied
@@ -536,7 +553,7 @@ var
             value = element.type === 'checkbox' ? element.checked : value;
             if (value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
                 || (!/\S/.test(value) && !params.allowEmpty)) {
-                var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.prefix);
+                var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
                 toolchain.registerMethods(model);
                 logger.dump(typeHelper.string.format('RequiredIf expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
                 if (modelHelper.ctxEval(params.expression, model)) { // check if the requirement condition is satisfied

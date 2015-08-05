@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Attributes;
+using ExpressiveAnnotations.MvcUnobtrusive.Attributes;
 
 namespace ExpressiveAnnotations.MvcWebSample.Models
 {
@@ -112,6 +113,8 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public string ReasonForTravel { get; set; }
 
         [UIHint("ISO8601Date")]
+        [ValueParser("NonStandardDateParser")] // serialized DOM field value, when language is set to polish, is given in yyyy-mm-dd format -
+                                               // - because built-in client-side logic cannot handle such a format, custom parser is indicated for use
         public DateTime LatestSuggestedReturnDate { get; set; }
 
         [RequiredIf("GoAbroad == true",
@@ -123,6 +126,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [AssertThat("ReturnDate < AddYears(Today(), 1)",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "NoMoreThanAYear")]
         [Display(ResourceType = typeof (Resources), Name = "ReturnDate")]
+        [ValueParser("NonStandardDateParser")]
         public DateTime? ReturnDate { get; set; }
 
         [RequiredIf("GoAbroad == true && ReturnDate > LatestSuggestedReturnDate",

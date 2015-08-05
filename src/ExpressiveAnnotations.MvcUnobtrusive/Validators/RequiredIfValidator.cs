@@ -45,6 +45,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
             rule.ValidationParameters.Add("expression", Expression);
             rule.ValidationParameters.Add("fieldsmap", FieldsMap.ToJson());
             rule.ValidationParameters.Add("constsmap", ConstsMap.ToJson());
+            rule.ValidationParameters.Add("parsersmap", ParsersMap.ToJson());
             rule.ValidationParameters.Add("allowempty", AllowEmpty.ToJson());
             yield return rule;
         }

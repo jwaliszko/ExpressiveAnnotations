@@ -71,7 +71,7 @@ namespace ExpressiveAnnotations.Attributes
             {
                 if (!_priority.HasValue)
                     throw new InvalidOperationException(
-                        String.Format("The {0} property has not been set. Use the {1} method to get the value.", "Priority", "GetPriority"));
+                        string.Format("The {0} property has not been set. Use the {1} method to get the value.", "Priority", "GetPriority"));
                 return _priority.Value;
             }
             set { _priority = value; }

@@ -10,6 +10,7 @@ using System.Web;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
+using ExpressiveAnnotations.MvcUnobtrusive.Attributes;
 
 namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
 {
@@ -37,8 +38,10 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 var attribId = string.Format("{0}.{1}", attribute.TypeId, annotatedField).ToLowerInvariant();
                 var fieldsId = string.Format("fields.{0}", attribId);
                 var constsId = string.Format("consts.{0}", attribId);
+                var parsersId = string.Format("parsers.{0}", attribId);
                 FieldsMap = HttpRuntime.Cache.Get(fieldsId) as IDictionary<string, string>;
                 ConstsMap = HttpRuntime.Cache.Get(constsId) as IDictionary<string, object>;
+                ParsersMap = HttpRuntime.Cache.Get(parsersId) as IDictionary<string, string>;
                 FieldAttributeType = string.Format("{0}.{1}", typeof(T).FullName, annotatedField).ToLowerInvariant();
 
                 if (!Cached)
@@ -53,10 +56,20 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
 
                             FieldsMap = parser.GetFields().ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value));
                             ConstsMap = parser.GetConsts();
+                            ParsersMap = metadata.ContainerType.GetProperties()
+                                .Select(p => new
+                                {
+                                    PropertyName = p.Name,
+                                    ParserAttribute = p.GetCustomAttributes(typeof (ValueParserAttribute), false)
+                                        .Cast<ValueParserAttribute>()
+                                        .SingleOrDefault()
+                                }).Where(x => x.ParserAttribute != null)
+                                .ToDictionary(x => x.PropertyName, x => x.ParserAttribute.ParserName);
 
                             AssertNoNamingCollisionsAtCorrespondingSegments();
                             HttpRuntime.Cache.Insert(fieldsId, FieldsMap);
                             HttpRuntime.Cache.Insert(constsId, ConstsMap);
+                            HttpRuntime.Cache.Insert(parsersId, ParsersMap);
 
                             attribute.Compile(metadata.ContainerType);
                         }
@@ -88,6 +101,11 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         ///     Gets names and coarse types of properties extracted from specified expression within given context.
         /// </summary>        
         protected IDictionary<string, string> FieldsMap { get; private set; }
+
+        /// <summary>
+        ///     Gets properties names and parsers registered for them via <see cref="ValueParserAttribute"/>.
+        /// </summary>
+        protected IDictionary<string, string> ParsersMap { get; private set; }
 
         /// <summary>
         ///     Gets names and values of constants extracted from specified expression within given context.
