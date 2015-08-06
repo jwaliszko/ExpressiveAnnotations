@@ -20,9 +20,6 @@ namespace ExpressiveAnnotations.MvcWebSample
             bundles.Add(new ScriptBundle("~/bundles/expressive").Include(
                         "~/Scripts/expressive.annotations*"));
 
-            bundles.Add(new ScriptBundle("~/bundles/site").Include(
-                        "~/Scripts/site.js"));
-
             bundles.Add(new StyleBundle("~/Content/css").Include("~/Content/site.css"));
 
             bundles.Add(new StyleBundle("~/Content/themes/base/css").Include(

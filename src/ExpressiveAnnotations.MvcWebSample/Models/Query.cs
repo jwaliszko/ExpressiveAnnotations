@@ -114,7 +114,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 
         [UIHint("ISO8601Date")]
         [ValueParser("NonStandardDateParser")] // serialized DOM field value, when language is set to polish, is given in yyyy-mm-dd format -
-                                               // - because built-in client-side logic cannot handle such a format, custom parser is indicated for use
+                                               // - because built-in client-side logic cannot handle such a format, custom parser is indicated for use by this attribute
         public DateTime LatestSuggestedReturnDate { get; set; }
 
         [RequiredIf("GoAbroad == true",
@@ -183,7 +183,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
                                                                 * interpret backslash control characters anymore - they lose any special significance for it (one thing to remember is 
                                                                 * usage of "" for quote escape sequence: http://msdn.microsoft.com/en-us/library/aa691090(v=vs.71).aspx).
                                                                 */
-        }        
+        }
 
         public DateTime AddYears(DateTime from, int years)
         {

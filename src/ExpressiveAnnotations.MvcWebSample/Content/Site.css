@@ -94,8 +94,9 @@ a {
 .content-wrapper {
     margin: 0 auto;
     max-width: 1100px;
+    min-height: 750px; /* hack that prevents site from collapsing on reload (probably the reason is some floated elements do not add to the height in the container element) */
 }
-
+                        
 fieldset {
     margin: 0;
 }

@@ -51,7 +51,7 @@
 
             ea.settings.debug = '@debug' === 'true';
 
-            var triggers = '@triggers';            
+            var triggers = '@triggers';
             ea.settings.dependencyTriggers = /\S/.test(triggers) ? triggers : undefined; // if not explicitly provided, default setup is: 'change keyup'
 
             $(document).ready(function() {
@@ -102,14 +102,18 @@
                 $(this).parent().find('.code').toggle('slow');
             });
 
-            if (typeof $('form').valid == 'function') { // safety check if our demo project is not set to server side validation only (no jquery.validate.js loaded)
-                $('.date').datepicker($.datepicker.regional["@lang"]).on('change', function() {
-                    $(this).valid(); // triggers the validation test on change (to avoid second click)                
-                });
-                $('input[type="checkbox"], input[type="radio"]').on('change', function() {
+            $('.date').datepicker($.datepicker.regional["@lang"]).on('change', function() {
+                if (typeof $('form').valid == 'function') { // safety check if our demo project is not set to server side validation only (no jquery.validate.js loaded)
+                    $(this).valid(); // triggers the validation test on change (to avoid second click)
+                }
+            });
+
+            $('input[type="checkbox"], input[type="radio"]').on('change', function() {
+                if (typeof $('form').valid == 'function') {
                     $(this).valid(); // triggers the validation test on change (jquery.validate.js does not trigger checkbox and radio validation on click, if such a click occurs prior to first submission attempt of entire form - later, validation is triggered 
-                });                  // (downside of this hack - validation triggered 2 times for these fields after first form submission attempt is done)
-            }
+                }
+            }); // (downside of this hack - validation triggered 2 times for these fields after first form submission attempt is done)
+
 
             $('#triggers input[type="checkbox"]').attr('disabled', @Json.Encode(!client));
         });

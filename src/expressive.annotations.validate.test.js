@@ -106,15 +106,17 @@
         var actual = result.msg.substring(0, expected.length);
         qunit.equal(actual, expected); // compare only explicitly defined piece of the full message (further part is engine related)
 
-        ea.addValueParser("xml", function(value) {
+        ea.addValueParser("xml bigxml", function(value) {
             return $.parseXML(value);
         });
         expected = $.parseXML("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>");
-        actual = eapriv.typeHelper.tryParse("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object", "xml");
+        var actual1 = eapriv.typeHelper.tryParse("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object", "xml");
+        var actual2 = eapriv.typeHelper.tryParse("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object", "bigxml");
 
         // deep and not deep equality fails because of some security issue, only brief equality comparison is done
-        qunit.ok(!actual.error, "XML parse success");
-        qunit.equal(actual.contentType, expected.contentType, "custom value parser properly handles non-json format");
+        qunit.ok(!actual1.error && !actual2.error, "XML parse success in multiple parsers");
+        qunit.equal(actual1.contentType, expected.contentType, "first custom value parser properly handles non-json format");
+        qunit.equal(actual2.contentType, expected.contentType, "second custom value parser properly handles non-json format");
     });
 
     qunit.test("verify_string_parsing", function() {

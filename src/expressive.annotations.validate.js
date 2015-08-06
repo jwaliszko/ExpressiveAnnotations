@@ -21,7 +21,7 @@ var
                                              // ea.addMethod('IsBloodType', function(group) {
                                              //     return /^(A|B|AB|0)[\+-]$/.test(group);
                                              // });
-        addValueParser: function(name, func) {     // provide custom deserialization method for values according to certain types they represents,
+        addValueParser: function(name, func) {     // provide custom deserialization methods for values of these DOM fields, which are accordingly decorated with ValueParser attribute at the server-side
             typeHelper.addValueParser(name, func); // e.g. for objects when stored in non-json format or dates when stored in non-standard format (not proper for Date.parse(dateString)),
         },                                         // i.e. suppose DOM field date string is given in dd/mm/yyyy format:
                                                    // ea.addValueParser('dateparser', function(value){ // value string is given as a raw data extracted from DOM element                                                    
@@ -338,7 +338,7 @@ var
                 return parseValue(value);
             }
             if (parser !== undefined) {
-                logger.warn(typeHelper.string.format('Custom value parser {0} not found. Consider registration with ea.addValueParser() or remove redundant attribute.', parser));
+                logger.warn(typeHelper.string.format('Custom value parser {0} not found. Consider registration with ea.addValueParser() or remove redundant ValueParser attribute from related model field.', parser));
             }
             switch (type) { // custom parser not provided - built-in type-detection logic runs instead
                 case 'timespan':
