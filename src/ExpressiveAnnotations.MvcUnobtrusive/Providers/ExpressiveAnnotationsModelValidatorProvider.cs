@@ -22,7 +22,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Providers
     public class ExpressiveAnnotationsModelValidatorProvider : DataAnnotationsModelValidatorProvider
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ExpressiveAnnotationsModelValidatorProvider"/> class.
+        ///     Initializes a new instance of the <see cref="ExpressiveAnnotationsModelValidatorProvider" /> class.
         /// </summary>
         public ExpressiveAnnotationsModelValidatorProvider()
         {

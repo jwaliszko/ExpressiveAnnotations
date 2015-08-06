@@ -44,9 +44,9 @@ namespace ExpressiveAnnotations.Attributes
         protected Parser Parser { get; private set; }
 
         /// <summary>
-        ///     Gets or sets the logical expression based on which specified condition is computed.
+        ///     Gets the logical expression based on which specified condition is computed.
         /// </summary>
-        public string Expression { get; set; }
+        public string Expression { get; private set; }
 
         /// <summary>
         ///     Gets or sets the hint, available for any concerned external components, indicating the order in which this attribute should be 
