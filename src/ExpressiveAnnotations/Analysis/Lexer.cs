@@ -56,8 +56,8 @@ namespace ExpressiveAnnotations.Analysis
 
             RegexMap = patterns.ToDictionary(
                 kvp => kvp.Key,
-                kvp => new Regex(string.Format("^{0}", kvp.Value), RegexOptions.Compiled));
-        }
+                kvp => new Regex(string.Format("^{0}", kvp.Value))); // in general, for compiled version of regular expressions their construction and initialization time is amortized out over many runs
+        }                                                            // in case of EA library interpreted version is preferred over compiled one - runs count is low (logical expressions provided to attributes aren't long that much)
 
         private Token Token { get; set; }
         private Location Location { get; set; }

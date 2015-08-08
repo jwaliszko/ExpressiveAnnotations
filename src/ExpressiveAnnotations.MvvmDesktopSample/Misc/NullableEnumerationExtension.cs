@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Reflection;
 using System.Windows.Markup;
 
 namespace ExpressiveAnnotations.MvvmDesktopSample.Misc
@@ -52,8 +53,8 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Misc
         {
             var displayAttrib = EnumType
                 .GetField(enumValue.ToString())
-                .GetCustomAttributes(typeof (DisplayAttribute), false)
-                .FirstOrDefault() as DisplayAttribute;
+                .GetCustomAttributes<DisplayAttribute>()
+                .FirstOrDefault();
 
             return displayAttrib != null ? displayAttrib.Name : enumValue.ToString();
         }

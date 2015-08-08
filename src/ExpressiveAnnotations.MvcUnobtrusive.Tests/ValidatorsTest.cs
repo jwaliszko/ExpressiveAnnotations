@@ -153,21 +153,23 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
         public void verify_validators_caching()
         {
             const int testLoops = 10;
+            var generatedCode = string.Join(" && ", Enumerable.Repeat(0, 100).Select(x => "true"));
+            
             var model = new Model();
             var metadata = GetModelMetadata(model);
             var controllerContext = GetControllerContext();
-            
-            var nonCached = MeasureExecutionTime(() => new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("true")));
+
+            var nonCached = MeasureExecutionTime(() => new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute(generatedCode)));
             for (var i = 0; i < testLoops; i++)
             {
-                var cached = MeasureExecutionTime(() => new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("true")));
+                var cached = MeasureExecutionTime(() => new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute(generatedCode)));
                 Assert.IsTrue(nonCached > cached);
             }
 
-            nonCached = MeasureExecutionTime(() => new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute("true")));
+            nonCached = MeasureExecutionTime(() => new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute(generatedCode)));
             for (var i = 0; i < testLoops; i++)
             {
-                var cached = MeasureExecutionTime(() => new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute("true")));
+                var cached = MeasureExecutionTime(() => new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute(generatedCode)));
                 Assert.IsTrue(nonCached > cached);
             }
         }

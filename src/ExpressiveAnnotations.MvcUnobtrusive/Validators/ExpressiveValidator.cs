@@ -39,6 +39,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 var fieldsId = string.Format("fields.{0}", attribId);
                 var constsId = string.Format("consts.{0}", attribId);
                 var parsersId = string.Format("parsers.{0}", attribId);
+
                 FieldsMap = HttpRuntime.Cache.Get(fieldsId) as IDictionary<string, string>;
                 ConstsMap = HttpRuntime.Cache.Get(constsId) as IDictionary<string, object>;
                 ParsersMap = HttpRuntime.Cache.Get(parsersId) as IDictionary<string, string>;
@@ -60,9 +61,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                                 .Select(p => new
                                 {
                                     PropertyName = p.Name,
-                                    ParserAttribute = p.GetCustomAttributes(typeof (ValueParserAttribute), false)
-                                        .Cast<ValueParserAttribute>()
-                                        .SingleOrDefault()
+                                    ParserAttribute = p.GetCustomAttributes(typeof (ValueParserAttribute), false) // use this version over generic one (.NET4.0 support)
+                                            .Cast<ValueParserAttribute>()
+                                            .SingleOrDefault()
                                 }).Where(x => x.ParserAttribute != null)
                                 .ToDictionary(x => x.PropertyName, x => x.ParserAttribute.ParserName);
 

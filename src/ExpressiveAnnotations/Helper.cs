@@ -175,9 +175,9 @@ namespace ExpressiveAnnotations
             
             // get member name from display attribute (if such an attribute exists) based on display name
             var props = type.GetProperties()
-                .Where(p => p.GetCustomAttributes(false)
-                    .OfType<DisplayAttribute>()
-                    .Any(a => a.GetName() == displayName))
+                .Where(p => p.GetCustomAttributes(typeof (DisplayAttribute), false) // use this version over generic one (.NET4.0 support)
+                            .Cast<DisplayAttribute>()
+                            .Any(a => a.GetName() == displayName))
                 .Select(p => p.Name).ToList();
 
             // if there is an ambiguity, return nothing

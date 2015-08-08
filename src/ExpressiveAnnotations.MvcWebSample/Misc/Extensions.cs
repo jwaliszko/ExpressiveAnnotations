@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Web.Mvc;
 using System.Web.Mvc.Html;
+using System.Reflection;
 
 namespace ExpressiveAnnotations.MvcWebSample.Misc
 {
@@ -48,7 +49,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
         private static string GetEnumDisplayText<TEnum>(TEnum value)
         {
             var field = value.GetType().GetField(value.ToString());
-            var attrib = field.GetCustomAttributes(typeof (DisplayAttribute), false).FirstOrDefault() as DisplayAttribute;
+            var attrib = field.GetCustomAttributes<DisplayAttribute>().FirstOrDefault();
             return attrib != null ? attrib.GetName() : value.ToString();
         }
     }
