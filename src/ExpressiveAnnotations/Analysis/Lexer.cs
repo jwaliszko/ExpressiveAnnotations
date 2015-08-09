@@ -51,7 +51,7 @@ namespace ExpressiveAnnotations.Analysis
                 {TokenType.INT, @"[0-9]+"},
                 {TokenType.BOOL, @"(?:true|false)"},
                 {TokenType.STRING, @"(['])(?:\\\1|.)*?\1"}, // '1234', 'John\'s cat'
-                {TokenType.FUNC, @"[a-zA-Z_]+(?:(?:\.[a-zA-Z_])?[a-zA-Z0-9_]*)*"} // field, field.value, func(...)
+                {TokenType.FUNC, @"[a-zA-Z_]+(?:(?:(?:\[[0-9]+\])?\.[a-zA-Z_])?[a-zA-Z0-9_]*)*(?:\[[0-9]+\])?"} // field, field.value, arr[0], func(...)
             };
 
             RegexMap = patterns.ToDictionary(
@@ -108,16 +108,16 @@ namespace ExpressiveAnnotations.Analysis
             {
                 var regex = kvp.Value;
                 var match = regex.Match(Expression);
+                if (!match.Success) 
+                    continue;
+                
                 var value = match.Value;
-                if (value.Any())
-                {
-                    Token = new Token(kvp.Key, ConvertTokenValue(kvp.Key, value), new Location(Location));
+                Token = new Token(kvp.Key, ConvertTokenValue(kvp.Key, value), new Location(Location));
 
-                    Expression = Expression.Substring(value.Length, out line, out column);
-                    Location.Line += line;
-                    Location.Column = line > 0 ? column : Location.Column + column;
-                    return true;
-                }
+                Expression = Expression.Substring(value.Length, out line, out column);
+                Location.Line += line;
+                Location.Column = line > 0 ? column : Location.Column + column;
+                return true;
             }
             throw new ParseErrorException("Invalid token.", new Location(Location));
         }

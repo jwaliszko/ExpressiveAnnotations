@@ -310,15 +310,26 @@
             Number: 123,
             Stability: {
                 High: 0
+            },
+            Items: {
+                7: {
+                    Items: {
+                        6: {
+                            Val: "abc"
+                        }
+                    }
+                }
             }
         }
-        var deserizedModel = eapriv.modelHelper.deserializeObject(null, null, { "Number": 123, "Stability.High": 0 }, null);
+        var deserizedModel = eapriv.modelHelper.deserializeObject(null, null, { "Number": 123, "Stability.High": 0, "Items[7].Items[6].Val": "abc" }, null);
         qunit.deepEqual(deserizedModel, model, 'model deserialized properly based on given consts map');
 
-        var expression = "Number - 23 == 100 && Stability.High == 0";
+        var expression = "Number - 23 == 100 && Stability.High == 0 && Items[7].Items[6].Val == 'abc'";
         var result = eapriv.modelHelper.ctxEval(expression, model);
+        qunit.ok(result, "expression evaluated correctly within given model context");
+
         with (model) {
-            qunit.ok(eval(expression) === result === true, "expression evaluated correctly within given model context");
+            qunit.ok(result === eval(expression), "ctxEval gives the same result as native eval");
         }
     });
 

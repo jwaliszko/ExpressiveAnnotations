@@ -400,12 +400,25 @@ var
         },
         deserializeObject: function(form, fieldsMap, constsMap, parsersMap, prefix) {
             function buildField(fieldName, fieldValue, object) {
-                var props, parent, i;
+                var props, parent, i, match, arridx;                
                 props = fieldName.split('.');
                 parent = object;
                 for (i = 0; i < props.length - 1; i++) {
                     fieldName = props[i];
-                    if (!parent[fieldName]) {
+
+                    match = /^([a-z_0-9]+)\[([0-9]+)\]$/i.exec(fieldName); // check for array element access
+                    if (match) {
+                        fieldName = match[1];
+                        arridx = match[2];
+                        if (!parent.hasOwnProperty(fieldName)) {
+                            parent[fieldName] = {};
+                        }
+                        parent[fieldName][arridx] = {};
+                        parent = parent[fieldName][arridx];
+                        continue;;
+                    }
+
+                    if (!parent.hasOwnProperty(fieldName)) {
                         parent[fieldName] = {};
                     }
                     parent = parent[fieldName];

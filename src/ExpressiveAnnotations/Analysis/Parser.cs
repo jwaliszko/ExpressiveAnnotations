@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace ExpressiveAnnotations.Analysis
 {
@@ -56,25 +57,25 @@ namespace ExpressiveAnnotations.Analysis
         /// <summary>
         ///     Parses a specified logical expression into expression tree within given context.
         /// </summary>
-        /// <typeparam name="Context">The type identifier of the context within which the expression is interpreted.</typeparam>
+        /// <typeparam name="TContext">The type identifier of the context within which the expression is interpreted.</typeparam>
         /// <param name="expression">The logical expression.</param>
         /// <returns>
         ///     A delegate containing the compiled version of the lambda expression described by created expression tree.
         /// </returns>
         /// <exception cref="System.InvalidOperationException"></exception>
-        public Func<Context, bool> Parse<Context>(string expression)
+        public Func<TContext, bool> Parse<TContext>(string expression)
         {
             lock (_locker)
             {
                 try
                 {
                     Clear();
-                    ContextType = typeof (Context);
-                    var param = Expression.Parameter(typeof (Context));
+                    ContextType = typeof (TContext);
+                    var param = Expression.Parameter(typeof (TContext));
                     ContextExpression = param;
                     Tokenize(expression);
                     var expressionTree = ParseExpression();
-                    var lambda = Expression.Lambda<Func<Context, bool>>(expressionTree, param);
+                    var lambda = Expression.Lambda<Func<TContext, bool>>(expressionTree, param);
                     return lambda.Compile();
                 }
                 catch (ParseErrorException e)
@@ -126,10 +127,10 @@ namespace ExpressiveAnnotations.Analysis
         /// <summary>
         ///     Registers function signature for the parser.
         /// </summary>
-        /// <typeparam name="Result">Type identifier of returned result.</typeparam>
+        /// <typeparam name="TResult">Type identifier of returned result.</typeparam>
         /// <param name="name">Function name.</param>
         /// <param name="func">Function lambda.</param>
-        public void AddFunction<Result>(string name, Expression<Func<Result>> func)
+        public void AddFunction<TResult>(string name, Expression<Func<TResult>> func)
         {
             PersistFunction(name, func);
         }
@@ -137,11 +138,11 @@ namespace ExpressiveAnnotations.Analysis
         /// <summary>
         ///     Registers function signature for the parser.
         /// </summary>
-        /// <typeparam name="Arg1">First argument.</typeparam>
-        /// <typeparam name="Result">Type identifier of returned result.</typeparam>
+        /// <typeparam name="TArg1">First argument.</typeparam>
+        /// <typeparam name="TResult">Type identifier of returned result.</typeparam>
         /// <param name="name">Function name.</param>
         /// <param name="func">Function lambda.</param>
-        public void AddFunction<Arg1, Result>(string name, Expression<Func<Arg1, Result>> func)
+        public void AddFunction<TArg1, TResult>(string name, Expression<Func<TArg1, TResult>> func)
         {
             PersistFunction(name, func);
         }
@@ -149,12 +150,12 @@ namespace ExpressiveAnnotations.Analysis
         /// <summary>
         ///     Registers function signature for the parser.
         /// </summary>
-        /// <typeparam name="Arg1">First argument.</typeparam>
-        /// <typeparam name="Arg2">Second argument.</typeparam>
-        /// <typeparam name="Result">Type identifier of returned result.</typeparam>
+        /// <typeparam name="TArg1">First argument.</typeparam>
+        /// <typeparam name="TArg2">Second argument.</typeparam>
+        /// <typeparam name="TResult">Type identifier of returned result.</typeparam>
         /// <param name="name">Function name.</param>
         /// <param name="func">Function lambda.</param>
-        public void AddFunction<Arg1, Arg2, Result>(string name, Expression<Func<Arg1, Arg2, Result>> func)
+        public void AddFunction<TArg1, TArg2, TResult>(string name, Expression<Func<TArg1, TArg2, TResult>> func)
         {
             PersistFunction(name, func);
         }
@@ -162,13 +163,13 @@ namespace ExpressiveAnnotations.Analysis
         /// <summary>
         ///     Registers function signature for the parser.
         /// </summary>
-        /// <typeparam name="Arg1">First argument.</typeparam>
-        /// <typeparam name="Arg2">Second argument.</typeparam>
-        /// <typeparam name="Arg3">Third argument.</typeparam>
-        /// <typeparam name="Result">Type identifier of returned result.</typeparam>
+        /// <typeparam name="TArg1">First argument.</typeparam>
+        /// <typeparam name="TArg2">Second argument.</typeparam>
+        /// <typeparam name="TArg3">Third argument.</typeparam>
+        /// <typeparam name="TResult">Type identifier of returned result.</typeparam>
         /// <param name="name">Function name.</param>
         /// <param name="func">Function lambda.</param>
-        public void AddFunction<Arg1, Arg2, Arg3, Result>(string name, Expression<Func<Arg1, Arg2, Arg3, Result>> func)
+        public void AddFunction<TArg1, TArg2, TArg3, TResult>(string name, Expression<Func<TArg1, TArg2, TArg3, TResult>> func)
         {
             PersistFunction(name, func);
         }
@@ -176,14 +177,14 @@ namespace ExpressiveAnnotations.Analysis
         /// <summary>
         ///     Registers function signature for the parser.
         /// </summary>
-        /// <typeparam name="Arg1">First argument.</typeparam>
-        /// <typeparam name="Arg2">Second argument.</typeparam>
-        /// <typeparam name="Arg3">Third argument.</typeparam>
-        /// <typeparam name="Arg4">Fourth argument.</typeparam>
-        /// <typeparam name="Result">Type identifier of returned result.</typeparam>
+        /// <typeparam name="TArg1">First argument.</typeparam>
+        /// <typeparam name="TArg2">Second argument.</typeparam>
+        /// <typeparam name="TArg3">Third argument.</typeparam>
+        /// <typeparam name="TArg4">Fourth argument.</typeparam>
+        /// <typeparam name="TResult">Type identifier of returned result.</typeparam>
         /// <param name="name">Function name.</param>
         /// <param name="func">Function lambda.</param>
-        public void AddFunction<Arg1, Arg2, Arg3, Arg4, Result>(string name, Expression<Func<Arg1, Arg2, Arg3, Arg4, Result>> func)
+        public void AddFunction<TArg1, TArg2, TArg3, TArg4, TResult>(string name, Expression<Func<TArg1, TArg2, TArg3, TArg4, TResult>> func)
         {
             PersistFunction(name, func);
         }
@@ -191,15 +192,15 @@ namespace ExpressiveAnnotations.Analysis
         /// <summary>
         ///     Registers function signature for the parser.
         /// </summary>
-        /// <typeparam name="Arg1">First argument.</typeparam>
-        /// <typeparam name="Arg2">Second argument.</typeparam>
-        /// <typeparam name="Arg3">Third argument.</typeparam>
-        /// <typeparam name="Arg4">Fourth argument.</typeparam>
-        /// <typeparam name="Arg5">Fifth argument.</typeparam>
-        /// <typeparam name="Result">Type identifier of returned result.</typeparam>
+        /// <typeparam name="TArg1">First argument.</typeparam>
+        /// <typeparam name="TArg2">Second argument.</typeparam>
+        /// <typeparam name="TArg3">Third argument.</typeparam>
+        /// <typeparam name="TArg4">Fourth argument.</typeparam>
+        /// <typeparam name="TArg5">Fifth argument.</typeparam>
+        /// <typeparam name="TResult">Type identifier of returned result.</typeparam>
         /// <param name="name">Function name.</param>
         /// <param name="func">Function lambda.</param>
-        public void AddFunction<Arg1, Arg2, Arg3, Arg4, Arg5, Result>(string name, Expression<Func<Arg1, Arg2, Arg3, Arg4, Arg5, Result>> func)
+        public void AddFunction<TArg1, TArg2, TArg3, TArg4, TArg5, TResult>(string name, Expression<Func<TArg1, TArg2, TArg3, TArg4, TArg5, TResult>> func)
         {
             PersistFunction(name, func);
         }
@@ -207,16 +208,16 @@ namespace ExpressiveAnnotations.Analysis
         /// <summary>
         ///     Registers function signature for the parser.
         /// </summary>
-        /// <typeparam name="Arg1">First argument.</typeparam>
-        /// <typeparam name="Arg2">Second argument.</typeparam>
-        /// <typeparam name="Arg3">Third argument.</typeparam>
-        /// <typeparam name="Arg4">Fourth argument.</typeparam>
-        /// <typeparam name="Arg5">Fifth argument.</typeparam>
-        /// <typeparam name="Arg6">Sixth argument.</typeparam>
-        /// <typeparam name="Result">Type identifier of returned result.</typeparam>
+        /// <typeparam name="TArg1">First argument.</typeparam>
+        /// <typeparam name="TArg2">Second argument.</typeparam>
+        /// <typeparam name="TArg3">Third argument.</typeparam>
+        /// <typeparam name="TArg4">Fourth argument.</typeparam>
+        /// <typeparam name="TArg5">Fifth argument.</typeparam>
+        /// <typeparam name="TArg6">Sixth argument.</typeparam>
+        /// <typeparam name="TResult">Type identifier of returned result.</typeparam>
         /// <param name="name">Function name.</param>
         /// <param name="func">Function lambda.</param>
-        public void AddFunction<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Result>(string name, Expression<Func<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Result>> func)
+        public void AddFunction<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TResult>(string name, Expression<Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TResult>> func)
         {
             PersistFunction(name, func);
         }
@@ -571,7 +572,7 @@ namespace ExpressiveAnnotations.Analysis
                     return ParseFunc();
                 case TokenType.EOF:
                     throw new ParseErrorException(
-                        string.Format("Expected \"null\", int, float, bool, string or func. Unexpected end of expression."),
+                        "Expected \"null\", int, float, bool, string or func. Unexpected end of expression.",
                         PeekToken().Location);
                 default:
                     throw new ParseErrorException(
@@ -656,8 +657,30 @@ namespace ExpressiveAnnotations.Analysis
             var expr = ContextExpression;
             var parts = name.Split('.');
 
+            var regex = new Regex(@"([a-zA-z_0-9]+)\[([0-9]+)\]"); // regex matching array element access
+
             foreach (var part in parts)
             {
+                var match = regex.Match(part);
+                if (match.Success)
+                {
+                    var arr = match.Groups[1].Value;
+                    var idx = int.Parse(match.Groups[2].Value);
+
+                    var arrpi = type.GetProperty(arr);
+                    if (arrpi == null)
+                        return null;
+                    if (!arrpi.PropertyType.IsArray)
+                        throw new ParseErrorException(
+                            string.Format("Identifier '{0}' does not represent an array type.", name.Substring(0, name.Length - 2 - idx.ToString().Length)),
+                            PeekToken(1).Location);
+
+                    expr = Expression.ArrayIndex(Expression.Property(expr, arrpi), Expression.Constant(idx));
+                    type = arrpi.PropertyType.GetElementType();
+
+                    continue;
+                }
+
                 var pi = type.GetProperty(part);
                 if (pi == null)
                     return null;

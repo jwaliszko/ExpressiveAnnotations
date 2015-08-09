@@ -224,6 +224,12 @@ namespace ExpressiveAnnotations.Tests
                 UlongNumber = UlongEnum.First,
                 Guid1 = Guid.NewGuid(),
                 Guid2 = Guid.Empty,
+                Array = new[]
+                {
+                    new Model {Number = -1, Array = new[] {new Model {Number = -2}}},
+                    new Model {Number = 1, Array = new[] {new Model {Number = 2}}}
+                },
+                List = new List<Model> {new Model {Number = -1}, new Model {Number = 1}},
                 SubModel = new Model
                 {
                     NDate = now.AddDays(1),
@@ -345,6 +351,9 @@ namespace ExpressiveAnnotations.Tests
                 expectedConsts.Keys.All(
                     key => parsedConsts.ContainsKey(key) &&
                            EqualityComparer<object>.Default.Equals(expectedConsts[key], parsedConsts[key])));
+
+            Assert.IsTrue(parser.Parse<Model>("Array[0] != null && Array[1] != null").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Array[0].Number + Array[0].Array[0].Number + Array[1].Number + Array[1].Array[0].Number == 0").Invoke(model));
         }
 
         [TestMethod]
@@ -1546,6 +1555,21 @@ namespace ExpressiveAnnotations.Tests
     ^--- Operator '-' cannot be applied to operands of type 'System.Nullable`1[System.TimeSpan]' and 'System.Int32'.",
                     e.Message);
             }
+
+            try
+            {
+                var model = new Model {List = new List<Model> {new Model()}};
+                Assert.IsTrue(parser.Parse<Model>("List[0] != null").Invoke(model));
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 1:
+... List[0] != null ...
+    ^--- Identifier 'List' does not represent an array type.",
+                    e.Message);
+            }
         }
 
         private class Model
@@ -1576,6 +1600,9 @@ namespace ExpressiveAnnotations.Tests
 
             public Guid? Guid1 { get; set; }
             public Guid? Guid2 { get; set; }
+
+            public Model[] Array { get; set; }
+            public List<Model> List { get; set; }
 
             public DateTime NextWeek()
             {

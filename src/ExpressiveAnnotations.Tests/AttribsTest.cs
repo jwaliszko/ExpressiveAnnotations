@@ -101,10 +101,6 @@ namespace ExpressiveAnnotations.Tests
                 var cached = MeasureExecutionTime(() => compiled.ForEach(x => x.Compile(typeof (Model))));
                 Assert.IsTrue(nonCached > cached);
             }
-            
-            //var compiled = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.CompileExpressiveAttributes()).ToList();
-            //var compiled = Assembly.GetExecutingAssembly().CompileExpressiveAttributes().ToList();
-            //var compiled = typeof (Model).CompileExpressiveAttributes().ToList());
         }
 
         private long MeasureExecutionTime(Action action)
@@ -157,17 +153,12 @@ namespace ExpressiveAnnotations.Tests
             }
         }
 
-        public static IEnumerable<ExpressiveAttribute> CompileExpressiveAttributes(this Assembly assembly)
-        {
-            return assembly.GetTypes().SelectMany(t => t.CompileExpressiveAttributes());
-        }
-
         public static IEnumerable<ExpressiveAttribute> CompileExpressiveAttributes(this Type type)
         {
             var properties = type.GetProperties()
                 .Where(p => Attribute.IsDefined(p, typeof (ExpressiveAttribute)));
-
             var attributes = new List<ExpressiveAttribute>();
+
             foreach (var prop in properties)
             {
                 var attribs = prop.GetCustomAttributes<ExpressiveAttribute>().ToList();

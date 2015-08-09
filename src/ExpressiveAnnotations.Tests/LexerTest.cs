@@ -18,12 +18,13 @@ namespace ExpressiveAnnotations.Tests
                       && (
                              (NextCountry != 'european country' && Compare(NextCountry, Country.Name) == 0)
                              || (Age > 24 && Age <= 55.5)
-                             && (1+2*2>1-2/2)
+                             
+                             &&(1.1+2*2>1-2/2+Array[0].Value)
                          )";
 
             var lexer = new Lexer();
             var tokens = lexer.Analyze(expression).ToArray();
-            Assert.AreEqual(45, tokens.Length);
+            Assert.AreEqual(47, tokens.Length);
             Assert.AreEqual("GoAbroad", tokens[0].Value);
             Assert.AreEqual(TokenType.FUNC, tokens[0].Type);
             Assert.AreEqual("==", tokens[1].Value);
@@ -86,8 +87,8 @@ namespace ExpressiveAnnotations.Tests
             Assert.AreEqual(TokenType.AND, tokens[29].Type);
             Assert.AreEqual("(", tokens[30].Value);
             Assert.AreEqual(TokenType.LEFT_BRACKET, tokens[30].Type);
-            Assert.AreEqual(1, tokens[31].Value);
-            Assert.AreEqual(TokenType.INT, tokens[31].Type);
+            Assert.AreEqual(1.1, tokens[31].Value);
+            Assert.AreEqual(TokenType.FLOAT, tokens[31].Type);
             Assert.AreEqual("+", tokens[32].Value);
             Assert.AreEqual(TokenType.ADD, tokens[32].Type);
             Assert.AreEqual(2, tokens[33].Value);
@@ -108,12 +109,16 @@ namespace ExpressiveAnnotations.Tests
             Assert.AreEqual(TokenType.DIV, tokens[40].Type);
             Assert.AreEqual(2, tokens[41].Value);
             Assert.AreEqual(TokenType.INT, tokens[41].Type);
-            Assert.AreEqual(")", tokens[42].Value);
-            Assert.AreEqual(TokenType.RIGHT_BRACKET, tokens[42].Type);
-            Assert.AreEqual(")", tokens[43].Value);
-            Assert.AreEqual(TokenType.RIGHT_BRACKET, tokens[43].Type);
-            Assert.AreEqual(string.Empty, tokens[44].Value);
-            Assert.AreEqual(TokenType.EOF, tokens[44].Type);
+            Assert.AreEqual("+", tokens[42].Value);
+            Assert.AreEqual(TokenType.ADD, tokens[42].Type);
+            Assert.AreEqual("Array[0].Value", tokens[43].Value);
+            Assert.AreEqual(TokenType.FUNC, tokens[43].Type);
+            Assert.AreEqual(")", tokens[44].Value);
+            Assert.AreEqual(TokenType.RIGHT_BRACKET, tokens[44].Type);
+            Assert.AreEqual(")", tokens[45].Value);
+            Assert.AreEqual(TokenType.RIGHT_BRACKET, tokens[45].Type);
+            Assert.AreEqual(string.Empty, tokens[46].Value);
+            Assert.AreEqual(TokenType.EOF, tokens[46].Type);
         }
 
         [TestMethod]
@@ -243,11 +248,24 @@ namespace ExpressiveAnnotations.Tests
             AssertToken("a1.a2.a3", "a1.a2.a3", TokenType.FUNC);
             AssertToken("_._._", "_._._", TokenType.FUNC);
             AssertToken("_123", "_123", TokenType.FUNC);
+            AssertToken("arr[0]", "arr[0]", TokenType.FUNC);
+            AssertToken("a[0]._", "a[0]._", TokenType.FUNC);
+            AssertToken("a[0].a", "a[0].a", TokenType.FUNC);
+            AssertToken("a[0].a1", "a[0].a1", TokenType.FUNC);
+            AssertToken("__[0].__[1]", "__[0].__[1]", TokenType.FUNC);
+            AssertToken("_[0].a[1].a1[2]", "_[0].a[1].a1[2]", TokenType.FUNC);
 
             AssertNotToken("1", TokenType.FUNC);
+            AssertNotToken("a.", TokenType.FUNC);
             AssertNotToken("a..a", TokenType.FUNC);
             AssertNotToken("a.1", TokenType.FUNC);
             AssertNotToken("a.+", TokenType.FUNC);
+            AssertNotToken("foo()", TokenType.FUNC); // brackets are not part of the token
+            AssertNotToken("[]", TokenType.FUNC);
+            AssertNotToken("[0]", TokenType.FUNC);
+            AssertNotToken("_[0].1", TokenType.FUNC);
+            AssertNotToken("_[0]_", TokenType.FUNC);
+            AssertNotToken("_[0][0]", TokenType.FUNC);
         }
 
         private static void AssertToken(string expression, object value, TokenType type)
@@ -255,7 +273,7 @@ namespace ExpressiveAnnotations.Tests
             var lexer = new Lexer();
             var tokens = lexer.Analyze(expression).ToArray();
 
-            Assert.AreEqual(2, tokens.Length);
+            Assert.AreEqual(2, tokens.Length); // tested token + EOF token
             Assert.AreEqual(value, tokens[0].Value);
             Assert.AreEqual(type, tokens[0].Type);
             Assert.AreEqual(TokenType.EOF, tokens[1].Type);

@@ -125,7 +125,7 @@ namespace ExpressiveAnnotations.Analysis
         STRING,
 
         /// <summary>
-        ///     Function (i.e. SomeProperty, SomeType.CONST, SomeEnumType.SomeValue, SomeFunction(...)).
+        ///     Function (i.e. SomeProperty, SomeType.CONST, SomeEnumType.SomeValue, SomeArray[0], SomeFunction(...)).
         /// </summary>
         FUNC,
 
