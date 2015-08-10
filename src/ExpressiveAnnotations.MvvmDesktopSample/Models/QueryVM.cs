@@ -8,7 +8,7 @@ using ExpressiveAnnotations.Attributes;
 
 namespace ExpressiveAnnotations.MvvmDesktopSample.Models
 {
-    public class QueryVM : BaseVM
+    public class QueryVM : ExpressiveVM
     {
         public const string SIMONS_CAT = @"Simon's cat named ""\\""
  (Double Backslash)";
@@ -17,7 +17,6 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
         private bool _agreeForContact;
         private bool _awareOfTheRisks;
         private string _bloodType;
-        private ContactVM _contactDetails;
         private string _country;
         private Guid? _flightId;
         private bool _goAbroad;
@@ -84,7 +83,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             set
             {
                 _goAbroad = value;
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -95,7 +94,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             set
             {
                 _age = value;
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -107,7 +106,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             set
             {
                 _passportNumber = value;
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -117,7 +116,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             set
             {
                 _country = value;
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -127,7 +126,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             set
             {
                 _nextCountry = value;
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -144,7 +143,7 @@ GoAbroad == true
             set
             {
                 _reasonForTravel = value;
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -160,7 +159,7 @@ GoAbroad == true
             set
             {
                 _returnDate = value;
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -171,7 +170,7 @@ GoAbroad == true
             set
             {
                 _reasonForLongTravel = value;
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -182,7 +181,7 @@ GoAbroad == true
             set
             {
                 _politicalStability = value;
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -198,7 +197,7 @@ GoAbroad == true
             set
             {
                 _awareOfTheRisks = value;
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -208,7 +207,7 @@ GoAbroad == true
             set
             {
                 _sportType = value;
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -220,7 +219,7 @@ GoAbroad == true
             set
             {
                 _bloodType = value;
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -231,18 +230,20 @@ GoAbroad == true
             set
             {
                 _agreeForContact = value;
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
-        [RequiredIf("AgreeForContact == true && (ContactDetails.Email != null || ContactDetails.Phone != null)")]
+        [RequiredIf(@"AgreeForContact == true
+&& (ContactDetails.Email != null || ContactDetails.Phone != null)
+&& (ContactDetails.Addresses[0].Details != null || ContactDetails.Addresses[1].Details != null)")]
         public bool? ImmediateContact
         {
             get { return _immediateContact; }
             set
             {
                 _immediateContact = value;
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -255,39 +256,11 @@ FlightId != Guid('00000000-0000-0000-0000-000000000000')
             set
             {
                 _flightId = value;
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
-        public ContactVM ContactDetails
-        {
-            get { return _contactDetails; }
-            set
-            {
-                _contactDetails = value;
-                OnPropertiesChanged();
-            }
-        }
-
-        private void OnPropertiesChanged()
-        {
-            OnPropertyChanged(() => GoAbroad);
-            OnPropertyChanged(() => Age);
-            OnPropertyChanged(() => PassportNumber);
-            OnPropertyChanged(() => Country);
-            OnPropertyChanged(() => NextCountry);
-            OnPropertyChanged(() => ReasonForTravel);
-            OnPropertyChanged(() => ReturnDate);
-            OnPropertyChanged(() => ReasonForLongTravel);
-            OnPropertyChanged(() => PoliticalStability);
-            OnPropertyChanged(() => AwareOfTheRisks);
-            OnPropertyChanged(() => SportType);
-            OnPropertyChanged(() => BloodType);
-            OnPropertyChanged(() => AgreeForContact);
-            OnPropertyChanged(() => ImmediateContact);
-            OnPropertyChanged(() => FlightId);
-            OnPropertyChanged(() => ContactDetails);
-        }
+        public ContactVM ContactDetails { get; private set; }
 
         public bool IsBloodType(string group)
         {

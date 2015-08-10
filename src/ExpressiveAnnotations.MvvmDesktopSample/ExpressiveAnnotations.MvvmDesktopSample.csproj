@@ -33,6 +33,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>favicon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -57,18 +60,25 @@
     <Compile Include="Misc\NullableEnumerationExtension.cs" />
     <Compile Include="Misc\StringMatchToBooleanConverter.cs" />
     <Compile Include="Misc\FormatStringConverter.cs" />
+    <Compile Include="Models\AddressVM.cs" />
+    <Compile Include="Views\AddressView.xaml.cs">
+      <DependentUpon>AddressView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ContactView.xaml.cs">
       <DependentUpon>ContactView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\MainWindowVM.cs" />
     <Compile Include="Models\ContactVM.cs" />
-    <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Views\QueryView.xaml.cs">
       <DependentUpon>QueryView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\QueryVM.cs" />
     <Compile Include="Models\Stability.cs" />
-    <Compile Include="Models\BaseVM.cs" />
+    <Compile Include="Models\ExpressiveVM.cs" />
+    <Page Include="Views\AddressView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\ContactView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -128,6 +138,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="screenshot.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="favicon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -3,8 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:views="clr-namespace:ExpressiveAnnotations.MvvmDesktopSample.Views"
         Title="ExpressiveAnnotations - annotation-based conditional validation"
-        Width="600" Height="585"
-        MinWidth="439" MinHeight="585">
+        Icon="./../favicon.ico"
+        Width="600" Height="645"
+        MinWidth="439" MinHeight="645">
 
     <Grid>
         <Grid.RowDefinitions>

@@ -2,10 +2,15 @@
 
 namespace ExpressiveAnnotations.MvvmDesktopSample.Models
 {
-    public class ContactVM : BaseVM
+    public class ContactVM : ExpressiveVM
     {
         private string _email;
         private string _phone;
+
+        public ContactVM()
+        {
+            Addresses = new[] { new AddressVm { Type = "Home address" }, new AddressVm { Type = "Office address" } };
+        }
 
         [RequiredIf("Phone == null")]
         [AssertThat("IsEmail(Email)")]
@@ -15,7 +20,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             set
             {
                 _email = value;
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
@@ -28,14 +33,10 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             set
             {
                 _phone = value;
-                OnPropertiesChanged();
+                OnPropertyChanged();
             }
         }
 
-        private void OnPropertiesChanged()
-        {
-            OnPropertyChanged(() => Email);
-            OnPropertyChanged(() => Phone);
-        }
+        public AddressVm[] Addresses { get; private set; }
     }
 }

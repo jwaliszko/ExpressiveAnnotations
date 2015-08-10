@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:views="clr-namespace:ExpressiveAnnotations.MvvmDesktopSample.Views"
              mc:Ignorable="d" d:DesignWidth="380">
 
     <Grid>
@@ -12,6 +13,7 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -25,5 +27,13 @@
                    Text="Phone" />
         <TextBox Grid.Row="1" Grid.Column="1"
                  Text="{Binding Phone, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, TargetNullValue={x:Static sys:String.Empty}}" />
+
+        <ItemsControl ItemsSource="{Binding Addresses}" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <views:AddressView DataContext="{Binding}" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </Grid>
 </UserControl>
