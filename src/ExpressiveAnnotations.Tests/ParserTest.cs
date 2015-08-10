@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -229,7 +230,7 @@ namespace ExpressiveAnnotations.Tests
                     new Model {Number = -1, Array = new[] {new Model {Number = -2}}},
                     new Model {Number = 1, Array = new[] {new Model {Number = 2}}}
                 },
-                List = new List<Model> {new Model {Number = -1}, new Model {Number = 1}},
+                Collection = new CustomCollection<Model>(),                
                 SubModel = new Model
                 {
                     NDate = now.AddDays(1),
@@ -354,6 +355,14 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.IsTrue(parser.Parse<Model>("Array[0] != null && Array[1] != null").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("Array[0].Number + Array[0].Array[0].Number + Array[1].Number + Array[1].Array[0].Number == 0").Invoke(model));
+
+            model.Collection[0] = new Model {Number = -1, Collection = new CustomCollection<Model>()};
+            model.Collection[0].Collection[0] = new Model {Number = -2};
+            model.Collection[1] = new Model {Number = 1, Collection = new CustomCollection<Model>()};
+            model.Collection[1].Collection[0] = new Model {Number = 2};
+
+            Assert.IsTrue(parser.Parse<Model>("Collection[0] != null && Collection[1] != null").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Collection[0].Number + Collection[0].Collection[0].Number + Collection[1].Number + Collection[1].Collection[0].Number == 0").Invoke(model));
         }
 
         [TestMethod]
@@ -1558,16 +1567,16 @@ namespace ExpressiveAnnotations.Tests
 
             try
             {
-                var model = new Model {List = new List<Model> {new Model()}};
-                Assert.IsTrue(parser.Parse<Model>("List[0] != null").Invoke(model));
+                var model = new Model {Items = new List<Model> {new Model()}};
+                Assert.IsTrue(parser.Parse<Model>("Items[0] != null").Invoke(model));
             }
             catch (Exception e)
             {
                 Assert.IsTrue(e is InvalidOperationException);
                 Assert.AreEqual(
                     @"Parse error on line 1, column 1:
-... List[0] != null ...
-    ^--- Identifier 'List' does not represent an array type.",
+... Items[0] != null ...
+    ^--- Identifier 'Items' either does not represent an array type or does not declare indexer.",
                     e.Message);
             }
         }
@@ -1601,8 +1610,9 @@ namespace ExpressiveAnnotations.Tests
             public Guid? Guid1 { get; set; }
             public Guid? Guid2 { get; set; }
 
-            public Model[] Array { get; set; }
-            public List<Model> List { get; set; }
+            public Model[] Array { get; set; } // array
+            public IEnumerable<Model> Items { get; set; } // collection without indexer
+            public CustomCollection<Model> Collection { get; set; } // collection with indexer, like e.g List<>
 
             public DateTime NextWeek()
             {
@@ -1698,5 +1708,17 @@ namespace ExpressiveAnnotations.Tests
 
         private class FirstDerived : ModelBase { }
         private class SecondDerived : ModelBase { }
+
+        private class CustomCollection<T>
+        {
+            private readonly T[] _elements = new T[100]; // backing store
+
+            [IndexerName("Element")] // change the default indexer property name (Item)
+            public T this[int index]
+            {
+                get { return _elements[index]; }
+                set { _elements[index] = value; }
+            }
+        }
     }
 }

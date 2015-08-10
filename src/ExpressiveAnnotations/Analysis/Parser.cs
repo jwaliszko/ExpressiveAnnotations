@@ -661,27 +661,42 @@ namespace ExpressiveAnnotations.Analysis
 
             foreach (var part in parts)
             {
-                var match = regex.Match(part);
+                PropertyInfo pi;
+
+                var match = regex.Match(part);                
                 if (match.Success)
                 {
-                    var arr = match.Groups[1].Value;
+                    var partName = match.Groups[1].Value;                    
                     var idx = int.Parse(match.Groups[2].Value);
 
-                    var arrpi = type.GetProperty(arr);
-                    if (arrpi == null)
+                    pi = type.GetProperty(partName);
+                    if (pi == null)
                         return null;
-                    if (!arrpi.PropertyType.IsArray)
-                        throw new ParseErrorException(
-                            string.Format("Identifier '{0}' does not represent an array type.", name.Substring(0, name.Length - 2 - idx.ToString().Length)),
-                            PeekToken(1).Location);
 
-                    expr = Expression.ArrayIndex(Expression.Property(expr, arrpi), Expression.Constant(idx));
-                    type = arrpi.PropertyType.GetElementType();
+                    var property = Expression.Property(expr, pi);
+                    if (pi.PropertyType.IsArray) // check if we have an array type
+                    {
+                        expr = Expression.ArrayIndex(property, Expression.Constant(idx));
+                        type = pi.PropertyType.GetElementType();
+                        continue;
+                    }
 
-                    continue;
+                    // not an array - check if the type declares indexer otherwise
+                    pi = pi.PropertyType.GetProperties().FirstOrDefault(p => p.GetIndexParameters().Any()); // look for indexer property (usually called Item...)
+                    if (pi != null)
+                    {
+                        expr = Expression.Property(property, pi.Name, Expression.Constant(idx));
+                        type = pi.PropertyType;
+                        continue;
+                    }
+
+                    throw new ParseErrorException(
+                        string.Format("Identifier '{0}' either does not represent an array type or does not declare indexer.",
+                            name.Substring(0, name.Length - 2 - idx.ToString().Length)),
+                        PeekToken(1).Location);
                 }
 
-                var pi = type.GetProperty(part);
+                pi = type.GetProperty(part);
                 if (pi == null)
                     return null;
 
