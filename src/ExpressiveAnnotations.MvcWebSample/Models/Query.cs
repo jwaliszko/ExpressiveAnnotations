@@ -14,6 +14,11 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public const string SIMONS_CAT = @"Simon's cat named ""\\""
  (Double Backslash)";
 
+        public Query()
+        {
+            ContactDetails = new Contact();
+        }
+
         public IEnumerable<SelectListItem> Sports
         {
             get
@@ -163,8 +168,10 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "AgreeForContact")]
         public bool AgreeForContact { get; set; }
 
-        [RequiredIf("AgreeForContact == true && (ContactDetails.Email != null || ContactDetails.Phone != null)",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ImmediateContactRequired")]
+        [RequiredIf(@"AgreeForContact == true
+                      && (ContactDetails.Email != null || ContactDetails.Phone != null)
+                      && (ContactDetails.Addresses[0].Details != null || ContactDetails.Addresses[1].Details != null)",
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "ImmediateContactRequired")]
         [Display(ResourceType = typeof (Resources), Name = "ImmediateContact")]
         public bool? ImmediateContact { get; set; }
 

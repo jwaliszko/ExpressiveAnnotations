@@ -126,6 +126,7 @@
     <Compile Include="Misc\TriggersManager.cs" />
     <Compile Include="Misc\ValidationManager.cs" />
     <Compile Include="Misc\CultureManager.cs" />
+    <Compile Include="Models\Address.cs" />
     <Compile Include="Models\Contact.cs" />
     <Compile Include="Models\Query.cs" />
     <Compile Include="Models\Stability.cs" />
@@ -274,6 +275,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Shared\DisplayTemplates\IntArray.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Home\EditorTemplates\Address.cshtml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

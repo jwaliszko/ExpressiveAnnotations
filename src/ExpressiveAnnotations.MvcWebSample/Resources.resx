@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AddressDetailsFormatInvalid" xml:space="preserve">
+    <value>Address format should start from 'Street' prefix.</value>
+  </data>
   <data name="Age" xml:space="preserve">
     <value>Age</value>
   </data>
@@ -189,6 +192,9 @@
   <data name="High" xml:space="preserve">
     <value>High</value>
   </data>
+  <data name="HomeAddress" xml:space="preserve">
+    <value>Home address</value>
+  </data>
   <data name="ImmediateContact" xml:space="preserve">
     <value>Immediate contact</value>
   </data>
@@ -218,6 +224,9 @@
   </data>
   <data name="Normal" xml:space="preserve">
     <value>Normal</value>
+  </data>
+  <data name="OfficeAddress" xml:space="preserve">
+    <value>Office address</value>
   </data>
   <data name="Other" xml:space="preserve">
     <value>Other</value>
@@ -269,6 +278,9 @@
   </data>
   <data name="SportType" xml:space="preserve">
     <value>Sports you like the most</value>
+  </data>
+  <data name="StreetPrefix" xml:space="preserve">
+    <value>Street</value>
   </data>
   <data name="Uncertain" xml:space="preserve">
     <value>Uncertain</value>

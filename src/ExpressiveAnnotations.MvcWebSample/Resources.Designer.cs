@@ -61,6 +61,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Address format should start from &apos;Street&apos; prefix..
+        /// </summary>
+        public static string AddressDetailsFormatInvalid {
+            get {
+                return ResourceManager.GetString("AddressDetailsFormatInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Age.
         /// </summary>
         public static string Age {
@@ -277,6 +286,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Home address.
+        /// </summary>
+        public static string HomeAddress {
+            get {
+                return ResourceManager.GetString("HomeAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Immediate contact.
         /// </summary>
         public static string ImmediateContact {
@@ -363,6 +381,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         public static string Normal {
             get {
                 return ResourceManager.GetString("Normal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Office address.
+        /// </summary>
+        public static string OfficeAddress {
+            get {
+                return ResourceManager.GetString("OfficeAddress", resourceCulture);
             }
         }
         
@@ -516,6 +543,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         public static string SportType {
             get {
                 return ResourceManager.GetString("SportType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Street.
+        /// </summary>
+        public static string StreetPrefix {
+            get {
+                return ResourceManager.GetString("StreetPrefix", resourceCulture);
             }
         }
         

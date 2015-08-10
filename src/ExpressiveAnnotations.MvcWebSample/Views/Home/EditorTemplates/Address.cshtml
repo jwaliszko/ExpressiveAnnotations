@@ -1,0 +1,9 @@
+﻿@model ExpressiveAnnotations.MvcWebSample.Models.Address
+
+@Html.Label(Model.Type, new { @class = "inline prefix" })
+@Html.EditorFor(model => model.Details)
+@Html.ValidationMessageFor(model => model.Details)
+
+@*hidden backing fields*@
+@Html.HiddenFor(model => model.StreetPrefix)
+@Html.HiddenFor(model => model.Type)

@@ -21,9 +21,23 @@
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>
-            @Html.LabelFor(model => model.Phone, new { @class = "inline prefix" })
+            @Html.LabelFor(model => model.Phone, new {@class = "inline prefix"})
             @Html.EditorFor(model => model.Phone)
             @Html.ValidationMessageFor(model => model.Phone)
         </div>
     </li>
+
+@for (var i = 0; i < Model.Addresses.Count; i++)
+{
+    <li>
+        <pre class="code">
+[AssertThat("StartsWith(Details, StreetPrefix)")]
+</pre>
+        <pre class="action">[show attribute]</pre>
+        <div>
+            @Html.EditorFor(model => Model.Addresses[i])
+        </div>
+    </li>
+}
+
 </ol>

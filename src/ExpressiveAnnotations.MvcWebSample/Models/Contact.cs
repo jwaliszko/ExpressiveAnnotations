@@ -1,10 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using ExpressiveAnnotations.Attributes;
 
 namespace ExpressiveAnnotations.MvcWebSample.Models
 {
     public class Contact
     {
+        public Contact()
+        {
+            Addresses = new List<Address> { new Address { Type = Resources.HomeAddress }, new Address { Type = Resources.OfficeAddress } };
+        }
+
         [RequiredIf("Phone == null",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "EmailOrPhoneRequired")]
         [AssertThat("IsEmail(Email)",
@@ -21,5 +27,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "RangeViolated")]
         [Display(ResourceType = typeof (Resources), Name = "Phone")]
         public string Phone { get; set; }
+
+        public List<Address> Addresses { get; set; }
     }
 }

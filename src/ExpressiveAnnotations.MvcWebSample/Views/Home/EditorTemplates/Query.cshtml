@@ -165,7 +165,9 @@
     </li>
     <li>
         <pre class="code">
-[RequiredIf("AgreeForContact == true && (ContactDetails.Email != null || ContactDetails.Phone != null)")]
+[RequiredIf(@@"AgreeForContact == true
+              && (ContactDetails.Email != null || ContactDetails.Phone != null)
+              && (ContactDetails.Addresses[0].Details != null || ContactDetails.Addresses[1].Details != null))]
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>

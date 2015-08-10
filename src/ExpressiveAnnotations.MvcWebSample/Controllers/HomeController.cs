@@ -15,8 +15,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
                 NextCountry = "Other",
                 SportType = "Extreme",
                 AgreeForContact = false,
-                LatestSuggestedReturnDate = DateTime.Today.AddMonths(1),
-                ContactDetails = new Contact()
+                LatestSuggestedReturnDate = DateTime.Today.AddMonths(1)
             };
 
             ViewBag.Success = TempData["Success"];
