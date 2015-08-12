@@ -7,7 +7,7 @@ using System;
 namespace ExpressiveAnnotations.MvcUnobtrusive.Attributes
 {
     /// <summary>
-    ///     Provides a hint for client-side script referring to parser name, which should be used for DOM field value deserialization.
+    ///     Provides a hint for client-side script pointing at parser name, which should be used for DOM field value deserialization.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
     public sealed class ValueParserAttribute : Attribute

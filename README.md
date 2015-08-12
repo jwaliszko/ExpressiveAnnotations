@@ -20,10 +20,13 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
    - [Built-in functions](#built-in-functions)
  - [What about the support of ASP.NET MVC client-side validation?](#what-about-the-support-of-aspnet-mvc-client-side-validation)
  - [Frequently asked questions](#frequently-asked-questions)
-   - [What if there is no built-in function I need?](#what-if-there-is-no-built-in-function-i-need)
-   - [How to cope with dates given in non-standard formats?](#how-to-cope-with-dates-given-in-non-standard-formats)
-   - [What if `ea` variable is already used by another library?](#what-if-ea-variable-is-already-used-by-another-library)
-   - [How to control frequency of dependent fields validation?](#how-to-control-frequency-of-dependent-fields-validation)
+   - [Is it possible to compile all usages of annotations at once?](#is-it-possible-to-compile-all-usages-of-annotations-at-once) <sup>(re server-side)</sup>
+   - [What if there is no built-in function I need?](#what-if-there-is-no-built-in-function-i-need) <sup>(re client and server-side)</sup>
+   - [How to cope with values of custom types?](#how-to-cope-with-values-of-custom-types) <sup>(re client-side)</sup>
+   - [How to cope with dates given in non-standard formats?](#how-to-cope-with-dates-given-in-non-standard-formats) <sup>(re client-side)</sup>
+   - [What if `ea` variable is already used by another library?](#what-if-ea-variable-is-already-used-by-another-library) <sup>(re client-side)</sup>
+   - [How to control frequency of dependent fields validation?](#how-to-control-frequency-of-dependent-fields-validation) <sup>(re client-side)</sup>
+   - [How to boost web console verbosity for debug purposes?](#how-to-boost-web-console-verbosity-for-debug-purposes) <sup>(re client-side)</sup>
    - [What if my question is not covered by FAQ section?](#what-if-my-question-is-not-covered-by-faq-section)
  - [Installation](#installation)
  - [Contributors](#contributors)
@@ -80,11 +83,11 @@ Finally, take a brief look at following construction:
 public string ReasonForTravel { get; set; }
 ```
 
-Restriction above is slightly more complex than its predecessors, but still can be quickly understood (reason for travel has to be provided if you plan to go abroad and: want to visit the same definite country twice, or are between 25 and 55 years old).
+Restriction above is slightly more complex than its predecessors, but still can be quickly understood (reason for travel has to be provided if you plan to go abroad and, either want to visit the same definite country twice, or are between 25 and 55).
 
 ###<a id="declarative-vs-imperative-programming---what-is-it-about">Declarative vs. imperative programming - what is it about?</a>
 
-With **declarative** programming you write logic that expresses *what* you want, but not necessarily *how* to achieve it. You declare your desired results, but not the necessarily step-by-step.
+With **declarative** programming you write logic that expresses *what* you want, but not necessarily *how* to achieve it. You declare your desired results, but not step-by-step.
 
 In our case, this concept is materialized by attributes, e.g.
 ```C#
@@ -92,6 +95,8 @@ In our case, this concept is materialized by attributes, e.g.
     ErrorMessage = "If you plan to travel abroad, why visit the same country twice?")]
 public string ReasonForTravel { get; set; }
 ```
+Here, we're saying "Ensure the field is required according to given condition."
+
 With **imperative** programming you define the control flow of the computation which needs to be done. You tell the compiler what you want, exactly step by step.
 
 If we choose this way instead of model fields decoration, it has negative impact on the complexity of the code. Logic responsible for validation is now implemented somewhere else in our application, e.g. inside controllers actions instead of model class itself:
@@ -108,6 +113,7 @@ If we choose this way instead of model fields decoration, it has negative impact
     return View("Home", model);
 }
 ```
+Here instead, we're saying "If condition is met, return some view. Otherwise, add error message to state container. Return other view."
 
 ###<a id="how-to-construct-conditional-validation-attributes">How to construct conditional validation attributes?</a>
 
@@ -161,7 +167,8 @@ Logical expressions should be built according to the syntax defined by grammar, 
 * binary operators: `||`, `&&`, `!`,
 * relational operators: `==`, `!=`,`<`, `<=`, `>`, `>=`,
 * arithmetic operators: `+`, `-`, `*`, `/`,	
-* brackets: `(`, `)`,
+* curly brackets: `(`, `)`,
+* square brackets: `[`, `]`,
 * alphanumeric characters with the support of `,`, `.`, `_`, `'` and whitespaces, used to synthesize suitable literals:
   * null literal: `null`, 
   * integer number literals, e.g. `123`, 
@@ -172,9 +179,12 @@ Logical expressions should be built according to the syntax defined by grammar, 
       * property names, e.g. `SomeProperty`,
 	  * constants, e.g. `SomeType.CONST`,
       * enum values, e.g. `SomeEnumType.SomeValue`,
+	  * arrays indexing, e.g. `SomeArray[0]`,
 	  * function invocations, e.g. `SomeFunction(...)`.
 
 Specified expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object. As a result of expression evaluation, boolean flag is returned, indicating that expression is true or false.
+
+For the sake of performance optimization, expressions provided to attributes are compiled only once. Such compiled lambdas are then cached inside attributes instances and invoked for any subsequent validation requests without recompilation.
 
 When working with ASP.NET MVC stack, unobtrusive client-side validation mechanism is [additionally available](#what-about-the-support-of-aspnet-mvc-client-side-validation). Client receives unchanged expression string from server. Such an expression is then evaluated using JavaScript [`eval()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) method within the context of reflected model object. Such a model, analogously to the server-side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
 
@@ -293,6 +303,59 @@ For supplementary reading visit the [installation section](#installation).
 
 ###<a id="frequently-asked-questions">Frequently asked questions</a>
 
+#####<a id="is-it-possible-to-compile-all-usages-of-annotations-at-once">Is it possible to compile all usages of annotations at once?</a>
+
+Yes, a list of types with annotations can be collected and compiled collectively. It can be useful, e.g. during unit tesing phase, when without the necessity of your main application startup, all the compile-time errors (syntax errors, typechecking errors) done to your expressions can be discovered. The following extension is helpful:
+
+```
+public static IEnumerable<ExpressiveAttribute> CompileExpressiveAttributes(this Type type)
+{
+	var properties = type.GetProperties()
+		.Where(p => Attribute.IsDefined(p, typeof (ExpressiveAttribute)));
+	var attributes = new List<ExpressiveAttribute>();
+	foreach (var prop in properties)
+	{
+		var attribs = prop.GetCustomAttributes<ExpressiveAttribute>().ToList();
+		attribs.ForEach(x => x.Compile(prop.DeclaringType));
+		attributes.AddRange(attribs);
+	}
+	return attributes;
+}
+```
+with the succeeding usage manner:
+
+```
+// compile all expressions for specified model:
+var compiled = typeof (SomeModel).CompileExpressiveAttributes().ToList();
+
+// ... or for current assembly:
+compiled = Assembly.GetExecutingAssembly().GetTypes()
+	.SelectMany(t => t.CompileExpressiveAttributes()).ToList();
+
+// ... or for all assemblies within current domain:
+compiled = AppDomain.CurrentDomain.GetAssemblies()
+	.SelectMany(a => a.GetTypes()
+		.SelectMany(t => t.CompileExpressiveAttributes())).ToList();
+```
+Notice that such compiled lambdas will be cached inside attributes instances stored in `compiled` list.
+That means that subsequent compilation requests:
+```
+compiled.ForEach(x => x.Compile(typeof (SomeModel));
+```
+do nothing (due to optimization purposes), unless invoked with enabled recompilation switch:
+```
+compiled.ForEach(x => x.Compile(typeof (SomeModel), force: true); 
+```
+Finally, this reveals compile-time errors only, you can still can get runtime errors though, e.g.:
+
+```
+var parser = new Parser();
+parser.AddFunction<object, bool>("CastToBool", obj => (bool) obj);
+
+parser.Parse<object>("CastToBool(null)"); // compilation succeeds
+parser.Parse<object>("CastToBool(null)").Invoke(null); // invocation fails (type casting err)
+```
+
 #####<a id="what-if-there-is-no-built-in-function-i-need">What if there is no built-in function I need?</a>
 
 Create it yourself. Any custom function defined within the model class scope at server-side is automatically recognized and can be used inside expressions, e.g.
@@ -316,23 +379,46 @@ class Model
 ```
 Many signatures can be defined for a single function name. Types are not taken under consideration as a differentiating factor though. Methods overloading is based on the number of arguments only. Functions with the same name and exact number of arguments are considered as ambiguous. The next issue important here is the fact that custom methods take precedence over built-in ones. If exact signatures are provided built-in methods are simply overridden by new definitions.
 
+#####<a id="how-to-cope-with-values-of-custom-types">How to cope with values of custom types?</a>
+
+If you need to handle value string extracted from DOM field in any non built-in way, you can redefine given type-detection logic. The default mechanism recognizes and handles automatically types identified as: `timespan`, `datetime`, `numeric`, `string`, `bool` and `guid`. If non of them is matched for a particular field, JSON deserialization is invoked. You can provide your own deserializers though. The process is as follows:
+
+* at server-side decorate your property with special attribute which gives a hint to client-side, which parser should be chosen for corresponding DOM field value deserialization:
+    ```C#
+    class Model
+    {
+	    [ValueParser('customparser')]
+	    public CustomType SomeField { get; set; }
+    ```
+
+* at client-side register such a parser:
+    ```JavaScript
+    <script>
+        ea.addValueParser('customparser', function(value) {
+		    return ... // handle exctracted field value string on your own
+        });
+    ```
+
 #####<a id="how-to-cope-with-dates-given-in-non-standard-formats">How to cope with dates given in non-standard formats?</a>
 
 When values of DOM elements are extracted, they are converted to appropriate types. For fields containing date strings, JavaScript `Date.parse()` method is used by default. As noted in [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse), the input parameter is:
 
 >A string representing an RFC 2822 or ISO 8601 date (other formats may be used, but results may be unexpected)
 
-When some non-standard format needs to be handled, simply override the default behavior and provide your own implementation. E.g. when dealing with UK format dd/mm/yyyy:
+When some non-standard format needs to be handled, simply override the default behavior and provide your own implementation. E.g. when dealing with UK format dd/mm/yyyy, solution is:
+```C#
+class Model
+{
+	[ValueParser('ukdateparser')]
+	public DateTime SomeField { get; set; }
+```
 ```JavaScript
 <script>
-    ea.settings.parseDate = function(str) {
-        if (!/^\d{2}\/\d{2}\/\d{4}$/.test(str)) { // in case str format is not dd/mm/yyyy...
-            return Date.parse(str); // ...default date parser is used
-        }
-        var arr = str.split('/');
-        var date = new Date(arr[2], arr[1] - 1, arr[0]);
-        return date.getTime(); // return milliseconds since January 1, 1970, 00:00:00 UTC
-    }
+    ea.addValueParser('ukdateparser', function(value) {
+		var arr = value.split('/');
+		var date = new Date(arr[2], arr[1] - 1, arr[0]);
+		return date.getTime(); // return msecs since January 1, 1970, 00:00:00 UTC
+	});
 ```
 
 #####<a id="what-if-ea-variable-is-already-used-by-another-library">What if `ea` variable is already used by another library?</a>
@@ -356,6 +442,15 @@ Default value is *'change keyup'* (for more information check `eventType` parame
 <script>
     ea.settings.dependencyTriggers = 'change'; // mute some excessive activity if you wish,
                                                // or turn it off entirely (set to undefined)
+```
+
+#####<a id="how-to-boost-web-console-verbosity-for-debug-purposes">How to boost web console verbosity for debug purposes?</a>
+
+If you need more insightful overview of what client-side script is doing (including warnings if detected) enable logging:
+```JavaScript
+<script>
+    ea.settings.debug = true; // output debug messages to the web console 
+							  // (should be disabled for release code)
 ```
 
 #####<a id="what-if-my-question-is-not-covered-by-faq-section">What if my question is not covered by FAQ section?</a>
