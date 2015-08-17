@@ -4,7 +4,7 @@
     <li>
         <pre class="code">
 [RequiredIf("Phone == null")]
-[AssertThat("IsEmail(Email)")]
+[AssertThat("IsEmail(Email) && IsUnique(Email)")]
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>

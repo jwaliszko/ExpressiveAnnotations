@@ -157,7 +157,7 @@
     <value>E-mail</value>
   </data>
   <data name="EmailFormatInvalid" xml:space="preserve">
-    <value>Provided e-mail address has invalid format.</value>
+    <value>Provided e-mail address either has invalid format or already exists in our database.</value>
   </data>
   <data name="EmailOrPhoneRequired" xml:space="preserve">
     <value>You do not enter any contact information. At least e-mail or phone should be provided.</value>

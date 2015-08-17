@@ -12,20 +12,34 @@ var
 
     api = { // to be accesssed from outer scope
         settings: {
-            debug: false, // output debug messages to the web console (should be disabled for release code)
+            debug: false, // output debug messages to the web console (should be disabled for release code)            
             dependencyTriggers: 'change keyup' // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names) for which fields directly dependent on referenced DOM field are validated
         },
         addMethod: function(name, func) {    // provide custom function to be accessible for expression,
-            toolchain.addMethod(name, func); // e.g. if server-side uses following attribute: [AssertThat("IsBloodType(BloodType)")], where IsBloodType() is a custom method available at C# side, 
+            toolchain.addMethod(name, func); // e.g. if server-side uses following attribute: [AssertThat("IsBloodType(BloodType)")], where IsBloodType(string group) is a custom method available at C# side, 
         },                                   // its client-side equivalet, mainly function of the same signature (name and the number of parameters), must be also provided, i.e.
                                              // ea.addMethod('IsBloodType', function(group) {
                                              //     return /^(A|B|AB|0)[\+-]$/.test(group);
                                              // });
+        addAsyncMethod: function(name, func) {    // provide custom asynchronous function to be accessible for expression,
+            toolchain.addAsyncMethod(name, func); // e.g. if server-side uses following attribute: [AssertThat("IsBloodType(BloodType)")], where IsBloodType(string group) is a custom method available at C# side, 
+        },                                        // its client-side equivalet, mainly function of the same signature, with single exception - last argument, must be also provided, i.e.
+                                                  // ea.addAsyncMethod('IsBloodType', function(group, done) { // notice done() argument at last position - it is a callback used to notify ea library, that async request is completed 
+                                                  //     $.ajax({                                             // !! it will be provided and injected by ea library automatically
+                                                  //         method: 'GET',                                   // its invocation should be executed by the user as soon as ajax request returns
+                                                  //         url: '/Home/IsBloodType?group=' + group,         //         |
+                                                  //         success: function(result) {                      //         |
+                                                  //             done(result);                                // <-------'
+                                                  //         },
+                                                  //         async: true
+                                                  //     });
+                                                  // });
         addValueParser: function(name, func) {     // provide custom deserialization methods for values of these DOM fields, which are accordingly decorated with ValueParser attribute at the server-side
             typeHelper.addValueParser(name, func); // e.g. for objects when stored in non-json format or dates when stored in non-standard format (not proper for Date.parse(dateString)),
         },                                         // i.e. suppose DOM field date string is given in dd/mm/yyyy format:
                                                    // ea.addValueParser('dateparser', function(value){ // value string is given as a raw data extracted from DOM element                                                    
-                                                   //     var arr = value.split('/'); return new Date(arr[2], arr[1] - 1, arr[0]).getTime(); // return milliseconds since January 1, 1970, 00:00:00 UTC
+                                                   //     var arr = value.split('/');
+                                                   //     return new Date(arr[2], arr[1] - 1, arr[0]).getTime(); // return milliseconds since January 1, 1970, 00:00:00 UTC
                                                    // });
                                                    // finally, multiple parsers can be registered at once when, separated by whitespace, are provided to name parameter, i.e. ea.addValueParser('p1 p2', ...
         noConflict: function() {
@@ -47,6 +61,45 @@ var
         }
     },
 
+    async = {
+        cache : {
+            calls: {},
+            models: {}
+        },
+        emptyCache: function(element, value) {
+            var key = this.getKey(element, value);
+            delete this.cache.models[key];
+            delete this.cache.calls[key];
+        },        
+        monitor: function(model, element, value) {
+            var key = this.getKey(element, value);
+            if (this.cache.models[key] !== undefined)
+                model = this.cache.models[key];
+
+            $(model).on('asyncnoise', function(data, arg) { // listen for async methods ascivity
+                async.cache.calls[key] = async.cache.calls[key] || [];
+                if (arg.status === 'start')
+                    async.cache.calls[key].push(arg.id);
+                else if (arg.status === 'done')
+                    async.cache.calls[key].pop(arg.id);
+
+                console.log('asyncnoise detected: ' + arg.id + ' ' + arg.status);
+                if (async.cache.calls[key].length === 0) { // all async calls returned
+                    model[arg.method] = function() { return arg.result; } // override async method with surrogate one (return the collected result)
+                    async.cache.models[key] = model;
+                    $(element).valid();
+                }
+            });
+        },
+        progress: function(element, value) {
+            var key = this.getKey(element, value);
+            return this.cache.calls[key] !== undefined && this.cache.calls[key].length !== 0;
+        },
+        getKey: function(element, value) {
+            return typeHelper.string.format('{0}_{1}', element.name, value);
+        }
+    },
+
     toolchain = {
         methods: {},
         addMethod: function(name, func) { // add multiple function signatures to methods object (methods overloading, based only on numbers of arguments)
@@ -54,6 +107,33 @@ var
             this.methods[name] = function() {
                 if (func.length === arguments.length) {
                     return func.apply(this, arguments);
+                }
+                if (typeof old === 'function') {
+                    return old.apply(this, arguments);
+                }
+            };
+        },
+        addAsyncMethod: function(name, func) {
+            var old = this.methods[name];
+            this.methods[name] = function() {
+                if (func.length - 1 === arguments.length) { // check over less number of args (done() arg will be injected later)
+
+                    // do stuff before calling function (something like AOP) ----------------------------------
+                    var model = this;
+                    var uuid = typeHelper.guid.create(); // create some unique identifier to mark this async invocation (for the awaiting code to know what it should actually await for - there can be many async requests in the air)
+                    var args = Array.prototype.slice.call(arguments);
+                    args[arguments.length] = function(result) { // insert one more argument - done() callback
+                        console.log('async done: (' + result + ') ' + uuid);
+                        $(model).trigger('asyncnoise', { id: uuid, status: 'done', method: name, result: result }); // notify
+                    }
+
+                    console.log('async start: ' + uuid);
+                    $(this).trigger('asyncnoise', { id: uuid, status: 'start', method: name }); // notify any listener which is interested in such an event
+                    // ----------------------------------------------------------------------------------------
+
+                    // call the function as it would have been called normally --------------------------------
+                    return func.apply(this, args);
+                    // ----------------------------------------------------------------------------------------
                 }
                 if (typeof old === 'function') {
                     return old.apply(this, arguments);
@@ -309,6 +389,12 @@ var
                     return value.toUpperCase();
                 }
                 return { error: true, msg: 'Given value was not recognized as a valid guid - guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).' };
+            },
+            create: function() { // RFC4122 version 4 (http://stackoverflow.com/a/2117523/270315)
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                    var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
             }
         },
         isTimeSpan: function(value) {
@@ -549,11 +635,21 @@ var
         $.validator.addMethod(method, function(value, element, params) {
             value = element.type === 'checkbox' ? element.checked : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
             if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
+
                 var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
                 toolchain.registerMethods(model);
+
+                async.monitor(model, element, value);
+
+                var key = async.getKey(element, value);
                 logger.dump(typeHelper.string.format('AssertThat expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
-                if (!modelHelper.ctxEval(params.expression, model)) { // check if the assertion condition is not satisfied
-                    return false; // assertion not satisfied => notify
+                var satisfied = modelHelper.ctxEval(params.expression, async.cache.models[key] || model); // blocking call, async method will be invoked if any, and our AOP logic will record async activity...
+
+                if (!async.progress(element, value)) { // ...so this condition will be reliable
+                    async.emptyCache(element, value);
+                    if (!satisfied) { // check if the assertion condition is not satisfied
+                        return false; // assertion not satisfied => notify
+                    }
                 }
             }
             return true;
@@ -566,11 +662,21 @@ var
             value = element.type === 'checkbox' ? element.checked : value;
             if (value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
                 || (!/\S/.test(value) && !params.allowEmpty)) {
+
                 var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
                 toolchain.registerMethods(model);
+
+                async.monitor(model, element, value);
+
+                var key = async.getKey(element, value);
                 logger.dump(typeHelper.string.format('RequiredIf expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
-                if (modelHelper.ctxEval(params.expression, model)) { // check if the requirement condition is satisfied
-                    return false; // requirement confirmed => notify
+                var satisfied = modelHelper.ctxEval(params.expression, async.cache.models[key] || model);
+
+                if (!async.progress(element, value)) {
+                    async.emptyCache(element, value);
+                    if (satisfied) { // check if the requirement condition is satisfied
+                        return false; // requirement confirmed => notify
+                    }
                 }
             }
             return true;

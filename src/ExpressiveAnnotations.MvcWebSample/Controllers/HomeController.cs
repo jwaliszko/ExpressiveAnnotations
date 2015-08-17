@@ -34,5 +34,12 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
 
             return View("Home", model);
         }
+
+        [HttpGet]
+        public JsonResult IsUnique(string email)
+        {
+            System.Threading.Thread.Sleep(1000);
+            return Json(email != "a@b.c", JsonRequestBehavior.AllowGet);
+        }
     }
 }

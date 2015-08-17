@@ -92,6 +92,16 @@
             ea.addMethod('ArrayContains', function(value, array) {
                 return $.inArray(value, array) >= 0;
             });
+            ea.addAsyncMethod('IsUnique', function(email, done) {
+                $.ajax({
+                    method: 'GET',
+                    url: '/Home/IsUnique?email=' + email,
+                    success: function(result) {
+                        done(result);
+                    },
+                    async: true
+                });
+            });
         </script>
     }
 

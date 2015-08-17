@@ -178,7 +178,7 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Provided e-mail address has invalid format..
+        ///   Looks up a localized string similar to Provided e-mail address either has invalid format or already exists in our database..
         /// </summary>
         public static string EmailFormatInvalid {
             get {
