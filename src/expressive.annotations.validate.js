@@ -77,22 +77,23 @@ var
                 model = this.cache.models[key];
 
             $(model).on('asyncnoise', function(data, arg) { // listen for async methods ascivity
+                console.log('asyncnoise event detected: ' + arg.method + ' ' + arg.id + ' ' + arg.status + (arg.status === 'start' ? '' : ' (' + arg.result + ')'));
+
                 async.cache.calls[key] = async.cache.calls[key] || [];
                 if (arg.status === 'start')
                     async.cache.calls[key].push(arg.id);
                 else if (arg.status === 'done')
                     async.cache.calls[key].pop(arg.id);
-
-                console.log('asyncnoise detected: ' + arg.id + ' ' + arg.status);
+                
                 if (async.cache.calls[key].length === 0) { // all async calls returned
                     model[arg.method] = function() { return arg.result; } // override async method with surrogate one (return the collected result)
                     async.cache.models[key] = model;
+                    console.log('revalidating... (all async calls returned)');
                     $(element).valid();
                 }
             });
         },
-        progress: function(element, value) {
-            var key = this.getKey(element, value);
+        progress: function(key) {
             return this.cache.calls[key] !== undefined && this.cache.calls[key].length !== 0;
         },
         getKey: function(element, value) {
@@ -106,6 +107,12 @@ var
             var old = this.methods[name];
             this.methods[name] = function() {
                 if (func.length === arguments.length) {
+
+                    var model = this;
+                    if (async.progress(model.___B51C6A9CCC114107BA19BB858616A559)) {
+                        throw 'another async call in progress...';
+                    }
+
                     return func.apply(this, arguments);
                 }
                 if (typeof old === 'function') {
@@ -122,12 +129,16 @@ var
                     var model = this;
                     var uuid = typeHelper.guid.create(); // create some unique identifier to mark this async invocation (for the awaiting code to know what it should actually await for - there can be many async requests in the air)
                     var args = Array.prototype.slice.call(arguments);
-                    args[arguments.length] = function(result) { // insert one more argument - done() callback
-                        console.log('async done: (' + result + ') ' + uuid);
+                    args[arguments.length] = function(result) { // inject additional argument - done() callback
+                        console.log('async method done: ' + name + ' ' + uuid + ' (' + result + ')');
                         $(model).trigger('asyncnoise', { id: uuid, status: 'done', method: name, result: result }); // notify
                     }
 
-                    console.log('async start: ' + uuid);
+                    if (async.progress(model.___B51C6A9CCC114107BA19BB858616A559)) {
+                        throw 'another async call in progress...';
+                    }
+
+                    console.log('async method start: ' + name + ' ' + uuid);
                     $(this).trigger('asyncnoise', { id: uuid, status: 'start', method: name }); // notify any listener which is interested in such an event
                     // ----------------------------------------------------------------------------------------
 
@@ -390,7 +401,7 @@ var
                 }
                 return { error: true, msg: 'Given value was not recognized as a valid guid - guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).' };
             },
-            create: function() { // RFC4122 version 4 (http://stackoverflow.com/a/2117523/270315)
+            create: function() { // RFC 4122 version 4 (http://stackoverflow.com/a/2117523/270315)
                 return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
                     var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
                     return v.toString(16);
@@ -639,18 +650,27 @@ var
                 var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
                 toolchain.registerMethods(model);
 
+                var key = async.getKey(element, value);
+                model._key = key;
                 async.monitor(model, element, value);
 
-                var key = async.getKey(element, value);
                 logger.dump(typeHelper.string.format('AssertThat expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
-                var satisfied = modelHelper.ctxEval(params.expression, async.cache.models[key] || model); // blocking call, async method will be invoked if any, and our AOP logic will record async activity...
 
-                if (!async.progress(element, value)) { // ...so this condition will be reliable
-                    async.emptyCache(element, value);
-                    if (!satisfied) { // check if the assertion condition is not satisfied
-                        return false; // assertion not satisfied => notify
+                try {
+                    var satisfied = modelHelper.ctxEval(params.expression, async.cache.models[key] || model); // blocking call, async method will be invoked if any, and our AOP logic will record async activity...
+
+                    if (!async.progress(key)) { // ...so this condition will be reliable
+                        async.emptyCache(element, value);
+                        if (!satisfied) { // check if the assertion condition is not satisfied
+                            return false; // assertion not satisfied => notify
+                        }
                     }
-                }
+                } catch (e) {
+                    if (!async.progress(key)) { // if there is progress, most likely method has been invoked to early, e.g. ExternalAsync(InternalAsync()) -> ExternalAsync will fail
+                        throw e;
+                    }
+                    console.log(e);
+                }                 
             }
             return true;
         }, '');
@@ -666,17 +686,26 @@ var
                 var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
                 toolchain.registerMethods(model);
 
-                async.monitor(model, element, value);
-
                 var key = async.getKey(element, value);
+                model.___B51C6A9CCC114107BA19BB858616A559 = key;
+                async.monitor(model, element, value);
+                
                 logger.dump(typeHelper.string.format('RequiredIf expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
-                var satisfied = modelHelper.ctxEval(params.expression, async.cache.models[key] || model);
 
-                if (!async.progress(element, value)) {
-                    async.emptyCache(element, value);
-                    if (satisfied) { // check if the requirement condition is satisfied
-                        return false; // requirement confirmed => notify
+                try {
+                    var satisfied = modelHelper.ctxEval(params.expression, async.cache.models[key] || model);
+
+                    if (!async.progress(key)) {
+                        async.emptyCache(element, value);
+                        if (satisfied) { // check if the requirement condition is satisfied
+                            return false; // requirement confirmed => notify
+                        }
                     }
+                } catch (e) {
+                    if (!async.progress(key)) {
+                        throw e;
+                    }
+                    console.log(e);
                 }
             }
             return true;

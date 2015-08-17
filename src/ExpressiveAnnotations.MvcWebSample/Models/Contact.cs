@@ -13,7 +13,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 
         [RequiredIf("Phone == null",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "EmailOrPhoneRequired")]
-        [AssertThat("IsEmail(Email) && IsUnique(Email)",
+        [AssertThat("IsEmail(Email) && IsTrue(IsUnique(Email))",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "EmailFormatInvalid")]
         [Display(ResourceType = typeof (Resources), Name = "Email")]
         public string Email { get; set; }
@@ -33,6 +33,11 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public bool IsUnique(string email)
         {
             return email != "a@b.c";
+        }
+
+        public bool IsTrue(bool value)
+        {
+            return value;
         }
     }
 }

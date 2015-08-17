@@ -102,6 +102,16 @@
                     async: true
                 });
             });
+            ea.addAsyncMethod('IsTrue', function(value, done) {
+                $.ajax({
+                    method: 'GET',
+                    url: '/Home/IsTrue?value=' + value,
+                    success: function(result) {
+                        done(result);
+                    },
+                    async: true
+                });
+            });
         </script>
     }
 

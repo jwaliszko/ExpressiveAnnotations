@@ -41,5 +41,12 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
             System.Threading.Thread.Sleep(1000);
             return Json(email != "a@b.c", JsonRequestBehavior.AllowGet);
         }
+
+        [HttpGet]
+        public JsonResult IsTrue(bool value)
+        {
+            System.Threading.Thread.Sleep(1000);
+            return Json(value, JsonRequestBehavior.AllowGet);
+        }
     }
 }
