@@ -27,6 +27,7 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
    - [What if `ea` variable is already used by another library?](#what-if-ea-variable-is-already-used-by-another-library) <sup>(re client-side)</sup>
    - [How to control frequency of dependent fields validation?](#how-to-control-frequency-of-dependent-fields-validation) <sup>(re client-side)</sup>
    - [How to boost web console verbosity for debug purposes?](#how-to-boost-web-console-verbosity-for-debug-purposes) <sup>(re client-side)</sup>
+   - [Is there a possibility to perform asynchronous validation?](#is-there-a-possibility-to-perform-asynchronous-validation) <sup>(re client-side)</sup>
    - [What if my question is not covered by FAQ section?](#what-if-my-question-is-not-covered-by-faq-section)
  - [Installation](#installation)
  - [Contributors](#contributors)
@@ -277,7 +278,7 @@ Client-side validation is fully supported. Enable it for your web project within
         DataAnnotationsModelValidatorProvider.RegisterAdapter(
             typeof (AssertThatAttribute), typeof (AssertThatValidator));
     ```
-	Alternatively, use predefined `ExpressiveAnnotationsModelValidatorProvider`:
+	Alternatively, use predefined `ExpressiveAnnotationsModelValidatorProvider` (recommended):
 	```C#
 	using ExpressiveAnnotations.MvcUnobtrusive.Providers;
 	
@@ -452,6 +453,10 @@ If you need more insightful overview of what client-side script is doing (includ
     ea.settings.debug = true; // output debug messages to the web console 
 							  // (should be disabled for release code)
 ```
+
+#####<a id="#is-there-a-possibility-to-perform-asynchronous-validation">Is there a possibility to perform asynchronous validation?</a>
+
+Currently not. Although there is an ongoing work on [async-work branch](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/async-work), created especially for asynchronous-related ideas. If you feel you'd like to contribute, either by providing better solution, review code or just test what is currently there, your help is always highly appreciated.
 
 #####<a id="what-if-my-question-is-not-covered-by-faq-section">What if my question is not covered by FAQ section?</a>
 
