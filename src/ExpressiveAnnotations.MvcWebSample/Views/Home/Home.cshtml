@@ -69,6 +69,24 @@
                         $(e.target).trigger(e.type);
                     }, 50);
                 });
+
+                // redefine onkeyup validation behaviour for email input field (for which ajax request is invoked) -
+                // - do not fire that validation too often (on every keyup event) - add some delay instead
+                var validator = $('form').validate();
+                validator.settings.onkeyup = function(element, event) {
+                    if (element.name === 'ContactDetails.Email') {
+                        var that = this;
+                        setTimeout(function() {
+                            that.element(element); // trigger validation after the delay
+                        }, 1000);
+                    } else { // otherwise, trigger default validation logic
+                        if (event.which === 9 && this.elementValue(element) === '') {
+                            return;
+                        } else if (element.name in this.submitted || element === this.lastActive) {
+                            this.element(element);
+                        }
+                    }
+                }
             });
 
             ea.addValueParser('NonStandardDateParser', function(value) { // override default datetime parsing mechanism to deal with yyyy-mm-dd format
