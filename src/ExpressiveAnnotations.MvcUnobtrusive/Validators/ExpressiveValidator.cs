@@ -58,6 +58,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                             FieldsMap = parser.GetFields().ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value));
                             ConstsMap = parser.GetConsts();
                             ParsersMap = metadata.ContainerType.GetProperties()
+                                .Where(p => FieldsMap.Keys.Contains(p.Name) || metadata.PropertyName == p.Name) // narrow down number of parsers sent to client
                                 .Select(p => new
                                 {
                                     PropertyName = p.Name,
