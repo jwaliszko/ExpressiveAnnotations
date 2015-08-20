@@ -153,6 +153,9 @@
   <data name="DigitsOnlyAccepted" xml:space="preserve">
     <value>Tylko cyfry są dozwolone.</value>
   </data>
+  <data name="Donations" xml:space="preserve">
+    <value>Darowizna [USD]</value>
+  </data>
   <data name="Email" xml:space="preserve">
     <value>E-mail</value>
   </data>
@@ -224,6 +227,9 @@
   </data>
   <data name="Normal" xml:space="preserve">
     <value>Rekreacyjny</value>
+  </data>
+  <data name="NotEnoughDonations" xml:space="preserve">
+    <value>Przynajmniej dwie oddzielne darowizny są wymagane</value>
   </data>
   <data name="OfficeAddress" xml:space="preserve">
     <value>Adres służbowy</value>

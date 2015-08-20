@@ -1,6 +1,7 @@
 ﻿@using System.Threading
 @using ExpressiveAnnotations.MvcWebSample
 @using ExpressiveAnnotations.MvcWebSample.Misc
+@using MvcCheckBoxList.Model
 @model ExpressiveAnnotations.MvcWebSample.Models.Query
 
 @{ var lang = Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName; }
@@ -185,6 +186,18 @@
             @Html.LabelFor(model => model.FlightId, new { @class = "inline prefix" })
             @Html.DropDownListFor(model => model.FlightId, Model.Flights)
             @Html.ValidationMessageFor(model => model.FlightId)
+        </div>
+    </li>
+    <li>
+        <pre class="code">
+[RequiredIf("GoAbroad == true")]
+[AssertThat("ArrayLength(SelectedDonations) > 1")]
+</pre>
+        <pre class="action">[show attribute]</pre>
+        <div>
+            @Html.LabelFor(model => model.SelectedDonations, new { @class = "inline prefix" })
+            @Html.CheckBoxListFor(model => model.SelectedDonations, model => model.AvailableDonations, item => item, item => item, model => model.SelectedDonations, Position.Horizontal, model => new { @class = "inline" })
+            @Html.ValidationMessageFor(model => model.SelectedDonations)
         </div>
     </li>
 </ol>

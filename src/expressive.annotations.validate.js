@@ -333,13 +333,16 @@ var
             return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value); // basic check
         },
         tryParse: function(value, type, parser) {
-            var parseValue = typeHelper.parsers[parser]; // custom parsing lookup
-            if (typeof parseValue === 'function') {
-                return parseValue(value);
-            }
             if (parser !== undefined) {
-                logger.warn(typeHelper.string.format('Custom value parser {0} not found. Consider registration with ea.addValueParser() or remove redundant ValueParser attribute from related model field.', parser));
+                var parsedValue = typeHelper.tryCustomParse(value, parser);
+                if (!parsedValue.error) {
+                    return parsedValue;
+                }
+                logger.warn(parsedValue.msg);
             }
+            return typeHelper.tryAutoParse(value, type);
+        },
+        tryAutoParse: function(value, type) {
             switch (type) { // custom parser not provided - built-in type-detection logic runs instead
                 case 'timespan':
                     return typeHelper.timespan.tryParse(value);
@@ -356,6 +359,13 @@ var
                 default:
                     return typeHelper.object.tryParse(value);
             }
+        },
+        tryCustomParse: function(value, parser) {
+            var parseValue = typeHelper.parsers[parser]; // custom parsing lookup
+            if (typeof parseValue === 'function') {
+                return parseValue(value);
+            }
+            return { error: true, msg: typeHelper.string.format('Custom value parser {0} not found. Consider registration with ea.addValueParser() or remove redundant ValueParser attribute from respective model field.', parser) };
         }
     },
 
@@ -365,20 +375,20 @@ var
         },
         extractValue: function(form, name, prefix, type, parser) {
             function getValue(element) {
-                var elementType = $(element).attr('type');
+                var elementType = element.attr('type');
                 switch (elementType) {
                     case 'checkbox':
-                        if (field.length > 2) {
-                            logger.warn(typeHelper.string.format('DOM field {0} is ambiguous.', name));
+                        if (element.length > 2) {
+                            logger.warn(typeHelper.string.format('DOM field {0} is ambiguous (unless custom value parser is provided).', name));
                         }
-                        return $(element).is(':checked');
+                        return element.is(':checked');
                     case 'radio':
-                        return $(element).filter(':checked').val();
+                        return element.filter(':checked').val();
                     default:
-                        if (field.length > 1) {
-                            logger.warn(typeHelper.string.format('DOM field {0} is ambiguous.', name));
+                        if (element.length > 1) {
+                            logger.warn(typeHelper.string.format('DOM field {0} is ambiguous (unless custom value parser is provided).', name));
                         }
-                        return $(element).val();
+                        return element.val();
                 }
             }
 
@@ -393,7 +403,7 @@ var
                 return null;
             }
             parsedValue = typeHelper.tryParse(rawValue, type, parser); // convert field value to required type
-            if (parsedValue.error) {
+            if (parsedValue !== null && parsedValue !== undefined && parsedValue.error) {
                 throw typeHelper.string.format('DOM field {0} value conversion to {1} failed. {2}', name, type, parsedValue.msg);
             }
             return parsedValue;
@@ -415,7 +425,7 @@ var
                         }
                         parent[fieldName][arridx] = {};
                         parent = parent[fieldName][arridx];
-                        continue;;
+                        continue;
                     }
 
                     if (!parent.hasOwnProperty(fieldName)) {
@@ -443,6 +453,19 @@ var
                 }
             }
             return model;
+        },
+        adjustGivenValue: function(value, element, params) {
+            value = element.type === 'checkbox' ? element.checked : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
+
+            var parser = params.parsersMap[element.name.replace(params.prefix, '')];
+            if (parser !== undefined) {
+                var parsedValue = typeHelper.tryCustomParse(value, parser);
+                if (parsedValue === null || parsedValue === undefined || !parsedValue.error) {
+                    return parsedValue;
+                }
+                logger.warn(parsedValue.msg);
+            }
+            return value;
         },
         ctxEval: function(exp, ctx) { // evaluates expression in the scope of context object
             return (new Function('expression', 'context', 'with(context){return eval(expression)}'))(exp, ctx); // function constructor used on purpose (a hack), for 'with' statement not to collide with strict mode, which
@@ -547,7 +570,8 @@ var
     $.each(annotations.split(''), function() {
         var method = typeHelper.string.format('assertthat{0}', $.trim(this));
         $.validator.addMethod(method, function(value, element, params) {
-            value = element.type === 'checkbox' ? element.checked : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
+            value = modelHelper.adjustGivenValue(value, element, params); // preprocess given value (here basically we are concerned about determining if such a value is null or not, and we may have
+                                                                          // to extract it using value parser, since e.g. for an array distracted in radios its value is not provided as expected here)
             if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
                 var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
                 toolchain.registerMethods(model);
@@ -563,7 +587,7 @@ var
     $.each(annotations.split(''), function() {
         var method = typeHelper.string.format('requiredif{0}', $.trim(this));
         $.validator.addMethod(method, function(value, element, params) {
-            value = element.type === 'checkbox' ? element.checked : value;
+            value = modelHelper.adjustGivenValue(value, element, params);
             if (value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
                 || (!/\S/.test(value) && !params.allowEmpty)) {
                 var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
@@ -579,9 +603,11 @@ var
 
     // for testing only (section to be removed in release code)
     api.___6BE7863DC1DB4AFAA61BB53FF97FE169 = {
+        logger: logger,
+        toolchain: toolchain,
         typeHelper: typeHelper,
         modelHelper: modelHelper,
-        toolchain: toolchain
+        validationHelper: validationHelper        
     };
     // --------------------------------------------------------
 

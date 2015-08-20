@@ -65,7 +65,7 @@
                 });
                 $(document).on('paste', function(e) {
                     e = $.extend({}, e, { type: 'afterpaste' }); // define custom event 'afterpaste', which fires slightly after 'paste' event is invoked - this tiny delay is necessary for the field value to become ready for being collected
-                    window.setTimeout(function() {               // ('paste' event itself is to early, because fires before field value is actually modified, so its new content value cannot be accessed from within this event)
+                    window.setTimeout(function() { // ('paste' event itself is to early, because fires before field value is actually modified, so its new content value cannot be accessed from within this event)
                         $(e.target).trigger(e.type);
                     }, 50);
                 });
@@ -79,6 +79,10 @@
                 var date = new Date(arr[0], arr[1] - 1, arr[2]); // months are 0-based
                 return date.getTime(); // return milliseconds
             });
+            ea.addValueParser('ArrayParser', function(value) {
+                var fields = $(':input[name="SelectedDonations"]').serializeArray();
+                return fields.length === 0 ? null : fields;
+            });
 
             ea.addMethod('IsBloodType', function(group) {
                 return /^(A|B|AB|0)[\+-]$/.test(group);
@@ -91,6 +95,9 @@
             });
             ea.addMethod('ArrayContains', function(value, array) {
                 return $.inArray(value, array) >= 0;
+            });
+            ea.addMethod('ArrayLength', function(array) {
+                return array.length;
             });
         </script>
     }

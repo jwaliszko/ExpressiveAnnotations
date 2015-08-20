@@ -169,6 +169,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Donations [USD].
+        /// </summary>
+        public static string Donations {
+            get {
+                return ResourceManager.GetString("Donations", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to E-mail.
         /// </summary>
         public static string Email {
@@ -381,6 +390,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         public static string Normal {
             get {
                 return ResourceManager.GetString("Normal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to At least two separate donations are required..
+        /// </summary>
+        public static string NotEnoughDonations {
+            get {
+                return ResourceManager.GetString("NotEnoughDonations", resourceCulture);
             }
         }
         

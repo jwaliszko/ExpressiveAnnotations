@@ -84,6 +84,11 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             get { return new[] {15, 16, 17}; }
         }
 
+        public List<int> AvailableDonations
+        {
+            get { return new List<int> {7, 14, 21, 28}; }
+        }
+
         [Display(ResourceType = typeof (Resources), Name = "GoAbroad")]
         public bool GoAbroad { get; set; }
         
@@ -171,7 +176,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [RequiredIf(@"AgreeForContact == true
                       && (ContactDetails.Email != null || ContactDetails.Phone != null)
                       && (ContactDetails.Addresses[0].Details != null || ContactDetails.Addresses[1].Details != null)",
-            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = "ImmediateContactRequired")]
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ImmediateContactRequired")]
         [Display(ResourceType = typeof (Resources), Name = "ImmediateContact")]
         public bool? ImmediateContact { get; set; }
 
@@ -179,6 +184,14 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FlightIdentifierInvalid")]        
         [Display(ResourceType = typeof (Resources), Name = "FlightId")]
         public Guid FlightId { get; set; }
+
+        [RequiredIf("GoAbroad == true",
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]
+        [AssertThat("ArrayLength(SelectedDonations) > 1",
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "NotEnoughDonations")]
+        [ValueParser("ArrayParser")]
+        [Display(ResourceType = typeof (Resources), Name = "Donations")]
+        public List<int> SelectedDonations { get; set; }
 
         public Contact ContactDetails { get; set; }
 
@@ -200,6 +213,11 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public bool ArrayContains(int? value, int[] array)
         {
             return value != null && array.Contains((int)value);
+        }
+
+        public int ArrayLength(List<int> array)
+        {
+            return array.Count;
         }
 
         public TimeSpan WeekPeriod
