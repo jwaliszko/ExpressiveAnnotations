@@ -190,7 +190,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [AssertThat("ArrayLength(SelectedDonations) > 1",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "NotEnoughDonations")]
         [ValueParser("ArrayParser")]
-        [Display(ResourceType = typeof (Resources), Name = "Donations")]
+        [Display(ResourceType = typeof (Resources), Name = "Donation")]
         public List<int> SelectedDonations { get; set; }
 
         public Contact ContactDetails { get; set; }

@@ -332,9 +332,9 @@ var
         isGuid: function(value) {
             return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value); // basic check
         },
-        tryParse: function(value, type, parser) {
+        tryParse: function(value, type, name, parser) {
             if (parser !== undefined) {
-                var parsedValue = typeHelper.tryCustomParse(value, parser);
+                var parsedValue = typeHelper.tryCustomParse(value, name, parser);
                 if (!parsedValue.error) {
                     return parsedValue;
                 }
@@ -360,10 +360,10 @@ var
                     return typeHelper.object.tryParse(value);
             }
         },
-        tryCustomParse: function(value, parser) {
+        tryCustomParse: function(value, name, parser) {
             var parseValue = typeHelper.parsers[parser]; // custom parsing lookup
             if (typeof parseValue === 'function') {
-                return parseValue(value);
+                return parseValue(value, name);
             }
             return { error: true, msg: typeHelper.string.format('Custom value parser {0} not found. Consider registration with ea.addValueParser() or remove redundant ValueParser attribute from respective model field.', parser) };
         }
@@ -379,32 +379,32 @@ var
                 switch (elementType) {
                     case 'checkbox':
                         if (element.length > 2) {
-                            logger.warn(typeHelper.string.format('DOM field {0} is ambiguous (unless custom value parser is provided).', name));
+                            logger.warn(typeHelper.string.format('DOM field {0} is ambiguous (unless custom value parser is provided).', element.attr('name')));
                         }
                         return element.is(':checked');
                     case 'radio':
                         return element.filter(':checked').val();
                     default:
                         if (element.length > 1) {
-                            logger.warn(typeHelper.string.format('DOM field {0} is ambiguous (unless custom value parser is provided).', name));
+                            logger.warn(typeHelper.string.format('DOM field {0} is ambiguous (unless custom value parser is provided).', element.attr('name')));
                         }
                         return element.val();
                 }
             }
 
-            var field, rawValue, parsedValue;
-            name = prefix + name;
-            field = $(form).find(typeHelper.string.format(':input[name="{0}"]', name));
+            var field, fieldName, rawValue, parsedValue;
+            fieldName = prefix + name;
+            field = $(form).find(typeHelper.string.format(':input[name="{0}"]', fieldName));
             if (field.length === 0) {
-                throw typeHelper.string.format('DOM field {0} not found.', name);
+                throw typeHelper.string.format('DOM field {0} not found.', fieldName);
             }
             rawValue = getValue(field);
             if (rawValue === undefined || rawValue === null || rawValue === '') { // field value not set
                 return null;
             }
-            parsedValue = typeHelper.tryParse(rawValue, type, parser); // convert field value to required type
+            parsedValue = typeHelper.tryParse(rawValue, type, fieldName, parser); // convert field value to required type
             if (parsedValue !== null && parsedValue !== undefined && parsedValue.error) {
-                throw typeHelper.string.format('DOM field {0} value conversion to {1} failed. {2}', name, type, parsedValue.msg);
+                throw typeHelper.string.format('DOM field {0} value conversion to {1} failed. {2}', fieldName, type, parsedValue.msg);
             }
             return parsedValue;
         },
@@ -457,9 +457,10 @@ var
         adjustGivenValue: function(value, element, params) {
             value = element.type === 'checkbox' ? element.checked : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
 
-            var parser = params.parsersMap[element.name.replace(params.prefix, '')];
+            var field = element.name.replace(params.prefix, '');
+            var parser = params.parsersMap[field];
             if (parser !== undefined) {
-                var parsedValue = typeHelper.tryCustomParse(value, parser);
+                var parsedValue = typeHelper.tryCustomParse(value, element.name, parser);
                 if (parsedValue === null || parsedValue === undefined || !parsedValue.error) {
                     return parsedValue;
                 }

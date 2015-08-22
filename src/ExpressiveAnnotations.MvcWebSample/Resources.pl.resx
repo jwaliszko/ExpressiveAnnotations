@@ -153,7 +153,7 @@
   <data name="DigitsOnlyAccepted" xml:space="preserve">
     <value>Tylko cyfry są dozwolone.</value>
   </data>
-  <data name="Donations" xml:space="preserve">
+  <data name="Donation" xml:space="preserve">
     <value>Darowizna [USD]</value>
   </data>
   <data name="Email" xml:space="preserve">

@@ -153,8 +153,8 @@
   <data name="DigitsOnlyAccepted" xml:space="preserve">
     <value>Only digits are accepted.</value>
   </data>
-  <data name="Donations" xml:space="preserve">
-    <value>Donations [USD]</value>
+  <data name="Donation" xml:space="preserve">
+    <value>Donation [USD]</value>
   </data>
   <data name="Email" xml:space="preserve">
     <value>E-mail</value>

@@ -79,8 +79,8 @@
                 var date = new Date(arr[0], arr[1] - 1, arr[2]); // months are 0-based
                 return date.getTime(); // return milliseconds
             });
-            ea.addValueParser('ArrayParser', function(value) {
-                var fields = $(':input[name="SelectedDonations"]').serializeArray();
+            ea.addValueParser('ArrayParser', function(value, field) {
+                var fields = $(':input[name="' + field + '"]').serializeArray();
                 return fields.length === 0 ? null : fields;
             });
 

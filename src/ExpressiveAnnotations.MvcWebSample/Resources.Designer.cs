@@ -169,11 +169,11 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Donations [USD].
+        ///   Looks up a localized string similar to Donation [USD].
         /// </summary>
-        public static string Donations {
+        public static string Donation {
             get {
-                return ResourceManager.GetString("Donations", resourceCulture);
+                return ResourceManager.GetString("Donation", resourceCulture);
             }
         }
         
