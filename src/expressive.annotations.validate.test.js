@@ -95,7 +95,7 @@
             var date = new Date(arr[2], arr[1] - 1, arr[0]);
             return date.getTime();
         });
-        actual = eapriv.typeHelper.tryParse("11/08/2014", "datetime", "nonStandard");
+        actual = eapriv.typeHelper.tryParse("11/08/2014", "datetime", "fieldname", "nonStandard");
         qunit.equal(actual, expected, "custom value parser properly handles non-standard dd/mm/yyyy format");
     });
 
@@ -106,12 +106,12 @@
         var actual = result.msg.substring(0, expected.length);
         qunit.equal(actual, expected); // compare only explicitly defined piece of the full message (further part is engine related)
 
-        ea.addValueParser("xml bigxml", function(value) {
+        ea.addValueParser("xml_first xml_second", function(value) {
             return $.parseXML(value);
         });
         expected = $.parseXML("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>");
-        var actual1 = eapriv.typeHelper.tryParse("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object", "xml");
-        var actual2 = eapriv.typeHelper.tryParse("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object", "bigxml");
+        var actual1 = eapriv.typeHelper.tryParse("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object", "fieldname", "xml_first");
+        var actual2 = eapriv.typeHelper.tryParse("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object", "fieldname", "xml_second");
 
         // deep and not deep equality fails because of some security issue, only brief equality comparison is done
         qunit.ok(!actual1.error && !actual2.error, "XML parse success in multiple parsers");
