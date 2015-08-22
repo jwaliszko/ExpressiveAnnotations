@@ -79,9 +79,13 @@
                 var date = new Date(arr[0], arr[1] - 1, arr[2]); // months are 0-based
                 return date.getTime(); // return milliseconds
             });
-            ea.addValueParser('ArrayParser', function(value, field) {
-                var fields = $(':input[name="' + field + '"]').serializeArray();
-                return fields.length === 0 ? null : fields;
+            ea.addValueParser('ArrayParser', function(value, field) { // provide your custom parsing mechanism of the field value at client side 
+                                                                      // parameters: value - raw data string extracted by default from DOM element
+                                                                      //             field - DOM element name for which parser was invoked
+                var array = $(':input[name="' + field + '"]').serializeArray();
+                return array.length === 0 
+                          ? null    // if array is empty, return null for RequiredIf to complain
+                          : array;  // otherwise - return array object for the ArrayLength method to work on
             });
 
             ea.addMethod('IsBloodType', function(group) {

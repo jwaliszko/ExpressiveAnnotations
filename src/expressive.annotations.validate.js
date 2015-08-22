@@ -24,7 +24,8 @@ var
         addValueParser: function(name, func) {     // provide custom deserialization methods for values of these DOM fields, which are accordingly decorated with ValueParser attribute at the server-side
             typeHelper.addValueParser(name, func); // e.g. for objects when stored in non-json format or dates when stored in non-standard format (not proper for Date.parse(dateString)),
         },                                         // i.e. suppose DOM field date string is given in dd/mm/yyyy format:
-                                                   // ea.addValueParser('dateparser', function(value){ // value string is given as a raw data extracted from DOM element                                                    
+                                                   // ea.addValueParser('dateparser', function(value, field) { // parameters: value - raw data string extracted by default from DOM element, 
+                                                   //                                                          //             field - DOM element name for which parser was invoked
                                                    //     var arr = value.split('/'); return new Date(arr[2], arr[1] - 1, arr[0]).getTime(); // return milliseconds since January 1, 1970, 00:00:00 UTC
                                                    // });
                                                    // finally, multiple parsers can be registered at once when, separated by whitespace, are provided to name parameter, i.e. ea.addValueParser('p1 p2', ...
