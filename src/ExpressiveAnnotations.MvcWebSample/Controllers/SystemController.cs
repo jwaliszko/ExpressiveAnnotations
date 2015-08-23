@@ -17,10 +17,11 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
             return Redirect(returnUrl);
         }
 
-        public ActionResult SetTriggers(string events, string returnUrl)
+        [HttpPost]
+        public JsonResult SetTriggers(string events)
         {
             TriggersManager.Instance.Save(events, HttpContext);
-            return Redirect(returnUrl);
+            return Json(new {success = true});
         }
     }
 }

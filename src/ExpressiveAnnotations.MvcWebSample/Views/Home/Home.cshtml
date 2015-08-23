@@ -18,10 +18,10 @@
     </div>
 </div>
 
-@using (Html.BeginForm())
+@using (Html.BeginForm("Index", "Home", FormMethod.Post, new {id = "mainform"}))
 {
     @Html.AntiForgeryToken()
-    @Html.ValidationSummary(true) @*show/hide validation summary block*@ 
+    @Html.ValidationSummary(true) @*show/hide validation summary block*@
 
     <div class="message-success">@(ViewBag.Success ?? Html.Raw("&nbsp;"))</div>
 
@@ -49,10 +49,10 @@
             // expann.addMethod... // do something with ExpressiveAnnotations
             // ea... // do something with original ea variable
 
-            ea.settings.debug = '@debug' === 'true';
-
-            var triggers = '@triggers';
-            ea.settings.dependencyTriggers = /\S/.test(triggers) ? triggers : undefined; // if not explicitly provided, default setup is: 'change keyup'
+            ea.settings.apply({
+                debug: '@debug' === 'true',
+                dependencyTriggers: '@triggers' // if not explicitly provided, default setup is: 'change keyup'
+            });
 
             $(document).ready(function() {
                 $('#triggers input[type="checkbox"]').on('click', function() {
@@ -60,9 +60,22 @@
                     // - when all triggers are disabled, validation will be fired on form submit attempt only
                     var triggers = $('#triggers input[type="checkbox"]:checked').map(function() {
                         return $(this).attr('data-val');
-                    }).toArray();
-                    window.location.href = '/System/SetTriggers?events=' + triggers.join(' ') + '&returnUrl=/';
+                    }).toArray().join(' ');
+
+                    $.ajax({ // set cookie
+                        type: 'POST',
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        url: '/System/SetTriggers',
+                        data: JSON.stringify({ events: triggers }),
+                        success: function(result) {
+                            if (result.success) {
+                                ea.settings.apply({ dependencyTriggers: triggers });
+                            }
+                        }
+                    });
                 });
+
                 $(document).on('paste', function(e) {
                     e = $.extend({}, e, { type: 'afterpaste' }); // define custom event 'afterpaste', which fires slightly after 'paste' event is invoked - this tiny delay is necessary for the field value to become ready for being collected
                     window.setTimeout(function() { // ('paste' event itself is to early, because fires before field value is actually modified, so its new content value cannot be accessed from within this event)
@@ -70,6 +83,8 @@
                     }, 50);
                 });
             });
+
+            // define value parsers
 
             ea.addValueParser('NonStandardDateParser', function(value) { // override default datetime parsing mechanism to deal with yyyy-mm-dd format
                 if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) { // in case the value does not have non-standard format (here, when language set to english)...
@@ -79,14 +94,16 @@
                 var date = new Date(arr[0], arr[1] - 1, arr[2]); // months are 0-based
                 return date.getTime(); // return milliseconds
             });
-            ea.addValueParser('ArrayParser', function(value, field) { // provide your custom parsing mechanism of the field value at client side 
-                                                                      // parameters: value - raw data string extracted by default from DOM element
-                                                                      //             field - DOM element name for which parser was invoked
+            ea.addValueParser('ArrayParser', function(value, field) { // provide your custom parsing mechanism of the field value at client side
+                // parameters: value - raw data string extracted by default from DOM element
+                //             field - DOM element name for which parser was invoked
                 var array = $(':input[name="' + field + '"]').serializeArray();
-                return array.length === 0 
-                          ? null    // if array is empty, return null for RequiredIf to complain
-                          : array;  // otherwise - return array object for the ArrayLength method to work on
+                return array.length === 0
+                    ? null    // if array is empty, return null for RequiredIf to complain
+                    : array;  // otherwise - return array object for the ArrayLength method to work on
             });
+
+            // define methods
 
             ea.addMethod('IsBloodType', function(group) {
                 return /^(A|B|AB|0)[\+-]$/.test(group);

@@ -13,7 +13,17 @@ var
     api = { // to be accesssed from outer scope
         settings: {
             debug: false, // output debug messages to the web console (should be disabled for release code)
-            dependencyTriggers: 'change keyup' // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names) for which fields directly dependent on referenced DOM field are validated
+            dependencyTriggers: 'change keyup', // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names) for which fields directly dependent on referenced DOM field are validated
+
+            apply: function(options) { // alternative way of settings setup, crucial to invoke e.g. for new set of dependency triggers to be re-bound
+                $.extend(api.settings, options);
+                $('form').each(function() {
+                    if (this.hasOwnProperty('eaTriggersBinded')) {
+                        $(this).find('input, select, textarea').off('.expressive.annotations'); // remove all event handlers in the '.expressive.annotations' namespace 
+                        validationHelper.bindFields(this, true);
+                    }
+                });
+            }
         },
         addMethod: function(name, func) {    // provide custom function to be accessible for expression,
             toolchain.addMethod(name, func); // e.g. if server-side uses following attribute: [AssertThat("IsBloodType(BloodType)")], where IsBloodType() is a custom method available at C# side, 
@@ -505,10 +515,9 @@ var
                 logger.dump(typeHelper.string.format('No dependencies of {0} field detected.', name));
             }
         },
-        binded: false,
-        bindFields: function(form) {
-            if (!this.binded) {
-                if (api.settings.dependencyTriggers !== undefined && api.settings.dependencyTriggers !== null) {
+        bindFields: function(form, force) { // attach validation handlers to dependency triggers (events) for some form elements
+            if (!form.eaTriggersBinded || force) {
+                if (api.settings.dependencyTriggers !== undefined && api.settings.dependencyTriggers !== null && api.settings.dependencyTriggers !== '') {
                     var namespacedEvents = [];
                     $.each(api.settings.dependencyTriggers.split(/\s+/), function(idx, event) {
                         if (/\S/.test(event)) {
@@ -521,7 +530,7 @@ var
                         validationHelper.validateReferences(field, form); // validate referenced fields only
                     });
                 }
-                this.binded = true;
+                form.eaTriggersBinded = true;
             }
         }
     },
