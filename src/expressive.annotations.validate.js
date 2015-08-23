@@ -651,7 +651,7 @@ var
                 toolchain.registerMethods(model);
 
                 var key = async.getKey(element, value);
-                model._key = key;
+                model.___B51C6A9CCC114107BA19BB858616A559 = key;
                 async.monitor(model, element, value);
 
                 logger.dump(typeHelper.string.format('AssertThat expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
