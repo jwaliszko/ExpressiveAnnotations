@@ -469,7 +469,7 @@ ea.addAsyncMethod('IsBloodType', function(group, done) { // notice done() param 
 ```
 Notice two differences though: 
  1. Instead of `addMethod`, this time `addAsyncMethod` is used for method registration.
- 2. Additional parameter should be provided at the end of parameters list - called `done` here. It is a callback used to notify ea library, that async request is completed. *This argument will be provided and injected by ea library automatically.* Its invocation should be executed by the user as soon as ajax request returns.
+ 2. Additional parameter should be provided at the end of parameters list (called `done` here). It is a callback used to notify ea library that async request is completed. This argument will be injected automatically. It should be invoked when method is finished.
 
 #####<a id="what-if-my-question-is-not-covered-by-faq-section">What if my question is not covered by FAQ section?</a>
 

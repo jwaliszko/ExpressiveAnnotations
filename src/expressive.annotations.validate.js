@@ -29,14 +29,12 @@ var
         addAsyncMethod: function(name, func) {    // provide custom asynchronous function to be accessible for expression,
             toolchain.addAsyncMethod(name, func); // e.g. if server-side uses following attribute: [AssertThat("IsBloodType(BloodType)")], where IsBloodType(string group) is a custom method available at C# side, 
         },                                        // its client-side equivalet, mainly function of the same signature, with single exception - last parameter, must be also provided, i.e.
-                                                  // ea.addAsyncMethod('IsBloodType', function(group, done) { // notice done() parameter at last position - it is a callback used to notify ea library, that async request is completed 
-                                                  //     $.ajax({                                             // !! this argument will be provided and injected by ea library automatically
-                                                  //         method: 'GET',                                   // its invocation should be executed by the user as soon as ajax request returns
-                                                  //         url: '/Home/IsBloodType?group=' + group,         //         |
-                                                  //         success: function(result) {                      //         |
-                                                  //             done(result);                                // <-------'
-                                                  //         },
-                                                  //         async: true
+                                                  // ea.addAsyncMethod('IsBloodType', function(group, done) { // notice done() parameter at last position - it is a callback used to notify ea library that async request is completed 
+                                                  //     $.ajax({                                             // this argument will be injected automatically
+                                                  //         url: '/Home/IsBloodType?group=' + group,         // it should be invoked when method is finished
+                                                  //         success: function(result) {                      //                 |
+                                                  //             done(result);                                // <---------------'
+                                                  //         }
                                                   //     });
                                                   // });
         addValueParser: function(name, func) {     // provide custom deserialization methods for values of these DOM fields, which are accordingly decorated with ValueParser attribute at the server-side
