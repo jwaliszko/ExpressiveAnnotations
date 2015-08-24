@@ -27,6 +27,7 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
    - [What if `ea` variable is already used by another library?](#what-if-ea-variable-is-already-used-by-another-library) <sup>(re client-side)</sup>
    - [How to control frequency of dependent fields validation?](#how-to-control-frequency-of-dependent-fields-validation) <sup>(re client-side)</sup>
    - [How to boost web console verbosity for debug purposes?](#how-to-boost-web-console-verbosity-for-debug-purposes) <sup>(re client-side)</sup>
+   - [Is there a possibility to perform asynchronous validation?](#is-there-a-possibility-to-perform-asynchronous-validation) <sup>(re client-side, experimental)</sup>
    - [What if my question is not covered by FAQ section?](#what-if-my-question-is-not-covered-by-faq-section)
  - [Installation](#installation)
  - [Contributors](#contributors)
@@ -452,6 +453,23 @@ If you need more insightful overview of what client-side script is doing (includ
     ea.settings.debug = true; // output debug messages to the web console 
 							  // (should be disabled for release code)
 ```
+
+#####<a id="#is-there-a-possibility-to-perform-asynchronous-validation">Is there a possibility to perform asynchronous validation?</a>
+
+It is possible to register asynchronous method in a very similar manner as for synchronous case, e.g.
+```JavaScript
+ea.addAsyncMethod('IsBloodType', function(group, done) { // notice done() param at last pos
+	$.ajax({                                             // invoke when method is completed
+        url: '/Home/IsBloodType?group=' + group,         //                           |
+        success: function(result) {                      //                           |
+            done(result);                                // <-------------------------'
+        }
+    });
+});
+```
+Notice two differences though: 
+ 1. Instead of `addMethod`, this time `addAsyncMethod` is used for method registration.
+ 2. Additional parameter should be provided at the end of parameters list - called `done` here. It is a callback used to notify ea library, that async request is completed. *This argument will be provided and injected by ea library automatically.* Its invocation should be executed by the user as soon as ajax request returns.
 
 #####<a id="what-if-my-question-is-not-covered-by-faq-section">What if my question is not covered by FAQ section?</a>
 

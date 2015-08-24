@@ -49,7 +49,9 @@
             // expann.addMethod... // do something with ExpressiveAnnotations
             // ea... // do something with original ea variable
 
-            ea.settings.debug = '@debug' === 'true';
+            if ('@debug' === 'true') {
+                ea.settings.debug = ea.settings.debugFlags.async;
+            }
 
             var triggers = '@triggers';
             ea.settings.dependencyTriggers = /\S/.test(triggers) ? triggers : undefined; // if not explicitly provided, default setup is: 'change keyup'

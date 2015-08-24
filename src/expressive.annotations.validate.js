@@ -13,7 +13,12 @@ var
     api = { // to be accesssed from outer scope
         settings: {
             debug: false, // output debug messages to the web console (should be disabled for release code)            
-            dependencyTriggers: 'change keyup' // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names) for which fields directly dependent on referenced DOM field are validated
+            dependencyTriggers: 'change keyup', // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names) for which fields directly dependent on referenced DOM field are validated
+
+            debugFlags: {
+                standard: 0x01,
+                async: 0x02
+            }
         },
         addMethod: function(name, func) {    // provide custom function to be accessible for expression,
             toolchain.addMethod(name, func); // e.g. if server-side uses following attribute: [AssertThat("IsBloodType(BloodType)")], where IsBloodType(string group) is a custom method available at C# side, 
@@ -23,9 +28,9 @@ var
                                              // });
         addAsyncMethod: function(name, func) {    // provide custom asynchronous function to be accessible for expression,
             toolchain.addAsyncMethod(name, func); // e.g. if server-side uses following attribute: [AssertThat("IsBloodType(BloodType)")], where IsBloodType(string group) is a custom method available at C# side, 
-        },                                        // its client-side equivalet, mainly function of the same signature, with single exception - last argument, must be also provided, i.e.
-                                                  // ea.addAsyncMethod('IsBloodType', function(group, done) { // notice done() argument at last position - it is a callback used to notify ea library, that async request is completed 
-                                                  //     $.ajax({                                             // !! it will be provided and injected by ea library automatically
+        },                                        // its client-side equivalet, mainly function of the same signature, with single exception - last parameter, must be also provided, i.e.
+                                                  // ea.addAsyncMethod('IsBloodType', function(group, done) { // notice done() parameter at last position - it is a callback used to notify ea library, that async request is completed 
+                                                  //     $.ajax({                                             // !! this argument will be provided and injected by ea library automatically
                                                   //         method: 'GET',                                   // its invocation should be executed by the user as soon as ajax request returns
                                                   //         url: '/Home/IsBloodType?group=' + group,         //         |
                                                   //         success: function(result) {                      //         |
@@ -51,13 +56,23 @@ var
     },
 
     logger = {
-        dump: function(message) {
-            if (api.settings.debug && console && typeof console.log === 'function')
-                console.log(message);
+        dump: function(message, flag) {
+            if (!api.settings.debug)
+                return;
+            if (console && typeof console.log === 'function') {
+                if (api.settings.debug === true || flag & api.settings.debug) {
+                    console.log(message);
+                }
+            }
         },
-        warn: function(message) {
-            if (api.settings.debug && console && typeof console.warn === 'function')
-                console.warn(message);
+        warn: function(message, flag) {
+            if (!api.settings.debug)
+                return;
+            if (console && typeof console.warn === 'function') {
+                if (api.settings.debug === true || flag & api.settings.debug) {
+                    console.warn(message);
+                }
+            }
         }
     },
 
@@ -77,7 +92,8 @@ var
                 model = this.cache.models[key];
 
             $(model).on('asyncnoise', function(data, arg) { // listen for async methods ascivity
-                console.log('asyncnoise event detected: ' + arg.method + ' ' + arg.id + ' ' + arg.status + (arg.status === 'start' ? '' : ' (' + arg.result + ')'));
+                var status = arg.status === 'start' ? '' : ' (' + arg.result + ')';
+                logger.dump(typeHelper.string.format('asyncnoise event detected: {0} {1} {2}', arg.method, arg.id, status), api.settings.debugFlags.async);
 
                 async.cache.calls[key] = async.cache.calls[key] || [];
                 if (arg.status === 'start')
@@ -85,10 +101,13 @@ var
                 else if (arg.status === 'done')
                     async.cache.calls[key].pop(arg.id);
                 
-                if (async.cache.calls[key].length === 0) { // all async calls returned
-                    model[arg.method] = function() { return arg.result; } // override async method with surrogate one (return the collected result)
+                if (async.cache.calls[key].length === 0) { // ongoing async calls returned
+                    model[arg.method] = function() { // override async method with surrogate one (return the collected result)
+                        logger.dump(typeHelper.string.format('async surrogate method (cached result) start: {0}', arg.method), api.settings.debugFlags.async);
+                        return arg.result;
+                    }
                     async.cache.models[key] = model;
-                    console.log('revalidating... (all async calls returned)');
+                    logger.dump('revalidating... (ongoing async calls returned)', api.settings.debugFlags.async);
                     $(element).valid();
                 }
             });
@@ -108,11 +127,13 @@ var
             this.methods[name] = function() {
                 if (func.length === arguments.length) {
 
+                    logger.dump(typeHelper.string.format('sync method start: {0}', name), api.settings.debugFlags.async);
+
                     var model = this;
                     if (async.progress(model.___B51C6A9CCC114107BA19BB858616A559)) {
-                        throw 'another async call in progress...';
+                        throw typeHelper.string.format('some async call in progress... {0} aborted', name);
                     }
-
+                    
                     return func.apply(this, arguments);
                 }
                 if (typeof old === 'function') {
@@ -128,17 +149,19 @@ var
                     // do stuff before calling function (something like AOP) ----------------------------------
                     var model = this;
                     var uuid = typeHelper.guid.create(); // create some unique identifier to mark this async invocation (for the awaiting code to know what it should actually await for - there can be many async requests in the air)
+
+                    logger.dump(typeHelper.string.format('async method start: {0} {1}', name, uuid), api.settings.debugFlags.async);
+
                     var args = Array.prototype.slice.call(arguments);
                     args[arguments.length] = function(result) { // inject additional argument - done() callback
-                        console.log('async method done: ' + name + ' ' + uuid + ' (' + result + ')');
+                        logger.dump(typeHelper.string.format('async method done: {0} {1} ({2})', name, uuid, result), api.settings.debugFlags.async);
                         $(model).trigger('asyncnoise', { id: uuid, status: 'done', method: name, result: result }); // notify
                     }
 
                     if (async.progress(model.___B51C6A9CCC114107BA19BB858616A559)) {
-                        throw 'another async call in progress...';
+                        throw typeHelper.string.format('some async call in progress... {0} {1} aborted', name, uuid);
                     }
-
-                    console.log('async method start: ' + name + ' ' + uuid);
+                    
                     $(this).trigger('asyncnoise', { id: uuid, status: 'start', method: name }); // notify any listener which is interested in such an event
                     // ----------------------------------------------------------------------------------------
 
@@ -435,7 +458,7 @@ var
                 return parseValue(value);
             }
             if (parser !== undefined) {
-                logger.warn(typeHelper.string.format('Custom value parser {0} not found. Consider registration with ea.addValueParser() or remove redundant ValueParser attribute from related model field.', parser));
+                logger.warn(typeHelper.string.format('Custom value parser {0} not found. Consider registration with ea.addValueParser() or remove redundant ValueParser attribute from related model field.', parser), api.settings.debugFlags.standard);
             }
             switch (type) { // custom parser not provided - built-in type-detection logic runs instead
                 case 'timespan':
@@ -466,14 +489,14 @@ var
                 switch (elementType) {
                     case 'checkbox':
                         if (field.length > 2) {
-                            logger.warn(typeHelper.string.format('DOM field {0} is ambiguous.', name));
+                            logger.warn(typeHelper.string.format('DOM field {0} is ambiguous.', name), api.settings.debugFlags.standard);
                         }
                         return $(element).is(':checked');
                     case 'radio':
                         return $(element).filter(':checked').val();
                     default:
                         if (field.length > 1) {
-                            logger.warn(typeHelper.string.format('DOM field {0} is ambiguous.', name));
+                            logger.warn(typeHelper.string.format('DOM field {0} is ambiguous.', name), api.settings.debugFlags.standard);
                         }
                         return $(element).val();
                 }
@@ -565,7 +588,7 @@ var
             var i, field, referencedFields;
             referencedFields = this.referencesMap[name];
             if (referencedFields !== undefined && referencedFields !== null) {
-                logger.dump(typeHelper.string.format('Validation triggered for following {0} dependencies: {1}.', name, referencedFields.join(', ')));
+                logger.dump(typeHelper.string.format('Validation triggered for following {0} dependencies: {1}.', name, referencedFields.join(', ')), api.settings.debugFlags.standard);
                 i = referencedFields.length;
                 while (i--) {
                     field = $(form).find(typeHelper.string.format(':input[data-val][name="{0}"]', referencedFields[i]));
@@ -574,7 +597,7 @@ var
                     }
                 }
             } else {
-                logger.dump(typeHelper.string.format('No dependencies of {0} field detected.', name));
+                logger.dump(typeHelper.string.format('No dependencies of {0} field detected.', name), api.settings.debugFlags.standard);
             }
         },
         binded: false,
@@ -589,7 +612,7 @@ var
                     });
                     $(form).find('input, select, textarea').on(namespacedEvents.join(' '), function(event) {
                         var field = $(this).attr('name');
-                        logger.dump(typeHelper.string.format('Dependency validation trigger - {0} event, handled.', event.type));
+                        logger.dump(typeHelper.string.format('Dependency validation trigger - {0} event, handled.', event.type), api.settings.debugFlags.standard);
                         validationHelper.validateReferences(field, form); // validate referenced fields only
                     });
                 }
@@ -654,22 +677,23 @@ var
                 model.___B51C6A9CCC114107BA19BB858616A559 = key;
                 async.monitor(model, element, value);
 
-                logger.dump(typeHelper.string.format('AssertThat expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
+                logger.dump(typeHelper.string.format('AssertThat expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model), api.settings.debugFlags.standard);
 
                 try {
                     var satisfied = modelHelper.ctxEval(params.expression, async.cache.models[key] || model); // blocking call, async method will be invoked if any, and our AOP logic will record async activity...
 
                     if (!async.progress(key)) { // ...so this condition will be reliable
+                        logger.dump(typeHelper.string.format('{0} validation result: {1}', element.name, satisfied), api.settings.debugFlags.standard | api.settings.debugFlags.async);
                         async.emptyCache(element, value);
                         if (!satisfied) { // check if the assertion condition is not satisfied
                             return false; // assertion not satisfied => notify
                         }
                     }
                 } catch (e) {
-                    if (!async.progress(key)) { // if there is progress, most likely method has been invoked to early, e.g. ExternalAsync(InternalAsync()) -> ExternalAsync will fail
+                    if (!async.progress(key)) { // if there is progress, most likely method has been invoked to early, e.g. ExternalAsync(InternalAsync()) -> external will fail unless internal is done
                         throw e;
                     }
-                    console.log(e);
+                    logger.dump(e, api.settings.debugFlags.async);
                 }                 
             }
             return true;
@@ -690,13 +714,14 @@ var
                 model.___B51C6A9CCC114107BA19BB858616A559 = key;
                 async.monitor(model, element, value);
                 
-                logger.dump(typeHelper.string.format('RequiredIf expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
+                logger.dump(typeHelper.string.format('RequiredIf expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model), api.settings.debugFlags.standard);
 
                 try {
                     var satisfied = modelHelper.ctxEval(params.expression, async.cache.models[key] || model);
 
                     if (!async.progress(key)) {
                         async.emptyCache(element, value);
+                        logger.dump(typeHelper.string.format('{0} validation result: {1}', element.name, satisfied), api.settings.debugFlags.standard | api.settings.debugFlags.async);
                         if (satisfied) { // check if the requirement condition is satisfied
                             return false; // requirement confirmed => notify
                         }
@@ -705,7 +730,7 @@ var
                     if (!async.progress(key)) {
                         throw e;
                     }
-                    console.log(e);
+                    logger.dump(e, api.settings.debugFlags.async);
                 }
             }
             return true;
