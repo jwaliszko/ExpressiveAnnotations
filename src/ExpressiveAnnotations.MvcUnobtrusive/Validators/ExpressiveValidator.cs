@@ -105,7 +105,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         protected IDictionary<string, string> FieldsMap { get; private set; }
 
         /// <summary>
-        ///     Gets properties names and parsers registered for them via <see cref="ValueParserAttribute"/>.
+        ///     Gets properties names and parsers registered for them via <see cref="ValueParserAttribute" />.
         /// </summary>
         protected IDictionary<string, string> ParsersMap { get; private set; }
 

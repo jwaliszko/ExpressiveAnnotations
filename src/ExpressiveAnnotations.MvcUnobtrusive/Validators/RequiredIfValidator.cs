@@ -42,7 +42,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 ValidationType = ProvideUniqueValidationType("requiredif")
             };
 
-            rule.ValidationParameters.Add("expression", Expression);
+            rule.ValidationParameters.Add("expression", Expression.ToJson());
             rule.ValidationParameters.Add("fieldsmap", FieldsMap.ToJson());
             rule.ValidationParameters.Add("constsmap", ConstsMap.ToJson());
             rule.ValidationParameters.Add("parsersmap", ParsersMap.ToJson());

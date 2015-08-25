@@ -210,6 +210,14 @@ var
                 }
                 return arr;
             },
+            isEmpty: function(obj) {
+                for(var key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+                        return false;
+                    }
+                }
+                return true;
+            },
             tryParse: function(value) {
                 try {
                     return $.parseJSON(value);
@@ -467,6 +475,8 @@ var
         },
         adjustGivenValue: function(value, element, params) {
             value = element.type === 'checkbox' ? element.checked : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
+            if (typeHelper.object.isEmpty(params.parsersMap))
+                return value;
 
             var field = element.name.replace(params.prefix, '');
             var parser = params.parsersMap[field];
@@ -535,80 +545,79 @@ var
         }
     },
 
+    buildAdapter = function(adapter, options) {
+        var rules = {
+            prefix: modelHelper.getPrefix(options.element.name),
+            form: options.form
+        };
+        for (var key in options.params) {
+            if (options.params.hasOwnProperty(key)) {
+                rules[key] = $.parseJSON(options.params[key]);
+            }
+        }
+        if (options.message) {
+            options.messages[adapter] = options.message;
+        }
+        validationHelper.bindFields(options.form);
+        validationHelper.collectReferences(typeHelper.object.keys(rules.fieldsMap), options.element.name, rules.prefix);
+        options.rules[adapter] = rules;
+    },
+
+    computeAssertThat = function(value, element, params) {
+        value = modelHelper.adjustGivenValue(value, element, params); // preprocess given value (here basically we are concerned about determining if such a value is null or not, and we may have
+                                                                        // to extract it using value parser, since e.g. for an array distracted in radios its value is not provided as expected here)
+        if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
+            var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
+            toolchain.registerMethods(model);
+            logger.dump(typeHelper.string.format('AssertThat expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
+            if (!modelHelper.ctxEval(params.expression, model)) { // check if the assertion condition is not satisfied
+                return false; // assertion not satisfied => notify
+            }
+        }
+        return true;
+    },
+
+    computeRequiredIf = function(value, element, params) {
+        value = modelHelper.adjustGivenValue(value, element, params);
+        if(value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
+            || (!/\S/.test(value) && !params.allowEmpty)) {
+            var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
+            toolchain.registerMethods(model);
+            logger.dump(typeHelper.string.format('RequiredIf expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
+            if (modelHelper.ctxEval(params.expression, model)) { // check if the requirement condition is satisfied
+                return false; // requirement confirmed => notify
+            }
+        }
+        return true;
+    },
+
     annotations = ' abcdefghijklmnopqrstuvwxyz'; // suffixes for attributes annotating single field multiple times
 
     $.each(annotations.split(''), function() { // it would be ideal to have exactly as many handlers as there are unique annotations, but the number of annotations isn't known untill DOM is ready
         var adapter = typeHelper.string.format('assertthat{0}', $.trim(this));
-        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsmap', 'constsmap', 'parsersmap'], function(options) {
-            options.rules[adapter] = {
-                prefix: modelHelper.getPrefix(options.element.name),
-                form: options.form,
-                expression: options.params.expression,
-                fieldsMap: $.parseJSON(options.params.fieldsmap),
-                constsMap: $.parseJSON(options.params.constsmap),
-                parsersMap: $.parseJSON(options.params.parsersmap)
-            };
-            if (options.message) {
-                options.messages[adapter] = options.message;
-            }
-            var rules = options.rules[adapter];
-            validationHelper.bindFields(options.form);
-            validationHelper.collectReferences(typeHelper.object.keys(rules.fieldsMap), options.element.name, rules.prefix);
+        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'parsersMap'], function(options) {
+            buildAdapter(adapter, options);
         });
     });
 
     $.each(annotations.split(''), function() {
         var adapter = typeHelper.string.format('requiredif{0}', $.trim(this));
-        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsmap', 'constsmap', 'parsersmap', 'allowempty'], function(options) {
-            options.rules[adapter] = {
-                prefix: modelHelper.getPrefix(options.element.name),
-                form: options.form,
-                expression: options.params.expression,
-                fieldsMap: $.parseJSON(options.params.fieldsmap),
-                constsMap: $.parseJSON(options.params.constsmap),
-                parsersMap: $.parseJSON(options.params.parsersmap),
-                allowEmpty: $.parseJSON(options.params.allowempty)
-            };
-            if (options.message) {
-                options.messages[adapter] = options.message;
-            }
-            var rules = options.rules[adapter];
-            validationHelper.bindFields(options.form);
-            validationHelper.collectReferences(typeHelper.object.keys(rules.fieldsMap), options.element.name, rules.prefix);
+        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'parsersMap', 'allowEmpty'], function(options) {
+            buildAdapter(adapter, options);
         });
     });
 
     $.each(annotations.split(''), function() {
         var method = typeHelper.string.format('assertthat{0}', $.trim(this));
         $.validator.addMethod(method, function(value, element, params) {
-            value = modelHelper.adjustGivenValue(value, element, params); // preprocess given value (here basically we are concerned about determining if such a value is null or not, and we may have
-                                                                          // to extract it using value parser, since e.g. for an array distracted in radios its value is not provided as expected here)
-            if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
-                var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
-                toolchain.registerMethods(model);
-                logger.dump(typeHelper.string.format('AssertThat expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
-                if (!modelHelper.ctxEval(params.expression, model)) { // check if the assertion condition is not satisfied
-                    return false; // assertion not satisfied => notify
-                }
-            }
-            return true;
+            return computeAssertThat(value, element, params);
         }, '');
     });
 
     $.each(annotations.split(''), function() {
         var method = typeHelper.string.format('requiredif{0}', $.trim(this));
         $.validator.addMethod(method, function(value, element, params) {
-            value = modelHelper.adjustGivenValue(value, element, params);
-            if (value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
-                || (!/\S/.test(value) && !params.allowEmpty)) {
-                var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
-                toolchain.registerMethods(model);
-                logger.dump(typeHelper.string.format('RequiredIf expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
-                if (modelHelper.ctxEval(params.expression, model)) { // check if the requirement condition is satisfied
-                    return false; // requirement confirmed => notify
-                }
-            }
-            return true;
+            return computeRequiredIf(value, element, params);
         }, '');
     });
 
@@ -618,7 +627,9 @@ var
         toolchain: toolchain,
         typeHelper: typeHelper,
         modelHelper: modelHelper,
-        validationHelper: validationHelper        
+        validationHelper: validationHelper,
+        computeRequiredIf: computeRequiredIf,
+        computeAssertThat: computeAssertThat
     };
     // --------------------------------------------------------
 

@@ -522,4 +522,110 @@
         qunit.equal(m.Guid('a1111111-1111-1111-1111-111111111111'), m.Guid('A1111111-1111-1111-1111-111111111111'));
     });
 
+    qunit.module("full computation flow");
+
+    qunit.test("verify_assertthat_not_computed_for_null_value", function() {
+
+        var elementMock = {};
+        var paramsMock = { expression: 'false', fieldsMap: {}, constsMap: {}, parsersMap: {} };
+        var result = eapriv.computeAssertThat(null, elementMock, paramsMock);
+        qunit.ok(result); // ok - satisfied despite false assertion (not invoked due to null value)
+
+        // the same behavior for empty or undefined
+        result = eapriv.computeAssertThat('', elementMock, paramsMock);
+        qunit.ok(result);
+        result = eapriv.computeAssertThat(undefined, elementMock, paramsMock);
+        qunit.ok(result);
+    });
+
+    qunit.test("verify_requiredif_not_computed_for_non_null_value", function() {
+
+        var elementMock = {};
+        var paramsMock = { expression: 'true', fieldsMap: {}, constsMap: {}, parsersMap: {} };
+        var result = eapriv.computeRequiredIf({}, elementMock, paramsMock);
+        qunit.ok(result); // ok - not required despite requirement obligation (not invoked due to non-null value)
+
+        // the same behavior for whitespace string if allowed
+        paramsMock.allowEmpty = true;
+        result = eapriv.computeRequiredIf(' ', elementMock, paramsMock);
+        qunit.ok(result);
+    });
+
+    qunit.test("verify_assertthat_computed_for_non_null_value", function() {
+
+        var elementMock = {};
+        var paramsMock = { expression: 'false', fieldsMap: {}, constsMap: {}, parsersMap: {} };
+        var result = eapriv.computeAssertThat({}, elementMock, paramsMock);
+        qunit.ok(!result); // not ok - not satisfied because of false assertion
+    });
+
+    qunit.test("verify_requiredif_computed_for_null_value", function() {
+
+        var elementMock = {};
+        var paramsMock = { expression: 'true', fieldsMap: {}, constsMap: {}, parsersMap: {} };
+        var result = eapriv.computeRequiredIf(null, elementMock, paramsMock);
+        qunit.ok(!result); // not ok - required because of requirement obligation
+
+        // the same behavior for empty or undefined
+        result = eapriv.computeRequiredIf('', elementMock, paramsMock);
+        qunit.ok(!result);
+        result = eapriv.computeRequiredIf(undefined, elementMock, paramsMock);
+        qunit.ok(!result);
+
+        // the same behavior for whitespace string if not allowed
+        paramsMock.allowEmpty = false;
+        result = eapriv.computeRequiredIf(' ', elementMock, paramsMock);
+        qunit.ok(!result);
+    });
+
+    qunit.test("verify_assertthat_complex_expression_computation", function() {
+
+        ea.addMethod('Whoami', function() {
+            return 'root';
+        });
+
+        var form =
+            "<form>" +
+                "<input id='f1' name='ContactDetails.Email' value='asd'>" +
+            "</form>";
+
+        var elementMock = {};
+        var paramsMock = {
+            form: $(form),
+            element: $(form).find('#f1'),
+            prefix: 'ContactDetails.',
+            expression: "Whoami() == 'root' && IsEmail(Email)",
+            fieldsMap: { Email: 'string' },
+            constsMap: {},
+            parsersMap: {}
+        }
+        var result = eapriv.computeAssertThat({}, elementMock, paramsMock);
+        qunit.ok(!result);
+    });
+
+    qunit.test("verify_requiredif_complex_expression_computation", function() {
+
+        ea.addMethod('Whoami', function() {
+            return 'root';
+        });
+
+        var form =
+            "<form>" +
+                "<input id='f1' name='ContactDetails.Email' value='asd'>" +
+            "</form>";
+
+        var elementMock = {};
+        var paramsMock = {
+            form: $(form),
+            element: $(form).find('#f1'),
+            prefix: 'ContactDetails.',
+            expression: "Whoami() == 'root' && !IsEmail(Email)",
+            fieldsMap: { Email: 'string' },
+            constsMap: {},
+            parsersMap: {}
+        }
+        var result = eapriv.computeRequiredIf(null, elementMock, paramsMock);
+        qunit.ok(!result);
+    });
+
 }($, QUnit, window.ea, window.ea.___6BE7863DC1DB4AFAA61BB53FF97FE169));
