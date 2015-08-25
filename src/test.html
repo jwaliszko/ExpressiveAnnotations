@@ -10,6 +10,21 @@
     <div id="qunit"></div>
     <div id="qunit-fixture"></div>
 
+    <div style="display: none">
+        <form id="testform">
+            <input data-val="true"
+                   data-val-assertthat="Assertion not satisfied."
+                   data-val-assertthat-constsmap="{}"
+                   data-val-assertthat-expression="Whoami() == 'root' && IsEmail(Email)"
+                   data-val-assertthat-fieldsmap="{&quot;Email&quot;:&quot;string&quot;}"
+                   data-val-assertthat-parsersmap="{}"
+                   id="ContactDetails_Email"
+                   name="ContactDetails.Email"
+                   type="text"
+                   value="asd">
+        </form>
+    </div>
+
     <script src="qunit-1.18.0.js"></script>
     <script src="./packages/jQuery.1.8.2/Content/Scripts/jquery-1.8.2.js"></script>
     <script src="./packages/jQuery.Validation.1.10.0/Content/Scripts/jquery.validate.js"></script>

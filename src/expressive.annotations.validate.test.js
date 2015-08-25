@@ -7,8 +7,9 @@
 (function($, qunit, ea, eapriv) {
     // equal( actual, expected [, message ] )
 
-    // qunit.testDone(function() { // reset state for further tests if needed
-    // });
+    qunit.testDone(function() { // reset state for further tests if needed
+        eapriv.toolchain.methods = {};
+    });
 
     qunit.module("type helper");
 
@@ -520,6 +521,39 @@
         qunit.ok(!m.IsRegexMatch(null, null));
 
         qunit.equal(m.Guid('a1111111-1111-1111-1111-111111111111'), m.Guid('A1111111-1111-1111-1111-111111111111'));
+    });
+
+    qunit.test("verify_assertthat_complex_expression_computation", function() {
+
+        ea.addMethod('Whoami', function() {
+            return 'root';
+        });
+
+        var validator = $('#testform').validate();
+        var element = $('#testform').find('#ContactDetails_Email');
+        var result = element.valid(); // trigger wait for result (all is synchronous)
+        qunit.ok(!result);
+        qunit.ok(validator.numberOfInvalids() === 1);
+    });
+
+    qunit.test("verify_assertthat_complex_expression_computation_async", function(assert) {
+        var finished = assert.async();
+
+        ea.addAsyncMethod('Whoami', function(done) {
+            window.setTimeout(function() {
+                done('root');
+            }, 10);
+        });
+
+        var validator = $('#testform').validate();
+        var element = $('#testform').find('#ContactDetails_Email');
+        element.valid(); // trigger and don't wait for result (async methods invoked)
+        qunit.ok(validator.numberOfInvalids() === 0); // expect no errors now
+
+        window.setTimeout(function() {
+            assert.ok(validator.numberOfInvalids() === 1); // errors shown (after async calls had returned and expression was re-computed)
+            finished();
+        }, 100);
     });
 
 }($, QUnit, window.ea, window.ea.___6BE7863DC1DB4AFAA61BB53FF97FE169));
