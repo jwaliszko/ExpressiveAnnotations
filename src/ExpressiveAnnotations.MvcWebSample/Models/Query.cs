@@ -86,7 +86,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 
         public List<int> AvailableDonations
         {
-            get { return new List<int> {1, 1, 2, 3, 5, 8, 13}; }
+            get { return new List<int> {1, 4, 9, 16, 25, 36, 49}; }
         }
 
         [Display(ResourceType = typeof (Resources), Name = "GoAbroad")]

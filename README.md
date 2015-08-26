@@ -444,6 +444,13 @@ Default value is *'change keyup'* (for more information check `eventType` parame
     ea.settings.dependencyTriggers = 'change'; // mute some excessive activity if you wish,
                                                // or turn it off entirely (set to undefined)
 ```
+Alternatively, to enforce re-binding of already attached validation handlers, use following construction:
+```JavaScript
+<script>
+	ea.settings.apply({
+		dependencyTriggers: 'new set of events'
+    });
+```
 
 #####<a id="how-to-boost-web-console-verbosity-for-debug-purposes">How to boost web console verbosity for debug purposes?</a>
 

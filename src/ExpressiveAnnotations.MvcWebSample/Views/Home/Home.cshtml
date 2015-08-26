@@ -95,8 +95,8 @@
                 return date.getTime(); // return milliseconds
             });
             ea.addValueParser('ArrayParser', function(value, field) { // provide your custom parsing mechanism of the field value at client side
-                // parameters: value - raw data string extracted by default from DOM element
-                //             field - DOM element name for which parser was invoked
+                                                                      // parameters: value - raw data string extracted by default from DOM element
+                                                                      //             field - DOM element name for which parser was invoked
                 var array = $(':input[name="' + field + '"]').serializeArray();
                 return array.length === 0
                     ? null    // if array is empty, return null for RequiredIf to complain
