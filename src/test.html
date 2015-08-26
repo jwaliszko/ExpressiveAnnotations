@@ -23,6 +23,54 @@
                    type="text"
                    value="asd">
         </form>
+
+        <form id="separate_async_form">
+            <input data-val="true"
+                   data-val-assertthat="Assertion for separate async invocations not satisfied."
+                   data-val-assertthat-constsmap="{}"
+                   data-val-assertthat-expression="A('x') + B('y') != C('xy')"
+                   data-val-assertthat-fieldsmap="{}"
+                   data-val-assertthat-parsersmap="{}"
+                   name="email"
+                   type="text"
+                   value="ea@home.com">
+        </form>
+
+        <form id="separate_repeated_async_form">
+            <input data-val="true"
+                   data-val-assertthat="Assertion for separate and repeated async invocations not satisfied."
+                   data-val-assertthat-constsmap="{}"
+                   data-val-assertthat-expression="A('x') + A('y') != A('xy')"
+                   data-val-assertthat-fieldsmap="{}"
+                   data-val-assertthat-parsersmap="{}"
+                   name="email"
+                   type="text"
+                   value="ea@home.com">
+        </form>
+
+        <form id="nested_async_form">
+            <input data-val="true"
+                   data-val-assertthat="Assertion for nested async invocations not satisfied."
+                   data-val-assertthat-constsmap="{}"
+                   data-val-assertthat-expression="A(B(C('x'))) != 'x'"
+                   data-val-assertthat-fieldsmap="{}"
+                   data-val-assertthat-parsersmap="{}"
+                   name="email"
+                   type="text"
+                   value="ea@home.com">
+        </form>
+
+        <form id="nested_repeated_async_form">
+            <input data-val="true"
+                   data-val-assertthat="Assertion for nested and repeated async invocations not satisfied."
+                   data-val-assertthat-constsmap="{}"
+                   data-val-assertthat-expression="A(A(A('x'))) != 'x'"
+                   data-val-assertthat-fieldsmap="{}"
+                   data-val-assertthat-parsersmap="{}"
+                   name="email"
+                   type="text"
+                   value="ea@home.com">
+        </form>
     </div>
 
     <script src="qunit-1.18.0.js"></script>

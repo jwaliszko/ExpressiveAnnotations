@@ -556,4 +556,155 @@
         }, 100);
     });
 
+    qunit.module("async tests");
+
+    function arrMatch(source, dest) { // check if 2 arrays contain the same elements (order doesn't matter)
+        if (source.length !== dest.length)
+            return false;
+
+        var i = source.length;
+        while (i--) {
+            var j = source.length;
+            var found = false;
+            while (j--) {
+                if (source[i] === dest[j]) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    qunit.test("verify_assertthat_separate_async", function(assert) {
+        var finished = assert.async();
+
+        var invoked = [];
+        ea.addAsyncMethod('A', function(arg, done) {
+            window.setTimeout(function() {
+                invoked.push('A');
+                done(arg);
+            }, 10);
+        });
+        ea.addAsyncMethod('B', function(arg, done) {
+            window.setTimeout(function() {
+                invoked.push('B');
+                done(arg);
+            }, 10);
+        });
+        ea.addAsyncMethod('C', function(arg, done) {
+            window.setTimeout(function() {
+                invoked.push('C');
+                done(arg);
+            }, 10);
+        });
+
+        var validator = $('#separate_async_form').validate();
+        var element = $('#separate_async_form').find('input');
+        element.valid();
+        assert.equal(validator.numberOfInvalids(), 0);
+
+        window.setTimeout(function() {
+            assert.equal(invoked.length, 3);
+            assert.ok(arrMatch(invoked, ['A', 'B', 'C']));
+
+            assert.equal(validator.numberOfInvalids(), 1);
+
+            finished();
+        }, 100);
+    });
+
+    qunit.test("verify_assertthat_separate_repeated_async", function(assert) {
+        var finished = assert.async();
+
+        var invoked = [];
+        ea.addAsyncMethod('A', function(arg, done) {
+            window.setTimeout(function() {
+                invoked.push('A');
+                done(arg);
+            }, 10);
+        });
+
+        var validator = $('#separate_repeated_async_form').validate();
+        var element = $('#separate_repeated_async_form').find('input');
+        element.valid();
+        assert.equal(validator.numberOfInvalids(), 0);
+
+        window.setTimeout(function() {
+            assert.equal(invoked.length, 3);
+            assert.ok(arrMatch(invoked, ['A', 'A', 'A']));
+
+            assert.equal(validator.numberOfInvalids(), 1);
+
+            finished();
+        }, 100);
+    });
+
+    qunit.test("verify_assertthat_nested_async", function(assert) {
+        var finished = assert.async();
+
+        var invoked = [];
+        ea.addAsyncMethod('A', function(arg, done) {
+            window.setTimeout(function() {
+                invoked.push('A');
+                done(arg);
+            }, 10);
+        });
+        ea.addAsyncMethod('B', function(arg, done) {
+            window.setTimeout(function() {
+                invoked.push('B');
+                done(arg);
+            }, 10);
+        });
+        ea.addAsyncMethod('C', function(arg, done) {
+            window.setTimeout(function() {
+                invoked.push('C');
+                done(arg);
+            }, 10);
+        });
+
+        var validator = $('#nested_async_form').validate();
+        var element = $('#nested_async_form').find('input');
+        element.valid();
+        qunit.equal(validator.numberOfInvalids(), 0);
+
+        window.setTimeout(function() {
+            assert.equal(invoked.length, 3);
+            assert.ok(arrMatch(invoked, ['A', 'B', 'C']));
+
+            assert.equal(validator.numberOfInvalids(), 1);
+
+            finished();
+        }, 100);
+    });
+
+    qunit.test("verify_assertthat_nested_repeated_async", function(assert) {
+        var finished = assert.async();
+
+        var invoked = [];
+        ea.addAsyncMethod('A', function(arg, done) {
+            window.setTimeout(function() {
+                invoked.push('A');
+                done(arg);
+            }, 10);
+        });
+
+        var validator = $('#nested_repeated_async_form').validate();
+        var element = $('#nested_repeated_async_form').find('input');
+        element.valid();
+        qunit.equal(validator.numberOfInvalids(), 0);
+
+        window.setTimeout(function() {
+            assert.equal(invoked.length, 3);
+            assert.ok(arrMatch(invoked, ['A', 'A', 'A']));
+
+            assert.equal(validator.numberOfInvalids(), 1);
+
+            finished();
+        }, 100);
+    });
+
 }($, QUnit, window.ea, window.ea.___6BE7863DC1DB4AFAA61BB53FF97FE169));
