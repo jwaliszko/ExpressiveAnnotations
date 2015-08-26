@@ -97,8 +97,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             
             Assert.AreEqual("{\"Value\":\"numeric\",\"Status\":\"numeric\"}", (string)assertRule.ValidationParameters["fieldsmap"], false, CultureInfo.InvariantCulture);
             Assert.AreEqual("{\"ValidatorsTest.State.High\":0}", (string)assertRule.ValidationParameters["constsmap"], false, CultureInfo.InvariantCulture);
-            // expression is not a json actually, but tested for the sake of clarity
-            Assert.AreEqual("Value > 0 && Status == ValidatorsTest.State.High", (string)assertRule.ValidationParameters["expression"], false, CultureInfo.InvariantCulture);
+            Assert.AreEqual("\"Value > 0 && Status == ValidatorsTest.State.High\"", (string)assertRule.ValidationParameters["expression"], false, CultureInfo.InvariantCulture);
 
             var requir = new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute("Value > 0 && Status == ValidatorsTest.State.High"));
             var requirRule = requir.GetClientValidationRules().Single();
@@ -106,8 +105,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             Assert.AreEqual("{\"Value\":\"numeric\",\"Status\":\"numeric\"}", (string)requirRule.ValidationParameters["fieldsmap"], false, CultureInfo.InvariantCulture);
             Assert.AreEqual("{\"ValidatorsTest.State.High\":0}", (string)requirRule.ValidationParameters["constsmap"], false, CultureInfo.InvariantCulture);
             Assert.AreEqual("false", (string)requirRule.ValidationParameters["allowempty"], false, CultureInfo.InvariantCulture);
-            // expression is not a json actually, but tested for the sake of clarity
-            Assert.AreEqual("Value > 0 && Status == ValidatorsTest.State.High", (string)requirRule.ValidationParameters["expression"], false, CultureInfo.InvariantCulture);
+            Assert.AreEqual("\"Value > 0 && Status == ValidatorsTest.State.High\"", (string)requirRule.ValidationParameters["expression"], false, CultureInfo.InvariantCulture);
 
             JsonConvert.DefaultSettings = settings; // reset settings to original state
         }
