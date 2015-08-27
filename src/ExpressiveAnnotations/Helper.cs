@@ -48,6 +48,32 @@ namespace ExpressiveAnnotations
             }
         }
 
+        public static object ExtractValue(object source, string property)
+        {
+            if (source == null)
+                throw new ArgumentNullException("source");
+            if (property == null)
+                throw new ArgumentNullException("property");
+
+            var props = property.Split('.');
+            for (var i = 0; i < props.Length; i++)
+            {
+                if (source == null)
+                    throw new ArgumentException(
+                        string.Format("Value extraction interrupted. Field {0} is null.", props[i - 1]), property);
+
+                var type = source.GetType();
+                var prop = props[i];
+                var pi = type.GetProperty(prop);
+                if (pi == null)
+                    throw new ArgumentException(
+                        string.Format("Value extraction interrupted. Field {0} not found.", prop), property);
+
+                source = pi.GetValue(source, null);
+            }
+            return source;
+        }
+
         public static bool IsDateTime(this Type type)
         {
             if (type == null)

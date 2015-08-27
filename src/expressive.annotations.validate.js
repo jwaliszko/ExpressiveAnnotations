@@ -233,19 +233,19 @@ var
                     value = typeHelper.isString(value) ? value.replace(/\$/g, '$$$$'): value; // escape $ sign for string.replace()
                     return value;
                 }
-                function applyParam(text, param) {
-                    return text.replace(new RegExp('\\{' + i + '\\}', 'gm'), param);
+                function applyParam(text, param, idx) {
+                    return text.replace(new RegExp('\\{' + idx + '\\}', 'gm'), param);
                 }
 
                 var i;
                 if (params instanceof Array) {
                     for (i = 0; i < params.length; i++) {
-                        text = applyParam(text, makeParam(params[i]));
+                        text = applyParam(text, makeParam(params[i]), i);
                     }
                     return text;
                 }
                 for (i = 0; i < arguments.length - 1; i++) {
-                    text = applyParam(text, makeParam(arguments[i +1]));
+                    text = applyParam(text, makeParam(arguments[i + 1]), i);
                 }
                 return text;
             },
@@ -352,7 +352,7 @@ var
             return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value); // basic check
         },
         tryParse: function(value, type, name, parser) {
-            if (parser !== undefined) {
+            if (parser !== null && parser !== undefined) {
                 var parsedValue = typeHelper.tryCustomParse(value, name, parser);
                 if (!parsedValue.error) {
                     return parsedValue;
@@ -418,7 +418,7 @@ var
                 throw typeHelper.string.format('DOM field {0} not found.', fieldName);
             }
             rawValue = getValue(field);
-            if (rawValue === undefined || rawValue === null || rawValue === '') { // field value not set
+            if (rawValue === null || rawValue === undefined  || rawValue === '') { // field value not set
                 return null;
             }
             parsedValue = typeHelper.tryParse(rawValue, type, fieldName, parser); // convert field value to required type
@@ -480,7 +480,7 @@ var
 
             var field = element.name.replace(params.prefix, '');
             var parser = params.parsersMap[field];
-            if (parser !== undefined) {
+            if (parser !== null && parser !== undefined) {
                 var parsedValue = typeHelper.tryCustomParse(value, element.name, parser);
                 if (parsedValue === null || parsedValue === undefined || !parsedValue.error) {
                     return parsedValue;
@@ -527,7 +527,7 @@ var
         },
         bindFields: function(form, force) { // attach validation handlers to dependency triggers (events) for some form elements
             if (!form.eaTriggersBinded || force) {
-                if (api.settings.dependencyTriggers !== undefined && api.settings.dependencyTriggers !== null && api.settings.dependencyTriggers !== '') {
+                if (api.settings.dependencyTriggers !== null && api.settings.dependencyTriggers !== undefined && api.settings.dependencyTriggers !== '') {
                     var namespacedEvents = [];
                     $.each(api.settings.dependencyTriggers.split(/\s+/), function(idx, event) {
                         if (/\S/.test(event)) {
@@ -547,7 +547,7 @@ var
 
     buildAdapter = function(adapter, options) {
         var rules = {
-            prefix: modelHelper.getPrefix(options.element.name),
+            prefix: modelHelper.getPrefix(options.element.name),            
             form: options.form
         };
         for (var key in options.params) {
@@ -556,7 +556,16 @@ var
             }
         }
         if (options.message) {
-            options.messages[adapter] = options.message;
+            options.messages[adapter] = function(params, element) {
+                var matches;
+                var message = options.message;
+                while ((matches = /{([^}]+)}/g.exec(message)) !== null) {
+                    var field = matches[1];
+                    var value = modelHelper.extractValue(params.form, field, params.prefix, 'string', null);
+                    message = message.replace(new RegExp('\\{' + field + '\\}', 'gm'), value);
+                }
+                return message;
+            };
         }
         validationHelper.bindFields(options.form);
         validationHelper.collectReferences(typeHelper.object.keys(rules.fieldsMap), options.element.name, rules.prefix);

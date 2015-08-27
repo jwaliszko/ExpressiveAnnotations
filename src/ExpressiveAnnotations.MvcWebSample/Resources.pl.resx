@@ -265,7 +265,7 @@
     <value>Jeśli planujesz wyjechać za granicę i jesteś w wieku 25-55 lat lub planujesz odwiedzić dwukrotnie ten sam obcy kraj, podaj powody.</value>
   </data>
   <data name="ReasonForTravelRequiredForYouth" xml:space="preserve">
-    <value>Jeśli planujesz jakąkolwiek podróż i nie masz ukończonych 18 lat, podaj powody.</value>
+    <value>Jeśli planujesz jakąkolwiek podróż i nie masz ukończonych 18 lat (wskazałeś {Age}, tak {Age}), podaj powody (PS. {Country}... dobry wybór).</value>
   </data>
   <data name="ReturnDate" xml:space="preserve">
     <value>Data powrotu</value>

@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Text.RegularExpressions;
 using ExpressiveAnnotations.Analysis;
 
@@ -17,6 +18,8 @@ namespace ExpressiveAnnotations.Attributes
     public abstract class ExpressiveAttribute : ValidationAttribute
     {
         private int? _priority;
+        private const string _fieldRegex = @"{[a-zA-Z_]+(?:(?:\.[a-zA-Z_])?[a-zA-Z0-9_]*)*}"; // {field}, {field.value}
+        private readonly IDictionary<string, string> _messageValuesMap;
 
         /// <summary>
         ///     Constructor for expressive validation attribute.
@@ -31,6 +34,7 @@ namespace ExpressiveAnnotations.Attributes
 
             Expression = expression;
             CachedValidationFuncs = new Dictionary<Type, Func<object, bool>>();
+            _messageValuesMap = new Dictionary<string, string>();
         }
 
         /// <summary>
@@ -164,7 +168,29 @@ namespace ExpressiveAnnotations.Attributes
         /// </returns>
         public string FormatErrorMessage(string displayName, string expression)
         {
-            return string.Format(ErrorMessageString, displayName, expression);
+            var matches = Regex.Matches(ErrorMessageString, _fieldRegex);
+            if (matches.Count <= 0)
+                return string.Format(ErrorMessageString, displayName, expression);
+
+            var message = ErrorMessageString;
+            if (_messageValuesMap.Any())
+            {
+                message = _messageValuesMap.Aggregate(message, (current, kvp) => current.Replace(kvp.Key, kvp.Value));
+                return string.Format(message, displayName, expression);
+            }
+
+            var substitutes = new Dictionary<string, string>();
+            for (var i = 0; i < matches.Count; i++)
+            {
+                var arg = matches[i].Value;
+                if (substitutes.ContainsKey(arg))
+                    continue;
+
+                substitutes[arg] = Guid.NewGuid().ToString();
+            }
+            message = substitutes.Aggregate(message, (current, kvp) => current.Replace(kvp.Key, kvp.Value));
+            message = string.Format(message, displayName, expression);
+            return substitutes.Aggregate(message, (current, kvp) => current.Replace(kvp.Value, kvp.Key));
         }
 
         /// <summary>
@@ -211,6 +237,7 @@ namespace ExpressiveAnnotations.Attributes
                                            ?? validationContext.ObjectType.GetMemberNameFromDisplayAttribute(validationContext.DisplayName);
             try
             {
+                ExtractValuesForMessage(validationContext);
                 return IsValidInternal(value, validationContext);
             }
             catch (Exception e)
@@ -218,6 +245,21 @@ namespace ExpressiveAnnotations.Attributes
                 throw new ValidationException(
                     string.Format("{0}: validation applied to {1} field failed.",
                         GetType().Name, validationContext.MemberName), e);
+            }
+        }
+
+        private void ExtractValuesForMessage(ValidationContext validationContext)
+        {
+            var matches = Regex.Matches(ErrorMessageString, _fieldRegex);
+            if (matches.Count <= 0) 
+                return;
+
+            for (var i = 0; i < matches.Count; i++)
+            {
+                var arg = matches[i].Value;
+                var val = (Helper.ExtractValue(validationContext.ObjectInstance, arg.Substring(1, arg.Length - 2))
+                           ?? string.Empty).ToString();
+                _messageValuesMap[arg] = val;
             }
         }
     }
