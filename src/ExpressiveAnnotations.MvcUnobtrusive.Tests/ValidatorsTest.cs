@@ -3,10 +3,12 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using ExpressiveAnnotations.Attributes;
+using ExpressiveAnnotations.MvcUnobtrusive.Attributes;
 using ExpressiveAnnotations.MvcUnobtrusive.Validators;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -34,7 +36,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             var assertAttributes = Enumerable.Range(0, 28).Select(x => new AssertThatAttribute(string.Format("Value > {0}", x))).ToArray();
             var requirAttributes = Enumerable.Range(0, 28).Select(x => new RequiredIfAttribute(string.Format("Value > {0}", x))).ToArray();
 
-            var metadata = GetModelMetadata(model);
+            var metadata = GetModelMetadata(model, m => m.Value);
             var controllerContext = GetControllerContext();
 
             try
@@ -88,8 +90,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             };
 
-            var model = new Model {Value = 1, Status = State.High};
-            var metadata = GetModelMetadata(model);
+            var model = new Model();
+            var metadata = GetModelMetadata(model, m => m.Array);
             var controllerContext = GetControllerContext();
 
             var assert = new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("Value > 0 && Status == ValidatorsTest.State.High"));
@@ -97,17 +99,46 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             
             Assert.AreEqual("{\"Value\":\"numeric\",\"Status\":\"numeric\"}", (string)assertRule.ValidationParameters["fieldsmap"], false, CultureInfo.InvariantCulture);
             Assert.AreEqual("{\"ValidatorsTest.State.High\":0}", (string)assertRule.ValidationParameters["constsmap"], false, CultureInfo.InvariantCulture);
-            Assert.AreEqual("\"Value > 0 && Status == ValidatorsTest.State.High\"", (string)assertRule.ValidationParameters["expression"], false, CultureInfo.InvariantCulture);
+            Assert.AreEqual("{\"Array\":\"arrayparser\"}", (string)assertRule.ValidationParameters["parsersmap"], false, CultureInfo.InvariantCulture);
+            Assert.AreEqual("\"Value > 0 && Status == ValidatorsTest.State.High\"", (string)assertRule.ValidationParameters["expression"], false, CultureInfo.InvariantCulture);            
 
             var requir = new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute("Value > 0 && Status == ValidatorsTest.State.High"));
             var requirRule = requir.GetClientValidationRules().Single();
             
             Assert.AreEqual("{\"Value\":\"numeric\",\"Status\":\"numeric\"}", (string)requirRule.ValidationParameters["fieldsmap"], false, CultureInfo.InvariantCulture);
             Assert.AreEqual("{\"ValidatorsTest.State.High\":0}", (string)requirRule.ValidationParameters["constsmap"], false, CultureInfo.InvariantCulture);
+            Assert.AreEqual("{\"Array\":\"arrayparser\"}", (string)assertRule.ValidationParameters["parsersmap"], false, CultureInfo.InvariantCulture);
             Assert.AreEqual("false", (string)requirRule.ValidationParameters["allowempty"], false, CultureInfo.InvariantCulture);
             Assert.AreEqual("\"Value > 0 && Status == ValidatorsTest.State.High\"", (string)requirRule.ValidationParameters["expression"], false, CultureInfo.InvariantCulture);
 
             JsonConvert.DefaultSettings = settings; // reset settings to original state
+        }
+
+        [TestMethod]
+        public void empty_client_validation_rules_are_not_created()
+        {
+            var model = new Model();
+            var metadata = GetModelMetadata(model, m => m.Value);
+            var controllerContext = GetControllerContext();
+
+            var assert = new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("1 > 2"));
+            var assertRule = assert.GetClientValidationRules().Single();
+
+            Assert.IsFalse(assertRule.ValidationParameters.ContainsKey("fieldsmap"));
+            Assert.IsFalse(assertRule.ValidationParameters.ContainsKey("constsmap"));
+            Assert.IsFalse(assertRule.ValidationParameters.ContainsKey("parsersmap"));
+
+            Assert.IsTrue(assertRule.ValidationParameters.ContainsKey("expression"));
+
+            var requir = new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute("1 > 2"));
+            var requirRule = requir.GetClientValidationRules().Single();
+
+            Assert.IsFalse(requirRule.ValidationParameters.ContainsKey("fieldsmap"));
+            Assert.IsFalse(requirRule.ValidationParameters.ContainsKey("constsmap"));
+            Assert.IsFalse(requirRule.ValidationParameters.ContainsKey("parsersmap"));
+
+            Assert.IsTrue(requirRule.ValidationParameters.ContainsKey("allowempty"));
+            Assert.IsTrue(requirRule.ValidationParameters.ContainsKey("expression"));
         }
 
         [TestMethod]
@@ -154,7 +185,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             var generatedCode = string.Join(" && ", Enumerable.Repeat(0, 100).Select(x => "true"));
             
             var model = new Model();
-            var metadata = GetModelMetadata(model);
+            var metadata = GetModelMetadata(model, m => m.Value);
             var controllerContext = GetControllerContext();
 
             var nonCached = MeasureExecutionTime(() => new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute(generatedCode)));
@@ -180,10 +211,10 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             return stopwatch.ElapsedTicks;
         }
 
-        private ModelMetadata GetModelMetadata(Model model)
+        private ModelMetadata GetModelMetadata<TModel, TProp>(TModel model, Expression<Func<TModel, TProp>> expression)
         {
-            var metadata = new ModelMetadata(ModelMetadataProviders.Current, model.GetType(), () => model, model.Value.GetType(), "Value");
-            return metadata;
+            var property = ((MemberExpression) expression.Body).Member.Name;
+            return new ModelMetadata(ModelMetadataProviders.Current, typeof (TModel), () => model, typeof (TProp), property);
         }
 
         private ControllerContext GetControllerContext()
@@ -205,6 +236,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
         public class Model
         {
             public int Value { get; set; }
+            [ValueParser("arrayparser")]
+            public int[] Array { get; set; }
             public State Status { get; set; }
         }
     }
