@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using ExpressiveAnnotations.Analysis;
 
@@ -18,7 +19,7 @@ namespace ExpressiveAnnotations.Attributes
     public abstract class ExpressiveAttribute : ValidationAttribute
     {
         private int? _priority;
-        private const string _fieldRegex = @"{[a-zA-Z_]+(?:(?:\.[a-zA-Z_])?[a-zA-Z0-9_]*)*}"; // {field}, {field.value}
+        private const string _fieldRegex = @"({+)[a-zA-Z_]+(?:(?:\.[a-zA-Z_])?[a-zA-Z0-9_]*)*(}+)"; // {field}, {field.value}
         private readonly IDictionary<string, string> _messageValuesMap;
 
         /// <summary>
@@ -173,12 +174,6 @@ namespace ExpressiveAnnotations.Attributes
                 return string.Format(ErrorMessageString, displayName, expression);
 
             var message = ErrorMessageString;
-            if (_messageValuesMap.Any())
-            {
-                message = _messageValuesMap.Aggregate(message, (current, kvp) => current.Replace(kvp.Key, kvp.Value));
-                return string.Format(message, displayName, expression);
-            }
-
             var substitutes = new Dictionary<string, string>();
             for (var i = 0; i < matches.Count; i++)
             {
@@ -188,9 +183,17 @@ namespace ExpressiveAnnotations.Attributes
 
                 substitutes[arg] = Guid.NewGuid().ToString();
             }
+
+            // substitute custom formatters not to interfere with standard string.Format
             message = substitutes.Aggregate(message, (current, kvp) => current.Replace(kvp.Key, kvp.Value));
             message = string.Format(message, displayName, expression);
-            return substitutes.Aggregate(message, (current, kvp) => current.Replace(kvp.Value, kvp.Key));
+            // give back custom formatters - standard string.Format is already done, so it will not fail
+            message = substitutes.Aggregate(message, (current, kvp) => current.Replace(kvp.Value, kvp.Key));
+
+            if (_messageValuesMap.Any())
+                message = _messageValuesMap.Aggregate(message, (current, kvp) => current.Replace(kvp.Key, kvp.Value));
+
+            return message;
         }
 
         /// <summary>
@@ -251,15 +254,33 @@ namespace ExpressiveAnnotations.Attributes
         private void ExtractValuesForMessage(ValidationContext validationContext)
         {
             var matches = Regex.Matches(ErrorMessageString, _fieldRegex);
-            if (matches.Count <= 0) 
+            if (matches.Count <= 0)
                 return;
 
             for (var i = 0; i < matches.Count; i++)
             {
-                var arg = matches[i].Value;
-                var val = (Helper.ExtractValue(validationContext.ObjectInstance, arg.Substring(1, arg.Length - 2))
-                           ?? string.Empty).ToString();
-                _messageValuesMap[arg] = val;
+                var match = matches[i];
+                var arg = match.Value;
+                var leftBrackets = match.Groups[1];
+                var rightBrackets = match.Groups[2];
+
+                if (leftBrackets.Length != rightBrackets.Length)
+                    throw new FormatException("Input string was not in a correct format.");
+                
+                var length = leftBrackets.Length;
+                var left = new StringBuilder();
+                var right = new StringBuilder();
+                for (var j = 0; j < length / 2; j++) // flatten each pair of braces (curly brackets) into single artifact,
+                {                                    // in order to escape them - to output a { uses {{ and to output a } uses }} (just like standard string.Format does)
+                    left.Append("{");
+                    right.Append("}");
+                }
+
+                var param = arg.Substring(length, arg.Length - 2 * length);
+                if (length % 2 != 0) // substitute param with respective value (just like string.Format does)
+                    param = (Helper.ExtractValue(validationContext.ObjectInstance, param) ?? string.Empty).ToString();
+
+                _messageValuesMap[match.ToString()] = string.Format("{0}{1}{2}", left, param, right);
             }
         }
     }
