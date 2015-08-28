@@ -124,12 +124,14 @@ Here instead, we're saying "If condition is met, return some view. Otherwise, ad
 RequiredIfAttribute(
     string expression,
     [bool AllowEmptyStrings], 
-	[int Priority]           ...) - Validation attribute which indicates that annotated 
+	[int Priority]           
+	[string ErrorMessage]    ...) - Validation attribute which indicates that annotated 
                                     field is required when computed result of given logical 
                                     expression is true.
 AssertThatAttribute(
     string expression,
-	[int Priority]           ...) - Validation attribute, executed for non-null annotated 
+	[int Priority]           
+	[string ErrorMessage]    ...) - Validation attribute, executed for non-null annotated 
                                     field, which indicates that assertion given in logical 
                                     expression has to be satisfied, for such field to be 
                                     considered as valid.
@@ -141,6 +143,12 @@ Priority          - Gets or sets the hint, available for any concerned external 
                     indicating the order in which this attribute should be executed among 
                     others of its kind, i.e. ExpressiveAttribute. Value is optional and not
 					set by default, which means that execution order is undefined.
+ErrorMessage      - Gets or sets an explicit error message string. A difference to default 
+					behavior is awarness of new format specifiers, given in curly brackets, 
+					used to extract values of specified fields, e.g. {field}, {field.field}
+					within current model context. Braces can be escaped by double-braces, 
+					i.e. to output a { use {{ and to output a } use }}. The same logic works 
+					for messages provided in resources.
 ```
 
 Full API documentation *(probably not useful at all, since the note above covers almost exhaustively what is actually needed to work with EA)* generated with [Sandcastle](https://sandcastle.codeplex.com/) (with the support of [SHFB](http://shfb.codeplex.com/)), can be downloaded in the form of compiled HTML help file from [here](doc/api/api.chm?raw=true) (only C# API, no JavaScript there).

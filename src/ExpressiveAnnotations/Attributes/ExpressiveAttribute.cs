@@ -167,6 +167,10 @@ namespace ExpressiveAnnotations.Attributes
         /// <returns>
         ///     The localized message to present to the user.
         /// </returns>
+        /// <remarks>
+        ///     This method interprets custom format specifiers, provided to error message string, for which model fields values will be extracted. Specifiers should be
+        ///     given in braces (curly brackets), e.g. {field}, {field.field}. Braces can be escaped by double-braces, i.e. to output a { use {{ and to output a } use }}.
+        /// </remarks>
         public string FormatErrorMessage(string displayName, string expression)
         {
             var matches = Regex.Matches(ErrorMessageString, _fieldRegex);
@@ -184,10 +188,10 @@ namespace ExpressiveAnnotations.Attributes
                 substitutes[arg] = Guid.NewGuid().ToString();
             }
 
-            // substitute custom formatters not to interfere with standard string.Format
+            // substitute custom format specifiers not to interfere with standard string.Format logic
             message = substitutes.Aggregate(message, (current, kvp) => current.Replace(kvp.Key, kvp.Value));
             message = string.Format(message, displayName, expression);
-            // give back custom formatters - standard string.Format is already done, so it will not fail
+            // give back custom format specifiers - standard string.Format is already done, so it will not fail
             message = substitutes.Aggregate(message, (current, kvp) => current.Replace(kvp.Value, kvp.Key));
 
             if (_messageValuesMap.Any())
@@ -269,13 +273,10 @@ namespace ExpressiveAnnotations.Attributes
                     throw new FormatException("Input string was not in a correct format.");
 
                 var length = leftBraces.Length;
-                var left = new StringBuilder();
-                var right = new StringBuilder();
-                for (var j = 0; j < length / 2; j++) // flatten each pair of braces (curly brackets) into single artifact,
-                {                                    // in order to escape them - to output a { use {{ and to output a } use }} (just like standard string.Format does)
-                    left.Append("{");
-                    right.Append("}");
-                }
+                // flatten each pair of braces (curly brackets) into single artifact
+                // in order to escape them - to output a { use {{ and to output a } use }} (just like standard string.Format does)
+                var left = new string('{', length/2);
+                var right = new string('}', length/2);
 
                 var param = arg.Substring(length, arg.Length - 2 * length);
                 if (length % 2 != 0) // substitute param with respective value (just like string.Format does)

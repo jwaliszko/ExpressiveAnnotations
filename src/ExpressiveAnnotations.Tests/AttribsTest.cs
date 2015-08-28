@@ -122,7 +122,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void verify_values_extraction_for_error_messages_before_validation() // before validation custom formatters are not applied (and e.g. are sent in unchanged form to client)
+        public void verify_values_extraction_for_error_messages_before_validation() // before validation, custom format specifiers used to extract fields values are not interpreted (to be sent in unchanged form to client)
         {
             AssertErrorMessage(
                 "field: {0}, expr: {1} | Value1: {Value1}{Value1}, Internal.Internal.Value1: {Internal.Internal.Value1}, {Internal.Internal.Value1}",
