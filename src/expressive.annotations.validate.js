@@ -547,12 +547,31 @@ var
         }
         if (options.message) {
             options.messages[adapter] = function(params, element) {
-                var matches;
-                var message = options.message;
-                while ((matches = /{([^}]+)}/g.exec(message)) !== null) {
-                    var field = matches[1];
-                    var value = modelHelper.extractValue(params.form, field, params.prefix, 'string', null);
-                    message = message.replace(new RegExp('\\{' + field + '\\}', 'gm'), value);
+                var matches, message, remaining;
+                message = remaining = options.message;
+                while ((matches = /({+)[a-zA-Z_]+(?:(?:\.[a-zA-Z_])?[a-zA-Z0-9_]*)*(}+)/g.exec(remaining)) !== null) { // search for custom string formatters, e.g. {field} {field.field}, for field values to be extracted                    
+                    var arg = matches[0];                                                                              // braces can be escaped by double-braces, i.e. to output a { use {{ and to output a } use }}
+                    var leftBraces = matches[1];
+                    var rightBraces = matches[2];
+
+                    if (leftBraces.length !== rightBraces.length)
+                        throw 'Input string was not in a correct format.';
+
+                    var length = leftBraces.length;
+                    var left = '';
+                    var right = '';
+                    for (var j = 0; j < parseInt(length / 2); j++) // flatten each pair of braces (curly brackets) into single artifact, in order to escape them
+                    {
+                        left += '{';
+                        right += '}';
+                    }
+
+                    var param = arg.substr(length, arg.length - 2 * length);
+                    if (length % 2 !== 0) // substitute param with respective value
+                        param = modelHelper.extractValue(params.form, param, params.prefix, 'string', null);
+                    
+                    remaining = remaining.replace(arg, '');
+                    message = message.replace(arg, typeHelper.string.format("{0}{1}{2}", left, param, right));
                 }
                 return message;
             };

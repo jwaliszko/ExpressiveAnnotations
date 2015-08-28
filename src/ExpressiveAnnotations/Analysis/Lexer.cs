@@ -51,7 +51,7 @@ namespace ExpressiveAnnotations.Analysis
                 {TokenType.INT, @"[0-9]+"},
                 {TokenType.BOOL, @"(?:true|false)"},
                 {TokenType.STRING, @"(['])(?:\\\1|.)*?\1"}, // '1234', 'John\'s cat'
-                {TokenType.FUNC, @"[a-zA-Z_]+(?:(?:(?:\[[0-9]+\])?\.[a-zA-Z_])?[a-zA-Z0-9_]*)*(?:\[[0-9]+\])?"} // field, field.value, arr[0], func(...)
+                {TokenType.FUNC, @"[a-zA-Z_]+(?:(?:(?:\[[0-9]+\])?\.[a-zA-Z_])?[a-zA-Z0-9_]*)*(?:\[[0-9]+\])?"} // field, field.field, arr[0], func(...)
             };
 
             RegexMap = patterns.ToDictionary(

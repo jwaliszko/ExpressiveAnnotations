@@ -648,6 +648,7 @@
         var result = element.valid(); // trigger wait for result (all is synchronous)
         qunit.ok(!result);
         qunit.equal(validator.numberOfInvalids(), 1);
+        qunit.equal(validator.errorList[0].message, 'Email ea@home.com{Email} {ea@home.com}{{Email}}');
     });
 
 }($, QUnit, window.ea, window.ea.___6BE7863DC1DB4AFAA61BB53FF97FE169));

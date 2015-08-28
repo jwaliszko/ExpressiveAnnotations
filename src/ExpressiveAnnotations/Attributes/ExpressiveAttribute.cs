@@ -19,7 +19,7 @@ namespace ExpressiveAnnotations.Attributes
     public abstract class ExpressiveAttribute : ValidationAttribute
     {
         private int? _priority;
-        private const string _fieldRegex = @"({+)[a-zA-Z_]+(?:(?:\.[a-zA-Z_])?[a-zA-Z0-9_]*)*(}+)"; // {field}, {field.value}
+        private const string _fieldRegex = @"({+)[a-zA-Z_]+(?:(?:\.[a-zA-Z_])?[a-zA-Z0-9_]*)*(}+)"; // {field}, {field.field}
         private readonly IDictionary<string, string> _messageValuesMap;
 
         /// <summary>
@@ -260,18 +260,19 @@ namespace ExpressiveAnnotations.Attributes
             for (var i = 0; i < matches.Count; i++)
             {
                 var match = matches[i];
-                var arg = match.Value;
-                var leftBrackets = match.Groups[1];
-                var rightBrackets = match.Groups[2];
 
-                if (leftBrackets.Length != rightBrackets.Length)
+                var arg = match.Value;
+                var leftBraces = match.Groups[1];
+                var rightBraces = match.Groups[2];
+
+                if (leftBraces.Length != rightBraces.Length)
                     throw new FormatException("Input string was not in a correct format.");
-                
-                var length = leftBrackets.Length;
+
+                var length = leftBraces.Length;
                 var left = new StringBuilder();
                 var right = new StringBuilder();
                 for (var j = 0; j < length / 2; j++) // flatten each pair of braces (curly brackets) into single artifact,
-                {                                    // in order to escape them - to output a { uses {{ and to output a } uses }} (just like standard string.Format does)
+                {                                    // in order to escape them - to output a { use {{ and to output a } use }} (just like standard string.Format does)
                     left.Append("{");
                     right.Append("}");
                 }
@@ -280,7 +281,7 @@ namespace ExpressiveAnnotations.Attributes
                 if (length % 2 != 0) // substitute param with respective value (just like string.Format does)
                     param = (Helper.ExtractValue(validationContext.ObjectInstance, param) ?? string.Empty).ToString();
 
-                _messageValuesMap[match.ToString()] = string.Format("{0}{1}{2}", left, param, right);
+                _messageValuesMap[arg] = string.Format("{0}{1}{2}", left, param, right);
             }
         }
     }
