@@ -210,14 +210,6 @@ var
                 }
                 return arr;
             },
-            isEmpty: function(obj) {
-                for(var key in obj) {
-                    if (obj.hasOwnProperty(key)) {
-                        return false;
-                    }
-                }
-                return true;
-            },
             tryParse: function(value) {
                 try {
                     return $.parseJSON(value);
@@ -475,8 +467,6 @@ var
         },
         adjustGivenValue: function(value, element, params) {
             value = element.type === 'checkbox' ? element.checked : value; // special treatment for checkbox, because when unchecked, false value should be retrieved instead of undefined
-            if (typeHelper.object.isEmpty(params.parsersMap))
-                return value;
 
             var field = element.name.replace(params.prefix, '');
             var parser = params.parsersMap[field];
@@ -552,7 +542,7 @@ var
         };
         for (var key in options.params) {
             if (options.params.hasOwnProperty(key)) {
-                rules[key] = $.parseJSON(options.params[key]);
+                rules[key] = $.parseJSON(options.params[key]) || {};
             }
         }
         if (options.message) {

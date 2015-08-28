@@ -526,7 +526,7 @@
 
     qunit.test("verify_assertthat_not_computed_for_null_value", function() {
 
-        var elementMock = {};
+        var elementMock = { name: 'name' };
         var paramsMock = { expression: 'false', fieldsMap: {}, constsMap: {}, parsersMap: {} };
         var result = eapriv.computeAssertThat(null, elementMock, paramsMock);
         qunit.ok(result); // ok - satisfied despite false assertion (not invoked due to null value)
@@ -540,7 +540,7 @@
 
     qunit.test("verify_requiredif_not_computed_for_non_null_value", function() {
 
-        var elementMock = {};
+        var elementMock = { name: 'name' };
         var paramsMock = { expression: 'true', fieldsMap: {}, constsMap: {}, parsersMap: {} };
         var result = eapriv.computeRequiredIf({}, elementMock, paramsMock);
         qunit.ok(result); // ok - not required despite requirement obligation (not invoked due to non-null value)
@@ -553,7 +553,7 @@
 
     qunit.test("verify_assertthat_computed_for_non_null_value", function() {
 
-        var elementMock = {};
+        var elementMock = { name: 'name' };
         var paramsMock = { expression: 'false', fieldsMap: {}, constsMap: {}, parsersMap: {} };
         var result = eapriv.computeAssertThat({}, elementMock, paramsMock);
         qunit.ok(!result); // not ok - not satisfied because of false assertion
@@ -561,7 +561,7 @@
 
     qunit.test("verify_requiredif_computed_for_null_value", function() {
 
-        var elementMock = {};
+        var elementMock = { name: 'name' };
         var paramsMock = { expression: 'true', fieldsMap: {}, constsMap: {}, parsersMap: {} };
         var result = eapriv.computeRequiredIf(null, elementMock, paramsMock);
         qunit.ok(!result); // not ok - required because of requirement obligation
@@ -589,7 +589,7 @@
                 "<input id='f1' name='ContactDetails.Email' value='asd'>" +
             "</form>";
 
-        var elementMock = {};
+        var elementMock = { name: 'name' };
         var paramsMock = {
             form: $(form),
             element: $(form).find('#f1'),
@@ -614,7 +614,7 @@
                 "<input id='f1' name='ContactDetails.Email' value='asd'>" +
             "</form>";
 
-        var elementMock = {};
+        var elementMock = { name: 'name' };
         var paramsMock = {
             form: $(form),
             element: $(form).find('#f1'),

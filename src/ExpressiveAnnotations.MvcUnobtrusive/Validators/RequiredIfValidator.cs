@@ -36,16 +36,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         /// </returns>
         public override IEnumerable<ModelClientValidationRule> GetClientValidationRules()
         {
-            var rule = new ModelClientValidationRule
-            {
-                ErrorMessage = FormattedErrorMessage,
-                ValidationType = ProvideUniqueValidationType("requiredif")
-            };
-
-            rule.ValidationParameters.Add("expression", Expression.ToJson());
-            rule.ValidationParameters.Add("fieldsmap", FieldsMap.ToJson());
-            rule.ValidationParameters.Add("constsmap", ConstsMap.ToJson());
-            rule.ValidationParameters.Add("parsersmap", ParsersMap.ToJson());
+            var rule = GetBasicRule("requiredif");
             rule.ValidationParameters.Add("allowempty", AllowEmpty.ToJson());
             yield return rule;
         }

@@ -122,13 +122,39 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         }
 
         /// <summary>
+        ///     Generates client validation rule with the basic set of parameters.
+        /// </summary>
+        ///     <param name="type">The validation type.</param>
+        /// <returns>
+        ///     Client validation rule with the basic set of parameters.
+        /// </returns>
+        protected ModelClientValidationRule GetBasicRule(string type)
+        {
+            var rule = new ModelClientValidationRule
+            {
+                ErrorMessage = FormattedErrorMessage,
+                ValidationType = ProvideUniqueValidationType(type)
+            };
+
+            rule.ValidationParameters.Add("expression", Expression.ToJson());
+            if (FieldsMap.Any())
+                rule.ValidationParameters.Add("fieldsmap", FieldsMap.ToJson());
+            if (ConstsMap.Any())
+                rule.ValidationParameters.Add("constsmap", ConstsMap.ToJson());
+            if (ParsersMap.Any())
+                rule.ValidationParameters.Add("parsersmap", ParsersMap.ToJson());
+
+            return rule;
+        }
+
+        /// <summary>
         ///     Provides unique validation type within current annotated field range, when multiple annotations are used (required for client-side).
         /// </summary>
         /// <param name="baseName">Base name.</param>
         /// <returns>
         ///     Unique validation type within current request.
         /// </returns>
-        protected string ProvideUniqueValidationType(string baseName)
+        private string ProvideUniqueValidationType(string baseName)
         {
             return string.Format("{0}{1}", baseName, AllocateSuffix());
         }
