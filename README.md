@@ -27,7 +27,8 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
    - [What if `ea` variable is already used by another library?](#what-if-ea-variable-is-already-used-by-another-library) <sup>(re client-side)</sup>
    - [How to control frequency of dependent fields validation?](#how-to-control-frequency-of-dependent-fields-validation) <sup>(re client-side)</sup>
    - [How to boost web console verbosity for debug purposes?](#how-to-boost-web-console-verbosity-for-debug-purposes) <sup>(re client-side)</sup>
-   - [Is there a possibility to perform asynchronous validation?](#is-there-a-possibility-to-perform-asynchronous-validation) <sup>(re client-side)</sup>
+   - [How to dynamically extract field value in error message?](#how-to-dynamically-extract-field-value-in-error-message) <sup>(re client and server-side)</sup>
+   - [Is there a possibility to perform asynchronous validation?](#is-there-a-possibility-to-perform-asynchronous-validation) <sup>(re client-side, experimental)</sup>
    - [What if my question is not covered by FAQ section?](#what-if-my-question-is-not-covered-by-faq-section)
  - [Installation](#installation)
  - [Contributors](#contributors)
@@ -144,7 +145,7 @@ Priority          - Gets or sets the hint, available for any concerned external 
                     others of its kind, i.e. ExpressiveAttribute. Value is optional and not
 					set by default, which means that execution order is undefined.
 ErrorMessage      - Gets or sets an explicit error message string. A difference to default 
-					behavior is awarness of new format specifiers, given in curly brackets, 
+					behavior is awareness of new format specifiers, given in curly brackets, 
 					used to extract values of specified fields, e.g. {field}, {field.field}
 					within current model context. Braces can be escaped by double-braces, 
 					i.e. to output a { use {{ and to output a } use }}. The same logic works 
@@ -468,6 +469,10 @@ If you need more insightful overview of what client-side script is doing (includ
     ea.settings.debug = true; // output debug messages to the web console 
 							  // (should be disabled for release code)
 ```
+
+#####<a id="#how-to-dynamically-extract-field-value-in-error-message">How to dynamically extract field value in error message?</a>
+
+Use braces (curly brackets), e.g. `{field}` or `{field.field}` for nested fields. Notice that `{{` is treated as the escaped bracket character.
 
 #####<a id="#is-there-a-possibility-to-perform-asynchronous-validation">Is there a possibility to perform asynchronous validation?</a>
 
