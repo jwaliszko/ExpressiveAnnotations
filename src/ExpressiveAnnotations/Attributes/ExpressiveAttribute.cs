@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using ExpressiveAnnotations.Analysis;
 
@@ -273,7 +272,7 @@ namespace ExpressiveAnnotations.Attributes
                     throw new FormatException("Input string was not in a correct format.");
 
                 var length = leftBraces.Length;
-                // flatten each pair of braces (curly brackets) into single artifact
+                // flatten each pair of braces (curly brackets) into single brace
                 // in order to escape them - to output a { use {{ and to output a } use }} (just like standard string.Format does)
                 var left = new string('{', length/2);
                 var right = new string('}', length/2);

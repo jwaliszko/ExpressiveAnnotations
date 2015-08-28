@@ -558,7 +558,7 @@ var
                         throw 'Input string was not in a correct format.';
 
                     length = leftBraces.length;
-                    // flatten each pair of braces (curly brackets) into single artifact, in order to escape them
+                    // flatten each pair of braces (curly brackets) into single brace
                     left = new Array(parseInt(length / 2) + 1).join('{');
                     right = new Array(parseInt(length / 2) + 1).join('}');
 
