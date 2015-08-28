@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.validate.js - v2.6.2
+﻿/* expressive.annotations.validate.js - v2.6.3
  * Client-side component of ExpresiveAnnotations - annotation-based conditional validation library.
  * https://github.com/JaroslawWaliszko/ExpressiveAnnotations
  *
@@ -542,7 +542,7 @@ var
         };
         for (var key in options.params) {
             if (options.params.hasOwnProperty(key)) {
-                rules[key] = $.parseJSON(options.params[key]) || {};
+                rules[key] = $.parseJSON(options.params[key] || '{}');
             }
         }
         if (options.message) {
