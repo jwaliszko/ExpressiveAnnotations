@@ -58,8 +58,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Misc\NullableEnumerationExtension.cs" />
-    <Compile Include="Misc\StringMatchToBooleanConverter.cs" />
+    <Compile Include="Misc\RadioButtonCheckedConverter.cs" />
     <Compile Include="Misc\FormatStringConverter.cs" />
+    <Compile Include="Misc\StringToBooleanConverter.cs" />
     <Compile Include="Models\AddressVM.cs" />
     <Compile Include="Views\AddressView.xaml.cs">
       <DependentUpon>AddressView.xaml</DependentUpon>

@@ -11,8 +11,9 @@
              d:DesignHeight="537" d:DesignWidth="573">
 
     <UserControl.Resources>
-        <misc:FormatStringConverter x:Key="formatConverter" />
-        <misc:StringMatchToBooleanConverter x:Key="boolConverter" />
+        <misc:FormatStringConverter x:Key="formatStringConverter" />
+        <misc:RadioButtonCheckedConverter x:Key="radioButtonCheckedConverter" />
+        <misc:StringToBooleanConverter x:Key="stringToBooleanConverter" />
     </UserControl.Resources>
 
     <Grid>
@@ -47,7 +48,8 @@
         <TextBlock Grid.Row="1" Grid.Column="0"
                    Text="Age" />
         <ComboBox Grid.Row="1" Grid.Column="1"
-                  ItemsSource="{Binding Years}" SelectedValuePath="Value" DisplayMemberPath="Key" SelectedValue="{Binding Age, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                  ItemsSource="{Binding Years}" SelectedValuePath="Value" DisplayMemberPath="Key" 
+                  SelectedValue="{Binding Age, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
 
         <TextBlock Grid.Row="2" Grid.Column="0"
                    Text="Passport " />
@@ -57,12 +59,14 @@
         <TextBlock Grid.Row="3" Grid.Column="0"
                    Text="Country" />
         <ComboBox Grid.Row="3" Grid.Column="1"
-                  ItemsSource="{Binding Countries}" SelectedValuePath="Value" DisplayMemberPath="Key" SelectedValue="{Binding Country, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                  ItemsSource="{Binding Countries}" SelectedValuePath="Value" DisplayMemberPath="Key" 
+                  SelectedValue="{Binding Country, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
 
         <TextBlock Grid.Row="4" Grid.Column="0"
                    Text="Next country" />
         <ComboBox Grid.Row="4" Grid.Column="1"
-                  ItemsSource="{Binding Countries}" SelectedValuePath="Value" DisplayMemberPath="Key" SelectedValue="{Binding NextCountry, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                  ItemsSource="{Binding Countries}" SelectedValuePath="Value" DisplayMemberPath="Key" 
+                  SelectedValue="{Binding NextCountry, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
 
         <TextBlock Grid.Row="5" Grid.Column="0"
                    Text="Reason for travel" />
@@ -74,7 +78,7 @@
                    Text="Return date" />
         <StackPanel Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="3" Orientation="Horizontal">
             <DatePicker SelectedDate="{Binding ReturnDate, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
-            <TextBlock Text="{Binding LatestSuggestedReturnDate, Converter={StaticResource formatConverter}, ConverterParameter='Latest suggested return: {0}'}" />
+            <TextBlock Text="{Binding LatestSuggestedReturnDate, Converter={StaticResource formatStringConverter}, ConverterParameter='Latest suggested return: {0}'}" />
         </StackPanel>
 
         <TextBlock Grid.Row="7" Grid.Column="0"
@@ -86,7 +90,8 @@
         <TextBlock Grid.Row="8" Grid.Column="0"
                    Text="Political stability" />
         <ComboBox Grid.Row="8" Grid.Column="1"
-                  ItemsSource="{Binding Source={misc:NullableEnumeration {x:Type models:Stability}}}" SelectedValuePath="Value" DisplayMemberPath="Name" SelectedValue="{Binding PoliticalStability, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                  ItemsSource="{Binding Source={misc:NullableEnumeration {x:Type models:Stability}}}" SelectedValuePath="Value" DisplayMemberPath="Name" 
+                  SelectedValue="{Binding PoliticalStability, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
 
         <CheckBox Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="4"
                   IsChecked="{Binding AwareOfTheRisks, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Content="I am aware of the possible risks" />
@@ -95,15 +100,15 @@
                    Text="Sports you like the most" />
 
         <StackPanel Grid.Row="10" Grid.Column="1" Orientation="Horizontal">
-            <RadioButton Content="None" GroupName="Sport"
-                         IsChecked="{Binding Path=SportType, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged,
-                                    Converter={StaticResource boolConverter}, ConverterParameter=None}" />
-            <RadioButton Content="Normal" GroupName="Sport"
-                         IsChecked="{Binding Path=SportType, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged,
-                                    Converter={StaticResource boolConverter}, ConverterParameter=Normal}" />
-            <RadioButton Content="Extreme" GroupName="Sport"
-                         IsChecked="{Binding Path=SportType, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged,
-                                    Converter={StaticResource boolConverter}, ConverterParameter=Extreme}" />
+            <RadioButton GroupName="Sport" Content="None"
+                         IsChecked="{Binding Path=SportType,
+                                    Converter={StaticResource radioButtonCheckedConverter}, ConverterParameter='None'}" />
+            <RadioButton GroupName="Sport" Content="Normal"
+                         IsChecked="{Binding Path=SportType,
+                                    Converter={StaticResource radioButtonCheckedConverter}, ConverterParameter='Normal'}" />
+            <RadioButton GroupName="Sport" Content="Extreme"
+                         IsChecked="{Binding Path=SportType,
+                                    Converter={StaticResource radioButtonCheckedConverter}, ConverterParameter='Extreme'}" />
         </StackPanel>
 
         <TextBlock Grid.Row="11" Grid.Column="0"
@@ -117,16 +122,17 @@
         <StackPanel Grid.Row="13" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
             <RadioButton GroupName="Contact" Content="I agree for contact"
                          IsChecked="{Binding Path=AgreeForContact, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged,
-                                    Converter={StaticResource boolConverter}, ConverterParameter=True}" />
+                                    Converter={StaticResource stringToBooleanConverter}, ConverterParameter='True'}" />
             <RadioButton GroupName="Contact" Content="I do not agree for contact"
-                         IsChecked="{Binding Path=AgreeForContact,
-                                    Converter={StaticResource boolConverter}, ConverterParameter=False}" />
+                         IsChecked="{Binding Path=AgreeForContact, 
+                                    Converter={StaticResource stringToBooleanConverter}, ConverterParameter='False'}" />
         </StackPanel>
 
         <TextBlock Grid.Row="14" Grid.Column="0"
                    Text="Immediate contact" />
         <ComboBox Grid.Row="14" Grid.Column="1"
-                  ItemsSource="{Binding Answers}" SelectedValuePath="Value" DisplayMemberPath="Key" SelectedValue="{Binding ImmediateContact, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
+                  ItemsSource="{Binding Answers}" SelectedValuePath="Value" DisplayMemberPath="Key" 
+                  SelectedValue="{Binding ImmediateContact, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
 
         <TextBlock Grid.Row="15" Grid.Column="0"
                    Text="Flight identifier" />
