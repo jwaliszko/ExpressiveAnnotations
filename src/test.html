@@ -14,7 +14,7 @@
         <form id="basic_test_form">
             <input data-val="true"
                    data-val-assertthat="Email {Email}{{Email}} {{{Email}}}{{{{Email}}}}"
-                   data-val-as data-val-assertthat-constsmap="{&quot;Stability.Low&quot;:0}"
+                   data-val-assertthat-constsmap="{&quot;Stability.Low&quot;:0}"
                    data-val-assertthat-expression="&quot;Whoami() == 'root' && IsEmail(Email) && ArrayContains('a', Letters) && PoliticalStability == Stability.Low&quot;"
                    data-val-assertthat-fieldsmap="{&quot;Email&quot;:&quot;string&quot;,&quot;Letters&quot;:&quot;mytype&quot;,&quot;PoliticalStability&quot;:&quot;numeric&quot;}"
                    data-val-assertthat-parsersmap="{&quot;Letters&quot;:&quot;ArrayParser&quot;}"
@@ -24,7 +24,10 @@
             <input name="ContactDetails.Letters"
                    type="text"
                    value="a,b,c">
-            <input name="ContactDetails.PoliticalStability"
+            <input data-val="true"
+                   data-val-assertthat="{0}{1}"
+                   data-val-assertthat-expression="&quot;false&quot;"
+                   name="ContactDetails.PoliticalStability"
                    type="text"
                    value="1">
         </form>
