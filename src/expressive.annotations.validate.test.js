@@ -9,6 +9,7 @@
 
     qunit.testDone(function() { // reset state for further tests if needed
         eapriv.toolchain.methods = {};
+        ea.settings.debug = false;
     });
 
     qunit.module("type helper");
@@ -524,7 +525,7 @@
     });
 
     qunit.test("verify_assertthat_complex_expression_computation", function() {
-
+        ea.settings.debug = ea.settings.debugFlags.standard;
         ea.addMethod('Whoami', function() {
             return 'root';
         });
@@ -537,6 +538,7 @@
     });
 
     qunit.test("verify_assertthat_complex_expression_computation_async", function(assert) {
+        ea.settings.debug = ea.settings.debugFlags.async;
         var finished = assert.async();
 
         ea.addAsyncMethod('Whoami', function(done) {
@@ -580,6 +582,7 @@
     }
 
     qunit.test("verify_assertthat_separate_async", function(assert) {
+        ea.settings.debug = ea.settings.debugFlags.async;
         var finished = assert.async();
 
         var invoked = [];
@@ -617,33 +620,8 @@
         }, 100);
     });
 
-    qunit.test("verify_assertthat_separate_repeated_async", function(assert) {
-        var finished = assert.async();
-
-        var invoked = [];
-        ea.addAsyncMethod('A', function(arg, done) {
-            window.setTimeout(function() {
-                invoked.push('A');
-                done(arg);
-            }, 10);
-        });
-
-        var validator = $('#separate_repeated_async_form').validate();
-        var element = $('#separate_repeated_async_form').find('input');
-        element.valid();
-        assert.equal(validator.numberOfInvalids(), 0);
-
-        window.setTimeout(function() {
-            assert.equal(invoked.length, 3);
-            assert.ok(arrMatch(invoked, ['A', 'A', 'A']));
-
-            assert.equal(validator.numberOfInvalids(), 1);
-
-            finished();
-        }, 100);
-    });
-
     qunit.test("verify_assertthat_nested_async", function(assert) {
+        ea.settings.debug = ea.settings.debugFlags.async;
         var finished = assert.async();
 
         var invoked = [];
@@ -681,8 +659,33 @@
         }, 100);
     });
 
-    qunit.test("verify_assertthat_nested_repeated_async", function(assert) {
-        var finished = assert.async();
+    qunit.test("verify_assertthat_separate_repeated_async", function(assert) { // it is not a test actually but a case to show that async methods of the same name aren't invoked multiple times, but just a single time
+        ea.settings.debug = ea.settings.debugFlags.async;                      // it is here more or less to show a weak point of async functionality
+        var finished = assert.async();                                         // when async methods have the same name, result is undefined
+
+        var invoked = [];
+        ea.addAsyncMethod('A', function(arg, done) {
+            window.setTimeout(function() {
+                invoked.push('A');
+                done(arg);
+            }, 10);
+        });
+
+        var validator = $('#separate_repeated_async_form').validate();
+        var element = $('#separate_repeated_async_form').find('input');
+        element.valid();
+        assert.equal(validator.numberOfInvalids(), 0);
+
+        window.setTimeout(function() {
+            assert.equal(invoked.length, 1);
+            assert.ok(arrMatch(invoked, ['A']));
+            finished();
+        }, 100);
+    });
+
+    qunit.test("verify_assertthat_nested_repeated_async", function (assert) {  // it is not a test actually but a case to show that async methods of the same name aren't invoked multiple times, but just a single time
+        ea.settings.debug = ea.settings.debugFlags.async;                      // it is here more or less to show a weak point of async functionality
+        var finished = assert.async();                                         // when async methods have the same name, result is undefined
 
         var invoked = [];
         ea.addAsyncMethod('A', function(arg, done) {
@@ -698,11 +701,8 @@
         qunit.equal(validator.numberOfInvalids(), 0);
 
         window.setTimeout(function() {
-            assert.equal(invoked.length, 3);
-            assert.ok(arrMatch(invoked, ['A', 'A', 'A']));
-
-            assert.equal(validator.numberOfInvalids(), 1);
-
+            assert.equal(invoked.length, 1);
+            assert.ok(arrMatch(invoked, ['A']));
             finished();
         }, 100);
     });

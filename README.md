@@ -471,6 +471,8 @@ Notice two differences though:
  1. Instead of `addMethod`, this time `addAsyncMethod` is used for method registration.
  2. Additional parameter should be provided at the end of parameters list (called `done` here). It is a callback used to notify ea library that async request is completed. This argument will be injected automatically. It should be invoked when method is finished.
 
+**Restriction:** async methods are required to have unique names within single expression, otherwise result of such an expression evaluation is undefined.
+
 #####<a id="what-if-my-question-is-not-covered-by-faq-section">What if my question is not covered by FAQ section?</a>
 
 If you're searching for an answer to some other problem, not covered by this document, try to browse through [already posted issues](../../issues?q=label%3Aquestion) labelled by *question* tag, or possibly have a look [at Stack Overflow](http://stackoverflow.com/search?q=expressiveannotations).

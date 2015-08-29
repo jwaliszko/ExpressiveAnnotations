@@ -89,26 +89,30 @@ var
             if (this.cache.models[key] !== undefined)
                 model = this.cache.models[key];
 
-            $(model).on('asyncnoise', function(data, arg) { // listen for async methods ascivity
-                var status = arg.status === 'start' ? '' : ' (' + arg.result + ')';
-                logger.dump(typeHelper.string.format('asyncnoise event detected: {0} {1} {2}', arg.method, arg.id, status), api.settings.debugFlags.async);
+            if (model.___asyncnoiseHandlerBinded) {
+                return;
+            }
+            $(model).on('asyncnoise', function(data, arg) { // listen for async methods activity
+                var result = arg.status === 'started' ? '' : ' (' + arg.result + ')';
+                logger.dump(typeHelper.string.format('asyncnoise event detected: {0} {1} {2}{3}', arg.method, arg.id, arg.status, result), api.settings.debugFlags.async);
 
                 async.cache.calls[key] = async.cache.calls[key] || [];
-                if (arg.status === 'start')
+                if (arg.status === 'started')
                     async.cache.calls[key].push(arg.id);
                 else if (arg.status === 'done')
                     async.cache.calls[key].pop(arg.id);
                 
                 if (async.cache.calls[key].length === 0) { // ongoing async calls returned
                     model[arg.method] = function() { // override async method with surrogate one (return the collected result)
-                        logger.dump(typeHelper.string.format('async surrogate method (cached result) start: {0}', arg.method), api.settings.debugFlags.async);
+                        logger.dump(typeHelper.string.format('sync surrogate (cached result) of async method {0} started', arg.method), api.settings.debugFlags.async);
                         return arg.result;
                     }
                     async.cache.models[key] = model;
-                    logger.dump('revalidating... (ongoing async calls returned)', api.settings.debugFlags.async);
+                    logger.dump('revalidating... (ongoing async calls done)', api.settings.debugFlags.async);
                     $(element).valid();
                 }
             });
+            model.___asyncnoiseHandlerBinded = true;
         },
         progress: function(key) {
             return this.cache.calls[key] !== undefined && this.cache.calls[key].length !== 0;
@@ -125,10 +129,10 @@ var
             this.methods[name] = function() {
                 if (func.length === arguments.length) {
 
-                    logger.dump(typeHelper.string.format('sync method start: {0}', name), api.settings.debugFlags.async);
+                    logger.dump(typeHelper.string.format('sync method started: {0}', name), api.settings.debugFlags.async);
 
                     var model = this;
-                    if (async.progress(model.___B51C6A9CCC114107BA19BB858616A559)) {
+                    if (async.progress(model.___validationInstanceIdentifier)) {
                         throw typeHelper.string.format('some async call in progress... {0} aborted', name);
                     }
                     
@@ -148,19 +152,19 @@ var
                     var model = this;
                     var uuid = typeHelper.guid.create(); // create some unique identifier to mark this async invocation (for the awaiting code to know what it should actually await for - there can be many async requests in the air)
 
-                    logger.dump(typeHelper.string.format('async method start: {0} {1}', name, uuid), api.settings.debugFlags.async);
+                    logger.dump(typeHelper.string.format('async method {0} {1} started', name, uuid), api.settings.debugFlags.async);
 
                     var args = Array.prototype.slice.call(arguments);
                     args[arguments.length] = function(result) { // inject additional argument - done() callback
-                        logger.dump(typeHelper.string.format('async method done: {0} {1} ({2})', name, uuid, result), api.settings.debugFlags.async);
+                        logger.dump(typeHelper.string.format('async method {0} {1} done ({2})', name, uuid, result), api.settings.debugFlags.async);
                         $(model).trigger('asyncnoise', { id: uuid, status: 'done', method: name, result: result }); // notify
                     }
 
-                    if (async.progress(model.___B51C6A9CCC114107BA19BB858616A559)) {
+                    if (async.progress(model.___validationInstanceIdentifier)) {
                         throw typeHelper.string.format('some async call in progress... {0} {1} aborted', name, uuid);
                     }
                     
-                    $(this).trigger('asyncnoise', { id: uuid, status: 'start', method: name }); // notify any listener which is interested in such an event
+                    $(this).trigger('asyncnoise', { id: uuid, status: 'started', method: name }); // notify any listener which is interested in such an event
                     // ----------------------------------------------------------------------------------------
 
                     // call the function as it would have been called normally --------------------------------
@@ -672,7 +676,7 @@ var
                 toolchain.registerMethods(model);
 
                 var key = async.getKey(element, value);
-                model.___B51C6A9CCC114107BA19BB858616A559 = key;
+                model.___validationInstanceIdentifier = key;
                 async.monitor(model, element, value);
 
                 logger.dump(typeHelper.string.format('AssertThat expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model), api.settings.debugFlags.standard);
@@ -681,7 +685,7 @@ var
                     var satisfied = modelHelper.ctxEval(params.expression, async.cache.models[key] || model); // blocking call, async method will be invoked if any, and our AOP logic will record async activity...
 
                     if (!async.progress(key)) { // ...so this condition will be reliable
-                        logger.dump(typeHelper.string.format('{0} validation result: {1}', element.name, satisfied), api.settings.debugFlags.standard | api.settings.debugFlags.async);
+                        logger.dump(typeHelper.string.format('expression for {0} field computed - result: {1}', element.name, satisfied), api.settings.debugFlags.standard | api.settings.debugFlags.async);
                         async.emptyCache(element, value);
                         if (!satisfied) { // check if the assertion condition is not satisfied
                             return false; // assertion not satisfied => notify
@@ -709,7 +713,7 @@ var
                 toolchain.registerMethods(model);
 
                 var key = async.getKey(element, value);
-                model.___B51C6A9CCC114107BA19BB858616A559 = key;
+                model.___validationInstanceIdentifier = key;
                 async.monitor(model, element, value);
                 
                 logger.dump(typeHelper.string.format('RequiredIf expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model), api.settings.debugFlags.standard);
@@ -719,7 +723,7 @@ var
 
                     if (!async.progress(key)) {
                         async.emptyCache(element, value);
-                        logger.dump(typeHelper.string.format('{0} validation result: {1}', element.name, satisfied), api.settings.debugFlags.standard | api.settings.debugFlags.async);
+                        logger.dump(typeHelper.string.format('{0} validation done - result: {1}', element.name, satisfied), api.settings.debugFlags.standard | api.settings.debugFlags.async);
                         if (satisfied) { // check if the requirement condition is satisfied
                             return false; // requirement confirmed => notify
                         }
