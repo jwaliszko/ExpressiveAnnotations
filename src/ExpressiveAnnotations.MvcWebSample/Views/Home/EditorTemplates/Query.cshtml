@@ -76,6 +76,7 @@
 [AssertThat("ReturnDate >= Today()", Priority = 1)]
 [AssertThat("ReturnDate >= Today() + WeekPeriod", Priority = 2)]
 [AssertThat("ReturnDate < AddYears(Today(), 1)")]
+[ValueParser("NonStandardDateParser")]
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>
@@ -192,6 +193,7 @@
         <pre class="code">
 [RequiredIf("GoAbroad == true")]
 [AssertThat("ArrayLength(SelectedDonations) > 1")]
+[ValueParser("ArrayParser")]
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>

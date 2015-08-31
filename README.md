@@ -404,7 +404,9 @@ If you need to handle value string extracted from DOM field in any non built-in 
 * at client-side register such a parser:
     ```JavaScript
     <script>
-        ea.addValueParser('customparser', function(value) {
+        ea.addValueParser('customparser', function(value, field) {
+		    // parameters: value - raw data string extracted by default from DOM element, 
+            //             field - DOM element name for which parser was invoked
 		    return ... // handle exctracted field value string on your own
         });
     ```

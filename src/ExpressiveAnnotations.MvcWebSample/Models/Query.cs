@@ -84,9 +84,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             get { return new[] {15, 16, 17}; }
         }
 
-        public List<int> AvailableDonations
+        public int[] AvailableDonations
         {
-            get { return new List<int> {1, 4, 9, 16, 25, 36, 49}; }
+            get { return new[] {1, 4, 9, 16, 25, 36, 49}; }
         }
 
         [Display(ResourceType = typeof (Resources), Name = "GoAbroad")]
@@ -191,7 +191,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "NotEnoughDonations")]
         [ValueParser("ArrayParser")]
         [Display(ResourceType = typeof (Resources), Name = "Donation")]
-        public List<int> SelectedDonations { get; set; }
+        public int[] SelectedDonations { get; set; }
 
         public Contact ContactDetails { get; set; }
 
@@ -215,9 +215,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             return value != null && array.Contains((int)value);
         }
 
-        public int ArrayLength(List<int> array)
+        public int ArrayLength(int[] array)
         {
-            return array.Count;
+            return array.Length;
         }
 
         public TimeSpan WeekPeriod

@@ -19,8 +19,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
             };
 
             ViewBag.Success = TempData["Success"];
-
-            return View("Home", model);
+            return View("Home", TempData["Query"] as Query ?? model);
         }
 
         [HttpPost]
@@ -29,6 +28,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
             if (ModelState.IsValid)
             {
                 TempData["Success"] = "Query successfully submitted";
+                TempData["Query"] = model;
                 return RedirectToAction("Index"); // PRG to avoid subsequent form submission attempts on page refresh (http://en.wikipedia.org/wiki/Post/Redirect/Get)
             }
 
