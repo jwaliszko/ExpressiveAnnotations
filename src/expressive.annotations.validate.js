@@ -516,7 +516,7 @@ var
             }
         },
         bindFields: function(form, force) { // attach validation handlers to dependency triggers (events) for some form elements
-            if (!form.eaTriggersBinded || force) {
+            
                 if (api.settings.dependencyTriggers !== null && api.settings.dependencyTriggers !== undefined && api.settings.dependencyTriggers !== '') {
                     var namespacedEvents = [];
                     $.each(api.settings.dependencyTriggers.split(/\s+/), function(idx, event) {
@@ -524,13 +524,12 @@ var
                             namespacedEvents.push(typeHelper.string.format('{0}.expressive.annotations', event));
                         }
                     });
-                    $(form).find('input, select, textarea').on(namespacedEvents.join(' '), function(event) {
+                    // attach handlers to all inputs that do not have 'ea-bound' class (unless force == true)
+                    $(form).find('input, select, textarea').not(function(idx,el){ return $(el).hasClass('ea-bound') || force;}).on(namespacedEvents.join(' '), function () {
                         var field = $(this).attr('name');
-                        logger.dump(typeHelper.string.format('Dependency validation trigger - {0} event, handled.', event.type));
                         validationHelper.validateReferences(field, form); // validate referenced fields only
+                        $(this).addClass('ea-bound');
                     });
-                }
-                form.eaTriggersBinded = true;
             }
         }
     },
