@@ -62,7 +62,7 @@
                         return $(this).attr('data-val');
                     }).toArray().join(' ');
 
-                    $.ajax({ // set cookie
+                    $.ajax({ // set cookie (could be also done directly here, in JavaScript: http://stackoverflow.com/a/17521905/270315)
                         type: 'POST',
                         dataType: 'json',
                         contentType: 'application/json; charset=utf-8',
@@ -130,7 +130,12 @@
                 $(this).parent().find('.code').toggle('slow');
             });
 
-            $('.date').datepicker($.datepicker.regional["@lang"]).on('change', function() {
+            $.datepicker.setDefaults({
+                changeMonth: true,
+                changeYear: true
+            });
+
+            $('.date').datepicker($.datepicker.regional['@lang']).on('change', function() {
                 if (typeof $('form').valid == 'function') { // safety check if our demo project is not set to server side validation only (no jquery.validate.js loaded)
                     $(this).valid(); // triggers the validation test on change (to avoid second click)
                 }
@@ -146,7 +151,7 @@
             $('#triggers input[type="checkbox"]').attr('disabled', @Json.Encode(!client));
         });
 
-        $.datepicker.regional['pl'] = {
+        $.datepicker.regional['pl'] = { // https://github.com/jquery/jquery-ui/tree/master/ui/i18n
             closeText: 'Zamknij',
             prevText: '&#x3C;Poprzedni',
             nextText: 'Następny&#x3E;',

@@ -22,9 +22,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "EmailOrPhoneRequired")]
         [AssertThat(@"IsRegexMatch(Phone, '^\\d+$')", // regex pattern escaped despite verbatim string - it's because our expressive language parser
                                                       // verbatim syntax should be perfectly valid with that one JavaScript accepts 
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "DigitsOnlyAccepted")]
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "DigitsOnlyAccepted", Priority = 1)]
         [AssertThat("Length(Phone) > 8 && Length(Phone) < 16",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "RangeViolated")]
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "RangeViolated", Priority = 2)]
         [Display(ResourceType = typeof (Resources), Name = "Phone")]
         public string Phone { get; set; }
 

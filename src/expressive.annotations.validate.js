@@ -18,10 +18,8 @@ var
             apply: function(options) { // alternative way of settings setup, crucial to invoke e.g. for new set of dependency triggers to be re-bound
                 $.extend(api.settings, options);
                 $('form').each(function() {
-                    if (this.hasOwnProperty('eaTriggersBinded')) {
-                        $(this).find('input, select, textarea').off('.expressive.annotations'); // remove all event handlers in the '.expressive.annotations' namespace 
-                        validationHelper.bindFields(this, true);
-                    }
+                    $(this).find('input, select, textarea').off('.expressive.annotations'); // remove all event handlers in the '.expressive.annotations' namespace
+                    validationHelper.bindFields(this, true);
                 });
             }
         },
@@ -516,21 +514,23 @@ var
             }
         },
         bindFields: function(form, force) { // attach validation handlers to dependency triggers (events) for some form elements
-            if (!form.eaTriggersBinded || force) {
-                if (api.settings.dependencyTriggers !== null && api.settings.dependencyTriggers !== undefined && api.settings.dependencyTriggers !== '') {
-                    var namespacedEvents = [];
-                    $.each(api.settings.dependencyTriggers.split(/\s+/), function(idx, event) {
-                        if (/\S/.test(event)) {
-                            namespacedEvents.push(typeHelper.string.format('{0}.expressive.annotations', event));
-                        }
-                    });
-                    $(form).find('input, select, textarea').on(namespacedEvents.join(' '), function(event) {
-                        var field = $(this).attr('name');
-                        logger.dump(typeHelper.string.format('Dependency validation trigger - {0} event, handled.', event.type));
-                        validationHelper.validateReferences(field, form); // validate referenced fields only
-                    });
-                }
-                form.eaTriggersBinded = true;
+            if (api.settings.dependencyTriggers !== null && api.settings.dependencyTriggers !== undefined && api.settings.dependencyTriggers !== '') {
+                var namespacedEvents = [];
+                $.each(api.settings.dependencyTriggers.split(/\s+/), function(idx, event) {
+                    if (/\S/.test(event)) {
+                        namespacedEvents.push(typeHelper.string.format('{0}.expressive.annotations', event));
+                    }
+                });
+                // attach handlers to all inputs that do not have 'ea-triggers-bound' class (unless force is true)
+                $(form).find('input, select, textarea').not(function(idx, element) {
+                    var bound = $(element).hasClass('ea-triggers-bound');
+                    $(element).addClass('ea-triggers-bound');
+                    return !force && bound;
+                }).on(namespacedEvents.join(' '), function(event) {
+                    var field = $(this).attr('name');
+                    logger.dump(typeHelper.string.format('Dependency validation trigger - {0} event, handled.', event.type));
+                    validationHelper.validateReferences(field, form); // validate referenced fields only                    
+                });
             }
         }
     },
@@ -542,7 +542,7 @@ var
         };
         for (var key in options.params) {
             if (options.params.hasOwnProperty(key)) {
-                rules[key] = $.parseJSON(options.params[key] || '{}');
+                rules[key] = options.params[key] !== undefined ? $.parseJSON(options.params[key]) : {};
             }
         }
         if (options.message) {
@@ -578,8 +578,9 @@ var
     },
 
     computeAssertThat = function(value, element, params) {
-        value = modelHelper.adjustGivenValue(value, element, params); // preprocess given value (here basically we are concerned about determining if such a value is null or not, and we may have
-                                                                        // to extract it using value parser, since e.g. for an array distracted in radios its value is not provided as expected here)
+        value = modelHelper.adjustGivenValue(value, element, params); // preprocess given value (here basically we are concerned about determining if such a value is null or not, to determine if the attribute 
+                                                                      // logic should be invoked or not - full type-detection parsing is not required at this stage, but we may have to extract such a value using
+                                                                      // value parser, e.g. for an array which values are distracted among multiple fields)
         if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
             var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model);

@@ -16,8 +16,8 @@
     <li>
         <pre class="code">
 [RequiredIf("Email == null")]
-[AssertThat(@@"IsRegexMatch(Phone, '^\\d+$')")]
-[AssertThat("Length(Phone) > 8 && Length(Phone) < 16")]
+[AssertThat(@@"IsRegexMatch(Phone, '^\\d+$'), Priority = 1")]
+[AssertThat("Length(Phone) > 8 && Length(Phone) < 16", Priority = 2)]
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>
