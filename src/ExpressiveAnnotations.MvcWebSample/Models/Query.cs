@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Attributes;
-using ExpressiveAnnotations.MvcUnobtrusive.Attributes;
 
 namespace ExpressiveAnnotations.MvcWebSample.Models
 {

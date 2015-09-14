@@ -8,7 +8,6 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
 using ExpressiveAnnotations.Attributes;
-using ExpressiveAnnotations.MvcUnobtrusive.Attributes;
 using ExpressiveAnnotations.MvcUnobtrusive.Validators;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;

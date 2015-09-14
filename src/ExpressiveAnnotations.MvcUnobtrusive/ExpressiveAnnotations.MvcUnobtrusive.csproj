@@ -64,7 +64,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attributes\ValueParserAttribute.cs" />
     <Compile Include="Providers\ExpressiveAnnotationsModelValidatorProvider.cs" />
     <Compile Include="RequestStorage.cs" />
     <Compile Include="Validators\AssertThatValidator.cs" />

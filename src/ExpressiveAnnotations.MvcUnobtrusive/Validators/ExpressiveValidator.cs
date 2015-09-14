@@ -10,7 +10,6 @@ using System.Web;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
-using ExpressiveAnnotations.MvcUnobtrusive.Attributes;
 
 namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
 {

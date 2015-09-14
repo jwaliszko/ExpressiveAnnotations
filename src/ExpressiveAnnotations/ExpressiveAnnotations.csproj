@@ -59,6 +59,7 @@
     <Compile Include="Analysis\Lexer.cs" />
     <Compile Include="Analysis\Parser.cs" />
     <Compile Include="Attributes\ExpressiveAttribute.cs" />
+    <Compile Include="Attributes\ValueParserAttribute.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Attributes\RequiredIfAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

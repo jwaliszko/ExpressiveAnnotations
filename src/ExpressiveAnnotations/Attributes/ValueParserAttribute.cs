@@ -4,7 +4,7 @@
 
 using System;
 
-namespace ExpressiveAnnotations.MvcUnobtrusive.Attributes
+namespace ExpressiveAnnotations.Attributes
 {
     /// <summary>
     ///     Provides a hint for client-side script pointing at parser name, which should be used for DOM field value deserialization.
