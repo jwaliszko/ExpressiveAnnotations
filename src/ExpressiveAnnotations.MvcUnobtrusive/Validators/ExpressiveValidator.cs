@@ -135,14 +135,16 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 ErrorMessage = FormattedErrorMessage,
                 ValidationType = ProvideUniqueValidationType(type)
             };
-            
-            rule.ValidationParameters.Add("expression", Expression.ToJson());
-            Debug.Assert(FieldsMap != null && ConstsMap != null && ParsersMap != null);
 
+            rule.ValidationParameters.Add("expression", Expression.ToJson());
+
+            Debug.Assert(FieldsMap != null);
             if (FieldsMap != null && FieldsMap.Any())
                 rule.ValidationParameters.Add("fieldsmap", FieldsMap.ToJson());
+            Debug.Assert(ConstsMap != null);
             if (ConstsMap != null && ConstsMap.Any())
                 rule.ValidationParameters.Add("constsmap", ConstsMap.ToJson());
+            Debug.Assert(ParsersMap != null);
             if (ParsersMap != null && ParsersMap.Any())
                 rule.ValidationParameters.Add("parsersmap", ParsersMap.ToJson());
 
