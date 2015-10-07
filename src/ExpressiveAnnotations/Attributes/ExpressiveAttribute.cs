@@ -26,9 +26,13 @@ namespace ExpressiveAnnotations.Attributes
         /// </summary>
         /// <param name="expression">The logical expression based on which specified condition is computed.</param>
         /// <param name="errorMessage">The error message to associate with a validation control.</param>
+        /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
         protected ExpressiveAttribute(string expression, string errorMessage)
             : base(errorMessage)
         {
+            if (expression == null)
+                throw new ArgumentNullException("expression", "Expression not provided.");
+
             Parser = new Parser();
             Parser.RegisterMethods();
 

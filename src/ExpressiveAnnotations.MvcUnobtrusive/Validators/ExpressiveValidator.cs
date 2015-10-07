@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -44,7 +45,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 ParsersMap = HttpRuntime.Cache.Get(parsersId) as IDictionary<string, string>;
                 FieldAttributeType = string.Format("{0}.{1}", typeof(T).FullName, annotatedField).ToLowerInvariant();
 
-                if (!Cached)
+                if (!Cached) // is the cache empty?
                 {
                     lock (_locker)
                     {
@@ -117,7 +118,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
 
         private bool Cached
         {
-            get { return FieldsMap != null || ConstsMap != null; }
+            get { return FieldsMap != null || ConstsMap != null || ParsersMap != null; }
         }
 
         /// <summary>
@@ -134,13 +135,15 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 ErrorMessage = FormattedErrorMessage,
                 ValidationType = ProvideUniqueValidationType(type)
             };
-
+            
             rule.ValidationParameters.Add("expression", Expression.ToJson());
-            if (FieldsMap.Any())
+            Debug.Assert(FieldsMap != null && ConstsMap != null && ParsersMap != null);
+
+            if (FieldsMap != null && FieldsMap.Any())
                 rule.ValidationParameters.Add("fieldsmap", FieldsMap.ToJson());
-            if (ConstsMap.Any())
+            if (ConstsMap != null && ConstsMap.Any())
                 rule.ValidationParameters.Add("constsmap", ConstsMap.ToJson());
-            if (ParsersMap.Any())
+            if (ParsersMap != null && ParsersMap.Any())
                 rule.ValidationParameters.Add("parsersmap", ParsersMap.ToJson());
 
             return rule;
