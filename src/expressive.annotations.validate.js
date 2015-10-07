@@ -342,6 +342,7 @@ var
             return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value); // basic check
         },
         tryParse: function(value, type, name, parser) {
+            parser = parser || type;
             if (parser !== null && parser !== undefined) {
                 var parsedValue = typeHelper.tryCustomParse(value, name, parser);
                 if (!parsedValue.error) {
