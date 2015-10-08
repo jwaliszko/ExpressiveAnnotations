@@ -69,7 +69,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                                 .ToDictionary(x => x.PropertyName, x => x.ParserAttribute.ParserName);
 
                             AssertNoNamingCollisionsAtCorrespondingSegments();
-                            HttpRuntime.Cache.Insert(fieldsId, FieldsMap);
+                            HttpRuntime.Cache.Insert(fieldsId, FieldsMap); // HttpRuntime.Cache is global for the application, shared among all users/sessions (while Session is only unique per user session)
                             HttpRuntime.Cache.Insert(constsId, ConstsMap);
                             HttpRuntime.Cache.Insert(parsersId, ParsersMap);
 
@@ -101,7 +101,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
 
         /// <summary>
         ///     Gets names and coarse types of properties extracted from specified expression within given context.
-        /// </summary>        
+        /// </summary>
         protected IDictionary<string, string> FieldsMap { get; private set; }
 
         /// <summary>
@@ -111,14 +111,14 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
 
         /// <summary>
         ///     Gets names and values of constants extracted from specified expression within given context.
-        /// </summary>        
+        /// </summary>
         protected IDictionary<string, object> ConstsMap { get; private set; }
 
         private string FieldAttributeType { get; set; }
 
         private bool Cached
         {
-            get { return FieldsMap != null || ConstsMap != null || ParsersMap != null; }
+            get { return FieldsMap != null && ConstsMap != null && ParsersMap != null; } // && instead of ||, because cache expiration/removal of single map can possibly occur
         }
 
         /// <summary>
