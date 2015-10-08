@@ -49,10 +49,51 @@
             // expann.addMethod... // do something with ExpressiveAnnotations
             // ea... // do something with original ea variable
 
+            // ----- define settings -----
+
             ea.settings.apply({
                 debug: '@debug' === 'true',
                 dependencyTriggers: '@triggers' // if not explicitly provided, default setup is: 'change keyup'
             });
+
+            // ----- define parsers -----
+
+            ea.addValueParser('NonStandardDateParser', function(value) { // override default datetime parsing mechanism to deal with yyyy-mm-dd format
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) { // in case the value does not have non-standard format (here, when language set to english)...
+                    return Date.parse(value); // ...try to go with standard way (default date parser used)
+                }
+                var arr = value.split('-');
+                var date = new Date(arr[0], arr[1] - 1, arr[2]); // months are 0-based
+                return date.getTime(); // return milliseconds
+            });
+            ea.addValueParser('ArrayParser', function(value, field) { // provide your custom parsing mechanism of the field value at client side
+                                                                      // parameters: value - raw data string extracted by default from DOM element
+                                                                      //             field - DOM element name for which parser was invoked
+                var array = $(':input[name="' + field + '"]').serializeArray();
+                return array.length === 0
+                    ? null    // if array is empty, return null for RequiredIf to complain
+                    : array;  // otherwise - return array object for the ArrayLength method to work on
+            });
+
+            // ----- define methods -----
+
+            ea.addMethod('IsBloodType', function(group) {
+                return /^(A|B|AB|0)[\+-]$/.test(group);
+            });
+            ea.addMethod('AddYears', function(from, years) {
+                from = new Date(from); // preprocessed datetime arguments passed to functions are given milliseconds
+                var to = from.getFullYear() + years;
+                from.setFullYear(to);
+                return from.getTime();
+            });
+            ea.addMethod('ArrayContains', function(value, array) {
+                return $.inArray(value, array) >= 0;
+            });
+            ea.addMethod('ArrayLength', function(array) {
+                return array.length;
+            });
+
+            // ----- do some other stuff, not related to ea directly -----
 
             $(document).ready(function() {
                 $('#triggers input[type="checkbox"]').on('click', function() {
@@ -82,43 +123,6 @@
                         $(e.target).trigger(e.type);
                     }, 50);
                 });
-            });
-
-            // define value parsers
-
-            ea.addValueParser('NonStandardDateParser', function(value) { // override default datetime parsing mechanism to deal with yyyy-mm-dd format
-                if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) { // in case the value does not have non-standard format (here, when language set to english)...
-                    return Date.parse(value); // ...try to go with standard way (default date parser used)
-                }
-                var arr = value.split('-');
-                var date = new Date(arr[0], arr[1] - 1, arr[2]); // months are 0-based
-                return date.getTime(); // return milliseconds
-            });
-            ea.addValueParser('ArrayParser', function(value, field) { // provide your custom parsing mechanism of the field value at client side
-                                                                      // parameters: value - raw data string extracted by default from DOM element
-                                                                      //             field - DOM element name for which parser was invoked
-                var array = $(':input[name="' + field + '"]').serializeArray();
-                return array.length === 0
-                    ? null    // if array is empty, return null for RequiredIf to complain
-                    : array;  // otherwise - return array object for the ArrayLength method to work on
-            });
-
-            // define methods
-
-            ea.addMethod('IsBloodType', function(group) {
-                return /^(A|B|AB|0)[\+-]$/.test(group);
-            });
-            ea.addMethod('AddYears', function(from, years) {
-                from = new Date(from); // preprocessed datetime arguments passed to functions are given milliseconds
-                var to = from.getFullYear() + years;
-                from.setFullYear(to);
-                return from.getTime();
-            });
-            ea.addMethod('ArrayContains', function(value, array) {
-                return $.inArray(value, array) >= 0;
-            });
-            ea.addMethod('ArrayLength', function(array) {
-                return array.length;
             });
         </script>
     }

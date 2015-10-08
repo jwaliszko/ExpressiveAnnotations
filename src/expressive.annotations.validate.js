@@ -23,20 +23,25 @@ var
                 });
             }
         },
-        addMethod: function(name, func) {    // provide custom function to be accessible for expression,
-            toolchain.addMethod(name, func); // e.g. if server-side uses following attribute: [AssertThat("IsBloodType(BloodType)")], where IsBloodType() is a custom method available at C# side, 
-        },                                   // its client-side equivalet, mainly function of the same signature (name and the number of parameters), must be also provided, i.e.
+        addMethod: function(name, func) {    // provide custom function to be accessible for expression
+            toolchain.addMethod(name, func); // parameters: name - method name
+        },                                   //             func - method body
+                                             // e.g. if server-side uses following attribute: [AssertThat("IsBloodType(BloodType)")], where IsBloodType() is a custom method available at C# side,
+                                             // its client-side equivalet, mainly function of the same signature (name and the number of parameters), must be also provided, i.e.
                                              // ea.addMethod('IsBloodType', function(group) {
                                              //     return /^(A|B|AB|0)[\+-]$/.test(group);
                                              // });
         addValueParser: function(name, func) {     // provide custom deserialization methods for values of these DOM fields, which are accordingly decorated with ValueParser attribute at the server-side
-            typeHelper.addValueParser(name, func); // e.g. for objects when stored in non-json format or dates when stored in non-standard format (not proper for Date.parse(dateString)),
-        },                                         // i.e. suppose DOM field date string is given in dd/mm/yyyy format:
+            typeHelper.addValueParser(name, func); // parameters: name - parser name
+        },                                         //             func - parse logic
+                                                   // e.g. for objects when stored in non-json format or dates when stored in non-standard format (not proper for Date.parse(dateString)),
+                                                   // i.e. suppose DOM field date string is given in dd/mm/yyyy format:
                                                    // ea.addValueParser('dateparser', function(value, field) { // parameters: value - raw data string extracted by default from DOM element, 
                                                    //                                                          //             field - DOM element name for which parser was invoked
                                                    //     var arr = value.split('/'); return new Date(arr[2], arr[1] - 1, arr[0]).getTime(); // return milliseconds since January 1, 1970, 00:00:00 UTC
                                                    // });
-                                                   // finally, multiple parsers can be registered at once when, separated by whitespace, are provided to name parameter, i.e. ea.addValueParser('p1 p2', ...
+                                                   // multiple parsers can be registered at once when, separated by whitespace, are provided to name parameter, i.e. ea.addValueParser('p1 p2', ...
+                                                   // finally, if value parser is registered under the name of some type, e.g. datetime, int32, etc., all DOM fields of such a type are going to be deserialized using such a parser
         noConflict: function() {
             if (window.ea === this) {
                 window.ea = backup;
@@ -341,19 +346,24 @@ var
         isGuid: function(value) {
             return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value); // basic check
         },
-        tryParse: function(value, type, name, parser) {
-            parser = parser || type;
+        tryParse: function(value, type, field, parser) {
+            var parseFunc;
             if (parser !== null && parser !== undefined) {
-                var parsedValue = typeHelper.tryCustomParse(value, name, parser);
-                if (!parsedValue.error) {
-                    return parsedValue;
+                parseFunc = typeHelper.findValueParser(field, parser); // pointed by attribute custom field-specific parser lookup - highest parsing priority
+                if (!parseFunc.error) {
+                    return parseFunc(value, field);
                 }
-                logger.warn(parsedValue.msg);
+                logger.warn(parseFunc.msg);
             }
-            return typeHelper.tryAutoParse(value, type);
+            parseFunc = typeHelper.findValueParser(field, type); // custom type-specific parser lookup - secondary parsing priority
+            if (!parseFunc.error) {
+                logger.warn(typeHelper.string.format('Overriden {0} type parsing runs for {1} field. All fields of {0} type are going to be parsed using your value parser. If such a behaviour is unintentional, change the name of your value parser to one, which does not indicate at {0} (or any other) type name.', type, field));
+                return parseFunc(value, field);
+            }
+            return typeHelper.tryAutoParse(value, type); // built-in type-aware parser lookup - lowest parsing priority
         },
         tryAutoParse: function(value, type) {
-            switch (type) { // custom parser not provided - built-in type-detection logic runs instead
+            switch (type) {
                 case 'timespan':
                     return typeHelper.timespan.tryParse(value);
                 case 'datetime':
@@ -370,12 +380,12 @@ var
                     return typeHelper.object.tryParse(value);
             }
         },
-        tryCustomParse: function(value, name, parser) {
-            var parseValue = typeHelper.parsers[parser]; // custom parsing lookup
-            if (typeof parseValue === 'function') {
-                return parseValue(value, name);
+        findValueParser: function(field, parser) {
+            var parseFunc = typeHelper.parsers[parser]; // custom parsing lookup
+            if (typeof parseFunc === 'function') {
+                return parseFunc;
             }
-            return { error: true, msg: typeHelper.string.format('Custom value parser {0} not found. Consider registration with ea.addValueParser() or remove redundant ValueParser attribute from respective model field.', parser) };
+            return { error: true, msg: typeHelper.string.format('Custom value parser {0} not found. Consider its registration with ea.addValueParser(), or remove redundant ValueParser attribute from {1} model field.', parser, field) };
         }
     },
 
@@ -470,11 +480,11 @@ var
             var field = element.name.replace(params.prefix, '');
             var parser = params.parsersMap[field];
             if (parser !== null && parser !== undefined) {
-                var parsedValue = typeHelper.tryCustomParse(value, element.name, parser);
-                if (parsedValue === null || parsedValue === undefined || !parsedValue.error) {
-                    return parsedValue;
+                var parseFunc = typeHelper.findValueParser(element.name, parser); // pointed by attribute custom field-specific parser lookup - highest parsing priority
+                if (!parseFunc.error) {
+                    return parseFunc(value, element.name);
                 }
-                logger.warn(parsedValue.msg);
+                logger.warn(parseFunc.msg);
             }
             return value;
         },
