@@ -247,7 +247,7 @@ namespace ExpressiveAnnotations.Attributes
                                            ?? validationContext.ObjectType.GetMemberNameFromDisplayAttribute(validationContext.DisplayName);
             try
             {
-                ExtractValuesForMessage(validationContext);
+                ExtractValuesForMessage(validationContext.ObjectInstance);
                 return IsValidInternal(value, validationContext);
             }
             catch (Exception e)
@@ -258,7 +258,7 @@ namespace ExpressiveAnnotations.Attributes
             }
         }
 
-        private void ExtractValuesForMessage(ValidationContext validationContext)
+        private void ExtractValuesForMessage(object context)
         {
             var matches = Regex.Matches(ErrorMessageString, _fieldRegex);
             if (matches.Count <= 0)
@@ -282,8 +282,12 @@ namespace ExpressiveAnnotations.Attributes
                 var right = new string('}', length/2);
 
                 var param = arg.Substring(length, arg.Length - 2 * length);
-                if (length % 2 != 0) // substitute param with respective value (just like string.Format does)
-                    param = (Helper.ExtractValue(validationContext.ObjectInstance, param) ?? string.Empty).ToString();
+                if (length%2 != 0) // substitute param with respective value (just like string.Format does)
+                {
+                    if (context == null)
+                        throw new ArgumentNullException("context", "Field value cannot be extracted from null model context.");
+                    param = (Helper.ExtractValue(context, param) ?? string.Empty).ToString();
+                }
 
                 _messageValuesMap[arg] = string.Format("{0}{1}{2}", left, param, right);
             }
