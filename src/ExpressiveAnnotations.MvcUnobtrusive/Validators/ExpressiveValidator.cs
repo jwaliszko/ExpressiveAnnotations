@@ -3,6 +3,7 @@
  * Licensed MIT: http://opensource.org/licenses/MIT */
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
@@ -20,7 +21,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
     /// <typeparam name="T">Any type derived from <see cref="ExpressiveAttribute" /> class.</typeparam>
     public abstract class ExpressiveValidator<T> : DataAnnotationsModelValidator<T> where T : ExpressiveAttribute
     {
-        private readonly object _locker = new object();
+        static readonly ConcurrentDictionary<string, MapCacheItem> _cache = new ConcurrentDictionary<string, MapCacheItem>();
 
         /// <summary>
         ///     Constructor for expressive model validator.
@@ -36,48 +37,42 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
             {
                 var annotatedField = string.Format("{0}.{1}", metadata.ContainerType.FullName, metadata.PropertyName).ToLowerInvariant();
                 var attribId = string.Format("{0}.{1}", attribute.TypeId, annotatedField).ToLowerInvariant();
-                var fieldsId = string.Format("fields.{0}", attribId);
-                var constsId = string.Format("consts.{0}", attribId);
-                var parsersId = string.Format("parsers.{0}", attribId);
-
-                FieldsMap = HttpRuntime.Cache.Get(fieldsId) as IDictionary<string, string>;
-                ConstsMap = HttpRuntime.Cache.Get(constsId) as IDictionary<string, object>;
-                ParsersMap = HttpRuntime.Cache.Get(parsersId) as IDictionary<string, string>;
                 FieldAttributeType = string.Format("{0}.{1}", typeof(T).FullName, annotatedField).ToLowerInvariant();
 
-                if (!Cached) // is the cache empty?
+                MapCacheItem item = _cache.GetOrAdd(attribId, (trash) =>
                 {
-                    lock (_locker)
-                    {
-                        if (!Cached)
+                    var parser = new Parser();
+                    parser.RegisterMethods();
+                    parser.Parse(metadata.ContainerType, attribute.Expression);
+
+                    FieldsMap = parser.GetFields().ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value));
+                    ConstsMap = parser.GetConsts();
+                    ParsersMap = metadata.ContainerType.GetProperties()
+                        .Where(p => FieldsMap.Keys.Contains(p.Name) || metadata.PropertyName == p.Name) // narrow down number of parsers sent to client
+                        .Select(p => new
                         {
-                            var parser = new Parser();
-                            parser.RegisterMethods();
-                            parser.Parse(metadata.ContainerType, attribute.Expression);
+                            PropertyName = p.Name,
+                            ParserAttribute = p.GetCustomAttributes(typeof (ValueParserAttribute), false) // use this version over generic one (.NET4.0 support)
+                                    .Cast<ValueParserAttribute>()
+                                    .SingleOrDefault()
+                        }).Where(x => x.ParserAttribute != null)
+                        .ToDictionary(x => x.PropertyName, x => x.ParserAttribute.ParserName);
 
-                            FieldsMap = parser.GetFields().ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value));
-                            ConstsMap = parser.GetConsts();
-                            ParsersMap = metadata.ContainerType.GetProperties()
-                                .Where(p => FieldsMap.Keys.Contains(p.Name) || metadata.PropertyName == p.Name) // narrow down number of parsers sent to client
-                                .Select(p => new
-                                {
-                                    PropertyName = p.Name,
-                                    ParserAttribute = p.GetCustomAttributes(typeof (ValueParserAttribute), false) // use this version over generic one (.NET4.0 support)
-                                            .Cast<ValueParserAttribute>()
-                                            .SingleOrDefault()
-                                }).Where(x => x.ParserAttribute != null)
-                                .ToDictionary(x => x.PropertyName, x => x.ParserAttribute.ParserName);
+                    AssertNoNamingCollisionsAtCorrespondingSegments();
 
-                            AssertNoNamingCollisionsAtCorrespondingSegments();
-                            HttpRuntime.Cache.Insert(fieldsId, FieldsMap); // HttpRuntime.Cache is global for the application, shared among all users/sessions (while Session is only unique per user session)
-                            HttpRuntime.Cache.Insert(constsId, ConstsMap);
-                            HttpRuntime.Cache.Insert(parsersId, ParsersMap);
+                    attribute.Compile(metadata.ContainerType);
 
-                            attribute.Compile(metadata.ContainerType);
-                        }
-                    }
-                }
+                    return new MapCacheItem()
+                    {
+                        FieldsMap = FieldsMap,
+                        ConstsMap = ConstsMap,
+                        ParsersMap = ParsersMap
+                    };
+                });
 
+                FieldsMap = item.FieldsMap;
+                ConstsMap = item.ConstsMap;
+                ParsersMap = item.ParsersMap;
                 Expression = attribute.Expression;
                 FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);
             }
@@ -115,11 +110,6 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         protected IDictionary<string, object> ConstsMap { get; private set; }
 
         private string FieldAttributeType { get; set; }
-
-        private bool Cached
-        {
-            get { return FieldsMap != null && ConstsMap != null && ParsersMap != null; } // && instead of ||, because cache expiration/removal of single map can possibly occur
-        }
 
         /// <summary>
         ///     Generates client validation rule with the basic set of parameters.
@@ -187,6 +177,13 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
             if (count > max)
                 throw new InvalidOperationException(
                     string.Format("No more than {0} unique attributes of the same type can be applied for a single field or property.", max));
+        }
+
+        class MapCacheItem
+        {
+            public IDictionary<string, string> FieldsMap;
+            public IDictionary<string, string> ParsersMap;
+            public IDictionary<string, object> ConstsMap;
         }
     }
 }
