@@ -39,7 +39,7 @@ namespace ExpressiveAnnotations.Attributes
                 Compile(validationContext.ObjectType);
                 if (!CachedValidationFuncs[validationContext.ObjectType](validationContext.ObjectInstance)) // check if the assertion condition is not satisfied
                     return new ValidationResult( // assertion not satisfied => notify
-                        FormatErrorMessage(validationContext.DisplayName, Expression),
+                        FormatErrorMessage(validationContext.DisplayName, Expression, validationContext.ObjectInstance.GetType()),
                         new[] {validationContext.MemberName});
             }
 

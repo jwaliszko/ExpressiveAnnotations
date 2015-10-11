@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
@@ -21,7 +20,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
     /// <typeparam name="T">Any type derived from <see cref="ExpressiveAttribute" /> class.</typeparam>
     public abstract class ExpressiveValidator<T> : DataAnnotationsModelValidator<T> where T : ExpressiveAttribute
     {
-        static readonly ConcurrentDictionary<string, MapCacheItem> _cache = new ConcurrentDictionary<string, MapCacheItem>();
+        private static readonly ConcurrentDictionary<string, MapCacheItem> _cache = new ConcurrentDictionary<string, MapCacheItem>();
 
         /// <summary>
         ///     Constructor for expressive model validator.
@@ -39,7 +38,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 var attribId = string.Format("{0}.{1}", attribute.TypeId, annotatedField).ToLowerInvariant();
                 FieldAttributeType = string.Format("{0}.{1}", typeof(T).FullName, annotatedField).ToLowerInvariant();
 
-                MapCacheItem item = _cache.GetOrAdd(attribId, (trash) =>
+                var item = _cache.GetOrAdd(attribId, _ =>
                 {
                     var parser = new Parser();
                     parser.RegisterMethods();
@@ -59,10 +58,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                         .ToDictionary(x => x.PropertyName, x => x.ParserAttribute.ParserName);
 
                     AssertNoNamingCollisionsAtCorrespondingSegments();
-
                     attribute.Compile(metadata.ContainerType);
 
-                    return new MapCacheItem()
+                    return new MapCacheItem
                     {
                         FieldsMap = FieldsMap,
                         ConstsMap = ConstsMap,
@@ -73,8 +71,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 FieldsMap = item.FieldsMap;
                 ConstsMap = item.ConstsMap;
                 ParsersMap = item.ParsersMap;
+
                 Expression = attribute.Expression;
-                FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression);
+                FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression, metadata.ContainerType);
             }
             catch (Exception e)
             {
@@ -179,7 +178,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                     string.Format("No more than {0} unique attributes of the same type can be applied for a single field or property.", max));
         }
 
-        class MapCacheItem
+        private class MapCacheItem
         {
             public IDictionary<string, string> FieldsMap;
             public IDictionary<string, string> ParsersMap;

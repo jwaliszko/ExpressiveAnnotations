@@ -56,22 +56,68 @@ namespace ExpressiveAnnotations
                 throw new ArgumentNullException("property");
 
             var props = property.Split('.');
-            for (var i = 0; i < props.Length; i++)
+
+            var prop = props[0];
+            var type = source.GetType();
+            var pi = type.GetProperty(prop);
+            if (pi == null)
+                throw new ArgumentException(
+                    string.Format("Value extraction interrupted. Field {0} not found.", prop), property);
+
+            source = pi.GetValue(source, null);
+            for (var i = 1; i < props.Length; i++)
             {
                 if (source == null)
                     throw new ArgumentException(
-                        string.Format("Value extraction interrupted. Field {0} is null.", props[i - 1]), property);
+                        string.Format("Value extraction interrupted. Field {0} is null.", prop), property);
 
-                var type = source.GetType();
-                var prop = props[i];
-                var pi = type.GetProperty(prop);
+                prop = props[i];
+                type = source.GetType();
+                pi = type.GetProperty(prop);
                 if (pi == null)
                     throw new ArgumentException(
                         string.Format("Value extraction interrupted. Field {0} not found.", prop), property);
 
                 source = pi.GetValue(source, null);
             }
+
             return source;
+        }
+
+        public static string ExtractDisplayName(Type source, string property)
+        {
+            if (source == null)
+                throw new ArgumentNullException("source");
+            if (property == null)
+                throw new ArgumentNullException("property");
+
+            var props = property.Split('.');
+
+            var prop = props[0];
+            var pi = source.GetProperty(prop);
+            if (pi == null)
+                throw new ArgumentException(
+                    string.Format("Display name extraction interrupted. Field {0} not found.", prop), property);
+
+            for (var i = 1; i < props.Length; i++)
+            {
+                prop = props[i];
+                source = pi.PropertyType;
+                pi = source.GetProperty(prop);
+                if (pi == null)
+                    throw new ArgumentException(
+                        string.Format("Display name extraction interrupted. Field {0} not found.", prop), property);
+            }
+
+            var attrib = pi.GetCustomAttributes(typeof (DisplayAttribute), false)
+                .Cast<DisplayAttribute>()
+                .SingleOrDefault();
+
+            if (attrib == null)
+                throw new ArgumentException(
+                    string.Format("No DisplayName attribute provided for {0} field.", prop), property);
+
+            return attrib.GetName(); // instead of .Name, to work with resources
         }
 
         public static bool IsDateTime(this Type type)
@@ -207,7 +253,7 @@ namespace ExpressiveAnnotations
                 .Select(p => p.Name).ToList();
 
             // if there is an ambiguity, return nothing
-            return props.Count() == 1 ? props.SingleOrDefault() : null;
+            return props.Count == 1 ? props.SingleOrDefault() : null;
         }
 
         public static string TrimStart(this string input, out int line, out int column)

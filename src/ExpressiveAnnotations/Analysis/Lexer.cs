@@ -25,7 +25,7 @@ namespace ExpressiveAnnotations.Analysis
         /// </summary>
         public Lexer()
         {
-            // regex special characters (should be escaped if needed): .$^{[(|)*+?\
+            // regex special characters (should be escaped if needed, https://msdn.microsoft.com/en-us/library/4edbef7e(v=vs.110).aspx): .$^{[(|)*+?\
             var patterns = new Dictionary<TokenType, string>
             {
                 {TokenType.AND, @"&&"},

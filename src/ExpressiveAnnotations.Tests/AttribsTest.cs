@@ -122,32 +122,32 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
-        public void verify_values_extraction_for_error_messages_before_validation() // before validation, custom format specifiers used to extract fields values are not interpreted (to be sent in unchanged form to client)
+        public void verify_tokens_extraction_for_error_messages_before_validation() // before validation, custom format specifiers used to extract fields values are not interpreted (to be sent in unchanged form to client)
         {
             AssertErrorMessage(
-                "field: {0}, expr: {1} | Value1: {Value1}{Value1}, Internal.Internal.Value1: {Internal.Internal.Value1}, {Internal.Internal.Value1}",
-                "field: FieldName, expr: 1!=1 | Value1: {Value1}{Value1}, Internal.Internal.Value1: {Internal.Internal.Value1}, {Internal.Internal.Value1}",
-                "field: FieldName, expr: 1==1 | Value1: {Value1}{Value1}, Internal.Internal.Value1: {Internal.Internal.Value1}, {Internal.Internal.Value1}",
+                "field: {0}, expr: {1} | Value1: {Value1}{Value1:n}, Internal.Internal.Value1: {Internal.Internal.Value1}, {Internal.Internal.Value2:N}",
+                "field: FieldName, expr: 1!=1 | Value1: {Value1}Value_1, Internal.Internal.Value1: {Internal.Internal.Value1}, Value_2",
+                "field: FieldName, expr: 1==1 | Value1: {Value1}Value_1, Internal.Internal.Value1: {Internal.Internal.Value1}, Value_2",
                 false);
             AssertErrorMessage(
-                "field: {0}, expr: {1} | Value1: {{Value1}}{{Value1}}, Internal.Internal.Value1: {{Internal.Internal.Value1}}, {{Internal.Internal.Value1}}",
-                "field: FieldName, expr: 1!=1 | Value1: {{Value1}}{{Value1}}, Internal.Internal.Value1: {{Internal.Internal.Value1}}, {{Internal.Internal.Value1}}",
-                "field: FieldName, expr: 1==1 | Value1: {{Value1}}{{Value1}}, Internal.Internal.Value1: {{Internal.Internal.Value1}}, {{Internal.Internal.Value1}}",
+                "field: {{0}}, expr: {{1}} | Value1: {{Value1}}{{Value1:n}}, Internal.Internal.Value1: {{Internal.Internal.Value1}}, {{Internal.Internal.Value2:N}}",
+                "field: {0}, expr: {1} | Value1: {{Value1}}{Value1:n}, Internal.Internal.Value1: {{Internal.Internal.Value1}}, {Internal.Internal.Value2:N}",
+                "field: {0}, expr: {1} | Value1: {{Value1}}{Value1:n}, Internal.Internal.Value1: {{Internal.Internal.Value1}}, {Internal.Internal.Value2:N}",
                 false);
             AssertErrorMessage(
-                "field: {0}, expr: {1} | Value1: {{{Value1}}}{{{Value1}}}, Internal.Internal.Value1: {{{Internal.Internal.Value1}}}, {{{Internal.Internal.Value1}}}",
-                "field: FieldName, expr: 1!=1 | Value1: {{{Value1}}}{{{Value1}}}, Internal.Internal.Value1: {{{Internal.Internal.Value1}}}, {{{Internal.Internal.Value1}}}",
-                "field: FieldName, expr: 1==1 | Value1: {{{Value1}}}{{{Value1}}}, Internal.Internal.Value1: {{{Internal.Internal.Value1}}}, {{{Internal.Internal.Value1}}}",
+                "field: {{{0}}}, expr: {{{1}}} | Value1: {{{Value1}}}{{{Value1:n}}}, Internal.Internal.Value1: {{{Internal.Internal.Value1}}}, {{{Internal.Internal.Value2:N}}}",
+                "field: {FieldName}, expr: {1!=1} | Value1: {{{Value1}}}{Value_1}, Internal.Internal.Value1: {{{Internal.Internal.Value1}}}, {Value_2}",
+                "field: {FieldName}, expr: {1==1} | Value1: {{{Value1}}}{Value_1}, Internal.Internal.Value1: {{{Internal.Internal.Value1}}}, {Value_2}",
                 false);
             AssertErrorMessage(
-                "field: {0}, expr: {1} | Value1: {{{{Value1}}}}{{{{Value1}}}}, Internal.Internal.Value1: {{{{Internal.Internal.Value1}}}}, {{{{Internal.Internal.Value1}}}}",
-                "field: FieldName, expr: 1!=1 | Value1: {{{{Value1}}}}{{{{Value1}}}}, Internal.Internal.Value1: {{{{Internal.Internal.Value1}}}}, {{{{Internal.Internal.Value1}}}}",
-                "field: FieldName, expr: 1==1 | Value1: {{{{Value1}}}}{{{{Value1}}}}, Internal.Internal.Value1: {{{{Internal.Internal.Value1}}}}, {{{{Internal.Internal.Value1}}}}",
+                "field: {{{{0}}}}, expr: {{{{1}}}} | Value1: {{{{Value1}}}}{{{{Value1:n}}}}, Internal.Internal.Value1: {{{{Internal.Internal.Value1}}}}, {{{{Internal.Internal.Value2:N}}}}",
+                "field: {{0}}, expr: {{1}} | Value1: {{{{Value1}}}}{{Value1:n}}, Internal.Internal.Value1: {{{{Internal.Internal.Value1}}}}, {{Internal.Internal.Value2:N}}",
+                "field: {{0}}, expr: {{1}} | Value1: {{{{Value1}}}}{{Value1:n}}, Internal.Internal.Value1: {{{{Internal.Internal.Value1}}}}, {{Internal.Internal.Value2:N}}",
                 false);
         }
 
         [TestMethod]
-        public void verify_values_extraction_for_error_messages_after_validation()
+        public void verify_tokens_extraction_for_error_messages_after_validation()
         {
             //string.Format("{0}", 1); -> 1
             //string.Format("{{0}}", 1); -> {0}
@@ -155,40 +155,72 @@ namespace ExpressiveAnnotations.Tests
             //string.Format("{{{{0}}}}", 1); -> {{0}}
 
             AssertErrorMessage(
-                "field: {0}, expr: {1} | Value1: {Value1}{Value1}, Internal.Internal.Value1: {Internal.Internal.Value1}, {Internal.Internal.Value1}",
-                "field: FieldName, expr: 1!=1 | Value1: 00, Internal.Internal.Value1: 2, 2",
-                "field: FieldName, expr: 1==1 | Value1: 00, Internal.Internal.Value1: 2, 2",
+                "field: {0}, expr: {1} | Value1: {Value1}{Value1:n}, Internal.Internal.Value1: {Internal.Internal.Value1}, {Internal.Internal.Value2:N}",
+                "field: FieldName, expr: 1!=1 | Value1: 0Value_1, Internal.Internal.Value1: 2, Value_2",
+                "field: FieldName, expr: 1==1 | Value1: 0Value_1, Internal.Internal.Value1: 2, Value_2",
                 true);
             AssertErrorMessage(
-                "field: {0}, expr: {1} | Value1: {{Value1}}{{Value1}}, Internal.Internal.Value1: {{Internal.Internal.Value1}}, {{Internal.Internal.Value1}}",
-                "field: FieldName, expr: 1!=1 | Value1: {Value1}{Value1}, Internal.Internal.Value1: {Internal.Internal.Value1}, {Internal.Internal.Value1}",
-                "field: FieldName, expr: 1==1 | Value1: {Value1}{Value1}, Internal.Internal.Value1: {Internal.Internal.Value1}, {Internal.Internal.Value1}",
+                "field: {{0}}, expr: {{1}} | Value1: {{Value1}}{{Value1:n}}, Internal.Internal.Value1: {{Internal.Internal.Value1}}, {{Internal.Internal.Value2:N}}",
+                "field: {0}, expr: {1} | Value1: {Value1}{Value1:n}, Internal.Internal.Value1: {Internal.Internal.Value1}, {Internal.Internal.Value2:N}",
+                "field: {0}, expr: {1} | Value1: {Value1}{Value1:n}, Internal.Internal.Value1: {Internal.Internal.Value1}, {Internal.Internal.Value2:N}",
                 true);
             AssertErrorMessage(
-                "field: {0}, expr: {1} | Value1: {{{Value1}}}{{{Value1}}}, Internal.Internal.Value1: {{{Internal.Internal.Value1}}}, {{{Internal.Internal.Value1}}}",
-                "field: FieldName, expr: 1!=1 | Value1: {0}{0}, Internal.Internal.Value1: {2}, {2}",
-                "field: FieldName, expr: 1==1 | Value1: {0}{0}, Internal.Internal.Value1: {2}, {2}",
+                "field: {{{0}}}, expr: {{{1}}} | Value1: {{{Value1}}}{{{Value1:n}}}, Internal.Internal.Value1: {{{Internal.Internal.Value1}}}, {{{Internal.Internal.Value2:N}}}",
+                "field: {FieldName}, expr: {1!=1} | Value1: {0}{Value_1}, Internal.Internal.Value1: {2}, {Value_2}",
+                "field: {FieldName}, expr: {1==1} | Value1: {0}{Value_1}, Internal.Internal.Value1: {2}, {Value_2}",
                 true);
             AssertErrorMessage(
-                "field: {0}, expr: {1} | Value1: {{{{Value1}}}}{{{{Value1}}}}, Internal.Internal.Value1: {{{{Internal.Internal.Value1}}}}, {{{{Internal.Internal.Value1}}}}",
-                "field: FieldName, expr: 1!=1 | Value1: {{Value1}}{{Value1}}, Internal.Internal.Value1: {{Internal.Internal.Value1}}, {{Internal.Internal.Value1}}",
-                "field: FieldName, expr: 1==1 | Value1: {{Value1}}{{Value1}}, Internal.Internal.Value1: {{Internal.Internal.Value1}}, {{Internal.Internal.Value1}}",
+                "field: {{{{0}}}}, expr: {{{{1}}}} | Value1: {{{{Value1}}}}{{{{Value1:n}}}}, Internal.Internal.Value1: {{{{Internal.Internal.Value1}}}}, {{{{Internal.Internal.Value2:N}}}}",
+                "field: {{0}}, expr: {{1}} | Value1: {{Value1}}{{Value1:n}}, Internal.Internal.Value1: {{Internal.Internal.Value1}}, {{Internal.Internal.Value2:N}}",
+                "field: {{0}}, expr: {{1}} | Value1: {{Value1}}{{Value1:n}}, Internal.Internal.Value1: {{Internal.Internal.Value1}}, {{Internal.Internal.Value2:N}}",
+                true);
+
+            //string.Format("{{0", 1); -> {0
+            //string.Format("0}}", 1); -> 0}
+
+            AssertErrorMessage(
+                "field: {{0, expr: {{1 | Value1: {{Value1{{Value1:n, Internal.Internal.Value1: Internal.Internal.Value1}}, Internal.Internal.Value2:N}}",
+                "field: {0, expr: {1 | Value1: {Value1{Value1:n, Internal.Internal.Value1: Internal.Internal.Value1}, Internal.Internal.Value2:N}",
+                "field: {0, expr: {1 | Value1: {Value1{Value1:n, Internal.Internal.Value1: Internal.Internal.Value1}, Internal.Internal.Value2:N}",
                 true);
         }
 
-        private static void AssertErrorMessage(string input, string assertThatOutput, string requiredIfoutput, bool afterValidation)
+        [TestMethod]
+        public void verify_format_exceptions_from_incorrect_custom_format_specifiers() // custom specifiers handling should throw the same formatting error as framework implementation, when incorrect nesting is detected
+        {
+            new[]
+            {
+                "{{field}", "{{field.field}", "{field}}", "{field.field}}",
+                "{{field:n}", "{{field.field:n}", "{field:N}}", "{field.field:N}}"
+            }.ToList().ForEach(msg =>
+            {
+                try
+                {
+                    var attrib = new AssertThatAttribute("true") {ErrorMessage = msg};
+                    attrib.FormatErrorMessage("ads", "true", typeof(MsgModel));
+                    Assert.Fail();
+                }
+                catch (Exception e)
+                {
+                    Assert.IsInstanceOfType(e, typeof(FormatException));
+                    Assert.AreEqual("Input string was not in a correct format.", e.Message);
+                }
+            });
+        }
+
+        private static void AssertErrorMessage(string input, string assertThatOutput, string requiredIfOutput, bool afterValidation)
         {
             var assertThat = new AssertThatAttribute("1!=1");
             var requiredIf = new RequiredIfAttribute("1==1");
 
             var isValid = typeof (ExpressiveAttribute).GetMethod("IsValid", BindingFlags.NonPublic | BindingFlags.Instance);
-            var context = new ValidationContext(new Model
+            var context = new ValidationContext(new MsgModel
             {
                 Value1 = 0,
-                Internal = new Model
+                Internal = new MsgModel
                 {
                     Value1 = 1,
-                    Internal = new Model {Value1 = 2}
+                    Internal = new MsgModel {Value1 = 2}
                 }
             })
             {
@@ -198,8 +230,8 @@ namespace ExpressiveAnnotations.Tests
             if (input != null)
                 assertThat.ErrorMessage = requiredIf.ErrorMessage = input;
 
-            var assertThatError = assertThat.FormatErrorMessage(context.MemberName, assertThat.Expression);
-            var requiredIfError = requiredIf.FormatErrorMessage(context.MemberName, requiredIf.Expression);
+            var assertThatError = assertThat.FormatErrorMessage(context.MemberName, assertThat.Expression, typeof(MsgModel));
+            var requiredIfError = requiredIf.FormatErrorMessage(context.MemberName, requiredIf.Expression, typeof(MsgModel));
 
             if (afterValidation)
             {
@@ -211,7 +243,7 @@ namespace ExpressiveAnnotations.Tests
             }
 
             Assert.AreEqual(assertThatOutput, assertThatError);
-            Assert.AreEqual(requiredIfoutput, requiredIfError);
+            Assert.AreEqual(requiredIfOutput, requiredIfError);
         }
 
         private long MeasureExecutionTime(Action action)
@@ -247,8 +279,16 @@ namespace ExpressiveAnnotations.Tests
             [AssertThat("3 > 0")]
             [AssertThat("4 > 0")]
             public int Value2 { get; set; }
+        }
 
-            public Model Internal { get; set; }
+        private class MsgModel
+        {
+            [DisplayAttribute(Name = "Value_1")]
+            public int Value1 { get; set; }
+            [DisplayAttribute(ResourceType = typeof(Resources), Name = "Value2")]
+            public int Value2 { get; set; }
+
+            public MsgModel Internal { get; set; }
         }
     }
 

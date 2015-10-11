@@ -48,7 +48,7 @@ namespace ExpressiveAnnotations.Attributes
                 Compile(validationContext.ObjectType);
                 if (CachedValidationFuncs[validationContext.ObjectType](validationContext.ObjectInstance)) // check if the requirement condition is satisfied
                     return new ValidationResult( // requirement confirmed => notify
-                        FormatErrorMessage(validationContext.DisplayName, Expression),
+                        FormatErrorMessage(validationContext.DisplayName, Expression, validationContext.ObjectInstance.GetType()),
                         new[] {validationContext.MemberName});
             }
 

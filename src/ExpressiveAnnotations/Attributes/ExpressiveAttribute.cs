@@ -18,7 +18,7 @@ namespace ExpressiveAnnotations.Attributes
     public abstract class ExpressiveAttribute : ValidationAttribute
     {
         private int? _priority;
-        private const string _fieldRegex = @"({+)[a-zA-Z_]+(?:(?:\.[a-zA-Z_])?[a-zA-Z0-9_]*)*(}+)"; // {field}, {field.field}
+        private const string _fieldRegex = @"({+)[a-zA-Z_]+(?:(?:\.[a-zA-Z_])?[a-zA-Z0-9_]*)*(?::(?:n|N))?(}+)"; // {field[:n|N]}, {field.field[:n|N]} (all other specifiers, correct or not, should be handled by standard string.Format logic)
         private readonly IDictionary<string, string> _messageValuesMap;
 
         /// <summary>
@@ -167,14 +167,15 @@ namespace ExpressiveAnnotations.Attributes
         /// </summary>
         /// <param name="displayName">The user-visible name of the required field to include in the formatted message.</param>
         /// <param name="expression">The user-visible expression to include in the formatted message.</param>
+        /// <param name="objectContext">The annotated field container type.</param>
         /// <returns>
         ///     The localized message to present to the user.
         /// </returns>
         /// <remarks>
-        ///     This method interprets custom format specifiers, provided to error message string, for which model fields values will be extracted. Specifiers should be
-        ///     given in braces (curly brackets), e.g. {field}, {field.field}. Braces can be escaped by double-braces, i.e. to output a { use {{ and to output a } use }}.
+        ///     This method interprets custom format specifiers, provided to error message string, for which values or display names of model fields are extracted. Specifiers should be
+        ///     given in braces (curly brackets), e.g. {field}, {field.field:n}. Braces can be escaped by double-braces, i.e. to output a { use {{ and to output a } use }}.
         /// </remarks>
-        public string FormatErrorMessage(string displayName, string expression)
+        public string FormatErrorMessage(string displayName, string expression, Type objectContext)
         {
             var matches = Regex.Matches(ErrorMessageString, _fieldRegex);
             if (matches.Count <= 0)
@@ -191,11 +192,11 @@ namespace ExpressiveAnnotations.Attributes
                 substitutes[arg] = Guid.NewGuid().ToString();
             }
 
-            // substitute custom format specifiers not to interfere with standard string.Format logic
-            message = substitutes.Aggregate(message, (current, kvp) => current.Replace(kvp.Key, kvp.Value));
-            message = string.Format(message, displayName, expression);
-            // give back custom format specifiers - standard string.Format is already done, so it will not fail
-            message = substitutes.Aggregate(message, (current, kvp) => current.Replace(kvp.Value, kvp.Key));
+            message = substitutes.Aggregate(message, (current, kvp) => current.Replace(kvp.Key, kvp.Value)); // substitute our custom format specifiers not to interfere with standard string.Format logic
+            message = string.Format(message, displayName, expression); // handle standard format specifiers: {index[,alignment][:formatString]} https://msdn.microsoft.com/en-us/library/txafckwd(v=vs.110).aspx (also throw error if format is incorrect)
+            message = substitutes.Aggregate(message, (current, kvp) => current.Replace(kvp.Value, kvp.Key)); // give back custom format specifiers - standard string.Format is already done, so it will not fail
+
+            ExtractNamesForMessage(objectContext); // names, in contrast to values, do not change in runtime, so can be provided early (less code in js)
 
             if (_messageValuesMap.Any())
                 message = _messageValuesMap.Aggregate(message, (current, kvp) => current.Replace(kvp.Key, kvp.Value));
@@ -281,13 +282,48 @@ namespace ExpressiveAnnotations.Attributes
                 var left = new string('{', length/2);
                 var right = new string('}', length/2);
 
-                var param = arg.Substring(length, arg.Length - 2 * length);
+                var param = arg.Substring(length, arg.Length - 2*length);
+                if (param.Contains(":"))
+                    continue;
+
                 if (length%2 != 0) // substitute param with respective value (just like string.Format does)
                 {
                     if (context == null)
-                        throw new ArgumentNullException("context", "Field value cannot be extracted from null model context.");
+                        throw new ArgumentNullException("context", "Message tokens cannot be evaluated from null model context.");
                     param = (Helper.ExtractValue(context, param) ?? string.Empty).ToString();
                 }
+
+                _messageValuesMap[arg] = string.Format("{0}{1}{2}", left, param, right);
+            }
+        }
+
+        private void ExtractNamesForMessage(Type context)
+        {
+            var matches = Regex.Matches(ErrorMessageString, _fieldRegex);
+            if (matches.Count <= 0)
+                return;
+
+            for (var i = 0; i < matches.Count; i++)
+            {
+                var match = matches[i];
+
+                var arg = match.Value;
+                var leftBraces = match.Groups[1];
+                var rightBraces = match.Groups[2];
+
+                if (leftBraces.Length != rightBraces.Length)
+                    throw new FormatException("Input string was not in a correct format.");
+
+                var length = leftBraces.Length;
+                var left = new string('{', length/2);
+                var right = new string('}', length/2);
+
+                var param = arg.Substring(length, arg.Length - 2*length);
+                if (!param.EndsWith(":n") && !param.EndsWith(":N"))
+                    continue;
+
+                if (length%2 != 0)
+                    param = Helper.ExtractDisplayName(context, param.Substring(0, param.Length - 2));
 
                 _messageValuesMap[arg] = string.Format("{0}{1}{2}", left, param, right);
             }
