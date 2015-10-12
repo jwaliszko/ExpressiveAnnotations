@@ -52,12 +52,19 @@ var
 
     logger = {
         dump: function(message) {
-            if (api.settings.debug && console && typeof console.log === 'function')
+            if (api.settings.debug && console && typeof console.log === 'function') { // flush in debug mode only
                 console.log(message);
+            }
         },
         warn: function(message) {
-            if (api.settings.debug && console && typeof console.warn === 'function')
+            if (console && typeof console.warn === 'function') {
                 console.warn(message);
+            }
+        },
+        fail: function(message) {
+            if (console && typeof console.error === 'function') {
+                console.error(message);
+            }
         }
     },
 
@@ -636,14 +643,22 @@ var
     $.each(annotations.split(''), function() {
         var method = typeHelper.string.format('assertthat{0}', $.trim(this));
         $.validator.addMethod(method, function(value, element, params) {
-            return computeAssertThat(value, element, params);
+            try {
+                return computeAssertThat(value, element, params);
+            } catch (ex) {
+                logger.fail(ex);
+            }
         }, '');
     });
 
     $.each(annotations.split(''), function() {
         var method = typeHelper.string.format('requiredif{0}', $.trim(this));
         $.validator.addMethod(method, function(value, element, params) {
-            return computeRequiredIf(value, element, params);
+            try {
+                return computeRequiredIf(value, element, params);
+            } catch (ex) {
+                logger.fail(ex);
+            }
         }, '');
     });
 
