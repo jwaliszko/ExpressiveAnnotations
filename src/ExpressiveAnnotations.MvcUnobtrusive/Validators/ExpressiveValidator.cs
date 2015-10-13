@@ -3,7 +3,6 @@
  * Licensed MIT: http://opensource.org/licenses/MIT */
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
@@ -20,8 +19,6 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
     /// <typeparam name="T">Any type derived from <see cref="ExpressiveAttribute" /> class.</typeparam>
     public abstract class ExpressiveValidator<T> : DataAnnotationsModelValidator<T> where T : ExpressiveAttribute
     {
-        private static readonly ConcurrentDictionary<string, CacheItem> _cache = new ConcurrentDictionary<string, CacheItem>();
-
         /// <summary>
         ///     Constructor for expressive model validator.
         /// </summary>
@@ -38,7 +35,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 var attribId = string.Format("{0}.{1}", attribute.TypeId, annotatedField).ToLowerInvariant();
                 FieldAttributeType = string.Format("{0}.{1}", typeof(T).FullName, annotatedField).ToLowerInvariant();
 
-                var item = _cache.GetOrAdd(attribId, _ =>
+                var item = MapCache.Instance.GetOrAdd(attribId, _ =>
                 {
                     var parser = new Parser();
                     parser.RegisterMethods();
@@ -191,15 +188,6 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
             if (count > max)
                 throw new InvalidOperationException(
                     string.Format("No more than {0} unique attributes of the same type can be applied for a single field or property.", max));
-        }
-
-        private class CacheItem
-        {
-            public IDictionary<string, string> FieldsMap { get; set; }
-            public IDictionary<string, object> ConstsMap { get; set; }
-            public IDictionary<string, string> ParsersMap { get; set; }
-            public IDictionary<string, Guid> ErrFieldsMap { get; set; }
-            public string FormattedErrorMessage { get; set; }
         }
     }
 }

@@ -27,6 +27,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
                 new HttpRequest(string.Empty, "http://tempuri.org", string.Empty),
                 new HttpResponse(new StringWriter())
                 );
+
+            MapCache.Instance.Clear();
         }
 
         [TestMethod]
