@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -126,6 +127,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             Assert.IsFalse(assertRule.ValidationParameters.ContainsKey("fieldsmap"));
             Assert.IsFalse(assertRule.ValidationParameters.ContainsKey("constsmap"));
             Assert.IsFalse(assertRule.ValidationParameters.ContainsKey("parsersmap"));
+            Assert.IsFalse(assertRule.ValidationParameters.ContainsKey("errfieldsmap"));
 
             Assert.IsTrue(assertRule.ValidationParameters.ContainsKey("expression"));
 
@@ -135,9 +137,28 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             Assert.IsFalse(requirRule.ValidationParameters.ContainsKey("fieldsmap"));
             Assert.IsFalse(requirRule.ValidationParameters.ContainsKey("constsmap"));
             Assert.IsFalse(requirRule.ValidationParameters.ContainsKey("parsersmap"));
+            Assert.IsFalse(assertRule.ValidationParameters.ContainsKey("errfieldsmap"));
 
             Assert.IsTrue(requirRule.ValidationParameters.ContainsKey("allowempty"));
             Assert.IsTrue(requirRule.ValidationParameters.ContainsKey("expression"));
+        }
+
+        [TestMethod]
+        public void verify_formatted_message_sent_to_client()
+        {
+            var model = new Model();
+            var metadata = GetModelMetadata(model, m => m.Value);
+            var controllerContext = GetControllerContext();
+
+            var assert = new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("1 > 2")
+            {
+                ErrorMessage = "{0}{1}{Value:n}{Value}{{Value}}"
+            });
+            var assertRule = assert.GetClientValidationRules().Single();
+
+            var map = JsonConvert.DeserializeObject<dynamic>((string) assertRule.ValidationParameters["errfieldsmap"]);
+            var expected = "Value1 > 2_{Value}_" + map.Value + "{Value}";
+            Assert.AreEqual(expected, assertRule.ErrorMessage);
         }
 
         [TestMethod]
@@ -181,7 +202,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
         public void verify_validators_caching()
         {
             const int testLoops = 10;
-            var generatedCode = string.Join(" && ", Enumerable.Repeat(0, 100).Select(x => "true"));
+            var generatedCode = string.Join(" && ", Enumerable.Repeat(0, 100).Select(x => "true")); // give the parser some work
             
             var model = new Model();
             var metadata = GetModelMetadata(model, m => m.Value);
@@ -234,6 +255,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
 
         public class Model
         {
+            [Display(Name="_{Value}_")]
             public int Value { get; set; }
             [ValueParser("arrayparser")]
             public int[] Array { get; set; }

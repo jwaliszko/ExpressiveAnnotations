@@ -367,7 +367,7 @@ var
                 logger.warn(typeHelper.string.format('Overriden {0} type parsing runs for {1} field. All fields of {0} type are going to be parsed using your value parser. If such a behaviour is unintentional, change the name of your value parser to one, which does not indicate at {0} (or any other) type name.', type, field));
                 return parseFunc(value, field);
             }
-            return typeHelper.tryAutoParse(value, type); // built-in type-aware parser lookup - lowest parsing priority
+            return typeHelper.tryAutoParse(value, type); // built-in parser lookup - lowest parsing priority
         },
         tryAutoParse: function(value, type) {
             switch (type) {
@@ -565,27 +565,16 @@ var
         }
         if (options.message) {
             options.messages[adapter] = function(params, element) {
-                var matches, message, remaining, arg, leftBraces, rightBraces, length, left, right, param;
-                message = remaining = options.message;
-                while ((matches = /({+)[a-zA-Z_]+(?:(?:\.[a-zA-Z_])?[a-zA-Z0-9_]*)*(}+)/g.exec(remaining)) !== null) { // search for custom string format specifiers, e.g. {field} {field.field}, for field values to be extracted
-                    arg = matches[0];                                                                                  // braces can be escaped by double-braces, i.e. to output a { use {{ and to output a } use }}
-                    leftBraces = matches[1];
-                    rightBraces = matches[2];
+                var message, field, guid, value;
+                message = options.message;
+                for (field in params.errFieldsMap) {
+                    if (params.errFieldsMap.hasOwnProperty(field)) {
+                        guid = params.errFieldsMap[field];
+                        value = modelHelper.extractValue(params.form, field, params.prefix, 'string', null);
 
-                    if (leftBraces.length !== rightBraces.length)
-                        throw 'Input string was not in a correct format.';
-
-                    length = leftBraces.length;
-                    // flatten each pair of braces (curly brackets) into single brace
-                    left = new Array(parseInt(length / 2) + 1).join('{');
-                    right = new Array(parseInt(length / 2) + 1).join('}');
-
-                    param = arg.substr(length, arg.length - 2 * length);
-                    if (length % 2 !== 0) // substitute param with respective value
-                        param = modelHelper.extractValue(params.form, param, params.prefix, 'string', null);
-
-                    message = message.replace(arg, typeHelper.string.format("{0}{1}{2}", left, param, right));
-                    remaining = remaining.replace(arg, '');
+                        var re = new RegExp(guid, 'g'); // with this regex...
+                        message = message.replace(re, value); // ...occurrences are replaced globally
+                    }
                 }
                 return message;
             };
@@ -628,14 +617,14 @@ var
 
     $.each(annotations.split(''), function() { // it would be ideal to have exactly as many handlers as there are unique annotations, but the number of annotations isn't known untill DOM is ready
         var adapter = typeHelper.string.format('assertthat{0}', $.trim(this));
-        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'parsersMap'], function(options) {
+        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'parsersMap', 'errFieldsMap'], function (options) {
             buildAdapter(adapter, options);
         });
     });
 
     $.each(annotations.split(''), function() {
         var adapter = typeHelper.string.format('requiredif{0}', $.trim(this));
-        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'parsersMap', 'allowEmpty'], function(options) {
+        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'parsersMap', 'errFieldsMap', 'allowEmpty'], function(options) {
             buildAdapter(adapter, options);
         });
     });

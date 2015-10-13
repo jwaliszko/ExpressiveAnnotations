@@ -59,11 +59,12 @@
     <Compile Include="Analysis\Lexer.cs" />
     <Compile Include="Analysis\Parser.cs" />
     <Compile Include="Attributes\ExpressiveAttribute.cs" />
+    <Compile Include="MessageFormatter.cs" />
     <Compile Include="Attributes\ValueParserAttribute.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Attributes\RequiredIfAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Attributes\Toolchain.cs" />
+    <Compile Include="Toolchain.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -20,7 +20,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
     /// <typeparam name="T">Any type derived from <see cref="ExpressiveAttribute" /> class.</typeparam>
     public abstract class ExpressiveValidator<T> : DataAnnotationsModelValidator<T> where T : ExpressiveAttribute
     {
-        private static readonly ConcurrentDictionary<string, MapCacheItem> _cache = new ConcurrentDictionary<string, MapCacheItem>();
+        private static readonly ConcurrentDictionary<string, CacheItem> _cache = new ConcurrentDictionary<string, CacheItem>();
 
         /// <summary>
         ///     Constructor for expressive model validator.
@@ -57,23 +57,30 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                         }).Where(x => x.ParserAttribute != null)
                         .ToDictionary(x => x.PropertyName, x => x.ParserAttribute.ParserName);
 
+                    IDictionary<string, Guid> errFieldsMap;
+                    FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression, metadata.ContainerType, out errFieldsMap); // fields names, in contrast to values, do not change in runtime, so will be provided in message (less code in js)
+                    ErrFieldsMap = errFieldsMap;
+
                     AssertNoNamingCollisionsAtCorrespondingSegments();
                     attribute.Compile(metadata.ContainerType);
 
-                    return new MapCacheItem
+                    return new CacheItem
                     {
                         FieldsMap = FieldsMap,
                         ConstsMap = ConstsMap,
-                        ParsersMap = ParsersMap
+                        ParsersMap = ParsersMap,
+                        ErrFieldsMap = ErrFieldsMap,
+                        FormattedErrorMessage = FormattedErrorMessage
                     };
                 });
 
                 FieldsMap = item.FieldsMap;
                 ConstsMap = item.ConstsMap;
                 ParsersMap = item.ParsersMap;
+                ErrFieldsMap = item.ErrFieldsMap;
+                FormattedErrorMessage = item.FormattedErrorMessage;
 
                 Expression = attribute.Expression;
-                FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression, metadata.ContainerType);
             }
             catch (Exception e)
             {
@@ -92,6 +99,11 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         ///     Gets the formatted error message.
         /// </summary>
         protected string FormattedErrorMessage { get; private set; }
+
+        /// <summary>
+        ///     Gets fields names and corresponding guid identifiers obfuscating such fields in error message string.
+        /// </summary>
+        protected IDictionary<string, Guid> ErrFieldsMap { get; private set; }
 
         /// <summary>
         ///     Gets names and coarse types of properties extracted from specified expression within given context.
@@ -125,7 +137,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 ValidationType = ProvideUniqueValidationType(type)
             };
 
-            rule.ValidationParameters.Add("expression", Expression.ToJson());
+            rule.ValidationParameters.Add("expression", Expression.ToJson());            
 
             Debug.Assert(FieldsMap != null);
             if (FieldsMap != null && FieldsMap.Any())
@@ -136,6 +148,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
             Debug.Assert(ParsersMap != null);
             if (ParsersMap != null && ParsersMap.Any())
                 rule.ValidationParameters.Add("parsersmap", ParsersMap.ToJson());
+            Debug.Assert(ErrFieldsMap != null);
+            if (ErrFieldsMap != null && ErrFieldsMap.Any())
+                rule.ValidationParameters.Add("errfieldsmap", ErrFieldsMap.ToJson());
 
             return rule;
         }
@@ -178,11 +193,13 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                     string.Format("No more than {0} unique attributes of the same type can be applied for a single field or property.", max));
         }
 
-        private class MapCacheItem
+        private class CacheItem
         {
-            public IDictionary<string, string> FieldsMap;
-            public IDictionary<string, string> ParsersMap;
-            public IDictionary<string, object> ConstsMap;
+            public IDictionary<string, string> FieldsMap { get; set; }
+            public IDictionary<string, object> ConstsMap { get; set; }
+            public IDictionary<string, string> ParsersMap { get; set; }
+            public IDictionary<string, Guid> ErrFieldsMap { get; set; }
+            public string FormattedErrorMessage { get; set; }
         }
     }
 }

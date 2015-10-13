@@ -61,7 +61,7 @@ namespace ExpressiveAnnotations.Tests {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Value_2.
+        ///   Looks up a localized string similar to _{Value2}_.
         /// </summary>
         public static string Value2 {
             get {

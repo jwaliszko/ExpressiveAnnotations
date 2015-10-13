@@ -647,7 +647,7 @@
         var element = $('#basic_test_form').find('[name="ContactDetails.Email"]');
         var result = element.valid(); // trigger wait for result (all is synchronous)
         qunit.ok(!result);
-        qunit.equal(validator.errorList[0].message, 'Email ea@home.com{Email} {ea@home.com}{{Email}}');
+        qunit.equal(validator.errorList[0].message, 'Provided email: ea@home.com (yes ea@home.com) cannot be accepted.');
 
         element = $('#basic_test_form').find('[name="ContactDetails.PoliticalStability"]');
         result = element.valid();

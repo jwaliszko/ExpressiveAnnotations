@@ -96,8 +96,8 @@ namespace ExpressiveAnnotations.Tests
             Assert.AreEqual("Value_1", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Internal.Value1"));
             
             // name provided in resources
-            Assert.AreEqual("Value_2", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Value2"));
-            Assert.AreEqual("Value_2", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Internal.Value2"));
+            Assert.AreEqual("_{Value2}_", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Value2"));
+            Assert.AreEqual("_{Value2}_", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Internal.Value2"));
 
             try
             {
