@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ExpressiveAnnotations.Tests {
+namespace ExpressiveAnnotations.MvcUnobtrusive.Tests {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace ExpressiveAnnotations.Tests {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ExpressiveAnnotations.Tests.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ExpressiveAnnotations.MvcUnobtrusive.Tests.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -66,15 +66,6 @@ namespace ExpressiveAnnotations.Tests {
         public static string Lang {
             get {
                 return ResourceManager.GetString("Lang", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to _{Value2}_.
-        /// </summary>
-        public static string Value2 {
-            get {
-                return ResourceManager.GetString("Value2", resourceCulture);
             }
         }
     }

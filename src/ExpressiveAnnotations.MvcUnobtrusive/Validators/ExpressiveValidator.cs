@@ -54,10 +54,6 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                         }).Where(x => x.ParserAttribute != null)
                         .ToDictionary(x => x.PropertyName, x => x.ParserAttribute.ParserName);
 
-                    IDictionary<string, Guid> errFieldsMap;
-                    FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression, metadata.ContainerType, out errFieldsMap); // fields names, in contrast to values, do not change in runtime, so will be provided in message (less code in js)
-                    ErrFieldsMap = errFieldsMap;
-
                     AssertNoNamingCollisionsAtCorrespondingSegments();
                     attribute.Compile(metadata.ContainerType);
 
@@ -67,7 +63,6 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                         ConstsMap = ConstsMap,
                         ParsersMap = ParsersMap,
                         ErrFieldsMap = ErrFieldsMap,
-                        FormattedErrorMessage = FormattedErrorMessage
                     };
                 });
 
@@ -75,9 +70,12 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 ConstsMap = item.ConstsMap;
                 ParsersMap = item.ParsersMap;
                 ErrFieldsMap = item.ErrFieldsMap;
-                FormattedErrorMessage = item.FormattedErrorMessage;
 
                 Expression = attribute.Expression;
+
+                IDictionary<string, Guid> errFieldsMap;
+                FormattedErrorMessage = attribute.FormatErrorMessage(metadata.GetDisplayName(), attribute.Expression, metadata.ContainerType, out errFieldsMap); // fields names, in contrast to values, do not change in runtime, so will be provided in message (less code in js)
+                ErrFieldsMap = errFieldsMap;
             }
             catch (Exception e)
             {

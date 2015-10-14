@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
@@ -148,19 +149,45 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
         [TestMethod]
         public void verify_formatted_message_sent_to_client()
         {
-            var model = new Model();
+            var model = new MsgModel();
             var metadata = GetModelMetadata(model, m => m.Value);
             var controllerContext = GetControllerContext();
 
             var assert = new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("1 > 2")
             {
-                ErrorMessage = "{0}{1}{Value:n}{Value}{{Value}}"
+                ErrorMessage = "_{0}{1}{Value:n}{Value:N}{Value}{Value}_{{Value}}{{{Value}}}{{{{Value}}}}_"
             });
             var assertRule = assert.GetClientValidationRules().Single();
 
             var map = JsonConvert.DeserializeObject<dynamic>((string) assertRule.ValidationParameters["errfieldsmap"]);
-            var expected = "Value1 > 2_{Value}_" + map.Value + "{Value}";
+            var expected = "_Value1 > 2_{Value}__{Value}_" + map.Value + map.Value + "_{Value}" + "{" + map.Value + "}" + "{{Value}}_";
             Assert.AreEqual(expected, assertRule.ErrorMessage);
+        }
+
+        [TestMethod]
+        public void verify_that_culture_change_affects_message_sent_to_client()
+        {
+            var model = new MsgModel();
+            var metadata = GetModelMetadata(model, m => m.Lang);
+            var controllerContext = GetControllerContext();
+
+            var assert = new AssertThatValidator(metadata, controllerContext,
+                new AssertThatAttribute("1 > 2") {ErrorMessage = "{Lang:n}"});
+            var assertRule = assert.GetClientValidationRules().Single();
+            Assert.AreEqual("default", assertRule.ErrorMessage);
+
+            // change culture
+            var culture = Thread.CurrentThread.CurrentUICulture;
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture("pl");
+
+            // simulate next request - create new validator
+            assert = new AssertThatValidator(metadata, controllerContext,
+                new AssertThatAttribute("1 > 2") {ErrorMessage = "{Lang:n}"});
+            assertRule = assert.GetClientValidationRules().Single();
+            Assert.AreEqual("polski", assertRule.ErrorMessage);
+
+            // restore culture
+            Thread.CurrentThread.CurrentUICulture = culture;
         }
 
         [TestMethod]
@@ -257,11 +284,19 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
 
         public class Model
         {
-            [Display(Name="_{Value}_")]
             public int Value { get; set; }
             [ValueParser("arrayparser")]
             public int[] Array { get; set; }
             public State Status { get; set; }
+        }
+
+        public class MsgModel
+        {
+            [Display(Name = "_{Value}_")]
+            public int Value { get; set; }
+
+            [Display(ResourceType = typeof (Resources), Name = "Lang")]
+            public string Lang { get; set; }
         }
     }
 }

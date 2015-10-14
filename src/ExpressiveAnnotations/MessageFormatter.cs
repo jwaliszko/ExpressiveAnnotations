@@ -24,7 +24,7 @@ namespace ExpressiveAnnotations
             for (var i = 0; i < matches.Count; i++)
             {
                 var match = matches[i];
-                var arg = match.Value;
+                var item = match.Value;
                 var leftBraces = match.Groups[1];
                 var rightBraces = match.Groups[2];
 
@@ -36,8 +36,12 @@ namespace ExpressiveAnnotations
                 message.Append(input.Substring(start, chars));
                 prev = match;
 
-                if (items.Any(x => x.Body == arg))
+                var added = items.SingleOrDefault(x => x.Body == item);
+                if (added != null)
+                {
+                    message.Append(added.Uuid);
                     continue;
+                }
 
                 var length = leftBraces.Length;
 
@@ -45,20 +49,23 @@ namespace ExpressiveAnnotations
                 var leftBracesFlattened = new string('{', length / 2);
                 var rightBracesFlattened = new string('}', length / 2);
 
-                var guid = Guid.NewGuid();
-
-                var param = arg.Substring(length, arg.Length - 2 * length);
-                items.Add(new FormatItem
+                var uuid = Guid.NewGuid();
+                var param = item.Substring(length, item.Length - 2 * length);
+                var current = new FormatItem
                 {
-                    Id = guid,
-                    Body = arg,
+                    Uuid = uuid,
+                    Body = item,
                     Constant = length % 2 == 0,
                     FieldPath = param.Contains(":") ? param.Substring(0, param.IndexOf(":", StringComparison.Ordinal)) : param,
                     Indicator = param.Contains(":") ? param.Substring(param.IndexOf(":", StringComparison.Ordinal) + 1) : null,
-                    Substitute = string.Format("{0}{1}{2}", leftBracesFlattened, length % 2 != 0 ? guid.ToString() : param, rightBracesFlattened) // for odd number of braces, substitute param with respective value (just like string.Format() does)
-                });
-                message.Append(guid);
+                    Substitute = string.Format("{0}{1}{2}", leftBracesFlattened, length % 2 != 0 ? uuid.ToString() : param, rightBracesFlattened) // for odd number of braces, substitute param with respective value (just like string.Format() does)
+                };
+                items.Add(current);
+                message.Append(current.Uuid);
             }
+
+            if(prev != null)            
+                message.Append(input.Substring(prev.Index + prev.Length));
 
             return message.Length > 0 ? message.ToString() : input;
         }
@@ -66,7 +73,7 @@ namespace ExpressiveAnnotations
 
     internal class FormatItem
     {
-        public Guid Id { get; set; }
+        public Guid Uuid { get; set; }
         public string Body { get; set; }
         public bool Constant { get; set; }
         public string FieldPath { get; set; }

@@ -502,7 +502,7 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to If you are under 18 (indicated {Age} in {Age:N} field, yes {Age}), give us a reason of your travel no matter where you go (BTW.  {Country}... nice choice)..
+        ///   Looks up a localized string similar to If you are under 18 (indicated {Age} in {Age:N} field, yes - {Age:N} {Age}), give us a reason of your travel no matter where you go (BTW.  {Country}... nice choice)..
         /// </summary>
         public static string ReasonForTravelRequiredForYouth {
             get {

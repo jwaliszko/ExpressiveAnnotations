@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using ExpressiveAnnotations.Attributes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -168,6 +170,21 @@ namespace ExpressiveAnnotations.Tests
             });
         }
 
+        [TestMethod]
+        public void verify_that_culture_change_affects_validation_message()
+        {
+            AssertErrorMessage("{Lang:n}", "default", "default");
+
+            // change culture
+            var culture = Thread.CurrentThread.CurrentUICulture;
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture("pl");
+
+            AssertErrorMessage("{Lang:n}", "polski", "polski");
+
+            // restore culture
+            Thread.CurrentThread.CurrentUICulture = culture;
+        }
+
         private static void AssertErrorMessage(string input, string assertThatOutput, string requiredIfOutput)
         {
             var assertThat = new AssertThatAttribute("1!=1");
@@ -237,10 +254,14 @@ namespace ExpressiveAnnotations.Tests
         {
             [DisplayAttribute(Name = "_{Value1}_")]
             public int Value1 { get; set; }
-            [DisplayAttribute(ResourceType = typeof(Resources), Name = "Value2")]
+
+            [DisplayAttribute(ResourceType = typeof (Resources), Name = "Value2")]
             public int Value2 { get; set; }
 
             public MsgModel Internal { get; set; }
+
+            [Display(ResourceType = typeof (Resources), Name = "Lang")]
+            public string Lang { get; set; }
         }
     }
 

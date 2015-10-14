@@ -177,8 +177,8 @@ namespace ExpressiveAnnotations.Attributes
             IList<FormatItem> items;
             var message = PreformatMessage(displayName, expression, out items);
 
-            message = items.Aggregate(message, (cargo, current) => current.Indicator != null && !current.Constant ? cargo.Replace(current.Id.ToString(), Helper.ExtractDisplayName(objectInstance.GetType(), current.FieldPath)) : cargo);
-            message = items.Aggregate(message, (cargo, current) => current.Indicator == null && !current.Constant ? cargo.Replace(current.Id.ToString(), (Helper.ExtractValue(objectInstance, current.FieldPath) ?? string.Empty).ToString()) : cargo);
+            message = items.Aggregate(message, (cargo, current) => current.Indicator != null && !current.Constant ? cargo.Replace(current.Uuid.ToString(), Helper.ExtractDisplayName(objectInstance.GetType(), current.FieldPath)) : cargo);
+            message = items.Aggregate(message, (cargo, current) => current.Indicator == null && !current.Constant ? cargo.Replace(current.Uuid.ToString(), (Helper.ExtractValue(objectInstance, current.FieldPath) ?? string.Empty).ToString()) : cargo);
             return message;
         }
 
@@ -201,8 +201,10 @@ namespace ExpressiveAnnotations.Attributes
             IList<FormatItem> items;
             var message = PreformatMessage(displayName, expression, out items);
 
-            fieldsMap = items.Where(x => x.Indicator == null && !x.Constant).ToDictionary(x => x.FieldPath, x => x.Id);
-            message = items.Aggregate(message, (cargo, current) => current.Indicator != null && !current.Constant ? cargo.Replace(current.Id.ToString(), Helper.ExtractDisplayName(objectType, current.FieldPath)) : cargo);
+            var map = items.Where(x => x.Indicator == null && !x.Constant).Select(x => x.FieldPath).Distinct().ToDictionary(x => x, x => Guid.NewGuid()); // sanitize
+            message = items.Aggregate(message, (cargo, current) => current.Indicator != null && !current.Constant ? cargo.Replace(current.Uuid.ToString(), Helper.ExtractDisplayName(objectType, current.FieldPath)) : cargo);
+            message = items.Aggregate(message, (cargo, current) => current.Indicator == null && !current.Constant ? cargo.Replace(current.Uuid.ToString(), map[current.FieldPath].ToString()) : cargo);
+            fieldsMap = map;
             return message;
         }
         
@@ -264,7 +266,7 @@ namespace ExpressiveAnnotations.Attributes
         {
             var message = MessageFormatter.FormatString(ErrorMessageString, out items); // process custom format items: {fieldPath[:indicator]}, and substitute them entirely with guids, not to interfere with standard string.Format() invoked below
             message = string.Format(message, displayName, expression); // process standard format items: {index[,alignment][:formatString]}, https://msdn.microsoft.com/en-us/library/txafckwd(v=vs.110).aspx
-            message = items.Aggregate(message, (cargo, current) => cargo.Replace(current.Id.ToString(), current.Substitute)); // give back, initially preprocessed, custom format items
+            message = items.Aggregate(message, (cargo, current) => cargo.Replace(current.Uuid.ToString(), current.Substitute)); // give back, initially preprocessed, custom format items
             return message;
         }
     }

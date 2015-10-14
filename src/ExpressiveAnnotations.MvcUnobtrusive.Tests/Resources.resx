@@ -120,7 +120,4 @@
   <data name="Lang" xml:space="preserve">
     <value>default</value>
   </data>
-  <data name="Value2" xml:space="preserve">
-    <value>_{Value2}_</value>
-  </data>
 </root>

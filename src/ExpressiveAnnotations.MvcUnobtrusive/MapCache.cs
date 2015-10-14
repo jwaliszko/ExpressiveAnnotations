@@ -39,6 +39,5 @@ namespace ExpressiveAnnotations.MvcUnobtrusive
         public IDictionary<string, object> ConstsMap { get; set; }
         public IDictionary<string, string> ParsersMap { get; set; }
         public IDictionary<string, Guid> ErrFieldsMap { get; set; }
-        public string FormattedErrorMessage { get; set; }
     }
 }

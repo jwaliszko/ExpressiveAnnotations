@@ -118,9 +118,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Lang" xml:space="preserve">
-    <value>default</value>
-  </data>
-  <data name="Value2" xml:space="preserve">
-    <value>_{Value2}_</value>
+    <value>polski</value>
   </data>
 </root>
