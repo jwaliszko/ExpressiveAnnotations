@@ -49,14 +49,14 @@
             // expann.addMethod... // do something with ExpressiveAnnotations
             // ea... // do something with original ea variable
 
-            // ----- define settings -----
+            // ----- define your settings -----
 
             ea.settings.apply({
                 debug: '@debug' === 'true',
                 dependencyTriggers: '@triggers' // if not explicitly provided, default setup is: 'change keyup'
             });
 
-            // ----- define parsers -----
+            // ----- define your parsers -----
 
             ea.addValueParser('NonStandardDateParser', function(value) { // override default datetime parsing mechanism to deal with yyyy-mm-dd format
                 if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) { // in case the value does not have non-standard format (here, when language set to english)...
@@ -75,7 +75,7 @@
                     : array;  // otherwise - return array object for the ArrayLength method to work on
             });
 
-            // ----- define methods -----
+            // ----- define your methods -----
 
             ea.addMethod('IsBloodType', function(group) {
                 return /^(A|B|AB|0)[\+-]$/.test(group);

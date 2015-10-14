@@ -1,4 +1,4 @@
-﻿/* expressive.annotations.validate.js - v2.6.3
+﻿/* expressive.annotations.validate.js - v2.6.4
  * Client-side component of ExpresiveAnnotations - annotation-based conditional validation library.
  * https://github.com/JaroslawWaliszko/ExpressiveAnnotations
  *
@@ -36,7 +36,7 @@ var
         },                                         //             func - parse logic
                                                    // e.g. for objects when stored in non-json format or dates when stored in non-standard format (not proper for Date.parse(dateString)),
                                                    // i.e. suppose DOM field date string is given in dd/mm/yyyy format:
-                                                   // ea.addValueParser('dateparser', function(value, field) { // parameters: value - raw data string extracted by default from DOM element, 
+                                                   // ea.addValueParser('dateparser', function(value, field) { // parameters: value - raw data string extracted by default from DOM element 
                                                    //                                                          //             field - DOM element name for which parser was invoked
                                                    //     var arr = value.split('/'); return new Date(arr[2], arr[1] - 1, arr[0]).getTime(); // return milliseconds since January 1, 1970, 00:00:00 UTC
                                                    // });
@@ -364,7 +364,7 @@ var
             }
             parseFunc = typeHelper.findValueParser(field, type); // custom type-specific parser lookup - secondary parsing priority
             if (!parseFunc.error) {
-                logger.warn(typeHelper.string.format('Overriden {0} type parsing runs for {1} field. All fields of {0} type are going to be parsed using your value parser. If such a behaviour is unintentional, change the name of your value parser to one, which does not indicate at {0} (or any other) type name.', type, field));
+                logger.warn(typeHelper.string.format('Overriden {0} type parsing runs for {1} field. All fields of {0} type are going to be parsed using your value parser. If such a behavior is unintentional, change the name of your value parser to one, which does not indicate at {0} (or any other) type name.', type, field));
                 return parseFunc(value, field);
             }
             return typeHelper.tryAutoParse(value, type); // built-in parser lookup - lowest parsing priority

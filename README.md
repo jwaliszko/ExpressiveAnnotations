@@ -145,14 +145,15 @@ Priority          - Gets or sets the hint, available for any concerned external 
                     others of its kind, i.e. ExpressiveAttribute. Value is optional and not
 					set by default, which means that execution order is undefined.
 ErrorMessage      - Gets or sets an explicit error message string. A difference to default 
-					behavior is awareness of new format specifiers, given in curly brackets, 
-					used to extract values of specified fields, e.g. {field}, {field.field}
-					within current model context. Braces can be escaped by double-braces, 
-					i.e. to output a { use {{ and to output a } use }}. The same logic works 
-					for messages provided in resources.
+					behavior is awareness of new format items, i.e. {fieldPath[:indicator]}. 
+					Given in curly brackets, can be used to extract values of specified 
+					fields, e.g. {field}, {field.field}, within current model context or 
+					display names of such fields, e.g. {field:n}. Braces can be escaped by 
+					double-braces, i.e. to output a { use {{ and to output a } use }}. The 
+					same logic works for messages provided in resources.
 ```
 
-Full API documentation *(probably not useful at all, since the note above covers almost exhaustively what is actually needed to work with EA)* generated with [Sandcastle](https://sandcastle.codeplex.com/) (with the support of [SHFB](http://shfb.codeplex.com/)), can be downloaded in the form of compiled HTML help file from [here](doc/api/api.chm?raw=true) (only C# API, no JavaScript there).
+Full API documentation *(probably not much useful, since the note above covers almost exhaustively what is actually needed to work with EA)* generated with [Sandcastle](https://sandcastle.codeplex.com/) (with the support of [SHFB](http://shfb.codeplex.com/)), can be downloaded in the form of compiled HTML help file from [here](doc/api/api.chm?raw=true) (only C# API, no JavaScript there).
 
 #####<a id="implementation">Implementation</a>
 
@@ -405,11 +406,20 @@ If you need to handle value string extracted from DOM field in any non built-in 
     ```JavaScript
     <script>
         ea.addValueParser('customparser', function(value, field) {
-		    // parameters: value - raw data string extracted by default from DOM element, 
+		    // parameters: value - raw data string extracted by default from DOM element
             //             field - DOM element name for which parser was invoked
 		    return ... // handle exctracted field value string on your own
         });
     ```
+
+Finally, there is a possibility to override the default parser without the `ValueParser` annotation - use the type name for parser registration, e.g.
+```
+<script>
+	ea.addValueParser('numeric', function (value) {
+		return ... // handle global numeric parsing on your own
+	});
+```
+If you redefine default parsing mechanism, you can still have the `ValueParser` annotation on any fields you consider exceptional - annotation gives highest parsing priority.
 
 #####<a id="how-to-cope-with-dates-given-in-non-standard-formats">How to cope with dates given in non-standard formats?</a>
 

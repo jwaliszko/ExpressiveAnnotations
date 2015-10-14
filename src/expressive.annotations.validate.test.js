@@ -7,9 +7,6 @@
 (function($, qunit, ea, eapriv) {
     // equal( actual, expected [, message ] )
 
-    // qunit.testDone(function() { // reset state for further tests if needed
-    // });
-
     qunit.module("type helper");
 
     qunit.test("verify_array_storage", function() {
@@ -644,6 +641,8 @@
         });
 
         var validator = $('#basic_test_form').validate();
+        validator.settings.ignore = ''; // enable validation for hidden fields (our entire test form is hidden) http://stackoverflow.com/q/8466643/270315
+
         var element = $('#basic_test_form').find('[name="ContactDetails.Email"]');
         var result = element.valid(); // trigger wait for result (all is synchronous)
         qunit.ok(!result);
