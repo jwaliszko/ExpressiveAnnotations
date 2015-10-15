@@ -413,7 +413,7 @@ If you need to handle value string extracted from DOM field in any non built-in 
     ```
 
 Finally, there is a possibility to override the default parser without the `ValueParser` annotation - use the type name for parser registration, e.g.
-```
+```JavaScript
 <script>
 	ea.addValueParser('numeric', function (value) {
 		return ... // handle global numeric parsing on your own
