@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using OpenQA.Selenium;
 using OpenQA.Selenium.PhantomJS;
 using OpenQA.Selenium.Remote;
@@ -58,6 +59,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         {
             var go = Browser.FindElementByXPath("//input[@id='changeTrigger']");
             go.Click();
+            WaitForAjax();
         }
 
         public string GetBloodTypeError()
@@ -77,6 +79,17 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                 return server.Text;
 
             return null;
+        }
+
+        private void WaitForAjax() // wait for all ajax requests initiated by jQuery to complete
+        {
+            while (true)
+            {
+                var ajaxIsComplete = (bool) (Browser as IJavaScriptExecutor).ExecuteScript("return jQuery.active == 0"); // $.active returns the number of active Ajax requests                    
+                if (ajaxIsComplete)
+                    break;
+                Thread.Sleep(100);
+            }
         }
 
         protected virtual void Dispose(bool disposing)
