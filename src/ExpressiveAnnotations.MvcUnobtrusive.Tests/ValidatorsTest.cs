@@ -2,36 +2,19 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
-using System.Web;
-using System.Web.Mvc;
-using System.Web.Routing;
 using ExpressiveAnnotations.Attributes;
 using ExpressiveAnnotations.MvcUnobtrusive.Validators;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
 {
     [TestClass]
-    public class ValidatorsTest
+    public class ValidatorsTest : BaseTest
     {
-        [TestInitialize]
-        public void Setup()
-        {
-            HttpContext.Current = new HttpContext(
-                new HttpRequest(string.Empty, "http://tempuri.org", string.Empty),
-                new HttpResponse(new StringWriter())
-                );
-
-            MapCache.Instance.Clear();
-        }
-
         [TestMethod]
         public void verify_client_validation_rules()
         {
@@ -258,22 +241,6 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             action();
             stopwatch.Stop();
             return stopwatch.ElapsedTicks;
-        }
-
-        private ModelMetadata GetModelMetadata<TModel, TProp>(TModel model, Expression<Func<TModel, TProp>> expression)
-        {
-            var property = ((MemberExpression) expression.Body).Member.Name;
-            return new ModelMetadata(ModelMetadataProviders.Current, typeof (TModel), () => model, typeof (TProp), property);
-        }
-
-        private ControllerContext GetControllerContext()
-        {
-            var request = new Mock<HttpRequestBase>();
-            request.Setup(r => r.HttpMethod).Returns("GET");
-            var mockHttpContext = new Mock<HttpContextBase>();
-            mockHttpContext.Setup(c => c.Request).Returns(request.Object);
-            var controllerContext = new ControllerContext(mockHttpContext.Object, new RouteData(), new Mock<ControllerBase>().Object);
-            return controllerContext;
         }
 
         public enum State

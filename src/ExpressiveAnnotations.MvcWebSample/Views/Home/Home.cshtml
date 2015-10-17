@@ -59,12 +59,21 @@
             // ----- define your parsers -----
 
             ea.addValueParser('NonStandardDateParser', function(value) { // override default datetime parsing mechanism to deal with yyyy-mm-dd format
+                if (value === '')
+                    return;                    
+
+                var millisec;
                 if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) { // in case the value does not have non-standard format (here, when language set to english)...
-                    return Date.parse(value); // ...try to go with standard way (default date parser used)
+                    millisec = Date.parse(value); // ...try to go with standard way (default date parser used)                    
+                } else {
+                    var arr = value.split('-');
+                    var date = new Date(arr[0], arr[1] - 1, arr[2]); // months are 0-based
+                    millisec = date.getTime();
                 }
-                var arr = value.split('-');
-                var date = new Date(arr[0], arr[1] - 1, arr[2]); // months are 0-based
-                return date.getTime(); // return milliseconds
+
+                if (typeof millisec === 'number' && !isNaN(millisec))
+                    return millisec; // return milliseconds...
+                throw 'Some nonsense has been entered.';
             });
             ea.addValueParser('ArrayParser', function(value, field) { // provide your custom parsing mechanism of the field value at client side
                                                                       // parameters: value - raw data string extracted by default from DOM element
