@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvcUn
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{4FE56EA0-4550-4A07-A758-331B9CF470A1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvcWebSample.UITests", "ExpressiveAnnotations.MvcWebSample.UITests\ExpressiveAnnotations.MvcWebSample.UITests.csproj", "{0FC1317D-C657-4CD1-99A6-71A3C4372306}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,14 @@ Global
 		{46C5858F-76A5-4032-A4DA-5299CE51209B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{46C5858F-76A5-4032-A4DA-5299CE51209B}.Release-Net40|Any CPU.ActiveCfg = Release|Any CPU
 		{46C5858F-76A5-4032-A4DA-5299CE51209B}.Release-Net45|Any CPU.ActiveCfg = Release|Any CPU
+		{0FC1317D-C657-4CD1-99A6-71A3C4372306}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FC1317D-C657-4CD1-99A6-71A3C4372306}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FC1317D-C657-4CD1-99A6-71A3C4372306}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FC1317D-C657-4CD1-99A6-71A3C4372306}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FC1317D-C657-4CD1-99A6-71A3C4372306}.Release-Net40|Any CPU.ActiveCfg = Release|Any CPU
+		{0FC1317D-C657-4CD1-99A6-71A3C4372306}.Release-Net40|Any CPU.Build.0 = Release|Any CPU
+		{0FC1317D-C657-4CD1-99A6-71A3C4372306}.Release-Net45|Any CPU.ActiveCfg = Release|Any CPU
+		{0FC1317D-C657-4CD1-99A6-71A3C4372306}.Release-Net45|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -84,5 +94,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{78E4B95D-B0C3-486E-8847-CA444EF5BB95} = {4FE56EA0-4550-4A07-A758-331B9CF470A1}
 		{94B9466A-3C9E-47A3-A300-6E45AAE763D7} = {4FE56EA0-4550-4A07-A758-331B9CF470A1}
+		{0FC1317D-C657-4CD1-99A6-71A3C4372306} = {4FE56EA0-4550-4A07-A758-331B9CF470A1}
 	EndGlobalSection
 EndGlobal
