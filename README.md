@@ -26,8 +26,8 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
    - [How to cope with dates given in non-standard formats?](#how-to-cope-with-dates-given-in-non-standard-formats) <sup>(re client-side)</sup>
    - [What if `ea` variable is already used by another library?](#what-if-ea-variable-is-already-used-by-another-library) <sup>(re client-side)</sup>
    - [How to control frequency of dependent fields validation?](#how-to-control-frequency-of-dependent-fields-validation) <sup>(re client-side)</sup>
-   - [How to boost web console verbosity for debug purposes?](#how-to-boost-web-console-verbosity-for-debug-purposes) <sup>(re client-side)</sup>
-   - [How to dynamically extract field value in error message?](#how-to-dynamically-extract-field-value-in-error-message) <sup>(re client and server-side)</sup>
+   - [Can I increase web console verbosity for debug purposes?](#can-i-increase-web-console-verbosity-for-debug-purposes) <sup>(re client-side)</sup>
+   - [How to fetch field value or display name in error message?](#how-to-fetch-field-value-or-display-name-in-error-message) <sup>(re client and server-side)</sup>
    - [Is there a possibility to perform asynchronous validation?](#is-there-a-possibility-to-perform-asynchronous-validation) <sup>(re client-side, experimental)</sup>
    - [What if my question is not covered by FAQ section?](#what-if-my-question-is-not-covered-by-faq-section)
  - [Installation](#installation)
@@ -412,14 +412,14 @@ If you need to handle value string extracted from DOM field in any non built-in 
         });
     ```
 
-Finally, there is a possibility to override the default parser without the `ValueParser` annotation - use the type name for parser registration, e.g.
+Finally, there is a possibility to override built-in conversion globally. In this case, use the type name to register your value parser - all fields of such a type will be intercepted by it, e.g.
 ```JavaScript
 <script>
-	ea.addValueParser('numeric', function (value) {
-		return ... // handle global numeric parsing on your own
+	ea.addValueParser('typename', function (value) {
+		return ... // handle specified type (numeric, datetime, etc.) parsing on your own
 	});
 ```
-If you redefine default parsing mechanism, you can still have the `ValueParser` annotation on any fields you consider exceptional - annotation gives highest parsing priority.
+If you redefine default mechanism, you can still have the `ValueParser` annotation on any fields you consider exceptional - annotation gives the highest parsing priority.
 
 #####<a id="how-to-cope-with-dates-given-in-non-standard-formats">How to cope with dates given in non-standard formats?</a>
 
@@ -473,7 +473,7 @@ Alternatively, to enforce re-binding of already attached validation handlers, us
     });
 ```
 
-#####<a id="how-to-boost-web-console-verbosity-for-debug-purposes">How to boost web console verbosity for debug purposes?</a>
+#####<a id="can-i-increase-web-console-verbosity-for-debug-purposes">Can I increase web console verbosity for debug purposes?</a>
 
 If you need more insightful overview of what client-side script is doing (including warnings if detected) enable logging:
 ```JavaScript
@@ -482,9 +482,12 @@ If you need more insightful overview of what client-side script is doing (includ
 							  // (should be disabled for release code)
 ```
 
-#####<a id="#how-to-dynamically-extract-field-value-in-error-message">How to dynamically extract field value in error message?</a>
+#####<a id="#how-to-fetch-field-value-or-display-name-in-error-message">How to fetch field value or display name in error message?</a>
 
-Use braces (curly brackets), e.g. `{field}` or `{field.field}` for nested fields. Notice that `{{` is treated as the escaped bracket character.
+* to get a value, wrap the field name in braces, e.g. `{field}`, or for nested fields - `{field.field}`,
+* to get display name, given in `DisplayAttribute`, use additional `n` (or `N`) suffix, e.g. `{field:n}`. 
+
+Notice that `{{` is treated as the escaped bracket character.
 
 #####<a id="#is-there-a-possibility-to-perform-asynchronous-validation">Is there a possibility to perform asynchronous validation?</a>
 
