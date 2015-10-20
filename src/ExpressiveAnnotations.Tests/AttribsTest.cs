@@ -106,6 +106,55 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [TestMethod]
+        public void verify_parsing_error_catched_by_attribute()
+        {
+            var model = new BrokenModel();
+            var context = new ValidationContext(model);
+
+            try
+            {
+                model.Value = 0;
+                Validator.TryValidateObject(model, context, null, true);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is ValidationException);
+                Assert.AreEqual(
+                    "AssertThatAttribute: validation applied to Value field failed.",
+                    e.Message);
+                Assert.IsNotNull(e.InnerException);
+                Assert.IsTrue(e.InnerException is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 9:
+... # ...
+    ^--- Invalid token.",
+                    e.InnerException.Message);
+            }
+
+            try
+            {
+                model.Value = null;
+                Validator.TryValidateObject(model, context, null, true);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is ValidationException);
+                Assert.AreEqual(
+                    "RequiredIfAttribute: validation applied to Value field failed.",
+                    e.Message);
+                Assert.IsNotNull(e.InnerException);
+                Assert.IsTrue(e.InnerException is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 9:
+... # ...
+    ^--- Invalid token.",
+                    e.InnerException.Message);
+            }
+        }
+
+        [TestMethod]
         public void verify_default_error_message_after_validation()
         {
             AssertErrorMessage(null,
@@ -262,6 +311,13 @@ namespace ExpressiveAnnotations.Tests
 
             [Display(ResourceType = typeof (Resources), Name = "Lang")]
             public string Lang { get; set; }
+        }
+
+        private class BrokenModel
+        {
+            [RequiredIf("Value > #")]
+            [AssertThat("Value > #")]
+            public int? Value { get; set; }
         }
     }
 

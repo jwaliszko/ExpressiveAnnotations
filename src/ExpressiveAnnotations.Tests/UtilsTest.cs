@@ -111,6 +111,13 @@ namespace ExpressiveAnnotations.Tests
             }
         }
 
+        [TestMethod]
+        public void name_of_field_extracted_through_its_display_name_annotation() // DisplayAttribute used as a workaround for field name extraction in older versions of MVC where MemberName was not provided in ValidationContext
+        {
+            Assert.AreEqual("Value1", typeof (Model).GetMemberNameFromDisplayAttribute("Value_1"));
+            Assert.AreEqual("Value2", typeof (Model).GetMemberNameFromDisplayAttribute("_{Value2}_"));
+        }
+
         private class Model
         {
             [Display(Name = "Value_1")]

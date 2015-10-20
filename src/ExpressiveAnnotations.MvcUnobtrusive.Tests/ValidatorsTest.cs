@@ -16,7 +16,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
     public class ValidatorsTest : BaseTest
     {
         [TestMethod]
-        public void verify_client_validation_rules()
+        public void verify_client_validation_rules_collecting()
         {
             var model = new Model();
             var assertAttributes = Enumerable.Range(0, 28).Select(x => new AssertThatAttribute(string.Format("Value > {0}", x))).ToArray();
@@ -39,10 +39,15 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             }
             catch (Exception e)
             {
-                Assert.IsTrue(e is InvalidOperationException);
+                Assert.IsTrue(e is ValidationException);
+                Assert.AreEqual(
+                    "AssertThatValidator: collecting of client validation rules for Value field failed.",
+                    e.Message);
+                Assert.IsNotNull(e.InnerException);
+                Assert.IsTrue(e.InnerException is InvalidOperationException);
                 Assert.AreEqual(
                     "No more than 27 unique attributes of the same type can be applied for a single field or property.",
-                    e.Message);
+                    e.InnerException.Message);
             }
 
             try
@@ -54,16 +59,72 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
                     var rule = validator.GetClientValidationRules().Single();
                     var suffix = i == 0 ? string.Empty : char.ConvertFromUtf32(96 + i);
                     Assert.AreEqual(string.Format("requiredif{0}", suffix), rule.ValidationType);
-                } 
+                }
                 Assert.Fail();
             }
             catch (Exception e)
             {
-                Assert.IsTrue(e is InvalidOperationException);
+                Assert.IsTrue(e is ValidationException);
+                Assert.AreEqual(
+                    "RequiredIfValidator: collecting of client validation rules for Value field failed.",
+                    e.Message);
+                Assert.IsNotNull(e.InnerException);
+                Assert.IsTrue(e.InnerException is InvalidOperationException);
                 Assert.AreEqual(
                     "No more than 27 unique attributes of the same type can be applied for a single field or property.",
-                    e.Message);
+                    e.InnerException.Message);
             }
+        }
+
+        [TestMethod]
+        public void verify_parsing_error_catched_by_validator()
+        {
+            var model = new Model();
+
+            var metadata = GetModelMetadata(model, m => m.Value);
+            var controllerContext = GetControllerContext();
+
+            try
+            {
+                new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("Value > #"));
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is ValidationException);
+                Assert.AreEqual(
+                    "AssertThatValidator: validation applied to Value field failed.",
+                    e.Message);
+                Assert.IsNotNull(e.InnerException);
+                Assert.IsNotNull(e.InnerException);
+                Assert.IsTrue(e.InnerException is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 9:
+... # ...
+    ^--- Invalid token.",
+                    e.InnerException.Message);
+            }
+
+            try
+            {
+                new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute("Value > #"));
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is ValidationException);
+                Assert.AreEqual(
+                    "RequiredIfValidator: validation applied to Value field failed.",
+                    e.Message);
+                Assert.IsNotNull(e.InnerException);
+                Assert.IsNotNull(e.InnerException);
+                Assert.IsTrue(e.InnerException is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 9:
+... # ...
+    ^--- Invalid token.",
+                    e.InnerException.Message);
+            }            
         }
 
         [TestMethod]

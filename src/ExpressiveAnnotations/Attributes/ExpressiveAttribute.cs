@@ -257,8 +257,8 @@ namespace ExpressiveAnnotations.Attributes
             catch (Exception e)
             {
                 throw new ValidationException(
-                    string.Format("{0}: validation applied to {1} field failed.",
-                        GetType().Name, validationContext.MemberName), e);
+                    string.Format("{0}: validation applied to {1} field failed.", GetType().Name, validationContext.MemberName),
+                    e);
             }
         }
 

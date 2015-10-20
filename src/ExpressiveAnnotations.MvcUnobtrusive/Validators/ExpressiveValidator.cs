@@ -34,6 +34,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 var annotatedField = string.Format("{0}.{1}", metadata.ContainerType.FullName, metadata.PropertyName).ToLowerInvariant();
                 var attribId = string.Format("{0}.{1}", attribute.TypeId, annotatedField).ToLowerInvariant();
                 FieldAttributeType = string.Format("{0}.{1}", typeof(T).FullName, annotatedField).ToLowerInvariant();
+                FieldName = metadata.PropertyName;
 
                 var item = MapCache.Instance.GetOrAdd(attribId, _ =>
                 {
@@ -117,37 +118,49 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
 
         private string FieldAttributeType { get; set; }
 
+        private string FieldName { get; set; }
+
         /// <summary>
         ///     Generates client validation rule with the basic set of parameters.
         /// </summary>
-        ///     <param name="type">The validation type.</param>
+        /// <param name="type">The validation type.</param>
         /// <returns>
         ///     Client validation rule with the basic set of parameters.
         /// </returns>
+        /// <exception cref="System.ComponentModel.DataAnnotations.ValidationException"></exception>
         protected ModelClientValidationRule GetBasicRule(string type)
         {
-            var rule = new ModelClientValidationRule
+            try
             {
-                ErrorMessage = FormattedErrorMessage,
-                ValidationType = ProvideUniqueValidationType(type)
-            };
+                var rule = new ModelClientValidationRule
+                {
+                    ErrorMessage = FormattedErrorMessage,
+                    ValidationType = ProvideUniqueValidationType(type)
+                };
 
-            rule.ValidationParameters.Add("expression", Expression.ToJson());            
+                rule.ValidationParameters.Add("expression", Expression.ToJson());
 
-            Debug.Assert(FieldsMap != null);
-            if (FieldsMap != null && FieldsMap.Any())
-                rule.ValidationParameters.Add("fieldsmap", FieldsMap.ToJson());
-            Debug.Assert(ConstsMap != null);
-            if (ConstsMap != null && ConstsMap.Any())
-                rule.ValidationParameters.Add("constsmap", ConstsMap.ToJson());
-            Debug.Assert(ParsersMap != null);
-            if (ParsersMap != null && ParsersMap.Any())
-                rule.ValidationParameters.Add("parsersmap", ParsersMap.ToJson());
-            Debug.Assert(ErrFieldsMap != null);
-            if (ErrFieldsMap != null && ErrFieldsMap.Any())
-                rule.ValidationParameters.Add("errfieldsmap", ErrFieldsMap.ToJson());
+                Debug.Assert(FieldsMap != null);
+                if (FieldsMap != null && FieldsMap.Any())
+                    rule.ValidationParameters.Add("fieldsmap", FieldsMap.ToJson());
+                Debug.Assert(ConstsMap != null);
+                if (ConstsMap != null && ConstsMap.Any())
+                    rule.ValidationParameters.Add("constsmap", ConstsMap.ToJson());
+                Debug.Assert(ParsersMap != null);
+                if (ParsersMap != null && ParsersMap.Any())
+                    rule.ValidationParameters.Add("parsersmap", ParsersMap.ToJson());
+                Debug.Assert(ErrFieldsMap != null);
+                if (ErrFieldsMap != null && ErrFieldsMap.Any())
+                    rule.ValidationParameters.Add("errfieldsmap", ErrFieldsMap.ToJson());
 
-            return rule;
+                return rule;
+            }
+            catch (Exception e)
+            {
+                throw new ValidationException(
+                    string.Format("{0}: collecting of client validation rules for {1} field failed.", GetType().Name, FieldName),
+                    e);
+            }
         }
 
         /// <summary>
