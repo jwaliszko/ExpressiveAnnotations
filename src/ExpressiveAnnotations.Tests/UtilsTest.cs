@@ -109,6 +109,17 @@ namespace ExpressiveAnnotations.Tests
                 Assert.IsInstanceOfType(e, typeof(ArgumentException));
                 Assert.AreEqual("Display name extraction interrupted. Field Value123 not found.\r\nParameter name: Internal.Value123", e.Message);
             }
+
+            try
+            {
+                ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "NoName");
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsInstanceOfType(e, typeof(ArgumentException));
+                Assert.AreEqual("No DisplayName attribute provided for NoName field.\r\nParameter name: NoName", e.Message);
+            }
         }
 
         [TestMethod]
@@ -122,8 +133,11 @@ namespace ExpressiveAnnotations.Tests
         {
             [Display(Name = "Value_1")]
             public int? Value1 { get; set; }
+
             [DisplayAttribute(ResourceType = typeof(Resources), Name = "Value2")]
             public int? Value2 { get; set; }
+
+            public string NoName { get; set; }
 
             public Model Internal { get; set; }
         }

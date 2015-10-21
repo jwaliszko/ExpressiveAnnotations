@@ -208,13 +208,15 @@ namespace ExpressiveAnnotations.Tests
                 try
                 {
                     var attrib = new AssertThatAttribute("true") {ErrorMessage = msg};
-                    attrib.FormatErrorMessage("ads", "true", typeof(MsgModel));
+                    attrib.FormatErrorMessage("ads", "true", null);
                     Assert.Fail();
                 }
                 catch (Exception e)
                 {
                     Assert.IsInstanceOfType(e, typeof(FormatException));
-                    Assert.AreEqual("Input string was not in a correct format.", e.Message);
+                    Assert.AreEqual(string.Format("Problem with error message processing. The message is following: {0}", msg), e.Message);
+                    Assert.IsInstanceOfType(e.InnerException, typeof(FormatException));
+                    Assert.AreEqual("Input string was not in a correct format.", e.InnerException.Message);
                 }
             });
         }
@@ -305,12 +307,12 @@ namespace ExpressiveAnnotations.Tests
             public int Value1 { get; set; }
 
             [DisplayAttribute(ResourceType = typeof (Resources), Name = "Value2")]
-            public int Value2 { get; set; }
-
-            public MsgModel Internal { get; set; }
+            public int Value2 { get; set; }            
 
             [Display(ResourceType = typeof (Resources), Name = "Lang")]
             public string Lang { get; set; }
+
+            public MsgModel Internal { get; set; }
         }
 
         private class BrokenModel

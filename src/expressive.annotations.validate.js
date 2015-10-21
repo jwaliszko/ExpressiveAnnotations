@@ -555,7 +555,7 @@ var
 
     buildAdapter = function(adapter, options) {
         var rules = {
-            prefix: modelHelper.getPrefix(options.element.name),            
+            prefix: modelHelper.getPrefix(options.element.name),
             form: options.form
         };
         for (var key in options.params) {
@@ -617,7 +617,7 @@ var
 
     $.each(annotations.split(''), function() { // it would be ideal to have exactly as many handlers as there are unique annotations, but the number of annotations isn't known untill DOM is ready
         var adapter = typeHelper.string.format('assertthat{0}', $.trim(this));
-        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'parsersMap', 'errFieldsMap'], function (options) {
+        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'parsersMap', 'errFieldsMap'], function(options) {
             buildAdapter(adapter, options);
         });
     });

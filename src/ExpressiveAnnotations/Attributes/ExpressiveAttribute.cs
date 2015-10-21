@@ -168,18 +168,28 @@ namespace ExpressiveAnnotations.Attributes
         /// <returns>
         ///     The localized message to present to the user.
         /// </returns>
+        /// <exception cref="System.FormatException"></exception>
         /// <remarks>
         ///     This method interprets custom format specifiers, provided to error message string, for which values or display names of model fields are extracted. Specifiers should be given
         ///     in braces (curly brackets), i.e. {fieldPath[:indicator]}, e.g. {field}, {field.field:n}. Braces can be escaped by double-braces, i.e. to output a { use {{ and to output a } use }}.
         /// </remarks>
         public string FormatErrorMessage(string displayName, string expression, object objectInstance)
         {
-            IList<FormatItem> items;
-            var message = PreformatMessage(displayName, expression, out items);
+            try
+            {
+                IList<FormatItem> items;
+                var message = PreformatMessage(displayName, expression, out items);
 
-            message = items.Aggregate(message, (cargo, current) => current.Indicator != null && !current.Constant ? cargo.Replace(current.Uuid.ToString(), Helper.ExtractDisplayName(objectInstance.GetType(), current.FieldPath)) : cargo);
-            message = items.Aggregate(message, (cargo, current) => current.Indicator == null && !current.Constant ? cargo.Replace(current.Uuid.ToString(), (Helper.ExtractValue(objectInstance, current.FieldPath) ?? string.Empty).ToString()) : cargo);
-            return message;
+                message = items.Aggregate(message, (cargo, current) => current.Indicator != null && !current.Constant ? cargo.Replace(current.Uuid.ToString(), Helper.ExtractDisplayName(objectInstance.GetType(), current.FieldPath)) : cargo);
+                message = items.Aggregate(message, (cargo, current) => current.Indicator == null && !current.Constant ? cargo.Replace(current.Uuid.ToString(), (Helper.ExtractValue(objectInstance, current.FieldPath) ?? string.Empty).ToString()) : cargo);
+                return message;
+            }
+            catch (Exception e)
+            {
+                throw new FormatException(
+                    string.Format("Problem with error message processing. The message is following: {0}", ErrorMessageString), 
+                    e);
+            }            
         }
 
         /// <summary>
@@ -192,20 +202,30 @@ namespace ExpressiveAnnotations.Attributes
         /// <returns>
         ///     The localized message to sent to the client-side component.
         /// </returns>
+        /// <exception cref="System.FormatException"></exception>
         /// <remarks>
         ///     This method interprets custom format specifiers, provided to error message string, for which values or display names of model fields are extracted. Specifiers should be given
         ///     in braces (curly brackets), i.e. {fieldPath[:indicator]}, e.g. {field}, {field.field:n}. Braces can be escaped by double-braces, i.e. to output a { use {{ and to output a } use }}.
         /// </remarks>
         public string FormatErrorMessage(string displayName, string expression, Type objectType, out IDictionary<string, Guid> fieldsMap)
         {
-            IList<FormatItem> items;
-            var message = PreformatMessage(displayName, expression, out items);
+            try
+            {
+                IList<FormatItem> items;
+                var message = PreformatMessage(displayName, expression, out items);
 
-            var map = items.Where(x => x.Indicator == null && !x.Constant).Select(x => x.FieldPath).Distinct().ToDictionary(x => x, x => Guid.NewGuid()); // sanitize
-            message = items.Aggregate(message, (cargo, current) => current.Indicator != null && !current.Constant ? cargo.Replace(current.Uuid.ToString(), Helper.ExtractDisplayName(objectType, current.FieldPath)) : cargo);
-            message = items.Aggregate(message, (cargo, current) => current.Indicator == null && !current.Constant ? cargo.Replace(current.Uuid.ToString(), map[current.FieldPath].ToString()) : cargo);
-            fieldsMap = map;
-            return message;
+                var map = items.Where(x => x.Indicator == null && !x.Constant).Select(x => x.FieldPath).Distinct().ToDictionary(x => x, x => Guid.NewGuid()); // sanitize
+                message = items.Aggregate(message, (cargo, current) => current.Indicator != null && !current.Constant ? cargo.Replace(current.Uuid.ToString(), Helper.ExtractDisplayName(objectType, current.FieldPath)) : cargo);
+                message = items.Aggregate(message, (cargo, current) => current.Indicator == null && !current.Constant ? cargo.Replace(current.Uuid.ToString(), map[current.FieldPath].ToString()) : cargo);
+                fieldsMap = map;
+                return message;
+            }
+            catch (Exception e)
+            {
+                throw new FormatException(
+                    string.Format("Problem with error message processing. The message is following: {0}", ErrorMessageString), 
+                    e);
+            }            
         }
         
         /// <summary>
