@@ -4,6 +4,7 @@ using System.Threading;
 using OpenQA.Selenium;
 using OpenQA.Selenium.PhantomJS;
 using OpenQA.Selenium.Remote;
+using OpenQA.Selenium.Support.UI;
 
 namespace ExpressiveAnnotations.MvcWebSample.UITests
 {
@@ -22,51 +23,85 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             Browser.Navigate().GoToUrl("http://localhost:51622/");
         }
 
-        public void SetClientMode()
+        public void SetMode(string mode) // client, server
         {
-            var selector = "//a[@href='/System/SetValidation?type=client&returnUrl=%2F']";
-            var lnk = Browser.FindElementByXPath(selector);
-            lnk.Click();
+            var elem = Browser.FindElementByXPath(string.Format("//a[@href='/System/SetValidation?type={0}&returnUrl=%2F']", mode));
+            elem.Click();
         }
 
-        public void SetServerMode()
+        public void SetLang(string code) // en, pl
         {
-            var selector = "//a[@href='/System/SetValidation?type=server&returnUrl=%2F']";
-            var lnk = Browser.FindElementByXPath(selector);
-            lnk.Click();
-        }
-
-        public void SetPolishLang()
-        {
-            var selector = "//a[@href='/System/SetCulture?lang=pl&returnUrl=%2F']";
-            var lnk = Browser.FindElementByXPath(selector);
-            lnk.Click();
+            var elem = Browser.FindElementByXPath(string.Format("//a[@href='/System/SetCulture?lang={0}&returnUrl=%2F']", code));
+            elem.Click();
         }
 
         public void Submit()
         {
-            var sub = Browser.FindElementByXPath("//input[@type='submit']");
-            sub.Click();
+            var elem = Browser.FindElementByXPath("//input[@type='submit']");
+            elem.Click();
         }
 
-        public void ClickGoAbroad()
+        public void ClickCheckbox(string id)
         {
-            var go = Browser.FindElementByXPath("//input[@id='GoAbroad']");
-            go.Click();
+            var elem = Browser.FindElementByXPath(string.Format("//input[@id='{0}']", id));
+            elem.Click();
         }
 
-        public void ClickChangeTrigger()
+        public void ClickCheckbox(string name, string value)
         {
-            var go = Browser.FindElementByXPath("//input[@id='changeTrigger']");
-            go.Click();
+            var elem = Browser.FindElementByXPath(string.Format("//input[@name='{0}'][@value='{1}']", name, value));
+            elem.Click();
+        }
+
+        public void ClickRadio(string id, string value)
+        {
+            var elem = Browser.FindElementByXPath(string.Format("//input[@id='{0}'][@value='{1}']", id, value));
+            elem.Click();
+        }
+
+        public void ClickTrigger(string trigger) // change, paste, keyup
+        {
+            var elem = Browser.FindElementByXPath(string.Format("//input[@id='{0}Trigger']", trigger));
+            elem.Click();
             WaitForAjax();
         }
 
-        public string GetBloodTypeError()
+        public void Select(string id, string text)
         {
-            var blood = Browser.FindElementByXPath("//span[@data-valmsg-for='BloodType']");
-            var generated = blood.FindElements(By.TagName("span"));
-            return generated.Any() ? generated.Single().Text : blood.Text;
+            var elem = Browser.FindElementByXPath(string.Format("//select[@id='{0}']", id));
+            var select = new SelectElement(elem);
+            select.SelectByText(text);
+        }
+
+        public void WriteTextarea(string id, string text)
+        {
+            var elem = Browser.FindElementByXPath(string.Format("//textarea[@id='{0}']", id));
+            elem.SendKeys(text);
+        }
+
+        public void ClearTextarea(string id)
+        {
+            var elem = Browser.FindElementByXPath(string.Format("//textarea[@id='{0}']", id));
+            elem.Clear();
+        }
+
+        public void WriteInput(string id, string text)
+        {
+            var elem = Browser.FindElementByXPath(string.Format("//input[@id='{0}']", id));
+            elem.SendKeys(text);
+        }
+
+        public void ClearInput(string id)
+        {
+            var elem = Browser.FindElementByXPath(string.Format("//input[@id='{0}']", id));
+            elem.Clear();
+        }
+
+        public string GetErrorMessage(string id)
+        {
+            var elem = Browser.FindElementByXPath(string.Format("//span[@data-valmsg-for='{0}']", id));
+            var generated = elem.FindElements(By.TagName("span"));
+            return generated.Any() ? generated.Single().Text : elem.Text;
         }
 
         public string GetSelectedMode()
@@ -79,6 +114,12 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                 return server.Text;
 
             return null;
+        }
+
+        public int GetPostbacksCount()
+        {
+            var elem = Browser.FindElementByXPath("//meta[@name='postbacks']");
+            return int.Parse(elem.GetAttribute("content"));
         }
 
         private void WaitForAjax() // wait for all ajax requests initiated by jQuery to complete

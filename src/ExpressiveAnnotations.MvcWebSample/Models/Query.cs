@@ -138,7 +138,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [ValueParser("NonStandardDateParser")]
         public DateTime? ReturnDate { get; set; }
 
-        [RequiredIf("GoAbroad == true && ReturnDate > LatestSuggestedReturnDate",
+        [RequiredIf("GoAbroad == true && ReturnDate > LatestSuggestedReturnDate", AllowEmptyStrings = true,
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "ReasonForLongTravelRequired")]
         [Display(ResourceType = typeof (Resources), Name = "ReasonForLongTravel")]
         public string ReasonForLongTravel { get; set; }

@@ -8,6 +8,9 @@ using System.Collections.Generic;
 
 namespace ExpressiveAnnotations.MvcUnobtrusive
 {
+    /// <summary>
+    ///     Persists decomposed expressions parts for entire application instance.
+    /// </summary>
     internal class MapCache
     {
         private static readonly MapCache _instance = new MapCache();

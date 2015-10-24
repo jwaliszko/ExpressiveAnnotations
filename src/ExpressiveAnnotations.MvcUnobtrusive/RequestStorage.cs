@@ -9,7 +9,7 @@ using System.Web;
 namespace ExpressiveAnnotations.MvcUnobtrusive
 {
     /// <summary>
-    ///     Stores arbitrary data for the current HTTP request.
+    ///     Persists arbitrary data for the current HTTP request.
     /// </summary>
     internal class RequestStorage
     {

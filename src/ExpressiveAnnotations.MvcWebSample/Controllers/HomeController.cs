@@ -18,6 +18,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
                 LatestSuggestedReturnDate = DateTime.Today.AddMonths(1)
             };
 
+            Session["Postbacks"] = 0;
             ViewBag.Success = TempData["Success"];
             return View("Home", TempData["Query"] as Query ?? model);
         }
@@ -25,6 +26,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
         [HttpPost]
         public ActionResult Index(Query model)
         {
+            Session["Postbacks"] = (int)Session["Postbacks"] + 1;
             if (ModelState.IsValid)
             {
                 TempData["Success"] = "Query successfully submitted";

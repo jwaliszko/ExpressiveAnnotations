@@ -36,8 +36,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 FieldAttributeType = string.Format("{0}.{1}", typeof(T).FullName, annotatedField).ToLowerInvariant();
                 FieldName = metadata.PropertyName;
 
-                var item = MapCache.Instance.GetOrAdd(attribId, _ =>
-                {
+                var item = MapCache.Instance.GetOrAdd(attribId, _ => // map cache is based on concurrent static dictionary, set-up once for entire application instance
+                {                                                    // (by design, no reason to recompile once compiled expressions)
                     var parser = new Parser();
                     parser.RegisterMethods();
                     parser.Parse(metadata.ContainerType, attribute.Expression);

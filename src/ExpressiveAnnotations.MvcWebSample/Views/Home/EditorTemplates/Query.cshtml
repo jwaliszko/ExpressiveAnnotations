@@ -88,7 +88,7 @@
     <li>
         @Html.DisplayFor(x => x.LatestSuggestedReturnDate) @*hidden backing field storing date in RFC 2822 or ISO 8601 format (ISO8601Date template pointed by UIHint attrib)*@
         <pre class="code">
-[RequiredIf("GoAbroad == true && ReturnDate > LatestSuggestedReturnDate")]
+[RequiredIf("GoAbroad == true && ReturnDate > LatestSuggestedReturnDate", AllowEmptyStrings = true)]
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>
