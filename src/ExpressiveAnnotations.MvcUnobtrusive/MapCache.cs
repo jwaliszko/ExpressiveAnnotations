@@ -11,26 +11,16 @@ namespace ExpressiveAnnotations.MvcUnobtrusive
     /// <summary>
     ///     Persists decomposed expressions parts for entire application instance.
     /// </summary>
-    internal class MapCache
+    internal static class MapCache
     {
-        private static readonly MapCache _instance = new MapCache();
         private static readonly ConcurrentDictionary<string, CacheItem> _cache = new ConcurrentDictionary<string, CacheItem>();
 
-        private MapCache()
-        {
-        }
-
-        public static MapCache Instance
-        {
-            get { return _instance; }
-        }
-
-        public CacheItem GetOrAdd(string key, Func<string, CacheItem> func)
+        public static CacheItem GetOrAdd(string key, Func<string, CacheItem> func)
         {
             return _cache.GetOrAdd(key, func);
         }
 
-        public void Clear()
+        public static void Clear()
         {
             _cache.Clear();
         }

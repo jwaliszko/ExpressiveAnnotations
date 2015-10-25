@@ -4,6 +4,11 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
 {
     public class ServerModeTest: BaseTest
     {
+        public ServerModeTest(DriverFixture fixture)
+            : base(fixture)
+        {
+        }
+
         [Fact]
         public void server_validation_switch_should_be_highlited_in_server_mode()
         {
@@ -92,6 +97,6 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             Assert.Equal(
                 "The value '////' is not valid for Return date.", // 3rd party message
                 Home.GetErrorMessage("ReturnDate"));
-        }
+        }        
     }
 }

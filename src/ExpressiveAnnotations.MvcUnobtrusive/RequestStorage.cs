@@ -11,7 +11,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive
     /// <summary>
     ///     Persists arbitrary data for the current HTTP request.
     /// </summary>
-    internal class RequestStorage
+    internal static class RequestStorage
     {
         private static IDictionary Items
         {

@@ -69,9 +69,11 @@
   <ItemGroup>
     <Compile Include="BaseTest.cs" />
     <Compile Include="ClientModeTest.cs" />
+    <Compile Include="DriverFixture.cs" />
     <Compile Include="HomePage.cs" />
     <Compile Include="ServerModeTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServerStarter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

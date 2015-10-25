@@ -1,26 +1,30 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using OpenQA.Selenium;
-using OpenQA.Selenium.PhantomJS;
 using OpenQA.Selenium.Remote;
 using OpenQA.Selenium.Support.UI;
 
 namespace ExpressiveAnnotations.MvcWebSample.UITests
 {
-    public class HomePage : IDisposable
+    public class HomePage
     {
-        public HomePage()
+        public HomePage(RemoteWebDriver driver)
         {
-            Browser = new PhantomJSDriver(); // headless browser testing
-            Browser.Manage().Window.Maximize();
+            Browser = driver;
         }
 
         public RemoteWebDriver Browser { get; private set; }
 
-        public void NavigateToSelf()
+        public void Load(string url)
         {
-            Browser.Navigate().GoToUrl("http://localhost:51622/");
+            Browser.Navigate().GoToUrl(url);
+            Browser.Manage().Window.Maximize();
+        }
+
+        public void Clean()
+        {
+            Browser.Manage().Cookies.DeleteAllCookies();
+            Browser.Navigate().GoToUrl("about:blank");
         }
 
         public void SetMode(string mode) // client, server
@@ -131,24 +135,6 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                     break;
                 Thread.Sleep(100);
             }
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (Browser != null)
-                {
-                    Browser.Quit();
-                    Browser = null;
-                }
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
     }
 }

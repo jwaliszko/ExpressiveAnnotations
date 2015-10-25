@@ -6,6 +6,11 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
 {
     public class ClientModeTest : BaseTest
     {
+        public ClientModeTest(DriverFixture fixture)
+            : base(fixture)
+        {
+        }
+
         [Fact]
         public void client_validation_switch_should_be_highlited_in_client_mode()
         {            

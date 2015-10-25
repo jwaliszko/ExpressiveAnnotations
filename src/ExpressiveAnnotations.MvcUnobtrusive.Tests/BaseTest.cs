@@ -19,7 +19,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
                 new HttpResponse(new StringWriter())
                 );
 
-            MapCache.Instance.Clear();
+            MapCache.Clear();
         }
 
         protected ModelMetadata GetModelMetadata<TModel, TProp>(TModel model, Expression<Func<TModel, TProp>> expression)
