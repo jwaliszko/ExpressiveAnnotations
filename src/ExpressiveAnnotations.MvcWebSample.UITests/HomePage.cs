@@ -8,121 +8,108 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
 {
     public class HomePage
     {
+        private readonly RemoteWebDriver _driver;
+
         public HomePage(RemoteWebDriver driver)
         {
-            Browser = driver;
+            _driver = driver;
         }
-
-        public RemoteWebDriver Browser { get; private set; }
 
         public void Load(string url)
         {
-            Browser.Navigate().GoToUrl(url);
-            Browser.Manage().Window.Maximize();
+            _driver.Navigate().GoToUrl(url);
+            _driver.Manage().Window.Maximize();
         }
 
         public void Clean()
         {
-            Browser.Manage().Cookies.DeleteAllCookies();
-            Browser.Navigate().GoToUrl("about:blank");
+            _driver.Manage().Cookies.DeleteAllCookies();
+            _driver.Navigate().GoToUrl("about:blank");
         }
-
         public void SetMode(string mode) // client, server
         {
-            var elem = Browser.FindElementByXPath(string.Format("//a[@href='/System/SetValidation?type={0}&returnUrl=%2F']", mode));
+            var elem = _driver.FindElementByXPath(string.Format("//a[@href='/System/SetValidation?type={0}&returnUrl=%2F']", mode));
             elem.Click();
         }
 
         public void SetLang(string code) // en, pl
         {
-            var elem = Browser.FindElementByXPath(string.Format("//a[@href='/System/SetCulture?lang={0}&returnUrl=%2F']", code));
+            var elem = _driver.FindElementByXPath(string.Format("//a[@href='/System/SetCulture?lang={0}&returnUrl=%2F']", code));
             elem.Click();
         }
 
         public void Submit()
         {
-            var elem = Browser.FindElementByXPath("//input[@type='submit']");
+            var elem = _driver.FindElementByXPath("//input[@type='submit']");
             elem.Click();
         }
 
         public void ClickCheckbox(string id)
         {
-            var elem = Browser.FindElementByXPath(string.Format("//input[@id='{0}']", id));
+            var elem = _driver.FindElementByXPath(string.Format("//input[@id='{0}']", id));
             elem.Click();
         }
 
         public void ClickCheckbox(string name, string value)
         {
-            var elem = Browser.FindElementByXPath(string.Format("//input[@name='{0}'][@value='{1}']", name, value));
+            var elem = _driver.FindElementByXPath(string.Format("//input[@name='{0}'][@value='{1}']", name, value));
             elem.Click();
         }
 
         public void ClickRadio(string id, string value)
         {
-            var elem = Browser.FindElementByXPath(string.Format("//input[@id='{0}'][@value='{1}']", id, value));
+            var elem = _driver.FindElementByXPath(string.Format("//input[@id='{0}'][@value='{1}']", id, value));
             elem.Click();
         }
 
         public void ClickTrigger(string trigger) // change, paste, keyup
         {
-            var elem = Browser.FindElementByXPath(string.Format("//input[@id='{0}Trigger']", trigger));
+            var elem = _driver.FindElementByXPath(string.Format("//input[@id='{0}Trigger']", trigger));
             elem.Click();
             WaitForAjax();
         }
 
         public void Select(string id, string text)
         {
-            var elem = Browser.FindElementByXPath(string.Format("//select[@id='{0}']", id));
+            var elem = _driver.FindElementByXPath(string.Format("//select[@id='{0}']", id));
             var select = new SelectElement(elem);
             select.SelectByText(text);
         }
 
         public void WriteTextarea(string id, string text)
         {
-            var elem = Browser.FindElementByXPath(string.Format("//textarea[@id='{0}']", id));
+            var elem = _driver.FindElementByXPath(string.Format("//textarea[@id='{0}']", id));
             elem.SendKeys(text);
         }
 
         public void ClearTextarea(string id)
         {
-            var elem = Browser.FindElementByXPath(string.Format("//textarea[@id='{0}']", id));
+            var elem = _driver.FindElementByXPath(string.Format("//textarea[@id='{0}']", id));
             elem.Clear();
         }
 
         public void WriteInput(string id, string text)
         {
-            var elem = Browser.FindElementByXPath(string.Format("//input[@id='{0}']", id));
+            var elem = _driver.FindElementByXPath(string.Format("//input[@id='{0}']", id));
             elem.SendKeys(text);
         }
 
         public void ClearInput(string id)
         {
-            var elem = Browser.FindElementByXPath(string.Format("//input[@id='{0}']", id));
+            var elem = _driver.FindElementByXPath(string.Format("//input[@id='{0}']", id));
             elem.Clear();
         }
 
         public string GetErrorMessage(string id)
         {
-            var elem = Browser.FindElementByXPath(string.Format("//span[@data-valmsg-for='{0}']", id));
+            var elem = _driver.FindElementByXPath(string.Format("//span[@data-valmsg-for='{0}']", id));
             var generated = elem.FindElements(By.TagName("span"));
             return generated.Any() ? generated.Single().Text : elem.Text;
         }
 
-        public string GetSelectedMode()
-        {
-            var client = Browser.FindElementByXPath("//a[@href='/System/SetValidation?type=client&returnUrl=%2F']");
-            var server = Browser.FindElementByXPath("//a[@href='/System/SetValidation?type=server&returnUrl=%2F']");
-            if (client.Text.Contains("[") && !server.Text.Contains("]"))
-                return client.Text;
-            if (!client.Text.Contains("[") && server.Text.Contains("]"))
-                return server.Text;
-
-            return null;
-        }
-
         public int GetPostbacksCount()
         {
-            var elem = Browser.FindElementByXPath("//meta[@name='postbacks']");
+            var elem = _driver.FindElementByXPath("//meta[@name='postbacks']");
             return int.Parse(elem.GetAttribute("content"));
         }
 
@@ -130,7 +117,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         {
             while (true)
             {
-                var ajaxIsComplete = (bool) (Browser as IJavaScriptExecutor).ExecuteScript("return jQuery.active == 0"); // $.active returns the number of active Ajax requests                    
+                var ajaxIsComplete = (bool)(_driver as IJavaScriptExecutor).ExecuteScript("return jQuery.active == 0"); // $.active returns the number of active Ajax requests                    
                 if (ajaxIsComplete)
                     break;
                 Thread.Sleep(100);

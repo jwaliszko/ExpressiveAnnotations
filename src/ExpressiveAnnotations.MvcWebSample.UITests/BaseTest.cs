@@ -3,14 +3,12 @@ using Xunit;
 
 namespace ExpressiveAnnotations.MvcWebSample.UITests
 {
-    public abstract class BaseTest : IDisposable, IClassFixture<DriverFixture>
+    public abstract class BaseTest : IDisposable, IClassFixture<DriverFixture>, IAssemblyFixture<ServerFixture>
     {
-        protected BaseTest(DriverFixture context) // called before every test method
+        protected BaseTest(DriverFixture classContext, ServerFixture assemblyContext) // called before every test method
         {
-            const int port = 51622;
-            ServerStarter.Start(port);
-            Home = new HomePage(context.Driver);
-            Home.Load(string.Format("http://localhost:{0}/", port));
+            Home = new HomePage(classContext.Driver);
+            Home.Load(string.Format("http://localhost:{0}/", assemblyContext.Port));
         }
 
         public HomePage Home { get; private set; }
