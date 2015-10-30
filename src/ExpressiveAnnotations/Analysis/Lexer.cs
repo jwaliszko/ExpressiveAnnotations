@@ -25,7 +25,8 @@ namespace ExpressiveAnnotations.Analysis
         /// </summary>
         public Lexer()
         {
-            // regex special characters (should be escaped if needed, https://msdn.microsoft.com/en-us/library/4edbef7e(v=vs.110).aspx): .$^{[(|)*+?\
+            // regex special characters .$^{[(|)*+?\ should be escaped, if needed (in a character class any character except ^-]\ is a literal)
+            // https://msdn.microsoft.com/en-us/library/4edbef7e(v=vs.110).aspx, http://www.regular-expressions.info/refcharclass.html
             var patterns = new Dictionary<TokenType, string>
             {
                 {TokenType.AND, @"&&"},
@@ -42,12 +43,12 @@ namespace ExpressiveAnnotations.Analysis
                 {TokenType.NULL, @"null"},
                 {TokenType.COMMA, @","},
                 {TokenType.INC, @"\+{2}"}, // Despite the fact our language does not support ++ and -- prefix/postfix operations yet, these unary tokens are explicitly designated as illegal. We're detecting them to prevent unification which is done for consecutive plus or minus operators (e.g. + + - - +-+- => +).
-                {TokenType.DEC, @"\-{2}"}, // Unification of such unary operators breaks compatibility - such mixed 1++ + 2 operations are illegal in both C# and JavaScript (since we control C# side there is not pain here, but JavaScript would fail since we're sending raw expressions to client-side).
+                {TokenType.DEC, @"-{2}"},  // Unification of such unary operators breaks compatibility - such mixed 1++ + 2 operations are illegal in both C# and JavaScript (since we control C# side there is not pain here, but JavaScript would fail since we're sending raw expressions to client-side).
                 {TokenType.ADD, @"\+"},
                 {TokenType.SUB, @"-"},
                 {TokenType.MUL, @"\*"},
                 {TokenType.DIV, @"/"},
-                {TokenType.FLOAT, @"[0-9]*\.[0-9]+(?:[eE][\+-]?[0-9]+)?"}, // 1.0, 0.3e-2
+                {TokenType.FLOAT, @"(?:(?:[0-9]+[eE][+-]?[0-9]+)|(?:[0-9]*\.[0-9]+(?:[eE][+-]?[0-9]+)?))"}, // 1e5, 1.0, 0.3e-2
                 {TokenType.INT, @"[0-9]+"},
                 {TokenType.BOOL, @"(?:true|false)"},
                 {TokenType.STRING, @"(['])(?:\\\1|.)*?\1"}, // '1234', 'John\'s cat'

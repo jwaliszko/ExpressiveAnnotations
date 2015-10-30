@@ -188,6 +188,15 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("1.2 + 2 == 3.2").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("1.2 - 2 == -0.8").Invoke(null));
 
+            Assert.IsTrue(parser.Parse<object>("0e0 == 0").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>(".2 == 0.2").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("3.14 == 3.14").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("5e6 == 5000000").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("5e-6 == 5E-06").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("5e+6 == 5000000").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("9.0E-10 == 9E-10").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>(".11e10 == 1100000000").Invoke(null));
+
             Assert.IsTrue(parser.Parse<object>("1+2==3").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("1-2==-1").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("1*2>-1").Invoke(null));
@@ -196,6 +205,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("- - -1+'a'+'b'+null+''+'c'+1+2=='-1abc12'").Invoke(null));
 
             Assert.IsTrue(parser.Parse<object>("1 - 2 -(6 / ((2*1.5 - 1) + 1)) * -2 + 1/2/1 == 3.50").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("-.11e-10+.11e-10==.0-.0").Invoke(null));
 
             Assert.IsTrue(parser.Parse<object>("'abc' == Trim(' abc ')").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("Length(null) + Length('abc' + 'cde') >= Length(Trim(' abc def ')) - 2 - -1").Invoke(null));
