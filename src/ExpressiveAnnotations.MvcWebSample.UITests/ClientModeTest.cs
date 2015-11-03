@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using OpenQA.Selenium;
 using Xunit;
 
@@ -138,7 +139,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         [Fact]
         public void select_boundary_date_and_verify_no_error_for_long_travel_reason_in_client_mode()
         {
-            Home.WriteInput("ReturnDate", DateTime.Today.AddMonths(1).ToString("MM/dd/yyyy"));
+            Home.WriteInput("ReturnDate", DateTime.Today.AddMonths(1).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture));
             Assert.Equal(
                 string.Empty,
                 Home.GetErrorMessage("ReasonForLongTravel"));
@@ -147,7 +148,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         [Fact]
         public void select_slightly_too_late_date_and_verify_error_for_long_travel_reason_in_client_mode()
         {
-            Home.WriteInput("ReturnDate", DateTime.Today.AddMonths(1).AddDays(1).ToString("MM/dd/yyyy"));
+            Home.WriteInput("ReturnDate", DateTime.Today.AddMonths(1).AddDays(1).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture));
             Assert.Equal(
                 "If you plan to stay abroad longer than one month from now, write down your reasons.",
                 Home.GetErrorMessage("ReasonForLongTravel"));
@@ -156,7 +157,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         [Fact]
         public void select_slightly_too_late_date_then_clear_again_and_verify_no_error_for_long_travel_reason_in_client_mode()
         {
-            Home.WriteInput("ReturnDate", DateTime.Today.AddMonths(1).AddDays(1).ToString("MM/dd/yyyy"));
+            Home.WriteInput("ReturnDate", DateTime.Today.AddMonths(1).AddDays(1).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture));
             Home.ClearInput("ReturnDate");
             Assert.Equal(
                 string.Empty,
@@ -166,7 +167,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         [Fact]
         public void select_slightly_too_late_date_write_text_in_long_travel_reason_and_verify_no_error_for_long_travel_reason_in_client_mode()
         {
-            Home.WriteInput("ReturnDate", DateTime.Today.AddMonths(1).AddDays(1).ToString("MM/dd/yyyy"));
+            Home.WriteInput("ReturnDate", DateTime.Today.AddMonths(1).AddDays(1).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture));
             Home.WriteTextarea("ReasonForLongTravel", "a");
             Assert.Equal(
                 string.Empty,
@@ -176,7 +177,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         [Fact]
         public void select_slightly_too_late_date_write_empty_text_in_long_travel_reason_and_verify_no_error_for_long_travel_reason_in_client_mode()
         {
-            Home.WriteInput("ReturnDate", DateTime.Today.AddMonths(1).AddDays(1).ToString("MM/dd/yyyy"));
+            Home.WriteInput("ReturnDate", DateTime.Today.AddMonths(1).AddDays(1).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture));
             Home.WriteTextarea("ReasonForLongTravel", Keys.Enter);
             Assert.Equal(
                 string.Empty,
@@ -187,7 +188,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         public void change_culture_select_boundary_date_and_verify_no_error_for_long_travel_reason_in_client_mode()
         {
             Home.SetLang("pl");
-            Home.WriteInput("ReturnDate", DateTime.Today.AddMonths(1).ToString("yyyy-MM-dd"));
+            Home.WriteInput("ReturnDate", DateTime.Today.AddMonths(1).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
             Assert.Equal(
                 string.Empty,
                 Home.GetErrorMessage("ReasonForLongTravel"));
@@ -197,7 +198,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         public void change_culture_select_slightly_too_late_date_and_verify_error_for_long_travel_reason_in_client_mode()
         {
             Home.SetLang("pl");
-            Home.WriteInput("ReturnDate", DateTime.Today.AddMonths(1).AddDays(1).ToString("yyyy-MM-dd"));
+            Home.WriteInput("ReturnDate", DateTime.Today.AddMonths(1).AddDays(1).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
             Assert.Equal(
                 "Jeśli planujesz przebywać za granicą dłużej niż miesiąc, podaj powody.",
                 Home.GetErrorMessage("ReasonForLongTravel"));
@@ -206,7 +207,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         [Fact]
         public void select_past_date_and_verify_error_for_date_in_client_mode()
         {
-            Home.WriteInput("ReturnDate", DateTime.Today.AddDays(-1).ToString("MM/dd/yyyy"));
+            Home.WriteInput("ReturnDate", DateTime.Today.AddDays(-1).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture));
             Assert.Equal(
                 "We are afraid that going back to the past is not an option nowadays.",
                 Home.GetErrorMessage("ReturnDate"));
@@ -215,7 +216,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         [Fact]
         public void select_today_and_verify_error_for_date_in_client_mode()
         {
-            Home.WriteInput("ReturnDate", DateTime.Today.ToString("MM/dd/yyyy"));
+            Home.WriteInput("ReturnDate", DateTime.Today.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture));
             Assert.Equal(
                 "The period of stay should be at least a week.",
                 Home.GetErrorMessage("ReturnDate"));
@@ -224,7 +225,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         [Fact]
         public void select_six_days_from_today_and_verify_error_for_date_in_client_mode()
         {
-            Home.WriteInput("ReturnDate", DateTime.Today.AddDays(6).ToString("MM/dd/yyyy"));
+            Home.WriteInput("ReturnDate", DateTime.Today.AddDays(6).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture));
             Assert.Equal(
                 "The period of stay should be at least a week.",
                 Home.GetErrorMessage("ReturnDate"));
@@ -233,7 +234,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         [Fact]
         public void select_a_week_from_today_and_verify_no_error_for_date_in_client_mode()
         {
-            Home.WriteInput("ReturnDate", DateTime.Today.AddDays(7).ToString("MM/dd/yyyy"));
+            Home.WriteInput("ReturnDate", DateTime.Today.AddDays(7).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture));
             Assert.Equal(
                 string.Empty,
                 Home.GetErrorMessage("ReturnDate"));
@@ -242,7 +243,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         [Fact]
         public void select_a_year_without_day_from_today_and_verify_no_error_for_date_in_client_mode()
         {
-            Home.WriteInput("ReturnDate", DateTime.Today.AddYears(1).AddDays(-1).ToString("MM/dd/yyyy"));
+            Home.WriteInput("ReturnDate", DateTime.Today.AddYears(1).AddDays(-1).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture));
             Assert.Equal(
                 string.Empty,
                 Home.GetErrorMessage("ReturnDate"));
@@ -251,7 +252,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         [Fact]
         public void select_a_year_from_today_and_verify_error_for_date_in_client_mode()
         {
-            Home.WriteInput("ReturnDate", DateTime.Today.AddYears(1).ToString("MM/dd/yyyy"));
+            Home.WriteInput("ReturnDate", DateTime.Today.AddYears(1).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture));
             Assert.Equal(
                 "The period of stay should be less than a year.",
                 Home.GetErrorMessage("ReturnDate"));

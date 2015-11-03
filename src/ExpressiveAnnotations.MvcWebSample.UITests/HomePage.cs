@@ -26,6 +26,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             _driver.Manage().Cookies.DeleteAllCookies();
             _driver.Navigate().GoToUrl("about:blank");
         }
+
         public void SetMode(string mode) // client, server
         {
             var elem = _driver.FindElementByXPath(string.Format("//a[@href='/System/SetValidation?type={0}&returnUrl=%2F']", mode));
