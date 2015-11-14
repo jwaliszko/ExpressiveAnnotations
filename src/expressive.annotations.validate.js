@@ -167,7 +167,7 @@ var
                 return /^[0-9]+$/.test(str);
             });
             this.addMethod('IsNumber', function(str) {
-                return /^[+-]?(?:(?:[0-9]+[eE][+-]?[0-9]+)|(?:[0-9]*\.[0-9]+(?:[eE][+-]?[0-9]+)?))$/.test(str);
+                return /^[+-]?(?:(?:[0-9]+)|(?:[0-9]+[eE][+-]?[0-9]+)|(?:[0-9]*\.[0-9]+(?:[eE][+-]?[0-9]+)?))$/.test(str);
             });
             this.addMethod('IsEmail', function(str) {
                 // taken from HTML5 specification: http://www.w3.org/TR/html5/forms.html#e-mail-state-(type=email)

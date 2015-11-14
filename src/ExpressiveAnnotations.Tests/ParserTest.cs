@@ -748,6 +748,9 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("IsDigitChain(null) == false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsDigitChain('') == false").Invoke(null));
 
+            Assert.IsTrue(parser.Parse<object>("IsNumber('0') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber('0.0') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber('10.10') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsNumber('0e0') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsNumber('.2') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsNumber('3.14') == true").Invoke(null));
@@ -758,6 +761,8 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("IsNumber('.11e10') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsNumber('-0.3e-2') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsNumber('+0.3e-2') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber('+0') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber('-0') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsNumber('++0') == false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsNumber('--0') == false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsNumber('+-0') == false").Invoke(null));

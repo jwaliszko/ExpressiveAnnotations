@@ -498,6 +498,9 @@
         qunit.ok(!m.IsDigitChain(null));
         qunit.ok(!m.IsDigitChain(''));
 
+        qunit.ok(m.IsNumber('0'));
+        qunit.ok(m.IsNumber('0.0'));
+        qunit.ok(m.IsNumber('10.10'));
         qunit.ok(m.IsNumber('0e0'));
         qunit.ok(m.IsNumber('.2'));
         qunit.ok(m.IsNumber('3.14'));
@@ -508,6 +511,8 @@
         qunit.ok(m.IsNumber('.11e10'));
         qunit.ok(m.IsNumber('-0.3e-2'));
         qunit.ok(m.IsNumber('+0.3e-2'));
+        qunit.ok(m.IsNumber('+0'));
+        qunit.ok(m.IsNumber('-0'));
         qunit.ok(!m.IsNumber('++0'));
         qunit.ok(!m.IsNumber('--0'));
         qunit.ok(!m.IsNumber('+-0'));
