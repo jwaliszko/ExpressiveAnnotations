@@ -743,10 +743,24 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<object>("IsNullOrWhiteSpace('') == true").Invoke(null));
 
             Assert.IsTrue(parser.Parse<object>("IsDigitChain('0123456789') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsDigitChain('+0') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsDigitChain('-0') == false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsDigitChain(null) == false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsDigitChain('') == false").Invoke(null));
 
+            Assert.IsTrue(parser.Parse<object>("IsNumber('0e0') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber('.2') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber('3.14') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber('5e6') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber('5e-6') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber('5e+6') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber('9.0E-10') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber('.11e10') == true").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsNumber('-0.3e-2') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber('+0.3e-2') == true").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber('++0') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber('--0') == false").Invoke(null));
+            Assert.IsTrue(parser.Parse<object>("IsNumber('+-0') == false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsNumber(null) == false").Invoke(null));
             Assert.IsTrue(parser.Parse<object>("IsNumber('') == false").Invoke(null));
 

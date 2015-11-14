@@ -493,10 +493,24 @@
         qunit.ok(m.IsNullOrWhiteSpace(''));
 
         qunit.ok(m.IsDigitChain('0123456789'));
+        qunit.ok(!m.IsDigitChain('+0'));
+        qunit.ok(!m.IsDigitChain('-0'));
         qunit.ok(!m.IsDigitChain(null));
         qunit.ok(!m.IsDigitChain(''));
 
+        qunit.ok(m.IsNumber('0e0'));
+        qunit.ok(m.IsNumber('.2'));
+        qunit.ok(m.IsNumber('3.14'));
+        qunit.ok(m.IsNumber('5e6'));
+        qunit.ok(m.IsNumber('5e-6'));
+        qunit.ok(m.IsNumber('5e+6'));
+        qunit.ok(m.IsNumber('9.0E-10'));
+        qunit.ok(m.IsNumber('.11e10'));
         qunit.ok(m.IsNumber('-0.3e-2'));
+        qunit.ok(m.IsNumber('+0.3e-2'));
+        qunit.ok(!m.IsNumber('++0'));
+        qunit.ok(!m.IsNumber('--0'));
+        qunit.ok(!m.IsNumber('+-0'));
         qunit.ok(!m.IsNumber(null));
         qunit.ok(!m.IsNumber(''));
 
