@@ -84,9 +84,7 @@ Global
 		{0FC1317D-C657-4CD1-99A6-71A3C4372306}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0FC1317D-C657-4CD1-99A6-71A3C4372306}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0FC1317D-C657-4CD1-99A6-71A3C4372306}.Release-Net40|Any CPU.ActiveCfg = Release|Any CPU
-		{0FC1317D-C657-4CD1-99A6-71A3C4372306}.Release-Net40|Any CPU.Build.0 = Release|Any CPU
 		{0FC1317D-C657-4CD1-99A6-71A3C4372306}.Release-Net45|Any CPU.ActiveCfg = Release|Any CPU
-		{0FC1317D-C657-4CD1-99A6-71A3C4372306}.Release-Net45|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

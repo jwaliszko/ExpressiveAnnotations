@@ -711,15 +711,15 @@ namespace ExpressiveAnnotations.Analysis
         private Expression FetchEnumValue(string name)
         {
             var parts = name.Split('.');
-            if (parts.Count() > 1)
+            if (parts.Length > 1)
             {
-                var enumTypeName = string.Join(".", parts.Take(parts.Count() - 1).ToList());
+                var enumTypeName = string.Join(".", parts.Take(parts.Length - 1).ToList());
                 var enumTypes = AppDomain.CurrentDomain.GetAssemblies()
                     .SelectMany(a => a.GetLoadableTypes())
                     .Where(t => t.IsEnum && string.Concat(".", t.FullName.Replace("+", ".")).EndsWith(string.Concat(".", enumTypeName)))
                     .ToList();
 
-                if (enumTypes.Count() > 1)
+                if (enumTypes.Count > 1)
                     throw new ParseErrorException(
                         string.Format("Enum '{0}' is ambiguous, found following:{1}{2}.",
                             enumTypeName, Environment.NewLine, string.Join("," + Environment.NewLine,
@@ -740,9 +740,9 @@ namespace ExpressiveAnnotations.Analysis
         private Expression FetchConstValue(string name)
         {
             var parts = name.Split('.');
-            if (parts.Count() > 1)
+            if (parts.Length > 1)
             {
-                var constTypeName = string.Join(".", parts.Take(parts.Count() - 1).ToList());
+                var constTypeName = string.Join(".", parts.Take(parts.Length - 1).ToList());
                 var constants = AppDomain.CurrentDomain.GetAssemblies()
                     .SelectMany(a => a.GetLoadableTypes())
                     .Where(t => t.FullName.Replace("+", ".").EndsWith(constTypeName))
@@ -750,7 +750,7 @@ namespace ExpressiveAnnotations.Analysis
                         .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name.Equals(parts.Last())))                    
                     .ToList();
 
-                if (constants.Count() > 1)
+                if (constants.Count > 1)
                     throw new ParseErrorException(
                         string.Format("Constant '{0}' is ambiguous, found following:{1}{2}.",
                             name, Environment.NewLine, string.Join("," + Environment.NewLine,
@@ -844,7 +844,7 @@ namespace ExpressiveAnnotations.Analysis
         private MethodCallExpression CreateMethodCallExpression(Expression contextExpression, IList<Tuple<Expression, Location>> parsedArgs, MethodInfo methodInfo)
         {
             var parameters = methodInfo.GetParameters();
-            AssertParamsEquality(parameters.Count(), parsedArgs.Count, methodInfo.Name);
+            AssertParamsEquality(parameters.Length, parsedArgs.Count, methodInfo.Name);
 
             var convertedArgs = new List<Expression>();
             for (var i = 0; i < parsedArgs.Count; i++)

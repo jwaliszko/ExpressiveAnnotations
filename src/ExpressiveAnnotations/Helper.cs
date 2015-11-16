@@ -109,10 +109,7 @@ namespace ExpressiveAnnotations
                         string.Format("Display name extraction interrupted. Field {0} not found.", prop), property);
             }
 
-            var attrib = pi.GetCustomAttributes(typeof (DisplayAttribute), false)
-                .Cast<DisplayAttribute>()
-                .SingleOrDefault();
-
+            var attrib = pi.GetAttributes<DisplayAttribute>().SingleOrDefault();
             if (attrib == null)
                 throw new ArgumentException(
                     string.Format("No DisplayName attribute provided for {0} field.", prop), property);
@@ -247,13 +244,20 @@ namespace ExpressiveAnnotations
             
             // get member name from display attribute (if such an attribute exists) based on display name
             var props = type.GetProperties()
-                .Where(p => p.GetCustomAttributes(typeof (DisplayAttribute), false) // use this version over generic one (.NET4.0 support)
-                            .Cast<DisplayAttribute>()
-                            .Any(a => a.GetName() == displayName))
+                .Where(p => p.GetAttributes<DisplayAttribute>().Any(a => a.GetName() == displayName))
                 .Select(p => p.Name).ToList();
 
             // if there is an ambiguity, return nothing
             return props.Count == 1 ? props.SingleOrDefault() : null;
+        }
+
+        public static IEnumerable<T> GetAttributes<T>(this MemberInfo element) where T : Attribute
+        {
+#if NET40
+            return element.GetCustomAttributes(typeof (T), false).Cast<T>();
+#else
+            return element.GetCustomAttributes<T>(false);
+#endif
         }
 
         public static string TrimStart(this string input, out int line, out int column)

@@ -49,9 +49,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                         .Select(p => new
                         {
                             PropertyName = p.Name,
-                            ParserAttribute = p.GetCustomAttributes(typeof (ValueParserAttribute), false) // use this version over generic one (.NET4.0 support)
-                                    .Cast<ValueParserAttribute>()
-                                    .SingleOrDefault()
+                            ParserAttribute = p.GetAttributes<ValueParserAttribute>().SingleOrDefault()
                         }).Where(x => x.ParserAttribute != null)
                         .ToDictionary(x => x.PropertyName, x => x.ParserAttribute.ParserName);
 
