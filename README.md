@@ -316,7 +316,7 @@ For supplementary reading visit the [installation section](#installation).
 
 #####<a id="is-it-possible-to-compile-all-usages-of-annotations-at-once">Is it possible to compile all usages of annotations at once?</a>
 
-Yes, a list of types with annotations can be collected and compiled collectively. It can be useful, e.g. during unit tesing phase, when without the necessity of your main application startup, all the compile-time errors (syntax errors, typechecking errors) done to your expressions can be discovered. The following extension is helpful:
+Yes, a complete list of types with annotations can be retrieved and compiled collectively. It can be useful, e.g. during unit tesing phase, when without the necessity of your main application startup, all the compile-time errors (syntax errors, typechecking errors) done to your expressions can be discovered. The following extension is helpful:
 
 ```
 public static IEnumerable<ExpressiveAttribute> CompileExpressiveAttributes(this Type type)
@@ -457,7 +457,7 @@ Use `noConflict()` method. In case of naming collision return control of the `ea
 
 #####<a id="how-to-control-frequency-of-dependent-fields-validation">How to control frequency of dependent fields validation?</a>
 
-When a field value is modified, validation results for some other fields, directly dependent on currenty modified one, may be affected. To control the frequency of when dependent fields validation is triggered, change default `ea.settings.dependencyTriggers` settings. It is a string containing one or more DOM field event types (such as *change*, *keyup* or custom event names), associated with currently modified field, for which fields directly dependent on are validated.
+When a field value is modified, validation results for some other fields, directly dependent on currenty modified one, may be affected. To control the frequency of when dependent fields validation is triggered, change default `ea.settings.dependencyTriggers` settings. It is a string containing one or more DOM field event types (such as *change*, *keyup* or custom event names), associated with currently modified field, for which fields directly dependent on are validated. Multiple event types can be bound at once by including each one separated by a space.
 
 Default value is *'change keyup'* (for more information check `eventType` parameter of jQuery [`bind()`](http://api.jquery.com/bind) method). If you want to turn this feature off entirely, set it to *undefined* (validation will be fired on form submit attempt only).
 ```JavaScript

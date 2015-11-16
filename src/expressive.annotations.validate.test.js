@@ -7,6 +7,13 @@
 (function($, qunit, ea, eapriv) {
     // equal( actual, expected [, message ] )
 
+    qunit.testDone(function() { // reset state for further tests
+        ea.settings.apply({
+            debug: true,
+            dependencyTriggers: 'change keyup'
+        });
+    });
+
     qunit.module("type helper");
 
     qunit.test("verify_array_storage", function() {
@@ -536,6 +543,42 @@
         qunit.ok(!m.IsRegexMatch(null, null));
 
         qunit.equal(m.Guid('a1111111-1111-1111-1111-111111111111'), m.Guid('A1111111-1111-1111-1111-111111111111'));
+    });
+
+    qunit.test("verify_settings_apply", function() {
+        ea.settings.apply({
+            debug: true,
+            dependencyTriggers: 'change paste keyup'
+        });
+
+        qunit.equal(ea.settings.debug, true);
+        qunit.equal(ea.settings.dependencyTriggers, 'change paste keyup');
+
+        ea.settings.apply({
+            debug: false,
+            dependencyTriggers: undefined
+        });
+
+        qunit.equal(ea.settings.debug, false);
+        qunit.equal(ea.settings.dependencyTriggers, undefined);
+    });
+
+    qunit.test("detect_invalid_debug_setup", function() {
+        try {
+            ea.settings.apply({ debug: 1 });
+            qunit.fail();
+        } catch (ex) {
+            qunit.equal(ex, 'debug value must be a boolean (true or false)');
+        }
+    });
+
+    qunit.test("detect_invalid_triggers_setup", function() {
+        try {
+            ea.settings.apply({ dependencyTriggers: false });
+            qunit.fail();
+        } catch (ex) {
+            qunit.equal(ex, 'dependencyTriggers value must be a string (multiple event types can be bound at once by including each one separated by a space), null or undefined');
+        }
     });
 
     qunit.module("full computation flow");

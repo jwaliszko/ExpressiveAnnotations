@@ -15,8 +15,27 @@ var
             debug: false, // output debug messages to the web console (should be disabled for release code)
             dependencyTriggers: 'change keyup', // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names) for which fields directly dependent on referenced DOM field are validated
 
-            apply: function(options) { // alternative way of settings setup, crucial to invoke e.g. for new set of dependency triggers to be re-bound
-                $.extend(api.settings, options);
+            apply: function(options) { // alternative way of settings setup (recommended), crucial to invoke e.g. for new set of dependency triggers to be re-bound
+                function verifySetup() {
+                    if (!typeHelper.isBool(api.settings.debug)) {
+                        throw 'debug value must be a boolean (true or false)';
+                    }
+                    if (!typeHelper.isString(api.settings.dependencyTriggers)
+                        && api.settings.dependencyTriggers !== null && api.settings.dependencyTriggers !== undefined) {
+                        throw 'dependencyTriggers value must be a string (multiple event types can be bound at once by including each one separated by a space), null or undefined';
+                    }
+                }
+                function extend(target, source) { // custom implementation over jQuery.extend() because null/undefined merge is needed as well
+                    for (var key in source) {
+                        if (source.hasOwnProperty(key)) {
+                            target[key] = source[key];
+                        }
+                    }
+                }
+
+                extend(api.settings, options);
+                verifySetup();
+
                 $('form').each(function() {
                     $(this).find('input, select, textarea').off('.expressive.annotations'); // remove all event handlers in the '.expressive.annotations' namespace
                     validationHelper.bindFields(this, true);
