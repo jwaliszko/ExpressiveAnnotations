@@ -42,10 +42,11 @@
     <ContentPlacement>AboveNamespaces</ContentPlacement>
     <NamespaceSummaries>
       <NamespaceSummaryItem name="(global)" isDocumented="False" />
-<NamespaceSummaryItem name="ExpressiveAnnotations.Analysis" isDocumented="True">Namespace provides logic related to lexical and syntactic analysis of specified expressions.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="ExpressiveAnnotations.Attributes" isDocumented="True">Namespace provides expressive attributes that are used to define metadata for properties.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="ExpressiveAnnotations.MvcUnobtrusive.Providers" isDocumented="True">Namespace provides validator providers.</NamespaceSummaryItem>
-<NamespaceSummaryItem name="ExpressiveAnnotations.MvcUnobtrusive.Validators" isDocumented="True">Namespace provides expressive validators for a specified validation types.</NamespaceSummaryItem></NamespaceSummaries>
+      <NamespaceSummaryItem name="ExpressiveAnnotations.Analysis" isDocumented="True">Namespace provides logic related to lexical and syntactic analysis of specified expressions.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="ExpressiveAnnotations.Attributes" isDocumented="True">Namespace provides expressive attributes that are used to define metadata for properties.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="ExpressiveAnnotations.MvcUnobtrusive.Providers" isDocumented="True">Namespace provides validator providers.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="ExpressiveAnnotations.MvcUnobtrusive.Validators" isDocumented="True">Namespace provides expressive validators for a specified validation types.</NamespaceSummaryItem>
+	</NamespaceSummaries>
     <VisibleItems>InheritedMembers, Protected, ProtectedInternalAsProtected</VisibleItems>
     <ProjectSummary>ExpressiveAnnotations is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given RequiredIf and AssertThat attributes allow to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more condensed, since fields validation requirements are applied as metadata, just in the place of such fields declaration.</ProjectSummary>
     <RootNamespaceTitle>

@@ -148,6 +148,9 @@
     <Content Include="..\expressive.annotations.validate.js">
       <Link>Scripts\expressive.annotations.validate.js</Link>
     </Content>
+    <Content Include="..\expressive.annotations.validate.min.js">
+      <Link>Scripts\expressive.annotations.validate.min.js</Link>
+    </Content>
     <Content Include="favicon.ico" />
     <Content Include="Content\themes\base\images\animated-overlay.gif" />
     <Content Include="Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
@@ -301,7 +304,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>0</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:51621/</IISUrl>
+          <IISUrl>http://localhost:52637/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

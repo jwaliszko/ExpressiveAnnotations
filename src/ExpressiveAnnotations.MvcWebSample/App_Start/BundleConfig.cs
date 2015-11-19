@@ -16,7 +16,7 @@ namespace ExpressiveAnnotations.MvcWebSample
             bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
                         "~/Scripts/jquery.validate*"));
 
-            bundles.Add(new ScriptBundle("~/bundles/expressive").Include(
+            bundles.Add(new /*Script*/Bundle("~/bundles/expressive").Include( // ScriptBundle uses JsMinify transformation from System.Web.Optimization by default (alternatively, to pick already provided minified version, use Bundle)
                         "~/Scripts/expressive.annotations*"));
 
             bundles.Add(new StyleBundle("~/Content/css").Include("~/Content/site.css"));
@@ -34,6 +34,11 @@ namespace ExpressiveAnnotations.MvcWebSample
                         "~/Content/themes/base/jquery.ui.datepicker.css",
                         "~/Content/themes/base/jquery.ui.progressbar.css",
                         "~/Content/themes/base/jquery.ui.theme.css"));
+
+#if !DEBUG
+            BundleTable.EnableOptimizations = true; // forces bundling in development phase, where it's disabled by default (here, enabled for non-debug configuration only)
+                                                    // (web.[mode].config transformations are normally executed for deploying/publishing, not just for changing the active configuration in VS)
+#endif            
         }
     }
 }

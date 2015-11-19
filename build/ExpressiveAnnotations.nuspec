@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <id>ExpressiveAnnotations</id>
+        <version>$version$</version>
+        <title>ExpressiveAnnotations for ASP.NET MVC</title>
+        <authors>Jaroslaw Waliszko</authors>
+        <owners>Jaroslaw Waliszko</owners>
+        <iconUrl>https://raw.githubusercontent.com/JaroslawWaliszko/ExpressiveAnnotations/master/logo.png</iconUrl>
+        <licenseUrl>https://github.com/JaroslawWaliszko/ExpressiveAnnotations/blob/master/LICENSE</licenseUrl>
+        <projectUrl>https://github.com/JaroslawWaliszko/ExpressiveAnnotations</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>ExpressiveAnnotations is a small .NET and JavaScript library which provides annotation-based conditional validation mechanisms. Given attributes allow to forget about imperative way of step-by-step verification of validation conditions in many cases. Since fields validation requirements are applied as metadata, domain-related code is more condensed.
+
+This package contains 3 components: ExpressiveAnnotations.dll core annotations assembly, ExpressiveAnnotations.MvcUnobtrusive.dll MVC validators assembly and expressive.annotations.validate.js unobtrusive validation script.</description>
+        <releaseNotes>https://github.com/JaroslawWaliszko/ExpressiveAnnotations/releases</releaseNotes>
+        <language>en-US</language>
+        <tags>DataAnnotations Validation Mvc AspNetMvc jQuery Unobtrusive</tags>
+        <dependencies>
+            <dependency id="Newtonsoft.Json" version="4.5.11" />
+            <dependency id="jQuery" version="1.8.2" />
+            <dependency id="jQuery.Validation" version="1.10.0" />
+            <dependency id="Microsoft.jQuery.Unobtrusive.Validation" version="3.1.1" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="expressive.annotations.validate.js" target="content\Scripts\expressive.annotations.validate.js" />
+		<file src="expressive.annotations.validate.min.js" target="content\Scripts\expressive.annotations.validate.min.js" />
+
+        <file src="..\src\bin\Release-Net40\ExpressiveAnnotations.dll" target="lib\net40\ExpressiveAnnotations.dll" />
+        <file src="..\src\bin\Release-Net40\ExpressiveAnnotations.pdb" target="lib\net40\ExpressiveAnnotations.pdb" />
+        <file src="..\src\bin\Release-Net40\ExpressiveAnnotations.xml" target="lib\net40\ExpressiveAnnotations.xml" />
+        <file src="..\src\bin\Release-Net40\ExpressiveAnnotations.MvcUnobtrusive.dll" target="lib\net40\ExpressiveAnnotations.MvcUnobtrusive.dll" />
+        <file src="..\src\bin\Release-Net40\ExpressiveAnnotations.MvcUnobtrusive.pdb" target="lib\net40\ExpressiveAnnotations.MvcUnobtrusive.pdb" />
+        <file src="..\src\bin\Release-Net40\ExpressiveAnnotations.MvcUnobtrusive.xml" target="lib\net40\ExpressiveAnnotations.MvcUnobtrusive.xml" />
+
+        <file src="..\src\bin\Release-Net45\ExpressiveAnnotations.dll" target="lib\net45\ExpressiveAnnotations.dll" />
+        <file src="..\src\bin\Release-Net45\ExpressiveAnnotations.pdb" target="lib\net45\ExpressiveAnnotations.pdb" />
+        <file src="..\src\bin\Release-Net45\ExpressiveAnnotations.xml" target="lib\net45\ExpressiveAnnotations.xml" />
+        <file src="..\src\bin\Release-Net45\ExpressiveAnnotations.MvcUnobtrusive.dll" target="lib\net45\ExpressiveAnnotations.MvcUnobtrusive.dll" />
+        <file src="..\src\bin\Release-Net45\ExpressiveAnnotations.MvcUnobtrusive.pdb" target="lib\net45\ExpressiveAnnotations.MvcUnobtrusive.pdb" />
+        <file src="..\src\bin\Release-Net45\ExpressiveAnnotations.MvcUnobtrusive.xml" target="lib\net45\ExpressiveAnnotations.MvcUnobtrusive.xml" />
+
+        <file src="..\src\ExpressiveAnnotations\**\*.cs" target="src\ExpressiveAnnotations" exclude="..\src\ExpressiveAnnotations\obj\**" />
+        <file src="..\src\ExpressiveAnnotations.MvcUnobtrusive\**\*.cs" target="src\ExpressiveAnnotations.MvcUnobtrusive" exclude="..\src\ExpressiveAnnotations.MvcUnobtrusive\obj\**" />
+    </files>
+</package>

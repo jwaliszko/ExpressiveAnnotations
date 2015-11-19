@@ -1,7 +1,8 @@
-/// <reference path="./qunit-1.18.0.js" />
-/// <reference path="./packages/jQuery.1.8.2/Content/Scripts/jquery-1.8.2.js" />
-/// <reference path="./packages/jQuery.Validation.1.10.0/Content/Scripts/jquery.validate.js" />
-/// <reference path="./packages/Microsoft.jQuery.Unobtrusive.Validation.3.1.1/Content/Scripts/jquery.validate.unobtrusive.js" />
+/// <reference path="../extern/qunit-1.18.0.js" />
+/// <reference path="../extern/jquery-1.8.2.js" />
+/// <reference path="../extern/jquery.validate-1.10.0.js" />
+/// <reference path="../extern/jquery.validate.unobtrusive-3.1.1.js" />
+
 /// <reference path="./expressive.annotations.validate.js" />
 
 (function($, qunit, ea, eapriv) {
@@ -545,22 +546,24 @@
         qunit.equal(m.Guid('a1111111-1111-1111-1111-111111111111'), m.Guid('A1111111-1111-1111-1111-111111111111'));
     });
 
-    qunit.test("verify_settings_apply", function() {
-        ea.settings.apply({
-            debug: true,
-            dependencyTriggers: 'change paste keyup'
-        });
-
+    qunit.test("verify_allowed_settings_setup", function() {
+        ea.settings.apply({ debug: true });
         qunit.equal(ea.settings.debug, true);
+
+        ea.settings.apply({ debug: false });
+        qunit.equal(ea.settings.debug, false);
+
+        ea.settings.apply({ dependencyTriggers: 'change paste keyup' });
         qunit.equal(ea.settings.dependencyTriggers, 'change paste keyup');
 
-        ea.settings.apply({
-            debug: false,
-            dependencyTriggers: undefined
-        });
-
-        qunit.equal(ea.settings.debug, false);
+        ea.settings.apply({ dependencyTriggers: undefined });
         qunit.equal(ea.settings.dependencyTriggers, undefined);
+
+        ea.settings.apply({ dependencyTriggers: null });
+        qunit.equal(ea.settings.dependencyTriggers, null);
+
+        ea.settings.apply({ dependencyTriggers: '' });
+        qunit.equal(ea.settings.dependencyTriggers, '');
     });
 
     qunit.test("detect_invalid_debug_setup", function() {
@@ -687,7 +690,7 @@
         qunit.ok(!result);
     });
 
-    qunit.test("verify_sample_form_validation", function() {
+    qunit.test("verify_sample_form_validation", function() { // relies on form defined in test harness file (test.html)
 
         ea.addMethod('Whoami', function() {
             return 'root';
