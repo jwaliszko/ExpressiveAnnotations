@@ -266,12 +266,7 @@ namespace ExpressiveAnnotations
                 throw new ArgumentNullException("input");
 
             var output = input.TrimStart();
-            var redundancy = input.RemoveSuffix(output);
-            var lastLineBreak = redundancy.LastIndexOf('\n');
-            column = lastLineBreak > 0
-                ? redundancy.Length - lastLineBreak
-                : input.Length - output.Length;
-            line = redundancy.CountLineBreaks();
+            input.ComputeContactLocation(output, out line, out column);
             return output;
         }
 
@@ -283,13 +278,18 @@ namespace ExpressiveAnnotations
                 throw new ArgumentOutOfRangeException("start", "Start index can not be negative.");
 
             var output = input.Substring(start);
+            input.ComputeContactLocation(output, out line, out column);
+            return output;
+        }
+
+        public static void ComputeContactLocation(this string input, string output, out int line, out int column)
+        {
             var redundancy = input.RemoveSuffix(output);
             var lastLineBreak = redundancy.LastIndexOf('\n');
             column = lastLineBreak > 0
                 ? redundancy.Length - lastLineBreak
                 : input.Length - output.Length;
             line = redundancy.CountLineBreaks();
-            return output;
         }
 
         public static string RemoveSuffix(this string input, string suffix)
@@ -299,9 +299,7 @@ namespace ExpressiveAnnotations
             if (suffix == null)
                 throw new ArgumentNullException("suffix");
 
-            return input.EndsWith(suffix)
-                ? input.Substring(0, input.Length - suffix.Length)
-                : input;
+            return input.Substring(0, input.Length - suffix.Length);
         }
 
         public static int CountLineBreaks(this string input)

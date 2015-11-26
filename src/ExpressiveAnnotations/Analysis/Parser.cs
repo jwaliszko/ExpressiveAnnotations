@@ -739,13 +739,14 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression FetchConstValue(string name)
         {
+            FieldInfo constant;
             var parts = name.Split('.');
             if (parts.Length > 1)
             {
                 var constTypeName = string.Join(".", parts.Take(parts.Length - 1).ToList());
                 var constants = AppDomain.CurrentDomain.GetAssemblies()
                     .SelectMany(a => a.GetLoadableTypes())
-                    .Where(t => t.FullName.Replace("+", ".").EndsWith(constTypeName))
+                    .Where(t => string.Concat(".", t.FullName.Replace("+", ".")).EndsWith(string.Concat(".", constTypeName)))
                     .SelectMany(t => t.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
                         .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name.Equals(parts.Last())))                    
                     .ToList();
@@ -760,32 +761,24 @@ namespace ExpressiveAnnotations.Analysis
                                             : string.Format("'{0}'", x.Name)))),
                         PeekToken(1).Location);
 
-                var constant = constants.SingleOrDefault();
-                if (constant != null)
-                {
-                    var value = constant.GetRawConstantValue();
-                    Consts[name] = (value is string)
-                        ? ((string) value).Replace(Environment.NewLine, "\n")
-                        : value; // in our language new line is represented by \n char (consts map
-                                 // is then sent to JavaScript, and JavaScript new line is also \n)
-                    return Expression.Constant(value);
-                }
+                constant = constants.SingleOrDefault();
+                
             }
             else
             {
-                var constant = ContextType.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+                constant = ContextType.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
                     .SingleOrDefault(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name.Equals(name));
-
-                if (constant != null)
-                {
-                    var value = constant.GetRawConstantValue();
-                    Consts[name] = (value is string)
-                        ? ((string) value).Replace(Environment.NewLine, "\n")
-                        : value;
-                    return Expression.Constant(value);
-                }
             }
-            return null;
+
+            if (constant == null) 
+                return null;
+
+            var value = constant.GetRawConstantValue();
+            Consts[name] = (value is string)
+                ? ((string)value).Replace(Environment.NewLine, "\n")
+                : value; // in our language new line is represented by \n char (consts map
+                         // is then sent to JavaScript, and JavaScript new line is also \n)
+            return Expression.Constant(value);
         }
 
         private Expression ExtractMethodExpression(string name, IList<Tuple<Expression, Location>> args, Location funcPos)

@@ -80,7 +80,6 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
         public void verify_parsing_error_catched_by_validator()
         {
             var model = new Model();
-
             var metadata = GetModelMetadata(model, m => m.Value);
             var controllerContext = GetControllerContext();
 
@@ -215,8 +214,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             var metadata = GetModelMetadata(model, m => m.Lang);
             var controllerContext = GetControllerContext();
 
-            var assert = new AssertThatValidator(metadata, controllerContext,
-                new AssertThatAttribute("1 > 2") {ErrorMessage = "{Lang:n}"});
+            var assert = new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("1 > 2") {ErrorMessage = "{Lang:n}"});
             var assertRule = assert.GetClientValidationRules().Single();
             Assert.AreEqual("default", assertRule.ErrorMessage);
 
@@ -225,8 +223,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture("pl");
 
             // simulate next request - create new validator
-            assert = new AssertThatValidator(metadata, controllerContext,
-                new AssertThatAttribute("1 > 2") {ErrorMessage = "{Lang:n}"});
+            assert = new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("1 > 2") {ErrorMessage = "{Lang:n}"});
             assertRule = assert.GetClientValidationRules().Single();
             Assert.AreEqual("polski", assertRule.ErrorMessage);
 
@@ -269,6 +266,29 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             Assert.IsTrue(Helper.SegmentsCollide(new[] {"A.B.C"}, new[] {"A.B"}, out name, out level));
             Assert.AreEqual("B", name);
             Assert.AreEqual(level, 1);
+
+            var model = new Model();
+            var metadata = GetModelMetadata(model, m => m.Value);
+            var controllerContext = GetControllerContext();
+
+            try
+            {
+                new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("Value == Value.Zero"));
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is ValidationException);
+                Assert.AreEqual(
+                    "AssertThatValidator: validation applied to Value field failed.",
+                    e.Message);
+                Assert.IsNotNull(e.InnerException);
+                Assert.IsTrue(e.InnerException is InvalidOperationException);
+                Assert.AreEqual(
+                    "Naming collisions cannot be accepted by client-side - Value part at level 0 is ambiguous.",
+                    e.InnerException.Message);
+            }
+
         }
 
         [TestMethod]
@@ -308,6 +328,12 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
         {
             High,
             Low
+        }
+
+        public enum Value
+        {
+            Zero,
+            One
         }
 
         public class Model

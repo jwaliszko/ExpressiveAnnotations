@@ -59,7 +59,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive
                 foreach (var segB in segmentsB)
                 {
                     var equal = true;
-                    var boundary = new[] {segA.Count(), segB.Count()}.Min() - 1;
+                    var boundary = new[] {segA.Length, segB.Length}.Min() - 1;
                     for (var i = 0; i <= boundary; i++)
                     {
                         if (segA[i] != segB[i])

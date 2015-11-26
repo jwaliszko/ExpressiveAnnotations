@@ -18,13 +18,13 @@ namespace ExpressiveAnnotations.Tests
                       && (
                              (NextCountry != 'european country' && Compare(NextCountry, Country.Name) == 0)
                              || (Age > 24 && Age <= 55.5)
-                             
-                             &&(1.1+2*2>1-2/2+Array[0].Value)
+
+                             &&(1.1+2*2>1-2/2+Array[0].Value=='\'\na\n b\nc\n\'')
                          )";
 
             var lexer = new Lexer();
             var tokens = lexer.Analyze(expression).ToArray();
-            Assert.AreEqual(47, tokens.Length);
+            Assert.AreEqual(49, tokens.Length);
             Assert.AreEqual("GoAbroad", tokens[0].Value);
             Assert.AreEqual(TokenType.FUNC, tokens[0].Type);
             Assert.AreEqual("==", tokens[1].Value);
@@ -113,12 +113,16 @@ namespace ExpressiveAnnotations.Tests
             Assert.AreEqual(TokenType.ADD, tokens[42].Type);
             Assert.AreEqual("Array[0].Value", tokens[43].Value);
             Assert.AreEqual(TokenType.FUNC, tokens[43].Type);
-            Assert.AreEqual(")", tokens[44].Value);
-            Assert.AreEqual(TokenType.RIGHT_BRACKET, tokens[44].Type);
-            Assert.AreEqual(")", tokens[45].Value);
-            Assert.AreEqual(TokenType.RIGHT_BRACKET, tokens[45].Type);
-            Assert.AreEqual(string.Empty, tokens[46].Value);
-            Assert.AreEqual(TokenType.EOF, tokens[46].Type);
+            Assert.AreEqual("==", tokens[44].Value);
+            Assert.AreEqual(TokenType.EQ, tokens[44].Type);
+            Assert.AreEqual("'\r\na\r\n b\r\nc\r\n'", tokens[45].Value); // used alternatively to verbatim string (new line \n in expression has been replaced by windows \r\n)
+            Assert.AreEqual(TokenType.STRING, tokens[45].Type);
+            Assert.AreEqual(")", tokens[46].Value);
+            Assert.AreEqual(TokenType.RIGHT_BRACKET, tokens[46].Type);
+            Assert.AreEqual(")", tokens[47].Value);
+            Assert.AreEqual(TokenType.RIGHT_BRACKET, tokens[47].Type);
+            Assert.AreEqual(string.Empty, tokens[48].Value);
+            Assert.AreEqual(TokenType.EOF, tokens[48].Type);
         }
 
         [TestMethod]

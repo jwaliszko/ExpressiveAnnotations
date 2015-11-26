@@ -10,7 +10,7 @@
 
     qunit.testDone(function() { // reset state for further tests
         ea.settings.apply({
-            debug: true,
+            debug: false,
             dependencyTriggers: 'change keyup'
         });
     });

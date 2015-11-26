@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using ExpressiveAnnotations.Analysis;
-using ExpressiveAnnotations.Attributes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ExpressiveAnnotations.Tests
 {
     public class Utility
     {
-        public const string Const = "outside";
+        public const string Const = "outside1";
 
         public enum Stability
         {
@@ -20,11 +19,29 @@ namespace ExpressiveAnnotations.Tests
         }        
     }
 
+    public class Tools
+    {
+        public class Utility
+        {
+            public const string Const = "outside2";
+        }
+    }
+
     internal enum Stability
     {
         Good,
         Bad,
         Unknown
+    }
+
+    public class Dogs
+    {
+        public const int Const = 0;
+    }
+
+    public class HotDogs
+    {
+        public const int Const = 1;
     }
 
     public enum Dog
@@ -223,6 +240,7 @@ namespace ExpressiveAnnotations.Tests
                 Span = new TimeSpan(0),
                 Number = 0,
                 Flag = true,
+                NFlag = true,
                 Text = "hello world",
                 PoliticalStability = Utility.Stability.High,
                 SbyteNumber = SbyteEnum.First,
@@ -233,8 +251,9 @@ namespace ExpressiveAnnotations.Tests
                 UintNumber = UintEnum.First,
                 LongNumber = LongEnum.First,
                 UlongNumber = UlongEnum.First,
-                Guid1 = Guid.NewGuid(),
-                Guid2 = Guid.Empty,
+                Guid = Guid.NewGuid(),
+                NGuid1 = Guid.NewGuid(),
+                NGuid2 = Guid.Empty,
                 Array = new[]
                 {
                     new Model {Number = -1, Array = new[] {new Model {Number = -2}}},
@@ -247,6 +266,7 @@ namespace ExpressiveAnnotations.Tests
                     Date = now.AddDays(1),
                     Number = 1,
                     Flag = false,
+                    NFlag = false,
                     Text = " hello world ",
                     PoliticalStability = null,
                 }
@@ -275,11 +295,13 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<Model>("SubModel.PoliticalStability == null").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("SubModel.PoliticalStability != Utility.Stability.High").Invoke(model));
 
-            Assert.IsTrue(parser.Parse<Model>("Const != Utility.Const").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Const != Tools.Utility.Const").Invoke(model));
 
             Assert.IsTrue(parser.Parse<Model>("Flag").Invoke(model));
             Assert.IsFalse(parser.Parse<Model>("!Flag").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("Flag && true").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("NFlag == Flag").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Flag == NFlag").Invoke(model));
 
             Assert.IsFalse(parser.Parse<Model>("SubModel.Flag").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("!SubModel.Flag").Invoke(model));
@@ -298,7 +320,8 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<Model>("Today() - Today() == Span - Span").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("Today() - Today() == NSpan - NSpan").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("Span + NSpan == NSpan + Span").Invoke(model));
-            Assert.IsTrue(parser.Parse<Model>("Now() - Span > Date - NSpan").Invoke(model));            
+            Assert.IsTrue(parser.Parse<Model>("Now() - Span > Date - NSpan").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Now() - Span > NDate - Span").Invoke(model));
 
             Assert.IsTrue(parser.Parse<Model>("DecNumber(SubModel.Number) == Number").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("DecNumber(Number) == 0").Invoke(model.SubModel));
@@ -307,9 +330,11 @@ namespace ExpressiveAnnotations.Tests
             Assert.IsTrue(parser.Parse<Model>("'hello world' == Trim(SubModel.Text)").Invoke(model));
             Assert.IsTrue(parser.Parse<Model>("CompareOrdinal(Text, Trim(SubModel.Text)) == 0").Invoke(model));
 
-            Assert.IsTrue(parser.Parse<Model>("Guid1 != Guid('00000000-0000-0000-0000-000000000000')").Invoke(model));
-            Assert.IsTrue(parser.Parse<Model>("Guid2 == Guid('00000000-0000-0000-0000-000000000000')").Invoke(model));
-            Assert.IsTrue(parser.Parse<Model>("Guid1 != Guid2").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("NGuid1 != Guid('00000000-0000-0000-0000-000000000000')").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("NGuid2 == Guid('00000000-0000-0000-0000-000000000000')").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("NGuid1 != NGuid2").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("Guid != NGuid1").Invoke(model));
+            Assert.IsTrue(parser.Parse<Model>("NGuid1 != Guid").Invoke(model));
 
             model.NDate = null;
             model.NSpan = null;
@@ -328,7 +353,7 @@ namespace ExpressiveAnnotations.Tests
                                     (Number >= 0 && Number < 1) && PoliticalStability == Utility.Stability.High
                                 )
                          ) 
-                      && Const + Utility.Const == 'insideoutside'";
+                      && Const + Tools.Utility.Const == 'insideoutside2'";
             var func = parser.Parse(model.GetType(), expression);
             Assert.IsTrue(func(model));
 
@@ -355,7 +380,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 {"Utility.Stability.High", Utility.Stability.High},
                 {"Const", Model.Const},
-                {"Utility.Const", Utility.Const}
+                {"Tools.Utility.Const", Tools.Utility.Const}
             };
             Assert.AreEqual(expectedConsts.Count, parsedConsts.Count);
             Assert.IsTrue(
@@ -564,7 +589,7 @@ namespace ExpressiveAnnotations.Tests
         {
             var parser = new Parser();
 
-            // Ensure that this doesn't consider Dog and HotDog enums to be ambiguous
+            // ensure that this doesn't consider Dog and HotDog enums to be ambiguous
             Assert.IsTrue(parser.Parse<object>("Dog.Collie == 0").Invoke(null));
 
             try
@@ -581,6 +606,32 @@ namespace ExpressiveAnnotations.Tests
     ^--- Enum 'Stability' is ambiguous, found following:
 'ExpressiveAnnotations.Tests.Utility+Stability',
 'ExpressiveAnnotations.Tests.Stability'.",
+                    e.Message);
+            }
+        }
+
+        [TestMethod]
+        public void verify_consts_ambiguity()
+        {
+            var parser = new Parser();
+
+            // ensure that this doesn't consider Dogs.Const and HotDogs.Const constants to be ambiguous
+            Assert.IsTrue(parser.Parse<object>("Dogs.Const == 0").Invoke(null));
+
+            try
+            {
+                parser.Parse<object>("Utility.Const == 'outside1'").Invoke(null);
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e is InvalidOperationException);
+                Assert.AreEqual(
+                    @"Parse error on line 1, column 1:
+... Utility.Const == 'outside1' ...
+    ^--- Constant 'Utility.Const' is ambiguous, found following:
+'ExpressiveAnnotations.Tests.Utility.Const',
+'ExpressiveAnnotations.Tests.Tools+Utility.Const'.",
                     e.Message);
             }
         }
@@ -1623,6 +1674,7 @@ namespace ExpressiveAnnotations.Tests
             public TimeSpan Span { get; set; }
             public int? Number { get; set; }
             public bool Flag { get; set; }
+            public bool? NFlag { get; set; }
             public string Text { get; set; }
             public decimal Cash { get; set; }
             public Utility.Stability? PoliticalStability { get; set; }
@@ -1636,8 +1688,9 @@ namespace ExpressiveAnnotations.Tests
             public LongEnum? LongNumber { get; set; }
             public UlongEnum? UlongNumber { get; set; }
 
-            public Guid? Guid1 { get; set; }
-            public Guid? Guid2 { get; set; }
+            public Guid Guid { get; set; }
+            public Guid? NGuid1 { get; set; }
+            public Guid? NGuid2 { get; set; }
 
             public Model[] Array { get; set; } // array
             public IEnumerable<Model> Items { get; set; } // collection without indexer
