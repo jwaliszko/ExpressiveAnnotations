@@ -670,8 +670,8 @@ var
         }, '');
     });
 
-    // for testing only (section to be removed in release code)
-    api.___6BE7863DC1DB4AFAA61BB53FF97FE169 = {
+    // !debug section enter ----------------------------------------
+    api._private = { // for testing only (block removed for release)
         logger: logger,
         toolchain: toolchain,
         typeHelper: typeHelper,
@@ -680,7 +680,7 @@ var
         computeRequiredIf: computeRequiredIf,
         computeAssertThat: computeAssertThat
     };
-    // --------------------------------------------------------
+    // !debug section leave ----------------------------------------
 
     window.ea = api; // expose some tiny api to the ea global object
 

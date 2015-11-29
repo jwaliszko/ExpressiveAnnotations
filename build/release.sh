@@ -29,7 +29,7 @@ echo "------ generating documentation..."
 MSBuild.exe ../doc/api/api.shfbproj /t:Build /p:Configuration=Release
 
 echo "------ cutting of debug section from script..."
-sed '/for testing only/,/----------------/{N;d;}' ../src/expressive.annotations.validate.js > expressive.annotations.validate.js
+sed '/!debug section enter/,/!debug section leave/{N;d;}' ../src/expressive.annotations.validate.js > expressive.annotations.validate.js
 
 echo "------ generating minified script version..."
 uglifyjs --compress --mangle --comments /Copyright/ --output expressive.annotations.validate.min.js -- expressive.annotations.validate.js

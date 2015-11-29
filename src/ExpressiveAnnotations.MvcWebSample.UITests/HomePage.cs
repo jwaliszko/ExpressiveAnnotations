@@ -95,6 +95,12 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             elem.SendKeys(text);
         }
 
+        public void SetDate(string id, string text) // simulation of datepicker instant date selection (instead of sending key characters, one after another)
+        {
+            _driver.ExecuteScript(string.Format("$('#{0}').attr('value', '{1}')", id, text));
+            _driver.ExecuteScript("$('.date').trigger('change')");
+        }
+
         public void ClearInput(string id)
         {
             var elem = _driver.FindElementByXPath(string.Format("//input[@id='{0}']", id));

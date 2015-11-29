@@ -76,7 +76,7 @@
                     return millisec; // return milliseconds...
                 }
 
-                throw 'Some nonsense has been entered.';
+                throw 'Invalid date string provided.';
             });
             ea.addValueParser('ArrayParser', function(value, field) { // provide your custom parsing mechanism of the field value at client side
                                                                       // parameters: value - raw data string extracted by default from DOM element

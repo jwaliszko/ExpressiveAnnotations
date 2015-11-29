@@ -8,9 +8,8 @@
 </head>
 <body>
     <div id="qunit"></div>
-    <div id="qunit-fixture"></div>
 
-    <div style="display: none">
+    <div id="qunit-fixture">
         <form id="basic_test_form">
             <input data-val="true"
                    data-val-assertthat="Provided email: 02b4c617-f4a4-4820-9624-6bc4cd0922c5 (yes 02b4c617-f4a4-4820-9624-6bc4cd0922c5) cannot be accepted."
@@ -47,6 +46,35 @@
     <script src="https://cdn.jsdelivr.net/jquery.validation.unobtrusive/latest/jquery.validate.unobtrusive.min.js"></script>-->
 
     <script src="expressive.annotations.validate.js"></script>
-    <script src="expressive.annotations.validate.test.js"></script>
+
+    <script>
+        QUnit.test("verify_sample_form_validation", function(assert) { // relies on form defined in test harness file
+
+            ea.addMethod('Whoami', function() {
+                return 'root';
+            });
+            ea.addMethod('ArrayContains', function(value, array) {
+                return $.inArray(value, array) >= 0;
+            });
+            ea.addValueParser('ArrayParser', function(value, field) {
+                assert.equal(field, 'ContactDetails.Letters');
+
+                var array = value.split(',');
+                return array.length === 0 ? null : array;
+            });
+
+            var validator = $('#basic_test_form').validate();
+
+            var element = $('#basic_test_form').find('[name="ContactDetails.Email"]');
+            var result = element.valid(); // trigger wait for result (all is synchronous)
+            assert.ok(!result);
+            assert.equal(validator.errorList[0].message, 'Provided email: ea@home.com (yes ea@home.com) cannot be accepted.');
+
+            element = $('#basic_test_form').find('[name="ContactDetails.PoliticalStability"]');
+            result = element.valid();
+            assert.ok(!result);
+            assert.equal(validator.errorList[0].message, '{0}{1}');
+        });
+    </script>
 </body>
 </html>
