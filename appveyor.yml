@@ -1,0 +1,11 @@
+version: '{build}'
+branches:
+  only:
+  - master
+before_build:
+- ps: nuget restore src\ExpressiveAnnotations.sln
+build:
+  parallel: true
+  verbosity: minimal
+test_script:
+- ps: build\test.ps1
