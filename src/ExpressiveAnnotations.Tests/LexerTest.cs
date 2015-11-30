@@ -3,14 +3,23 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using ExpressiveAnnotations.Analysis;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace ExpressiveAnnotations.Tests
 {
-    [TestClass]
     public class LexerTest
     {
-        [TestMethod]
+        [Fact]
+        public void verify_empty_expression_analysis()
+        {
+            var lexer = new Lexer();
+            var tokens = lexer.Analyze(string.Empty).ToArray();
+            Assert.Equal(1, tokens.Length);
+            Assert.Equal(string.Empty, tokens[0].Value);
+            Assert.Equal(TokenType.EOF, tokens[0].Type);
+        }
+
+        [Fact]
         public void verify_complex_expression_analysis()
         {
             const string expression =
@@ -24,170 +33,137 @@ namespace ExpressiveAnnotations.Tests
 
             var lexer = new Lexer();
             var tokens = lexer.Analyze(expression).ToArray();
-            Assert.AreEqual(49, tokens.Length);
-            Assert.AreEqual("GoAbroad", tokens[0].Value);
-            Assert.AreEqual(TokenType.FUNC, tokens[0].Type);
-            Assert.AreEqual("==", tokens[1].Value);
-            Assert.AreEqual(TokenType.EQ, tokens[1].Type);
-            Assert.AreEqual(true, tokens[2].Value);
-            Assert.AreEqual(TokenType.BOOL, tokens[2].Type);
-            Assert.AreEqual("&&", tokens[3].Value);
-            Assert.AreEqual(TokenType.AND, tokens[3].Type);
-            Assert.AreEqual("(", tokens[4].Value);
-            Assert.AreEqual(TokenType.LEFT_BRACKET, tokens[4].Type);
-            Assert.AreEqual("(", tokens[5].Value);
-            Assert.AreEqual(TokenType.LEFT_BRACKET, tokens[5].Type);
-            Assert.AreEqual("NextCountry", tokens[6].Value);
-            Assert.AreEqual(TokenType.FUNC, tokens[6].Type);
-            Assert.AreEqual("!=", tokens[7].Value);
-            Assert.AreEqual(TokenType.NEQ, tokens[7].Type);
-            Assert.AreEqual("european country", tokens[8].Value);
-            Assert.AreEqual(TokenType.STRING, tokens[8].Type);
-            Assert.AreEqual("&&", tokens[9].Value);
-            Assert.AreEqual(TokenType.AND, tokens[9].Type);
-            Assert.AreEqual("Compare", tokens[10].Value);
-            Assert.AreEqual(TokenType.FUNC, tokens[10].Type);
-            Assert.AreEqual("(", tokens[11].Value);
-            Assert.AreEqual(TokenType.LEFT_BRACKET, tokens[11].Type);
-            Assert.AreEqual("NextCountry", tokens[12].Value);
-            Assert.AreEqual(TokenType.FUNC, tokens[12].Type);
-            Assert.AreEqual(",", tokens[13].Value);
-            Assert.AreEqual(TokenType.COMMA, tokens[13].Type);
-            Assert.AreEqual("Country.Name", tokens[14].Value);
-            Assert.AreEqual(TokenType.FUNC, tokens[14].Type);
-            Assert.AreEqual(")", tokens[15].Value);
-            Assert.AreEqual(TokenType.RIGHT_BRACKET, tokens[15].Type);
-            Assert.AreEqual("==", tokens[16].Value);
-            Assert.AreEqual(TokenType.EQ, tokens[16].Type);
-            Assert.AreEqual(0, tokens[17].Value);
-            Assert.AreEqual(TokenType.INT, tokens[17].Type);
-            Assert.AreEqual(")", tokens[18].Value);
-            Assert.AreEqual(TokenType.RIGHT_BRACKET, tokens[18].Type);
-            Assert.AreEqual("||", tokens[19].Value);
-            Assert.AreEqual(TokenType.OR, tokens[19].Type);
-            Assert.AreEqual("(", tokens[20].Value);
-            Assert.AreEqual(TokenType.LEFT_BRACKET, tokens[20].Type);
-            Assert.AreEqual("Age", tokens[21].Value);
-            Assert.AreEqual(TokenType.FUNC, tokens[21].Type);
-            Assert.AreEqual(">", tokens[22].Value);
-            Assert.AreEqual(TokenType.GT, tokens[22].Type);
-            Assert.AreEqual(24, tokens[23].Value);
-            Assert.AreEqual(TokenType.INT, tokens[23].Type);
-            Assert.AreEqual("&&", tokens[24].Value);
-            Assert.AreEqual(TokenType.AND, tokens[24].Type);
-            Assert.AreEqual("Age", tokens[25].Value);
-            Assert.AreEqual(TokenType.FUNC, tokens[25].Type);
-            Assert.AreEqual("<=", tokens[26].Value);
-            Assert.AreEqual(TokenType.LE, tokens[26].Type);
-            Assert.AreEqual(55.5d, tokens[27].Value);
-            Assert.AreEqual(TokenType.FLOAT, tokens[27].Type);
-            Assert.AreEqual(")", tokens[28].Value);
-            Assert.AreEqual(TokenType.RIGHT_BRACKET, tokens[28].Type);
-            Assert.AreEqual("&&", tokens[29].Value);
-            Assert.AreEqual(TokenType.AND, tokens[29].Type);
-            Assert.AreEqual("(", tokens[30].Value);
-            Assert.AreEqual(TokenType.LEFT_BRACKET, tokens[30].Type);
-            Assert.AreEqual(1.1, tokens[31].Value);
-            Assert.AreEqual(TokenType.FLOAT, tokens[31].Type);
-            Assert.AreEqual("+", tokens[32].Value);
-            Assert.AreEqual(TokenType.ADD, tokens[32].Type);
-            Assert.AreEqual(2, tokens[33].Value);
-            Assert.AreEqual(TokenType.INT, tokens[33].Type);
-            Assert.AreEqual("*", tokens[34].Value);
-            Assert.AreEqual(TokenType.MUL, tokens[34].Type);
-            Assert.AreEqual(2, tokens[35].Value);
-            Assert.AreEqual(TokenType.INT, tokens[35].Type);
-            Assert.AreEqual(">", tokens[36].Value);
-            Assert.AreEqual(TokenType.GT, tokens[36].Type);
-            Assert.AreEqual(1, tokens[37].Value);
-            Assert.AreEqual(TokenType.INT, tokens[37].Type);
-            Assert.AreEqual("-", tokens[38].Value);
-            Assert.AreEqual(TokenType.SUB, tokens[38].Type);
-            Assert.AreEqual(2, tokens[39].Value);
-            Assert.AreEqual(TokenType.INT, tokens[39].Type);
-            Assert.AreEqual("/", tokens[40].Value);
-            Assert.AreEqual(TokenType.DIV, tokens[40].Type);
-            Assert.AreEqual(2, tokens[41].Value);
-            Assert.AreEqual(TokenType.INT, tokens[41].Type);
-            Assert.AreEqual("+", tokens[42].Value);
-            Assert.AreEqual(TokenType.ADD, tokens[42].Type);
-            Assert.AreEqual("Array[0].Value", tokens[43].Value);
-            Assert.AreEqual(TokenType.FUNC, tokens[43].Type);
-            Assert.AreEqual("==", tokens[44].Value);
-            Assert.AreEqual(TokenType.EQ, tokens[44].Type);
-            Assert.AreEqual("'\r\na\r\n b\r\nc\r\n'", tokens[45].Value); // used alternatively to verbatim string (new line \n in expression has been replaced by windows \r\n)
-            Assert.AreEqual(TokenType.STRING, tokens[45].Type);
-            Assert.AreEqual(")", tokens[46].Value);
-            Assert.AreEqual(TokenType.RIGHT_BRACKET, tokens[46].Type);
-            Assert.AreEqual(")", tokens[47].Value);
-            Assert.AreEqual(TokenType.RIGHT_BRACKET, tokens[47].Type);
-            Assert.AreEqual(string.Empty, tokens[48].Value);
-            Assert.AreEqual(TokenType.EOF, tokens[48].Type);
+            Assert.Equal(49, tokens.Length);
+            Assert.Equal("GoAbroad", tokens[0].Value);
+            Assert.Equal(TokenType.FUNC, tokens[0].Type);
+            Assert.Equal("==", tokens[1].Value);
+            Assert.Equal(TokenType.EQ, tokens[1].Type);
+            Assert.Equal(true, tokens[2].Value);
+            Assert.Equal(TokenType.BOOL, tokens[2].Type);
+            Assert.Equal("&&", tokens[3].Value);
+            Assert.Equal(TokenType.AND, tokens[3].Type);
+            Assert.Equal("(", tokens[4].Value);
+            Assert.Equal(TokenType.LEFT_BRACKET, tokens[4].Type);
+            Assert.Equal("(", tokens[5].Value);
+            Assert.Equal(TokenType.LEFT_BRACKET, tokens[5].Type);
+            Assert.Equal("NextCountry", tokens[6].Value);
+            Assert.Equal(TokenType.FUNC, tokens[6].Type);
+            Assert.Equal("!=", tokens[7].Value);
+            Assert.Equal(TokenType.NEQ, tokens[7].Type);
+            Assert.Equal("european country", tokens[8].Value);
+            Assert.Equal(TokenType.STRING, tokens[8].Type);
+            Assert.Equal("&&", tokens[9].Value);
+            Assert.Equal(TokenType.AND, tokens[9].Type);
+            Assert.Equal("Compare", tokens[10].Value);
+            Assert.Equal(TokenType.FUNC, tokens[10].Type);
+            Assert.Equal("(", tokens[11].Value);
+            Assert.Equal(TokenType.LEFT_BRACKET, tokens[11].Type);
+            Assert.Equal("NextCountry", tokens[12].Value);
+            Assert.Equal(TokenType.FUNC, tokens[12].Type);
+            Assert.Equal(",", tokens[13].Value);
+            Assert.Equal(TokenType.COMMA, tokens[13].Type);
+            Assert.Equal("Country.Name", tokens[14].Value);
+            Assert.Equal(TokenType.FUNC, tokens[14].Type);
+            Assert.Equal(")", tokens[15].Value);
+            Assert.Equal(TokenType.RIGHT_BRACKET, tokens[15].Type);
+            Assert.Equal("==", tokens[16].Value);
+            Assert.Equal(TokenType.EQ, tokens[16].Type);
+            Assert.Equal(0, tokens[17].Value);
+            Assert.Equal(TokenType.INT, tokens[17].Type);
+            Assert.Equal(")", tokens[18].Value);
+            Assert.Equal(TokenType.RIGHT_BRACKET, tokens[18].Type);
+            Assert.Equal("||", tokens[19].Value);
+            Assert.Equal(TokenType.OR, tokens[19].Type);
+            Assert.Equal("(", tokens[20].Value);
+            Assert.Equal(TokenType.LEFT_BRACKET, tokens[20].Type);
+            Assert.Equal("Age", tokens[21].Value);
+            Assert.Equal(TokenType.FUNC, tokens[21].Type);
+            Assert.Equal(">", tokens[22].Value);
+            Assert.Equal(TokenType.GT, tokens[22].Type);
+            Assert.Equal(24, tokens[23].Value);
+            Assert.Equal(TokenType.INT, tokens[23].Type);
+            Assert.Equal("&&", tokens[24].Value);
+            Assert.Equal(TokenType.AND, tokens[24].Type);
+            Assert.Equal("Age", tokens[25].Value);
+            Assert.Equal(TokenType.FUNC, tokens[25].Type);
+            Assert.Equal("<=", tokens[26].Value);
+            Assert.Equal(TokenType.LE, tokens[26].Type);
+            Assert.Equal(55.5d, tokens[27].Value);
+            Assert.Equal(TokenType.FLOAT, tokens[27].Type);
+            Assert.Equal(")", tokens[28].Value);
+            Assert.Equal(TokenType.RIGHT_BRACKET, tokens[28].Type);
+            Assert.Equal("&&", tokens[29].Value);
+            Assert.Equal(TokenType.AND, tokens[29].Type);
+            Assert.Equal("(", tokens[30].Value);
+            Assert.Equal(TokenType.LEFT_BRACKET, tokens[30].Type);
+            Assert.Equal(1.1, tokens[31].Value);
+            Assert.Equal(TokenType.FLOAT, tokens[31].Type);
+            Assert.Equal("+", tokens[32].Value);
+            Assert.Equal(TokenType.ADD, tokens[32].Type);
+            Assert.Equal(2, tokens[33].Value);
+            Assert.Equal(TokenType.INT, tokens[33].Type);
+            Assert.Equal("*", tokens[34].Value);
+            Assert.Equal(TokenType.MUL, tokens[34].Type);
+            Assert.Equal(2, tokens[35].Value);
+            Assert.Equal(TokenType.INT, tokens[35].Type);
+            Assert.Equal(">", tokens[36].Value);
+            Assert.Equal(TokenType.GT, tokens[36].Type);
+            Assert.Equal(1, tokens[37].Value);
+            Assert.Equal(TokenType.INT, tokens[37].Type);
+            Assert.Equal("-", tokens[38].Value);
+            Assert.Equal(TokenType.SUB, tokens[38].Type);
+            Assert.Equal(2, tokens[39].Value);
+            Assert.Equal(TokenType.INT, tokens[39].Type);
+            Assert.Equal("/", tokens[40].Value);
+            Assert.Equal(TokenType.DIV, tokens[40].Type);
+            Assert.Equal(2, tokens[41].Value);
+            Assert.Equal(TokenType.INT, tokens[41].Type);
+            Assert.Equal("+", tokens[42].Value);
+            Assert.Equal(TokenType.ADD, tokens[42].Type);
+            Assert.Equal("Array[0].Value", tokens[43].Value);
+            Assert.Equal(TokenType.FUNC, tokens[43].Type);
+            Assert.Equal("==", tokens[44].Value);
+            Assert.Equal(TokenType.EQ, tokens[44].Type);
+            Assert.Equal("'\r\na\r\n b\r\nc\r\n'", tokens[45].Value); // used alternatively to verbatim string (new line \n in expression has been replaced by windows \r\n)
+            Assert.Equal(TokenType.STRING, tokens[45].Type);
+            Assert.Equal(")", tokens[46].Value);
+            Assert.Equal(TokenType.RIGHT_BRACKET, tokens[46].Type);
+            Assert.Equal(")", tokens[47].Value);
+            Assert.Equal(TokenType.RIGHT_BRACKET, tokens[47].Type);
+            Assert.Equal(string.Empty, tokens[48].Value);
+            Assert.Equal(TokenType.EOF, tokens[48].Type);
         }
 
-        [TestMethod]
+        [Fact]
+        public void verify_invalid_parameter()
+        {
+            var lexer = new Lexer();
+            var e = Assert.Throws<ArgumentNullException>(() => lexer.Analyze(null));
+            Assert.Equal("Expression not provided.\r\nParameter name: expression", e.Message);
+        }
+
+        [Fact]
         public void verify_invalid_tokens_detection()
         {
             var lexer = new Lexer();
 
-            try
-            {
-                lexer.Analyze(null);
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(e is ArgumentNullException);
-                Assert.AreEqual("Expression not provided.\r\nParameter name: expression", e.Message);
-            }
+            var e = Assert.Throws<ParseErrorException>(() => lexer.Analyze("true # false"));
+            Assert.Equal("Invalid token.", e.Message);
+            Assert.Equal(1, e.Location.Line);
+            Assert.Equal(6, e.Location.Column);
 
-            try
-            {
-                lexer.Analyze("true # false");
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(e is ParseErrorException);
-                Assert.AreEqual("Invalid token.", e.Message);
+            e = Assert.Throws<ParseErrorException>(() => lexer.Analyze("true\r\n&& ^"));
+            Assert.Equal("Invalid token.", e.Message);
+            Assert.Equal(2, e.Location.Line);
+            Assert.Equal(4, e.Location.Column);
 
-                var ctx = ((ParseErrorException) e).Location;
-                Assert.AreEqual(1, ctx.Line);
-                Assert.AreEqual(6, ctx.Column);
-            }
-
-            try
-            {
-                lexer.Analyze("true\r\n&& ^");
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(e is ParseErrorException);
-                Assert.AreEqual("Invalid token.", e.Message);
-
-                var ctx = ((ParseErrorException) e).Location;
-                Assert.AreEqual(2, ctx.Line);
-                Assert.AreEqual(4, ctx.Column);
-            }
-
-            try
-            {
-                lexer.Analyze("'John's cat'");
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(e is ParseErrorException);
-                Assert.AreEqual("Invalid token.", e.Message);
-
-                var ctx = ((ParseErrorException) e).Location;
-                Assert.AreEqual(1, ctx.Line);
-                Assert.AreEqual(12, ctx.Column);
-            }
+            e = Assert.Throws<ParseErrorException>(() => lexer.Analyze("'John's cat'"));
+            Assert.Equal("Invalid token.", e.Message);
+            Assert.Equal(1, e.Location.Line);
+            Assert.Equal(12, e.Location.Column);
         }
 
-        [TestMethod]
+        [Fact]
         public void verify_analysis_apathy_to_culture_settings()
         {
             var current = Thread.CurrentThread.CurrentCulture;
@@ -199,14 +175,14 @@ namespace ExpressiveAnnotations.Tests
 
                 // literals parsing should not vary across diverse cultures
                 var tkn = lexer.Analyze("0.1").First(); // e.g. double literal should be always written using dot in our expressions language, no matter the culture
-                Assert.AreEqual(TokenType.FLOAT, tkn.Type);
-                Assert.AreEqual(0.1, tkn.Value);
+                Assert.Equal(TokenType.FLOAT, tkn.Type);
+                Assert.Equal(0.1, tkn.Value);
             }
 
             Thread.CurrentThread.CurrentCulture = current;
         }
 
-        [TestMethod]
+        [Fact]
         public void verify_float_token_extraction()
         {
             AssertToken("1.0", 1.0, TokenType.FLOAT);
@@ -216,7 +192,7 @@ namespace ExpressiveAnnotations.Tests
             AssertNotToken("a", TokenType.FLOAT);
         }
 
-        [TestMethod]
+        [Fact]
         public void verify_string_token_extraction()
         {
             AssertToken("''", string.Empty, TokenType.STRING);
@@ -235,7 +211,7 @@ namespace ExpressiveAnnotations.Tests
             AssertNotToken("'John's cat'", TokenType.STRING);
         }
 
-        [TestMethod]
+        [Fact]
         public void verify_func_token_extraction()
         {
             AssertToken("_", "_", TokenType.FUNC);
@@ -277,10 +253,10 @@ namespace ExpressiveAnnotations.Tests
             var lexer = new Lexer();
             var tokens = lexer.Analyze(expression).ToArray();
 
-            Assert.AreEqual(2, tokens.Length); // tested token + EOF token
-            Assert.AreEqual(value, tokens[0].Value);
-            Assert.AreEqual(type, tokens[0].Type);
-            Assert.AreEqual(TokenType.EOF, tokens[1].Type);
+            Assert.Equal(2, tokens.Length); // tested token + EOF token
+            Assert.Equal(value, tokens[0].Value);
+            Assert.Equal(type, tokens[0].Type);
+            Assert.Equal(TokenType.EOF, tokens[1].Type);
         }
 
         private static void AssertNotToken(string expression, TokenType type)
@@ -290,12 +266,12 @@ namespace ExpressiveAnnotations.Tests
                 var lexer = new Lexer();
                 var tokens = lexer.Analyze(expression).ToArray();
 
-                Assert.IsFalse(tokens.Length == 2 && tokens[0].Type == type);
+                var recognized = tokens.Length == 2 && tokens[0].Type == type && tokens[1].Type == TokenType.EOF;
+                Assert.False(recognized);
             }
-            catch (Exception e)
+            catch (ParseErrorException e)
             {
-                Assert.IsTrue(e is ParseErrorException);
-                Assert.AreEqual("Invalid token.", e.Message);
+                Assert.Equal("Invalid token.", e.Message);
             }
         }
     }

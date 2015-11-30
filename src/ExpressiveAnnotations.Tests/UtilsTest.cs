@@ -3,28 +3,27 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using ExpressiveAnnotations.Analysis;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace ExpressiveAnnotations.Tests
 {
-    [TestClass]
     public class UtilsTest
     {
-        [TestMethod]
+        [Fact]
         public void verify_serialization_of_parse_exception() // not really required since this exception is not expected to travel through various app domains (nevertheless implemented to satisfy good practices)
         {
             var ex = new ParseErrorException("Operator '!' cannot be applied to operand of type 'System.String'", new Location(1, 5));
 
             // sanity check: make sure custom properties are set before serialization
-            Assert.AreEqual("Operator '!' cannot be applied to operand of type 'System.String'", ex.Message);
-            Assert.IsNotNull(ex.Location);
-            Assert.AreEqual(1, ex.Location.Line);
-            Assert.AreEqual(5, ex.Location.Column);
+            Assert.Equal("Operator '!' cannot be applied to operand of type 'System.String'", ex.Message);
+            Assert.NotNull(ex.Location);
+            Assert.Equal(1, ex.Location.Line);
+            Assert.Equal(5, ex.Location.Column);
 
             // save the full ToString() value, including the exception message and stack trace.
             var exceptionToString = ex.ToString();
 
-            // round-trip the exception: serialize and de-serialize with a BinaryFormatter            
+            // round-trip the exception: serialize and de-serialize with a BinaryFormatter
             using (var ms = new MemoryStream())
             {
                 var bf = new BinaryFormatter();
@@ -37,16 +36,16 @@ namespace ExpressiveAnnotations.Tests
             }
 
             // make sure custom properties are preserved after serialization
-            Assert.AreEqual("Operator '!' cannot be applied to operand of type 'System.String'", ex.Message);
-            Assert.IsNotNull(ex.Location);
-            Assert.AreEqual(1, ex.Location.Line, "ex.ValidationErrors[0]");
-            Assert.AreEqual(5, ex.Location.Column, "ex.ValidationErrors[1]");
+            Assert.Equal("Operator '!' cannot be applied to operand of type 'System.String'", ex.Message);
+            Assert.NotNull(ex.Location);
+            Assert.Equal(1, ex.Location.Line);
+            Assert.Equal(5, ex.Location.Column);
 
             // double-check that the exception message and stack trace (owned by the base Exception) are preserved
-            Assert.AreEqual(exceptionToString, ex.ToString());
+            Assert.Equal(exceptionToString, ex.ToString());
         }
 
-        [TestMethod]
+        [Fact]
         public void verify_fields_values_extraction_from_given_instance()
         {
             var model = new Model
@@ -60,73 +59,41 @@ namespace ExpressiveAnnotations.Tests
                 }
             };
 
-            Assert.AreEqual(1, ExpressiveAnnotations.Helper.ExtractValue(model, "Value1"));
-            Assert.AreEqual(11, ExpressiveAnnotations.Helper.ExtractValue(model, "Internal.Value1"));
-            Assert.AreEqual(null, ExpressiveAnnotations.Helper.ExtractValue(model, "Internal.Value2"));
+            Assert.Equal(1, ExpressiveAnnotations.Helper.ExtractValue(model, "Value1"));
+            Assert.Equal(11, ExpressiveAnnotations.Helper.ExtractValue(model, "Internal.Value1"));
+            Assert.Equal(null, ExpressiveAnnotations.Helper.ExtractValue(model, "Internal.Value2"));
 
-            try
-            {
-                ExpressiveAnnotations.Helper.ExtractValue(model, "Internal.Value123");
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsInstanceOfType(e, typeof(ArgumentException));
-                Assert.AreEqual("Value extraction interrupted. Field Value123 not found.\r\nParameter name: Internal.Value123", e.Message);
-            }
+            var e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractValue(model, "Internal.Value123"));
+            Assert.Equal("Value extraction interrupted. Field Value123 not found.\r\nParameter name: Internal.Value123", e.Message);
 
             model.Internal = null;
-            try
-            {
-                ExpressiveAnnotations.Helper.ExtractValue(model, "Internal.Value1");
-                Assert.Fail();
-            }
-            catch(Exception e)
-            {
-                Assert.IsInstanceOfType(e, typeof(ArgumentException));
-                Assert.AreEqual("Value extraction interrupted. Field Internal is null.\r\nParameter name: Internal.Value1", e.Message);
-            }
+            e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractValue(model, "Internal.Value1"));
+            Assert.Equal("Value extraction interrupted. Field Internal is null.\r\nParameter name: Internal.Value1", e.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void verify_display_names_extraction_from_given_type()
         {
             // name provided explicitly
-            Assert.AreEqual("Value_1", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Value1"));
-            Assert.AreEqual("Value_1", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Internal.Value1"));
+            Assert.Equal("Value_1", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Value1"));
+            Assert.Equal("Value_1", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Internal.Value1"));
             
             // name provided in resources
-            Assert.AreEqual("_{Value2}_", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Value2"));
-            Assert.AreEqual("_{Value2}_", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Internal.Value2"));
+            Assert.Equal("_{Value2}_", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Value2"));
+            Assert.Equal("_{Value2}_", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Internal.Value2"));
 
-            try
-            {
-                ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Internal.Value123");
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsInstanceOfType(e, typeof(ArgumentException));
-                Assert.AreEqual("Display name extraction interrupted. Field Value123 not found.\r\nParameter name: Internal.Value123", e.Message);
-            }
+            var e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "Internal.Value123"));
+            Assert.Equal("Display name extraction interrupted. Field Value123 not found.\r\nParameter name: Internal.Value123", e.Message);
 
-            try
-            {
-                ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "NoName");
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsInstanceOfType(e, typeof(ArgumentException));
-                Assert.AreEqual("No DisplayName attribute provided for NoName field.\r\nParameter name: NoName", e.Message);
-            }
+            e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "NoName"));
+            Assert.Equal("No DisplayName attribute provided for NoName field.\r\nParameter name: NoName", e.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void name_of_field_extracted_through_its_display_name_annotation() // DisplayAttribute used as a workaround for field name extraction in older versions of MVC where MemberName was not provided in ValidationContext
         {
-            Assert.AreEqual("Value1", typeof (Model).GetMemberNameFromDisplayAttribute("Value_1"));
-            Assert.AreEqual("Value2", typeof (Model).GetMemberNameFromDisplayAttribute("_{Value2}_"));
+            Assert.Equal("Value1", typeof (Model).GetMemberNameFromDisplayAttribute("Value_1"));
+            Assert.Equal("Value2", typeof (Model).GetMemberNameFromDisplayAttribute("_{Value2}_"));
         }
 
         private class Model

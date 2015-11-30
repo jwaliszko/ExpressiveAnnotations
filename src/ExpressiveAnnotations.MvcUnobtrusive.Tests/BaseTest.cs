@@ -4,15 +4,13 @@ using System.Linq.Expressions;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
 {
     public class BaseTest
     {
-        [TestInitialize]
-        public void Setup()
+        public BaseTest()
         {
             HttpContext.Current = new HttpContext(
                 new HttpRequest(string.Empty, "http://tempuri.org", string.Empty),

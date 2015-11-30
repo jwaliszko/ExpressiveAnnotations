@@ -7,22 +7,21 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using ExpressiveAnnotations.Attributes;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace ExpressiveAnnotations.Tests
 {
-    [TestClass]
     public class AttribsTest
     {
-        [TestMethod]
+        [Fact]
         public void verify_attributes_uniqueness()
         {
             var attributes = typeof (Model).GetProperty("Value1")
                 .GetCustomAttributes()
                 .DistinctBy(x => x.TypeId)
                 .ToList();
-            Assert.AreEqual(2, attributes.Count); // ignores redundant attributes of the same type id, because they do nothing new (exact type name, exact expression)
-            Assert.IsTrue(new[]
+            Assert.Equal(2, attributes.Count); // ignores redundant attributes of the same type id, because they do nothing new (exact type name, exact expression)
+            Assert.True(new[]
             {
                 typeof (RequiredIfAttribute),
                 typeof (AssertThatAttribute)
@@ -32,15 +31,15 @@ namespace ExpressiveAnnotations.Tests
                 .GetCustomAttributes()
                 .DistinctBy(x => x.TypeId)
                 .ToList();
-            Assert.AreEqual(4, attributes.Count); // all type ids are unique (despite the same type names of some attributes, they contain different expressions)
-            Assert.IsTrue(new[]
+            Assert.Equal(4, attributes.Count); // all type ids are unique (despite the same type names of some attributes, they contain different expressions)
+            Assert.True(new[]
             {
                 typeof (RequiredIfAttribute),
                 typeof (AssertThatAttribute)
             }.All(x => attributes.Select(y => y.GetType()).Contains(x)));
         }
 
-        [TestMethod]
+        [Fact]
         public void verify_validation_execution_for_derived_types()
         {
             // just assure that no exception is thrown during validation related to types casting and cached funcs
@@ -69,7 +68,7 @@ namespace ExpressiveAnnotations.Tests
             Validator.TryValidateObject(secondDerived, secondContext, null, true);
         }
 
-        [TestMethod]
+        [Fact]
         public void verify_attributes_compilation_caching_indirectly()
         {
             const int testLoops = 10;
@@ -80,11 +79,11 @@ namespace ExpressiveAnnotations.Tests
             for (var i = 0; i < testLoops; i++)
             {
                 var cached = MeasureExecutionTime(() => Validator.TryValidateObject(model, context, null, true));
-                Assert.IsTrue(nonCached > cached);
+                Assert.True(nonCached > cached);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void verify_attributes_compilation_caching_directly()
         {
             const int testLoops = 10;
@@ -94,75 +93,58 @@ namespace ExpressiveAnnotations.Tests
             for (var i = 0; i < testLoops; i++)
             {
                 var cached = MeasureExecutionTime(() => compiled.ForEach(x => x.Compile(typeof (Model))));
-                Assert.IsTrue(nonCached > cached);
+                Assert.True(nonCached > cached);
             }
 
             nonCached = MeasureExecutionTime(() => compiled.ForEach(x => x.Compile(typeof (Model), force: true))); // forcibly recompile already compiled expressions
             for (var i = 0; i < testLoops; i++)
             {
                 var cached = MeasureExecutionTime(() => compiled.ForEach(x => x.Compile(typeof (Model))));
-                Assert.IsTrue(nonCached > cached);
+                Assert.True(nonCached > cached);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void verify_parsing_error_catched_by_attribute()
         {
             var model = new BrokenModel();
             var context = new ValidationContext(model);
-
-            try
-            {
-                model.Value = 0;
-                Validator.TryValidateObject(model, context, null, true);
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(e is ValidationException);
-                Assert.AreEqual(
-                    "AssertThatAttribute: validation applied to Value field failed.",
-                    e.Message);
-                Assert.IsNotNull(e.InnerException);
-                Assert.IsTrue(e.InnerException is InvalidOperationException);
-                Assert.AreEqual(
-                    @"Parse error on line 1, column 9:
+            
+            model.Value = 0;                
+            var e = Assert.Throws<ValidationException>(() => Validator.TryValidateObject(model, context, null, true));
+            Assert.Equal(
+                "AssertThatAttribute: validation applied to Value field failed.", 
+                e.Message);
+            Assert.IsType<InvalidOperationException>(e.InnerException);
+            Assert.Equal(
+                @"Parse error on line 1, column 9:
 ... # ...
     ^--- Invalid token.",
-                    e.InnerException.Message);
-            }
+                e.InnerException.Message);            
 
-            try
-            {
-                model.Value = null;
-                Validator.TryValidateObject(model, context, null, true);
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsTrue(e is ValidationException);
-                Assert.AreEqual(
-                    "RequiredIfAttribute: validation applied to Value field failed.",
-                    e.Message);
-                Assert.IsNotNull(e.InnerException);
-                Assert.IsTrue(e.InnerException is InvalidOperationException);
-                Assert.AreEqual(
-                    @"Parse error on line 1, column 9:
+            model.Value = null;
+            e = Assert.Throws<ValidationException>(() => Validator.TryValidateObject(model, context, null, true));
+            Assert.Equal(
+                "RequiredIfAttribute: validation applied to Value field failed.", 
+                e.Message);
+            Assert.IsType<InvalidOperationException>(e.InnerException);
+            Assert.Equal(
+                @"Parse error on line 1, column 9:
 ... # ...
     ^--- Invalid token.",
-                    e.InnerException.Message);
-            }
+                e.InnerException.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void verify_default_error_message_after_validation()
         {
-            AssertErrorMessage(null,
+            AssertErrorMessage(
+                null,
                 "Assertion for #{Value1}# field is not satisfied by the following logic: 1!=1",
                 "The #{Value1}# field is required by the following logic: 1==1");
         }
 
-        [TestMethod]
+        [Fact]
         public void verify_custom_error_message_after_validation()
         {
             //string.Format("{0}", 1); -> 1
@@ -196,7 +178,7 @@ namespace ExpressiveAnnotations.Tests
                 "field: {0, expr: {1 | Value1: {Value1{Value1:n, Internal.Internal.Value1: Internal.Internal.Value1}, Internal.Internal.Value2:N}");
         }
 
-        [TestMethod]
+        [Fact]
         public void verify_format_exceptions_from_incorrect_custom_format_specifiers() // custom specifiers handling should throw the same formatting error as framework implementation, when incorrect nesting is detected
         {
             new[]
@@ -205,23 +187,15 @@ namespace ExpressiveAnnotations.Tests
                 "{{field:n}", "{{field.field:n}", "{field:N}}", "{field.field:N}}"
             }.ToList().ForEach(msg =>
             {
-                try
-                {
-                    var attrib = new AssertThatAttribute("true") {ErrorMessage = msg};
-                    attrib.FormatErrorMessage("ads", "true", null);
-                    Assert.Fail();
-                }
-                catch (Exception e)
-                {
-                    Assert.IsInstanceOfType(e, typeof(FormatException));
-                    Assert.AreEqual(string.Format("Problem with error message processing. The message is following: {0}", msg), e.Message);
-                    Assert.IsInstanceOfType(e.InnerException, typeof(FormatException));
-                    Assert.AreEqual("Input string was not in a correct format.", e.InnerException.Message);
-                }
+                var attrib = new AssertThatAttribute("true") {ErrorMessage = msg};
+                var e = Assert.Throws<FormatException>(() => attrib.FormatErrorMessage("ads", "true", null));
+                Assert.Equal(string.Format("Problem with error message processing. The message is following: {0}", msg), e.Message);
+                Assert.IsType<FormatException>(e.InnerException);
+                Assert.Equal("Input string was not in a correct format.", e.InnerException.Message);
             });
         }
 
-        [TestMethod]
+        [Fact]
         public void verify_that_culture_change_affects_validation_message()
         {
             AssertErrorMessage("{Lang:n}", "default", "default");
@@ -257,13 +231,12 @@ namespace ExpressiveAnnotations.Tests
 
             if (input != null)
                 assertThat.ErrorMessage = requiredIf.ErrorMessage = input;
-
             
             var assertThatResult = (ValidationResult) isValid.Invoke(assertThat, new[] {new object(), context});
             var requiredIfResult = (ValidationResult) isValid.Invoke(requiredIf, new[] {null, context});
 
-            Assert.AreEqual(assertThatOutput, assertThatResult.ErrorMessage);
-            Assert.AreEqual(requiredIfOutput, requiredIfResult.ErrorMessage);
+            Assert.Equal(assertThatOutput, assertThatResult.ErrorMessage);
+            Assert.Equal(requiredIfOutput, requiredIfResult.ErrorMessage);
         }
 
         private long MeasureExecutionTime(Action action)

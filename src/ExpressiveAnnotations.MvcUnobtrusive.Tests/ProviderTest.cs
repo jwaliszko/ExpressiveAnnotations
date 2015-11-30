@@ -2,14 +2,13 @@
 using ExpressiveAnnotations.Attributes;
 using ExpressiveAnnotations.MvcUnobtrusive.Providers;
 using ExpressiveAnnotations.MvcUnobtrusive.Validators;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
 {
-    [TestClass]
     public class ProviderTest: BaseTest
     {
-        [TestMethod]
+        [Fact]
         public void validators_ordered_by_ascending_priorities()
         {
             var model = new Model();
@@ -23,11 +22,11 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
                     .Count(c => c == '!'))
                 .ToList();
 
-            Assert.AreEqual(4, exps.Count);
-            Assert.AreEqual(1, exps[0]);
-            Assert.AreEqual(0, exps[1]);
-            Assert.AreEqual(3, exps[2]);
-            Assert.AreEqual(2, exps[3]);
+            Assert.Equal(4, exps.Count);
+            Assert.Equal(1, exps[0]);
+            Assert.Equal(0, exps[1]);
+            Assert.Equal(3, exps[2]);
+            Assert.Equal(2, exps[3]);
 
             exps = validators.Where(x => x is AssertThatValidator)
                 .Select(x => x.GetClientValidationRules()
@@ -35,11 +34,11 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
                     .Count(c => c == '!'))
                 .ToList();
 
-            Assert.AreEqual(4, exps.Count);
-            Assert.AreEqual(1, exps[0]);
-            Assert.AreEqual(0, exps[1]);
-            Assert.AreEqual(3, exps[2]);
-            Assert.AreEqual(2, exps[3]);
+            Assert.Equal(4, exps.Count);
+            Assert.Equal(1, exps[0]);
+            Assert.Equal(0, exps[1]);
+            Assert.Equal(3, exps[2]);
+            Assert.Equal(2, exps[3]);
         }
 
         private class Model
