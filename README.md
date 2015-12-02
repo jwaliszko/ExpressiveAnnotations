@@ -3,6 +3,7 @@
 #<a id="expressiveannotations-annotation-based-conditional-validation">ExpressiveAnnotations<sup><sup><sup>[annotation-based conditional validation]</sup></sup></sup></a>
 
 [![Build status](https://img.shields.io/appveyor/ci/JaroslawWaliszko/ExpressiveAnnotations.svg)](https://ci.appveyor.com/project/JaroslawWaliszko/ExpressiveAnnotations)
+[![Coverage status](https://img.shields.io/codecov/c/github/JaroslawWaliszko/ExpressiveAnnotations.svg)](https://codecov.io/github/JaroslawWaliszko/ExpressiveAnnotations)
 [![Release](https://img.shields.io/github/release/JaroslawWaliszko/ExpressiveAnnotations.svg)](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/releases/latest)
 [![License](http://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 
