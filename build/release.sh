@@ -15,7 +15,7 @@ if [ ! -f nuget.exe ]; then
 fi
 
 echo "------ package restoration..."
-./nuget.exe restore ExpressiveAnnotations.sln
+./nuget.exe restore ../src/ExpressiveAnnotations.sln
 
 echo "------ release config compilation..."
 MSBuild.exe ../src/ExpressiveAnnotations.sln /t:Build /p:Configuration=Release /verbosity:minimal
@@ -28,7 +28,7 @@ MSBuild.exe ../src/ExpressiveAnnotations.sln /t:Build /p:Configuration=Release-N
 echo "------ generating documentation..."
 MSBuild.exe ../doc/api/api.shfbproj /t:Build /p:Configuration=Release
 
-echo "------ cutting of debug section from script..."
+echo "------ cutting off debug section from script..."
 sed '/!debug section enter/,/!debug section leave/{N;d;}' ../src/expressive.annotations.validate.js > expressive.annotations.validate.js
 
 echo "------ generating minified script version..."
@@ -58,6 +58,5 @@ MSBuild.exe ../src/ExpressiveAnnotations.sln /t:Clean /p:Configuration=Release-N
 MSBuild.exe ../src/ExpressiveAnnotations.sln /t:Clean /p:Configuration=Release-Net45 /verbosity:quiet
 
 #nuget setapikey ...
-#nuget push ...
-
-echo "------ done."
+#nuget push ExpressiveAnnotations.x.x.x.nupkg
+#nuget push ExpressiveAnnotations.dll.x.x.x.nupkg

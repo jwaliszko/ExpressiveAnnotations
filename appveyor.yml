@@ -4,6 +4,7 @@ init:
 branches:
   only:
   - master
+configuration: Debug
 before_build:
 - ps: nuget restore src\ExpressiveAnnotations.sln
 build:
