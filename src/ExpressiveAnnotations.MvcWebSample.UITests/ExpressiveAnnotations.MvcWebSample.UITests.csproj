@@ -35,6 +35,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
@@ -74,6 +75,7 @@
   <ItemGroup>
     <Compile Include="BaseTest.cs" />
     <Compile Include="ClientModeTest.cs" />
+    <Compile Include="AttributesCompilationTest.cs" />
     <Compile Include="DriverFixture.cs" />
     <Compile Include="HomePage.cs" />
     <Compile Include="ServerModeTest.cs" />
@@ -99,6 +101,12 @@
     <Content Include="phantomjs-license.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ExpressiveAnnotations\ExpressiveAnnotations.csproj">
+      <Project>{70dd327b-f37c-4291-9388-212aa541e970}</Project>
+      <Name>ExpressiveAnnotations</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

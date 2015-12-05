@@ -30,4 +30,4 @@ using Xunit;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
-[assembly: CollectionBehavior(CollectionBehavior.CollectionPerClass, MaxParallelThreads = 2)] // override default setup (and start both browsers even on single core)
+[assembly: CollectionBehavior(CollectionBehavior.CollectionPerClass, MaxParallelThreads = 3)] // override default setup (e.g. to start both browsers even on a single core)

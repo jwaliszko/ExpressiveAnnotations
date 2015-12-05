@@ -20,7 +20,7 @@ $uitestdll = "$rootdir\src\ExpressiveAnnotations.MvcWebSample.UITests\bin\$build
 $webmvcbin = "$rootdir\src\ExpressiveAnnotations.MvcWebSample\bin"
 
 $opencovercmd = "$opencover -register:user -hideskipped:All -mergebyhash '-target:$xunit' '-targetargs:$eatestdll $vatestdll $uitestdll -noshadow -appveyor' -returntargetcode '-targetdir:$webmvcbin' '-filter:+[ExpressiveAnnotations(.MvcUnobtrusive)?]*' '-output:.\csharp-coverage.xml'"
-$chutzpahcmd = "$chutzpah /path $rootdir\src\expressive.annotations.validate.test.js /path $rootdir\src\tests.html /junit .\chutzpah-results.xml"
+$chutzpahcmd = "$chutzpah /path $rootdir\src\expressive.annotations.validate.test.js /path $rootdir\src\tests.html /coverage /coverageExcludes '*jquery*' /junit .\chutzpah-results.xml /lcov .\chutzpah-results.lcov"
 
 Invoke-Expression $opencovercmd
 Invoke-Expression $chutzpahcmd

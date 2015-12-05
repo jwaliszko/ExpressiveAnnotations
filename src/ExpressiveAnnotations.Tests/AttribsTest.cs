@@ -210,6 +210,65 @@ namespace ExpressiveAnnotations.Tests
             Thread.CurrentThread.CurrentUICulture = culture;
         }
 
+        [Fact]
+        public void verify_attributes_identification()
+        {
+            var assertThat = new AssertThatAttribute("1 !=    1"); // spaces on purpose
+            var requiredIf = new RequiredIfAttribute("1 ==    1");
+
+            const string assertThatRepresentation = "ExpressiveAnnotations.Attributes.AssertThatAttribute[1!=1]";
+            const string requiredIfRepresentation = "ExpressiveAnnotations.Attributes.RequiredIfAttribute[1==1]";
+
+            Assert.Equal(assertThatRepresentation, assertThat.TypeId);
+            Assert.Equal(requiredIfRepresentation, requiredIf.TypeId);
+
+            Assert.Equal(assertThatRepresentation, assertThat.ToString());
+            Assert.Equal(requiredIfRepresentation, requiredIf.ToString());
+
+            Assert.Equal(assertThatRepresentation.GetHashCode(), assertThat.GetHashCode());
+            Assert.Equal(requiredIfRepresentation.GetHashCode(), requiredIf.GetHashCode());
+        }
+
+        [Fact]
+        public void verify_attributes_equality()
+        {
+            var assertThat = new AssertThatAttribute("1 !=    1");
+            var requiredIf = new RequiredIfAttribute("1 ==    1");
+
+            var assertThat2 = new AssertThatAttribute("1    != 1");
+            var requiredIf2 = new RequiredIfAttribute("1    == 1");
+
+            Assert.True(assertThat.Equals(assertThat2));
+            Assert.True(requiredIf.Equals(requiredIf2));
+
+            Assert.False(assertThat.Equals(null));
+            Assert.False(requiredIf.Equals(null));
+        }
+
+        [Fact]
+        public void verify_attribute_constructor_invalid_parameter()
+        {
+            var e = Assert.Throws<ArgumentNullException>(() => new AssertThatAttribute(null));
+            Assert.Equal("Expression not provided.\r\nParameter name: expression", e.Message);
+            e = Assert.Throws<ArgumentNullException>(() => new RequiredIfAttribute(null));
+            Assert.Equal("Expression not provided.\r\nParameter name: expression", e.Message);
+        }
+
+        [Fact]
+        public void throw_when_priority_is_not_provided_but_requested_explicitly()
+        {
+            var assertThat = new AssertThatAttribute("1!=1");
+            var requiredIf = new RequiredIfAttribute("1==1");
+
+            Assert.Null(assertThat.GetPriority());
+            Assert.Null(requiredIf.GetPriority());
+
+            var e = Assert.Throws<InvalidOperationException>(() => assertThat.Priority);
+            Assert.Equal("The Priority property has not been set. Use the GetPriority method to get the value.", e.Message);
+            e = Assert.Throws<InvalidOperationException>(() => requiredIf.Priority);
+            Assert.Equal("The Priority property has not been set. Use the GetPriority method to get the value.", e.Message);
+        }
+
         private static void AssertErrorMessage(string input, string assertThatOutput, string requiredIfOutput)
         {
             var assertThat = new AssertThatAttribute("1!=1");

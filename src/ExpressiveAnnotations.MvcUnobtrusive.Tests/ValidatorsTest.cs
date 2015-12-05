@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using System.Web;
 using ExpressiveAnnotations.Attributes;
 using ExpressiveAnnotations.MvcUnobtrusive.Validators;
 using Newtonsoft.Json;
@@ -42,7 +43,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             Assert.Equal(
                 "No more than 27 unique attributes of the same type can be applied for a single field or property.",
                 e.InnerException.Message);
-
+            
             e = Assert.Throws<ValidationException>(() =>
             {
                 for (var i = 0; i < requirAttributes.Length; i++)
@@ -60,6 +61,37 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             Assert.IsType<InvalidOperationException>(e.InnerException);
             Assert.Equal(
                 "No more than 27 unique attributes of the same type can be applied for a single field or property.",
+                e.InnerException.Message);
+        }
+
+        [Fact]
+        public void throw_when_no_httpcontext_is_available()
+        {
+            HttpContext.Current = null;
+
+            var model = new Model();
+            var assertAttribute = new AssertThatAttribute("true");
+            var requirAttribute = new RequiredIfAttribute("true");
+
+            var metadata = GetModelMetadata(model, m => m.Value);
+            var controllerContext = GetControllerContext();
+
+            var e = Assert.Throws<ValidationException>(() => new AssertThatValidator(metadata, controllerContext, assertAttribute).GetClientValidationRules().Single());
+            Assert.Equal(
+                "AssertThatValidator: collecting of client validation rules for Value field failed.",
+                e.Message);
+            Assert.IsType<ApplicationException>(e.InnerException);
+            Assert.Equal(
+                "HttpContext not available.",
+                e.InnerException.Message);
+
+            e = Assert.Throws<ValidationException>(() => new RequiredIfValidator(metadata, controllerContext, requirAttribute).GetClientValidationRules().Single());
+            Assert.Equal(
+                "RequiredIfValidator: collecting of client validation rules for Value field failed.",
+                e.Message);
+            Assert.IsType<ApplicationException>(e.InnerException);
+            Assert.Equal(
+                "HttpContext not available.",
                 e.InnerException.Message);
         }
 
@@ -107,22 +139,24 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             var metadata = GetModelMetadata(model, m => m.Array);
             var controllerContext = GetControllerContext();
 
-            var assert = new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("Value > 0 && Status == ValidatorsTest.State.High"));
+            const string expression = "Value > 0 && Status == ValidatorsTest.State.High && InsensString == NInsensString";
+
+            var assert = new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute(expression));
             var assertRule = assert.GetClientValidationRules().Single();
-            
-            Assert.Equal("{\"Value\":\"numeric\",\"Status\":\"numeric\"}", (string)assertRule.ValidationParameters["fieldsmap"], false);
+
+            Assert.Equal("{\"Value\":\"numeric\",\"Status\":\"numeric\",\"InsensString\":\"stringinsens\",\"NInsensString\":\"stringinsens\"}", (string)assertRule.ValidationParameters["fieldsmap"], false);
             Assert.Equal("{\"ValidatorsTest.State.High\":0}", (string)assertRule.ValidationParameters["constsmap"], false);
             Assert.Equal("{\"Array\":\"arrayparser\"}", (string)assertRule.ValidationParameters["parsersmap"], false);
-            Assert.Equal("\"Value > 0 && Status == ValidatorsTest.State.High\"", (string)assertRule.ValidationParameters["expression"], false);
+            Assert.Equal("\"Value > 0 && Status == ValidatorsTest.State.High && InsensString == NInsensString\"", (string)assertRule.ValidationParameters["expression"], false);
 
-            var requir = new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute("Value > 0 && Status == ValidatorsTest.State.High"));
+            var requir = new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute(expression));
             var requirRule = requir.GetClientValidationRules().Single();
-            
-            Assert.Equal("{\"Value\":\"numeric\",\"Status\":\"numeric\"}", (string)requirRule.ValidationParameters["fieldsmap"], false);
+
+            Assert.Equal("{\"Value\":\"numeric\",\"Status\":\"numeric\",\"InsensString\":\"stringinsens\",\"NInsensString\":\"stringinsens\"}", (string)requirRule.ValidationParameters["fieldsmap"], false);
             Assert.Equal("{\"ValidatorsTest.State.High\":0}", (string)requirRule.ValidationParameters["constsmap"], false);
             Assert.Equal("{\"Array\":\"arrayparser\"}", (string)assertRule.ValidationParameters["parsersmap"], false);
             Assert.Equal("false", (string)requirRule.ValidationParameters["allowempty"], false);
-            Assert.Equal("\"Value > 0 && Status == ValidatorsTest.State.High\"", (string)requirRule.ValidationParameters["expression"], false);
+            Assert.Equal("\"Value > 0 && Status == ValidatorsTest.State.High && InsensString == NInsensString\"", (string)requirRule.ValidationParameters["expression"], false);
 
             JsonConvert.DefaultSettings = settings; // reset settings to original state
         }
@@ -261,7 +295,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
         public void verify_validators_caching()
         {
             const int testLoops = 10;
-            var generatedCode = string.Join(" && ", Enumerable.Repeat(0, 100).Select(x => "true")); // give the parser some work
+            var generatedCode = Enumerable.Repeat(0, 100).Select(x => "true")
+                .Aggregate("true", (accumulator, item) => string.Format("({0} && {1} && !false)", accumulator, item)); // give the parser some work (deep dive)
             
             var model = new Model();
             var metadata = GetModelMetadata(model, m => m.Value);
@@ -308,6 +343,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             [ValueParser("arrayparser")]
             public int[] Array { get; set; }
             public State Status { get; set; }
+            public StringInsens InsensString { get; set; }
+            public StringInsens? NInsensString { get; set; }
         }
 
         public class MsgModel
@@ -317,6 +354,42 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
 
             [Display(ResourceType = typeof (Resources), Name = "Lang")]
             public string Lang { get; set; }
+        }
+
+        public struct StringInsens
+        {
+            private readonly string _value;
+
+            public StringInsens(string value)
+            {
+                _value = value;
+            }
+
+            public bool Equals(StringInsens other)
+            {
+                return string.Equals(_value, other._value);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                return obj is StringInsens && Equals((StringInsens)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return (_value != null ? _value.GetHashCode() : 0);
+            }
+
+            public static bool operator ==(StringInsens a, StringInsens b)
+            {
+                return string.Equals(a._value, b._value, StringComparison.CurrentCultureIgnoreCase);
+            }
+
+            public static bool operator !=(StringInsens a, StringInsens b)
+            {
+                return !(a == b);
+            }
         }
     }
 }

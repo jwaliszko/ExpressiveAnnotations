@@ -135,7 +135,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Fact]
-        public void verify_invalid_parameter()
+        public void verify_lexer_analyze_invalid_parameter()
         {
             var lexer = new Lexer();
             var e = Assert.Throws<ArgumentNullException>(() => lexer.Analyze(null));

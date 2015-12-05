@@ -178,6 +178,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<object>("' ' == ' '").Invoke(null));
             Assert.True(parser.Parse<object>("' ' != '  '").Invoke(null));
             Assert.True(parser.Parse<object>("'asd' == 'asd'").Invoke(null));
+            Assert.True(parser.Parse<object>("'asd' != 'ASD'").Invoke(null));
             Assert.True(parser.Parse<object>("'' != null").Invoke(null));
 
             Assert.True(parser.Parse<object>("'a' + 'b' == 'ab'").Invoke(null));
@@ -253,6 +254,8 @@ namespace ExpressiveAnnotations.Tests
                 Guid = Guid.NewGuid(),
                 NGuid1 = Guid.NewGuid(),
                 NGuid2 = Guid.Empty,
+                InsensString = new StringInsens("asd"),
+                NInsensString = new StringInsens("ASD"),
                 Array = new[]
                 {
                     new Model {Number = -1, Array = new[] {new Model {Number = -2}}},
@@ -334,6 +337,8 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<Model>("NGuid1 != NGuid2").Invoke(model));
             Assert.True(parser.Parse<Model>("Guid != NGuid1").Invoke(model));
             Assert.True(parser.Parse<Model>("NGuid1 != Guid").Invoke(model));
+
+            Assert.True(parser.Parse<Model>("InsensString == NInsensString").Invoke(model));
 
             model.NDate = null;
             model.NSpan = null;
@@ -1287,6 +1292,9 @@ namespace ExpressiveAnnotations.Tests
             public IEnumerable<Model> Items { get; set; } // collection without indexer
             public CustomCollection<Model> Collection { get; set; } // collection with indexer, like e.g List<>
 
+            public StringInsens InsensString { get; set; }
+            public StringInsens? NInsensString { get; set; }
+
             public DateTime NextWeek()
             {
                 return DateTime.Now.AddDays(7);
@@ -1391,6 +1399,42 @@ namespace ExpressiveAnnotations.Tests
             {
                 get { return _elements[index]; }
                 set { _elements[index] = value; }
+            }
+        }
+
+        public struct StringInsens
+        {
+            private readonly string _value;
+
+            public StringInsens(string value)
+            {
+                _value = value;
+            }
+
+            public bool Equals(StringInsens other)
+            {
+                return string.Equals(_value, other._value);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                return obj is StringInsens && Equals((StringInsens)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return (_value != null ? _value.GetHashCode() : 0);
+            }
+
+            public static bool operator ==(StringInsens a, StringInsens b)
+            {
+                return string.Equals(a._value, b._value, StringComparison.CurrentCultureIgnoreCase);
+            }
+
+            public static bool operator !=(StringInsens a, StringInsens b)
+            {
+                return !(a == b);
             }
         }
     }
