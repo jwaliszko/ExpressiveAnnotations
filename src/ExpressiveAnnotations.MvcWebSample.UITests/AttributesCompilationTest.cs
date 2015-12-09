@@ -38,8 +38,8 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         {
             var applicationAssembly = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
                 @"..\..\..\ExpressiveAnnotations.MvcWebSample\bin\ExpressiveAnnotations.MvcWebSample.dll"));
-            var assembly = Assembly.LoadFile(applicationAssembly);
-            var attribs = assembly.GetTypes().SelectMany(t => t.CompileExpressiveAttributes());
+            var assembly = Assembly.LoadFrom(applicationAssembly);
+            var attribs = assembly.CompileExpressiveAttributes();
             Assert.Equal(25, attribs.Count());
         }
     }

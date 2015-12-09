@@ -549,8 +549,8 @@ namespace ExpressiveAnnotations.Tests
                 @"Parse error on line 1, column 1:
 ... Stability.High == 0 ...
     ^--- Enum 'Stability' is ambiguous, found following:
-'ExpressiveAnnotations.Tests.Utility+Stability',
-'ExpressiveAnnotations.Tests.Stability'.",
+'ExpressiveAnnotations.Tests.Stability',
+'ExpressiveAnnotations.Tests.Utility+Stability'.",
                 e.Message);
         }
 

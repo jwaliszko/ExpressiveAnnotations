@@ -302,17 +302,20 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             var metadata = GetModelMetadata(model, m => m.Value);
             var controllerContext = GetControllerContext();
 
-            var nonCached = MeasureExecutionTime(() => new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute(generatedCode)));
+            var assertThat = new AssertThatAttribute(generatedCode);
+            var requiredIf = new RequiredIfAttribute(generatedCode);
+
+            var nonCached = MeasureExecutionTime(() => new AssertThatValidator(metadata, controllerContext, assertThat));
             for (var i = 0; i < testLoops; i++)
             {
-                var cached = MeasureExecutionTime(() => new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute(generatedCode)));
+                var cached = MeasureExecutionTime(() => new AssertThatValidator(metadata, controllerContext, assertThat));
                 Assert.True(nonCached > cached);
             }
 
-            nonCached = MeasureExecutionTime(() => new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute(generatedCode)));
+            nonCached = MeasureExecutionTime(() => new RequiredIfValidator(metadata, controllerContext, requiredIf));
             for (var i = 0; i < testLoops; i++)
             {
-                var cached = MeasureExecutionTime(() => new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute(generatedCode)));
+                var cached = MeasureExecutionTime(() => new RequiredIfValidator(metadata, controllerContext, requiredIf));
                 Assert.True(nonCached > cached);
             }
         }

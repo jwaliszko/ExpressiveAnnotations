@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\xunit.runner.visualstudio.2.1.0\build\net20\xunit.runner.visualstudio.props" Condition="Exists('..\packages\xunit.runner.visualstudio.2.1.0\build\net20\xunit.runner.visualstudio.props')" />
   <Import Project="..\packages\xunit.core.2.1.0\build\portable-net45+win8+wp8+wpa81\xunit.core.props" Condition="Exists('..\packages\xunit.core.2.1.0\build\portable-net45+win8+wp8+wpa81\xunit.core.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -13,7 +13,8 @@
     <AssemblyName>ExpressiveAnnotations.MvcWebSample.UITests</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <NuGetPackageImportStamp>a33373b7</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -51,7 +52,7 @@
       <HintPath>..\packages\Selenium.Support.2.48.2\lib\net40\WebDriver.Support.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="xunit.abstractions">
+    <Reference Include="xunit.abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
       <HintPath>..\packages\xunit.abstractions.2.0.0\lib\net35\xunit.abstractions.dll</HintPath>
       <Private>True</Private>
     </Reference>
@@ -59,15 +60,15 @@
       <HintPath>..\packages\xunit.assemblyfixture.2.0.2\lib\net45\xunit.assemblyfixture.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="xunit.assert">
-      <HintPath>..\packages\xunit.assert.2.1.0\lib\portable-net45+win8+wp8+wpa81\xunit.assert.dll</HintPath>
+    <Reference Include="xunit.assert, Version=2.1.0.3179, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\packages\xunit.assert.2.1.0\lib\dotnet\xunit.assert.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="xunit.core">
-      <HintPath>..\packages\xunit.extensibility.core.2.1.0\lib\portable-net45+win8+wp8+wpa81\xunit.core.dll</HintPath>
+    <Reference Include="xunit.core, Version=2.1.0.3179, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\packages\xunit.extensibility.core.2.1.0\lib\dotnet\xunit.core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="xunit.execution.desktop">
+    <Reference Include="xunit.execution.desktop, Version=2.1.0.3179, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
       <HintPath>..\packages\xunit.extensibility.execution.2.1.0\lib\net45\xunit.execution.desktop.dll</HintPath>
       <Private>True</Private>
     </Reference>
@@ -86,12 +87,16 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ExpressiveAnnotations\ExpressiveAnnotations.csproj">
+      <Project>{70dd327b-f37c-4291-9388-212aa541e970}</Project>
+      <Name>ExpressiveAnnotations</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Content Include="..\packages\PhantomJS.2.0.0\tools\phantomjs\phantomjs.exe">
@@ -101,12 +106,6 @@
     <Content Include="phantomjs-license.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ExpressiveAnnotations\ExpressiveAnnotations.csproj">
-      <Project>{70dd327b-f37c-4291-9388-212aa541e970}</Project>
-      <Name>ExpressiveAnnotations</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
