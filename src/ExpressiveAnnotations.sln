@@ -29,6 +29,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{4FE56EA0-4550-4A07-A758-331B9CF470A1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations.MvcWebSample.UITests", "ExpressiveAnnotations.MvcWebSample.UITests\ExpressiveAnnotations.MvcWebSample.UITests.csproj", "{0FC1317D-C657-4CD1-99A6-71A3C4372306}"
+	ProjectSection(ProjectDependencies) = postProject
+		{78E4B95D-B0C3-486E-8847-CA444EF5BB95} = {78E4B95D-B0C3-486E-8847-CA444EF5BB95}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{19195FF5-4C1F-4330-9CA5-2C2A313C4A7B}"
 	ProjectSection(SolutionItems) = preProject

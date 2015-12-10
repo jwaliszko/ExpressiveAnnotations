@@ -2,23 +2,23 @@
 
 #<a id="expressiveannotations-annotation-based-conditional-validation">ExpressiveAnnotations<sup><sup><sup>[annotation-based conditional validation]</sup></sup></sup></a>
 
-[![Build status](https://img.shields.io/appveyor/ci/JaroslawWaliszko/ExpressiveAnnotations.svg)](https://ci.appveyor.com/project/JaroslawWaliszko/ExpressiveAnnotations)
-[![Coverage status](https://img.shields.io/codecov/c/github/JaroslawWaliszko/ExpressiveAnnotations.svg)](https://codecov.io/github/JaroslawWaliszko/ExpressiveAnnotations)
-[![Release](https://img.shields.io/github/release/JaroslawWaliszko/ExpressiveAnnotations.svg)](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/releases/latest)
+[![Build status](https://img.shields.io/appveyor/ci/jwaliszko/ExpressiveAnnotations.svg)](https://ci.appveyor.com/project/jwaliszko/ExpressiveAnnotations)
+[![Coverage status](https://img.shields.io/codecov/c/github/jwaliszko/ExpressiveAnnotations.svg)](https://codecov.io/github/jwaliszko/ExpressiveAnnotations)
+[![Release version](https://img.shields.io/github/release/jwaliszko/ExpressiveAnnotations.svg)](https://github.com/jwaliszko/ExpressiveAnnotations/releases/latest)
 [![License](http://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 
-ExpressiveAnnotations is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given `RequiredIf` and `AssertThat` attributes allow to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more condensed, since fields validation requirements are applied as metadata, just in the place of such fields declaration.
+A small .NET and JavaScript library which provides annotation-based conditional validation mechanisms. Given attributes allow to forget about imperative way of step-by-step verification of validation conditions in many cases. Since fields validation requirements are applied as metadata, domain-related code is more condensed.
 
 ###Table of contents
- - [What is the context behind this implementation?](#what-is-the-context-behind-this-implementation)
+ - [What is the context behind this work?](#what-is-the-context-behind-this-implementation)
  - [`RequiredIf` vs. `AssertThat` - where is the difference?](#requiredif-vs-assertthat---where-is-the-difference)
  - [What are brief examples of usage?](#what-are-brief-examples-of-usage)
  - [Declarative vs. imperative programming - what is it about?](#declarative-vs-imperative-programming---what-is-it-about)
  - [How to construct conditional validation attributes?](#how-to-construct-conditional-validation-attributes)
-   - [Signatures](#signatures)
-   - [Implementation](#implementation)
-   - [Traps](#traps)
-   - [Built-in functions](#built-in-functions)
+   - [Signatures description](#signatures)
+   - [Implementation details outline](#implementation)
+   - [Traps (discrepancies between C# and JavaScript)](#traps)
+   - [Built-in functions (methods ready to be used by expressions)](#built-in-functions)
  - [What about the support of ASP.NET MVC client-side validation?](#what-about-the-support-of-aspnet-mvc-client-side-validation)
  - [Frequently asked questions](#frequently-asked-questions)
    - [Is it possible to compile all usages of annotations at once?](#is-it-possible-to-compile-all-usages-of-annotations-at-once) <sup>(re server-side)</sup>
@@ -31,13 +31,15 @@ ExpressiveAnnotations is a small .NET and JavaScript library, which provides ann
    - [How to fetch field value or display name in error message?](#how-to-fetch-field-value-or-display-name-in-error-message) <sup>(re client and server-side)</sup>
    - [Is there a possibility to perform asynchronous validation?](#is-there-a-possibility-to-perform-asynchronous-validation) <sup>(re client-side, experimental)</sup>
    - [What if my question is not covered by FAQ section?](#what-if-my-question-is-not-covered-by-faq-section)
- - [Installation](#installation)
+ - [Installation instructions](#installation)
  - [Contributors](#contributors)
  - [License](#license)
 
-###<a id="what-is-the-context-behind-this-implementation">What is the context behind this implementation?</a>
+###<a id="what-is-the-context-behind-this-implementation">What is the context behind this work?</a>
 
-There are number of cases where the concept of metadata is used for justified reasons. Attributes are one of the ways to associate complementary information with existing data. Such annotations may also define the correctness of data. Declarative validation when [compared](#declarative-vs-imperative-programming---what-is-it-about) to imperative approach seems to be more convenient in many cases. Clean, compact code - all validation logic defined within the model scope. Simple to write, obvious to read.
+There are number of cases where the concept of metadata is used for justified reasons. Attributes are one of the ways to associate complementary information with existing data. Such annotations may also define the correctness of data. 
+
+Declarative validation when [compared](#declarative-vs-imperative-programming---what-is-it-about) to imperative approach seems to be more convenient in many cases. Clean, compact code - all validation logic defined within the model scope. Simple to write, obvious to read.
 
 ###<a id="requiredif-vs-assertthat---where-is-the-difference">`RequiredIf` vs. `AssertThat` - where is the difference?</a>
 
@@ -120,7 +122,7 @@ Here instead, we're saying "If condition is met, return some view. Otherwise, ad
 
 ###<a id="how-to-construct-conditional-validation-attributes">How to construct conditional validation attributes?</a>
 
-#####<a id="signatures">Signatures</a>
+#####<a id="signatures">Signatures description</a>
 
 ```
 RequiredIfAttribute(
@@ -154,11 +156,11 @@ ErrorMessage      - Gets or sets an explicit error message string. A difference 
 					same logic works for messages provided in resources.
 ```
 
-Full API documentation *(probably not much useful, since the note above covers almost exhaustively what is actually needed to work with EA)* generated with [Sandcastle](https://sandcastle.codeplex.com/) (with the support of [SHFB](http://shfb.codeplex.com/)), can be downloaded in the form of compiled HTML help file from [here](doc/api/api.chm?raw=true) (only C# API, no JavaScript there).
+Note above covers almost exhaustively what is actually needed to work with EA. Nevertheless, the full API documentation, generated with [Sandcastle](https://sandcastle.codeplex.com/) (with the support of [SHFB](http://shfb.codeplex.com/)), can be downloaded (in the form of compiled HTML help file) from [here](doc/api/api.chm?raw=true) (includes only C# API, no JavaScript part there).
 
-#####<a id="implementation">Implementation</a>
+#####<a id="implementation">Implementation details outline</a>
 
-Implementation core is based on top-down recursive descent [logical expressions parser](src/ExpressiveAnnotations/Analysis/Parser.cs), with a single token of lookahead ([LL(1)](http://en.wikipedia.org/wiki/LL_parser)), which runs on the following [EBNF-like](http://en.wikipedia.org/wiki/Extended_Backus–Naur_Form) grammar:
+Implementation core is based on top-down recursive descent [logical expressions parser](src/ExpressiveAnnotations/Analysis/Parser.cs?raw=true), with a single token of lookahead ([LL(1)](http://en.wikipedia.org/wiki/LL_parser)), which runs on the following [EBNF-like](http://en.wikipedia.org/wiki/Extended_Backus–Naur_Form) grammar:
 ```
 expression => or-exp
 or-exp     => and-exp [ "||" or-exp ]
@@ -186,7 +188,7 @@ Logical expressions should be built according to the syntax defined by grammar, 
   * integer number literals, e.g. `123`, 
   * real number literals, e.g. `1.5` or `-0.3e-2`,
   * boolean literals: `true` and `false`,
-  * string literals: `'in single quotes'` (internal quote escape sequence is `\'`, character representing new line no matter the platform is `\n`),
+  * string literals: `'in single quotes'` (internal quote escape sequence is `\'`, character representing new line is `\n`),
   * func literals:
       * property names, e.g. `SomeProperty`,
 	  * constants, e.g. `SomeType.CONST`,
@@ -200,16 +202,16 @@ For the sake of performance optimization, expressions provided to attributes are
 
 When working with ASP.NET MVC stack, unobtrusive client-side validation mechanism is [additionally available](#what-about-the-support-of-aspnet-mvc-client-side-validation). Client receives unchanged expression string from server. Such an expression is then evaluated using JavaScript [`eval()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) method within the context of reflected model object. Such a model, analogously to the server-side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
 
-#####<a id="traps">Traps</a>
+#####<a id="traps">Traps (discrepancies between C# and JavaScript)</a>
 
-Attention needed when dealing with `null` - there are discrepancies between C# and JavaScript, e.g.
+Because client-side handles expressions in its unchanged form (as provided to attribute), attention is needed when dealing with `null` keyword - there are discrepancies between C# and JavaScript, e.g.
 
 * `null + "text"` - in C# `"text"`, in JS `"nulltext"`,
 * `2 * null`      - in C# `null`  , in JS `0`,
 * `null > -1`     - in C# `false` , in JS `true`,
 * and more...
 
-#####<a id="built-in-functions">Built-in functions</a>
+#####<a id="built-in-functions">Built-in functions (methods ready to be used by expressions)</a>
 
 As already noted, there is an option to reinforce expressions with functions, e.g.
 ```C#
@@ -302,7 +304,7 @@ Client-side validation is fully supported. Enable it for your web project within
 	        new ExpressiveAnnotationsModelValidatorProvider());
 	```
 	Despite the fact this provider automatically registers adapters for expressive validation attributes, it additionally respects their processing priorities when validation is performed (i.e. the [`Priority`](#signatures) property actually means something in practice).
-3. Include [**expressive.annotations.validate.js**](src/expressive.annotations.validate.js) script in your page (it should be included in bundle below jQuery validation files):
+3. Include [**expressive.annotations.validate.js**](src/expressive.annotations.validate.js?raw=true) script in your page (it should be included in bundle below jQuery validation files):
 
     ```JavaScript
     <script src="/Scripts/jquery.validate.js"></script>
@@ -492,13 +494,13 @@ Notice that `{{` is treated as the escaped bracket character.
 
 #####<a id="#is-there-a-possibility-to-perform-asynchronous-validation">Is there a possibility to perform asynchronous validation?</a>
 
-Currently not. Although there is an ongoing work on [async-work branch](https://github.com/JaroslawWaliszko/ExpressiveAnnotations/tree/async-work), created especially for asynchronous-related ideas. If you feel you'd like to contribute, either by providing better solution, review code or just test what is currently there, your help is always highly appreciated.
+Currently not. Although there is an ongoing work on [async-work branch](https://github.com/jwaliszko/ExpressiveAnnotations/tree/async-work), created especially for asynchronous-related ideas. If you feel you'd like to contribute, either by providing better solution, review code or just test what is currently there, your help is always highly appreciated.
 
 #####<a id="what-if-my-question-is-not-covered-by-faq-section">What if my question is not covered by FAQ section?</a>
 
 If you're searching for an answer to some other problem, not covered by this document, try to browse through [already posted issues](../../issues?q=label%3Aquestion) labelled by *question* tag, or possibly have a look [at Stack Overflow](http://stackoverflow.com/search?q=expressiveannotations).
 
-###<a id="installation">Installation</a>
+###<a id="installation">Installation instructions</a>
 
 Simplest way is using the [NuGet](https://www.nuget.org) Package Manager Console:
 
@@ -518,10 +520,10 @@ Simplest way is using the [NuGet](https://www.nuget.org) Package Manager Console
 
 [GitHub Users](../../graphs/contributors)
 
-Special thanks to Szymon Malczak
+Special thanks to Szymon Małczak
 
 ###<a id="license">License</a>
 
-Copyright (c) 2014 Jaroslaw Waliszko
+Copyright (c) 2014 Jarosław Waliszko
 
 Licensed MIT: http://opensource.org/licenses/MIT

@@ -46,11 +46,12 @@
       <NamespaceSummaryItem name="ExpressiveAnnotations.Attributes" isDocumented="True">Namespace provides expressive attributes that are used to define metadata for properties.</NamespaceSummaryItem>
       <NamespaceSummaryItem name="ExpressiveAnnotations.MvcUnobtrusive.Providers" isDocumented="True">Namespace provides validator providers.</NamespaceSummaryItem>
       <NamespaceSummaryItem name="ExpressiveAnnotations.MvcUnobtrusive.Validators" isDocumented="True">Namespace provides expressive validators for a specified validation types.</NamespaceSummaryItem>
-	</NamespaceSummaries>
+    </NamespaceSummaries>
     <VisibleItems>InheritedMembers, Protected, ProtectedInternalAsProtected</VisibleItems>
-    <ProjectSummary>ExpressiveAnnotations is a small .NET and JavaScript library, which provides annotation-based conditional validation mechanisms. Given RequiredIf and AssertThat attributes allow to forget about imperative way of step-by-step verification of validation conditions in many cases. This in turn results in less amount of code which is also more condensed, since fields validation requirements are applied as metadata, just in the place of such fields declaration.</ProjectSummary>
+    <ProjectSummary>A small .NET and JavaScript library which provides annotation-based conditional validation mechanisms. Given attributes allow to forget about imperative way of step-by-step verification of validation conditions in many cases. Since fields validation requirements are applied as metadata, domain-related code is more condensed.</ProjectSummary>
     <RootNamespaceTitle>
     </RootNamespaceTitle>
+    <FooterText>&amp;lt%3ba href=&amp;quot%3bhttps://github.com/jwaliszko/ExpressiveAnnotations&amp;quot%3b target=&amp;quot%3b_blank&amp;quot%3b&amp;gt%3b[more on github]&amp;lt%3b/a&amp;gt%3b</FooterText>
   </PropertyGroup>
   <!-- There are no properties for these groups.  AnyCPU needs to appear in order for Visual Studio to perform
 			 the build.  The others are optional common platform types that may appear. -->

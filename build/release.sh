@@ -17,16 +17,18 @@ fi
 echo "------ package restoration..."
 ./nuget.exe restore ../src/ExpressiveAnnotations.sln
 
+msbuild="/cygdrive/c/Program Files (x86)/Msbuild/14.0/bin/MSBuild.exe"
+
 echo "------ release config compilation..."
-MSBuild.exe ../src/ExpressiveAnnotations.sln /t:Build /p:Configuration=Release /verbosity:minimal
+"$msbuild" ../src/ExpressiveAnnotations.sln /t:Build /p:Configuration=Release /verbosity:minimal
 
 echo "------ release-net40 config compilation..."
-MSBuild.exe ../src/ExpressiveAnnotations.sln /t:Build /p:Configuration=Release-Net40 /verbosity:minimal
+"$msbuild" ../src/ExpressiveAnnotations.sln /t:Build /p:Configuration=Release-Net40 /verbosity:minimal
 echo "------ release-net45 config compilation..."
-MSBuild.exe ../src/ExpressiveAnnotations.sln /t:Build /p:Configuration=Release-Net45 /verbosity:minimal
+"$msbuild" ../src/ExpressiveAnnotations.sln /t:Build /p:Configuration=Release-Net45 /verbosity:minimal
 
 echo "------ generating documentation..."
-MSBuild.exe ../doc/api/api.shfbproj /t:Build /p:Configuration=Release
+"$msbuild" ../doc/api/api.shfbproj /t:Build /p:Configuration=Release
 
 echo "------ cutting off debug section from script..."
 sed '/!debug section enter/,/!debug section leave/{N;d;}' ../src/expressive.annotations.validate.js > expressive.annotations.validate.js
@@ -53,9 +55,9 @@ cd $1 && zip ExpressiveAnnotations.zip ExpressiveAnnotations/*
 
 echo "------ cleanup..."
 cd ..
-MSBuild.exe ../src/ExpressiveAnnotations.sln /t:Clean /p:Configuration=Release /verbosity:quiet
-MSBuild.exe ../src/ExpressiveAnnotations.sln /t:Clean /p:Configuration=Release-Net40 /verbosity:quiet
-MSBuild.exe ../src/ExpressiveAnnotations.sln /t:Clean /p:Configuration=Release-Net45 /verbosity:quiet
+"$msbuild" ../src/ExpressiveAnnotations.sln /t:Clean /p:Configuration=Release /verbosity:quiet
+"$msbuild" ../src/ExpressiveAnnotations.sln /t:Clean /p:Configuration=Release-Net40 /verbosity:quiet
+"$msbuild" ../src/ExpressiveAnnotations.sln /t:Clean /p:Configuration=Release-Net45 /verbosity:quiet
 
 #nuget setapikey ...
 #nuget push ExpressiveAnnotations.x.x.x.nupkg
