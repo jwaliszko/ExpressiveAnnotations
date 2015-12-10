@@ -6,7 +6,7 @@ using Xunit;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("ExpressiveAnnotations.MvcWebSample.UITests")]
-[assembly: AssemblyCopyright("Copyright © Jaroslaw Waliszko 2014")]
+[assembly: AssemblyCopyright("Copyright © Jarosław Waliszko 2014")]
 [assembly: AssemblyProduct("ExpressiveAnnotations.MvcWebSample.UITests")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

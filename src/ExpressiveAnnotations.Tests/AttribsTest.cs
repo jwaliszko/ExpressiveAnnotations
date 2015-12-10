@@ -72,10 +72,10 @@ namespace ExpressiveAnnotations.Tests
         public void verify_attributes_compilation_caching_indirectly()
         {
             const int testLoops = 10;
-            var model = new Model();
+            var model = new WorkModel();
             var context = new ValidationContext(model);
 
-            var nonCached = MeasureExecutionTime(() => Validator.TryValidateObject(model, context, null, true));            
+            var nonCached = MeasureExecutionTime(() => Validator.TryValidateObject(model, context, null, true));
             for (var i = 0; i < testLoops; i++)
             {
                 var cached = MeasureExecutionTime(() => Validator.TryValidateObject(model, context, null, true));
@@ -89,17 +89,17 @@ namespace ExpressiveAnnotations.Tests
             const int testLoops = 10;
             List<ExpressiveAttribute> compiled = null;
 
-            var nonCached = MeasureExecutionTime(() => compiled = typeof (Model).CompileExpressiveAttributes().ToList());
+            var nonCached = MeasureExecutionTime(() => compiled = typeof (WorkModel).CompileExpressiveAttributes().ToList());
             for (var i = 0; i < testLoops; i++)
             {
-                var cached = MeasureExecutionTime(() => compiled.ForEach(x => x.Compile(typeof (Model))));
+                var cached = MeasureExecutionTime(() => compiled.ForEach(x => x.Compile(typeof (WorkModel))));
                 Assert.True(nonCached > cached);
             }
 
-            nonCached = MeasureExecutionTime(() => compiled.ForEach(x => x.Compile(typeof (Model), force: true))); // forcibly recompile already compiled expressions
+            nonCached = MeasureExecutionTime(() => compiled.ForEach(x => x.Compile(typeof (WorkModel), force: true))); // forcibly recompile already compiled expressions
             for (var i = 0; i < testLoops; i++)
             {
-                var cached = MeasureExecutionTime(() => compiled.ForEach(x => x.Compile(typeof (Model))));
+                var cached = MeasureExecutionTime(() => compiled.ForEach(x => x.Compile(typeof (WorkModel))));
                 Assert.True(nonCached > cached);
             }
         }
@@ -189,7 +189,7 @@ namespace ExpressiveAnnotations.Tests
             {
                 var attrib = new AssertThatAttribute("true") {ErrorMessage = msg};
                 var e = Assert.Throws<FormatException>(() => attrib.FormatErrorMessage("ads", "true", null));
-                Assert.Equal(string.Format("Problem with error message processing. The message is following: {0}", msg), e.Message);
+                Assert.Equal($"Problem with error message processing. The message is following: {msg}", e.Message);
                 Assert.IsType<FormatException>(e.InnerException);
                 Assert.Equal("Input string was not in a correct format.", e.InnerException.Message);
             });
@@ -352,6 +352,13 @@ namespace ExpressiveAnnotations.Tests
             [RequiredIf("Value > #")]
             [AssertThat("Value > #")]
             public int? Value { get; set; }
+        }
+
+        private class WorkModel
+        {
+            [RequiredIf("(((1 > 0*0) && 1 > 0*0) && 1 > 0*0)")] // some random calculations, give the parser some work
+            [AssertThat("(((1 > 0*0) && 1 > 0*0) && 1 > 0*0)")]
+            public int Value { get; set; }
         }
     }
 

@@ -1,5 +1,5 @@
-﻿/* https://github.com/JaroslawWaliszko/ExpressiveAnnotations
- * Copyright (c) 2014 Jaroslaw Waliszko
+﻿/* https://github.com/jwaliszko/ExpressiveAnnotations
+ * Copyright (c) 2014 Jarosław Waliszko
  * Licensed MIT: http://opensource.org/licenses/MIT */
 
 using System;
@@ -29,7 +29,7 @@ namespace ExpressiveAnnotations.Attributes
             : base(errorMessage)
         {
             if (expression == null)
-                throw new ArgumentNullException("expression", "Expression not provided.");
+                throw new ArgumentNullException(nameof(expression), "Expression not provided.");
 
             Parser = new Parser();
             Parser.RegisterMethods();
@@ -76,7 +76,7 @@ namespace ExpressiveAnnotations.Attributes
             {
                 if (!_priority.HasValue)
                     throw new InvalidOperationException(
-                        string.Format("The {0} property has not been set. Use the {1} method to get the value.", "Priority", "GetPriority"));
+                        $"The {"Priority"} property has not been set. Use the {"GetPriority"} method to get the value.");
                 return _priority.Value;
             }
             set { _priority = value; }
@@ -85,28 +85,10 @@ namespace ExpressiveAnnotations.Attributes
         /// <summary>
         ///     When implemented in a derived class, gets a unique identifier for this <see cref="T:System.Attribute" />.
         /// </summary>
-        public override object TypeId
-        {
-            /* From MSDN (msdn.microsoft.com/en-us/library/system.attribute.typeid.aspx, msdn.microsoft.com/en-us/library/6w3a7b50.aspx): 
-             * 
-             * As implemented, this identifier is merely the Type of the attribute. However, it is intended that the unique identifier be used to 
-             * identify two attributes of the same type. 
-             * 
-             * When you define a custom attribute with AttributeUsageAttribute.AllowMultiple set to true, you must override the Attribute.TypeId 
-             * property to make it unique. If all instances of your attribute are unique, override Attribute.TypeId to return the object identity 
-             * of your attribute. If only some instances of your attribute are unique, return a value from Attribute.TypeId that would return equality 
-             * in those cases. For example, some attributes have a constructor parameter that acts as a unique key. For these attributes, return the 
-             * value of the constructor parameter from the Attribute.TypeId property.
-             * 
-             * To summarize: 
-             * TypeId is documented as being a "unique identifier used to identify two attributes of the same type". By default, TypeId is just the 
-             * type of the attribute, so when two attributes of the same type are encountered, they're considered "the same" by many frameworks.
-             */
-            get { return string.Format("{0}[{1}]", GetType().FullName, Regex.Replace(Expression, @"\s+", string.Empty)); } /* distinguishes instances based on provided expressions - that way of TypeId creation is chosen over the alternatives below: 
-                                                                                                                            *     - returning new object - it is too much, instances would be always different, 
-                                                                                                                            *     - returning hash code based on expression - can lead to collisions (infinitely many strings can't be mapped injectively into any finite set - best unique identifier for string is the string itself) 
-                                                                                                                            */
-        }
+        public override object TypeId => $"{GetType().FullName}[{Regex.Replace(Expression, @"\s+", string.Empty)}]"; /* distinguishes instances based on provided expressions - that way of TypeId creation is chosen over the alternatives below: 
+                                                                                                                      *     - returning new object - it is too much, instances would be always different, 
+                                                                                                                      *     - returning hash code based on expression - can lead to collisions (infinitely many strings can't be mapped injectively into any finite set - best unique identifier for string is the string itself) 
+                                                                                                                      */
 
         /// <summary>
         ///     Determines whether the specified <see cref="System.Object" />, is equal to this instance.
@@ -186,9 +168,7 @@ namespace ExpressiveAnnotations.Attributes
             }
             catch (Exception e)
             {
-                throw new FormatException(
-                    string.Format("Problem with error message processing. The message is following: {0}", ErrorMessageString), 
-                    e);
+                throw new FormatException($"Problem with error message processing. The message is following: {ErrorMessageString}", e);
             }            
         }
 
@@ -222,9 +202,7 @@ namespace ExpressiveAnnotations.Attributes
             }
             catch (Exception e)
             {
-                throw new FormatException(
-                    string.Format("Problem with error message processing. The message is following: {0}", ErrorMessageString), 
-                    e);
+                throw new FormatException($"Problem with error message processing. The message is following: {ErrorMessageString}", e);
             }            
         }
         
@@ -266,7 +244,7 @@ namespace ExpressiveAnnotations.Attributes
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             if (validationContext == null)
-                throw new ArgumentNullException("validationContext", "ValidationContext not provided.");
+                throw new ArgumentNullException(nameof(validationContext), "ValidationContext not provided.");
 
             validationContext.MemberName = validationContext.MemberName // in case member name is a null (e.g. like in older MVC versions), try workaround - get member name using display attribute
                                            ?? validationContext.ObjectType.GetMemberNameFromDisplayAttribute(validationContext.DisplayName);
@@ -276,9 +254,7 @@ namespace ExpressiveAnnotations.Attributes
             }
             catch (Exception e)
             {
-                throw new ValidationException(
-                    string.Format("{0}: validation applied to {1} field failed.", GetType().Name, validationContext.MemberName),
-                    e);
+                throw new ValidationException($"{GetType().Name}: validation applied to {validationContext.MemberName} field failed.", e);
             }
         }
 

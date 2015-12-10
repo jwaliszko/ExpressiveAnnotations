@@ -34,7 +34,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
     public class AttributesCompilationTest
     {
         [Fact]
-        public void all_annotations_used_in_application_are_compiled_with_success() // reveals compile-time errors (no need to wait for application startup)
+        public void annotations_used_in_application_are_compiled_with_success() // reveals compile-time errors (no need to wait for application startup)
         {
             var applicationAssembly = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
                 @"..\..\..\ExpressiveAnnotations.MvcWebSample\bin\ExpressiveAnnotations.MvcWebSample.dll"));

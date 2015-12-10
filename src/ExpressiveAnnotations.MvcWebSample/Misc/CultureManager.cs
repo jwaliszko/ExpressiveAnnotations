@@ -6,16 +6,16 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
 {
     public class CultureManager
     {
-        private static readonly CultureManager _instance = new CultureManager();
+        static CultureManager()
+        {
+            Instance = new CultureManager();
+        }
 
         private CultureManager()
         {
         }
 
-        public static CultureManager Instance
-        {
-            get { return _instance; }
-        }
+        public static CultureManager Instance { get; }
 
         public void Save(string lang, HttpContextBase httpContext)
         {

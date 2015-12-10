@@ -21,7 +21,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
             var metadata = ModelMetadata.FromLambdaExpression(expression, htmlHelper.ViewData);
             var type = Nullable.GetUnderlyingType(metadata.ModelType) ?? metadata.ModelType;
             if (!type.IsEnum)
-                throw new ArgumentException("Given parameter expression has to indicate enum type.", "expression");
+                throw new ArgumentException
+                    ("Given parameter expression has to indicate enum type.", 
+                    nameof(expression));
             var values = Enum.GetValues(type).Cast<TEnum>();
 
             var items = values.Select(value => new SelectListItem

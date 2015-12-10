@@ -1,5 +1,5 @@
-﻿/* https://github.com/JaroslawWaliszko/ExpressiveAnnotations
- * Copyright (c) 2014 Jaroslaw Waliszko
+﻿/* https://github.com/jwaliszko/ExpressiveAnnotations
+ * Copyright (c) 2014 Jarosław Waliszko
  * Licensed MIT: http://opensource.org/licenses/MIT */
 
 using System.ComponentModel.DataAnnotations;

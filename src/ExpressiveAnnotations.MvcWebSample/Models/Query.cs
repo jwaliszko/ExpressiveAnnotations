@@ -18,75 +18,44 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             ContactDetails = new Contact();
         }
 
-        public IEnumerable<SelectListItem> Sports
+        public IEnumerable<SelectListItem> Sports => new[]
         {
-            get
-            {
-                return new[]
-                {
-                    new SelectListItem {Text = Resources.None, Value = "None"},
-                    new SelectListItem {Text = Resources.Normal, Value = "Normal"},
-                    new SelectListItem {Text = Resources.Extreme, Value = "Extreme"}
-                };
-            }
-        }
+            new SelectListItem {Text = Resources.None, Value = "None"},
+            new SelectListItem {Text = Resources.Normal, Value = "Normal"},
+            new SelectListItem {Text = Resources.Extreme, Value = "Extreme"}
+        };
 
-        public IEnumerable<SelectListItem> Countries
+        public IEnumerable<SelectListItem> Countries => new[]
         {
-            get
-            {
-                return new[]
-                {
-                    new SelectListItem {Text = Resources.Poland, Value = "Poland"},
-                    new SelectListItem {Text = Resources.Germany, Value = "Germany"},
-                    new SelectListItem {Text = Resources.France, Value = "France"},
-                    new SelectListItem {Text = Resources.Other, Value = "Other"}
-                };
-            }
-        }
+            new SelectListItem {Text = Resources.Poland, Value = "Poland"},
+            new SelectListItem {Text = Resources.Germany, Value = "Germany"},
+            new SelectListItem {Text = Resources.France, Value = "France"},
+            new SelectListItem {Text = Resources.Other, Value = "Other"}
+        };
 
-        public IEnumerable<SelectListItem> Answers
+        public IEnumerable<SelectListItem> Answers => new[]
         {
-            get
-            {
-                return new[]
-                {
-                    new SelectListItem {Text = string.Empty, Value = null},
-                    new SelectListItem {Text = Resources.Yes, Value = true.ToString()},
-                    new SelectListItem {Text = Resources.No, Value = false.ToString()}
-                };
-            }
-        }
+            new SelectListItem {Text = string.Empty, Value = null},
+            new SelectListItem {Text = Resources.Yes, Value = true.ToString()},
+            new SelectListItem {Text = Resources.No, Value = false.ToString()}
+        };
 
-        public IEnumerable<SelectListItem> Flights
+        public IEnumerable<SelectListItem> Flights => new[]
         {
-            get
-            {
-                return new[]
-                {
-                    new SelectListItem {Text = string.Empty, Value = Guid.Empty.ToString()},
-                    new SelectListItem {Text = "58776d02-7028-4299-81f5-db234c44b294", Value = "58776d02-7028-4299-81f5-db234c44b294"},
-                    new SelectListItem {Text = "8b7ee575-eeaa-441c-811f-db6eaacc7115", Value = "8b7ee575-eeaa-441c-811f-db6eaacc7115"},
-                    new SelectListItem {Text = "6b403167-5792-4871-bdf3-cdce8e9b90c0", Value = "6b403167-5792-4871-bdf3-cdce8e9b90c0"}
-                };
-            }
-        }
+            new SelectListItem {Text = string.Empty, Value = Guid.Empty.ToString()},
+            new SelectListItem {Text = "58776d02-7028-4299-81f5-db234c44b294", Value = "58776d02-7028-4299-81f5-db234c44b294"},
+            new SelectListItem {Text = "8b7ee575-eeaa-441c-811f-db6eaacc7115", Value = "8b7ee575-eeaa-441c-811f-db6eaacc7115"},
+            new SelectListItem {Text = "6b403167-5792-4871-bdf3-cdce8e9b90c0", Value = "6b403167-5792-4871-bdf3-cdce8e9b90c0"}
+        };
 
-        public IEnumerable<int?> Years
-        {
-            get { return Enumerable.Range(15, 82).Cast<int?>(); }
-        }
+        public IEnumerable<int?> Years => Enumerable.Range(15, 82).Cast<int?>();
 
         [UIHint("IntArray")]
-        public int[] EarlyYears
-        {
-            get { return new[] {15, 16, 17}; }
-        }
+        public int[] EarlyYears => new[] {15, 16, 17};
 
-        public int[] AvailableDonations
-        {
-            get { return new[] {1, 4, 9, 16, 25, 36, 49}; }
-        }
+        public int[] AvailableDonations => new[] {1, 4, 9, 16, 25, 36, 49};
+
+        public TimeSpan WeekPeriod => new TimeSpan(7, 0, 0, 0);
 
         [Display(ResourceType = typeof (Resources), Name = "GoAbroad")]
         public bool GoAbroad { get; set; }
@@ -217,11 +186,6 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public int ArrayLength(int[] array)
         {
             return array.Length;
-        }
-
-        public TimeSpan WeekPeriod
-        {
-            get { return new TimeSpan(7, 0, 0, 0); }
-        }
+        }        
     }
 }

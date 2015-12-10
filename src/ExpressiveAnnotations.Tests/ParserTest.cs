@@ -432,8 +432,8 @@ namespace ExpressiveAnnotations.Tests
             // methods overloading is based on the number of arguments
             var parser = new Parser();
             parser.AddFunction("Whoami", () => "utility method");
-            parser.AddFunction<int, string>("Whoami", i => string.Format("utility method {0}", i));
-            parser.AddFunction<int, string, string>("Whoami", (i, s) => string.Format("utility method {0} - {1}", i, s));
+            parser.AddFunction<int, string>("Whoami", i => $"utility method {i}");
+            parser.AddFunction<int, string, string>("Whoami", (i, s) => $"utility method {i} - {s}");
 
             Assert.True(parser.Parse<object>("Whoami() == 'utility method'").Invoke(null));
             Assert.True(parser.Parse<object>("Whoami(1) == 'utility method 1'").Invoke(null));
@@ -447,7 +447,7 @@ namespace ExpressiveAnnotations.Tests
 
             // register utility methods
             parser.AddFunction("Whoami", () => "utility method");
-            parser.AddFunction<int, string>("Whoami", i => string.Format("utility method {0}", i));
+            parser.AddFunction<int, string>("Whoami", i => $"utility method {i}");
 
             var model = new ModelWithMethods();
 
@@ -462,8 +462,8 @@ namespace ExpressiveAnnotations.Tests
             // since arguments types are not taken under consideration for methods overloading, following logic should fail
             var parser = new Parser();
 
-            parser.AddFunction<int, string>("Whoami", i => string.Format("utility method {0}", i));
-            parser.AddFunction<string, string>("Whoami", s => string.Format("utility method {0}", s));
+            parser.AddFunction<int, string>("Whoami", i => $"utility method {i}");
+            parser.AddFunction<string, string>("Whoami", s => $"utility method {s}");
 
             parser.AddFunction<string, string, string>("Glue", (s1, s2) => string.Concat(s1, s2));
             parser.AddFunction<int, int, string>("Glue", (i1, i2) => string.Concat(i1, i2));
@@ -502,8 +502,8 @@ namespace ExpressiveAnnotations.Tests
         public void verify_implicit_type_conversion()
         {
             var parser = new Parser();
-            parser.AddFunction<object, string>("Whoami", o => string.Format("utility method {0}", o));
-            parser.AddFunction<int, string, string>("Whoami", (i, s) => string.Format("utility method {0} - {1}", i, s));
+            parser.AddFunction<object, string>("Whoami", o => $"utility method {o}");
+            parser.AddFunction<int, string, string>("Whoami", (i, s) => $"utility method {i} - {s}");
 
             Assert.True(parser.Parse<object>("Whoami('0') == 'utility method 0'").Invoke(null)); // successful conversion from String to Object
             Assert.True(parser.Parse<object>("Whoami(1, '2') == 'utility method 1 - 2'").Invoke(null)); // types matched, no conversion needed
@@ -1424,7 +1424,7 @@ namespace ExpressiveAnnotations.Tests
 
             public override int GetHashCode()
             {
-                return (_value != null ? _value.GetHashCode() : 0);
+                return _value?.GetHashCode() ?? 0;
             }
 
             public static bool operator ==(StringInsens a, StringInsens b)

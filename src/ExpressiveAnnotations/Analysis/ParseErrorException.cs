@@ -1,5 +1,5 @@
-﻿/* https://github.com/JaroslawWaliszko/ExpressiveAnnotations
- * Copyright (c) 2014 Jaroslaw Waliszko
+﻿/* https://github.com/jwaliszko/ExpressiveAnnotations
+ * Copyright (c) 2014 Jarosław Waliszko
  * Licensed MIT: http://opensource.org/licenses/MIT */
 
 using System;
@@ -43,7 +43,7 @@ namespace ExpressiveAnnotations.Analysis
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             if (info == null)
-                throw new ArgumentNullException("info");
+                throw new ArgumentNullException(nameof(info));
 
             info.AddValue("Location", Location, typeof(Location));
             base.GetObjectData(info, context);

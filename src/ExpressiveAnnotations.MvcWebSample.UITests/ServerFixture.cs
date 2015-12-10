@@ -19,7 +19,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                 StartInfo =
                 {
                     FileName = programFiles + @"\IIS Express\iisexpress.exe",
-                    Arguments = string.Format("/path:{0} /port:{1}", applicationPath, Port)
+                    Arguments = $"/path:{applicationPath} /port:{Port}"
                 }
             };
             _iisProcess.Start();

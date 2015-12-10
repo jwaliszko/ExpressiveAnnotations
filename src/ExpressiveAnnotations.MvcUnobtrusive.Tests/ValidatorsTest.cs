@@ -19,8 +19,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
         public void verify_client_validation_rules_collecting()
         {
             var model = new Model();
-            var assertAttributes = Enumerable.Range(0, 28).Select(x => new AssertThatAttribute(string.Format("Value > {0}", x))).ToArray();
-            var requirAttributes = Enumerable.Range(0, 28).Select(x => new RequiredIfAttribute(string.Format("Value > {0}", x))).ToArray();
+            var assertAttributes = Enumerable.Range(0, 28).Select(x => new AssertThatAttribute($"Value > {x}")).ToArray();
+            var requirAttributes = Enumerable.Range(0, 28).Select(x => new RequiredIfAttribute($"Value > {x}")).ToArray();
 
             var metadata = GetModelMetadata(model, m => m.Value);
             var controllerContext = GetControllerContext();
@@ -33,7 +33,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
                     var validator = new AssertThatValidator(metadata, controllerContext, attribute);
                     var rule = validator.GetClientValidationRules().Single();
                     var suffix = i == 0 ? string.Empty : char.ConvertFromUtf32(96 + i);
-                    Assert.Equal(string.Format("assertthat{0}", suffix), rule.ValidationType);
+                    Assert.Equal($"assertthat{suffix}", rule.ValidationType);
                 }
             });
             Assert.Equal(
@@ -52,7 +52,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
                     var validator = new RequiredIfValidator(metadata, controllerContext, attribute);
                     var rule = validator.GetClientValidationRules().Single();
                     var suffix = i == 0 ? string.Empty : char.ConvertFromUtf32(96 + i);
-                    Assert.Equal(string.Format("requiredif{0}", suffix), rule.ValidationType);
+                    Assert.Equal($"requiredif{suffix}", rule.ValidationType);
                 }
             });
             Assert.Equal(
@@ -296,7 +296,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
         {
             const int testLoops = 10;
             var generatedCode = Enumerable.Repeat(0, 100).Select(x => "true")
-                .Aggregate("true", (accumulator, item) => string.Format("({0} && {1} && !false)", accumulator, item)); // give the parser some work (deep dive)
+                .Aggregate("true", (accumulator, item) => $"({accumulator} && {item} && !false)"); // give the parser some work (deep dive)
             
             var model = new Model();
             var metadata = GetModelMetadata(model, m => m.Value);
@@ -381,7 +381,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
 
             public override int GetHashCode()
             {
-                return (_value != null ? _value.GetHashCode() : 0);
+                return _value?.GetHashCode() ?? 0;
             }
 
             public static bool operator ==(StringInsens a, StringInsens b)

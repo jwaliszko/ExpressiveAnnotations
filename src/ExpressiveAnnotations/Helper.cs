@@ -1,5 +1,5 @@
-﻿/* https://github.com/JaroslawWaliszko/ExpressiveAnnotations
- * Copyright (c) 2014 Jaroslaw Waliszko
+﻿/* https://github.com/jwaliszko/ExpressiveAnnotations
+ * Copyright (c) 2014 Jarosław Waliszko
  * Licensed MIT: http://opensource.org/licenses/MIT */
 
 using System;
@@ -51,9 +51,9 @@ namespace ExpressiveAnnotations
         public static object ExtractValue(object source, string property)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             if (property == null)
-                throw new ArgumentNullException("property");
+                throw new ArgumentNullException(nameof(property));
 
             var props = property.Split('.');
 
@@ -61,22 +61,19 @@ namespace ExpressiveAnnotations
             var type = source.GetType();
             var pi = type.GetProperty(prop);
             if (pi == null)
-                throw new ArgumentException(
-                    string.Format("Value extraction interrupted. Field {0} not found.", prop), property);
+                throw new ArgumentException($"Value extraction interrupted. Field {prop} not found.", property);
 
             source = pi.GetValue(source, null);
             for (var i = 1; i < props.Length; i++)
             {
                 if (source == null)
-                    throw new ArgumentException(
-                        string.Format("Value extraction interrupted. Field {0} is null.", prop), property);
+                    throw new ArgumentException($"Value extraction interrupted. Field {prop} is null.", property);
 
                 prop = props[i];
                 type = source.GetType();
                 pi = type.GetProperty(prop);
                 if (pi == null)
-                    throw new ArgumentException(
-                        string.Format("Value extraction interrupted. Field {0} not found.", prop), property);
+                    throw new ArgumentException($"Value extraction interrupted. Field {prop} not found.", property);
 
                 source = pi.GetValue(source, null);
             }
@@ -87,17 +84,16 @@ namespace ExpressiveAnnotations
         public static string ExtractDisplayName(Type source, string property)
         {
             if (source == null)
-                throw new ArgumentNullException("source");
+                throw new ArgumentNullException(nameof(source));
             if (property == null)
-                throw new ArgumentNullException("property");
+                throw new ArgumentNullException(nameof(property));
 
             var props = property.Split('.');
 
             var prop = props[0];
             var pi = source.GetProperty(prop);
             if (pi == null)
-                throw new ArgumentException(
-                    string.Format("Display name extraction interrupted. Field {0} not found.", prop), property);
+                throw new ArgumentException($"Display name extraction interrupted. Field {prop} not found.", property);
 
             for (var i = 1; i < props.Length; i++)
             {
@@ -105,14 +101,12 @@ namespace ExpressiveAnnotations
                 source = pi.PropertyType;
                 pi = source.GetProperty(prop);
                 if (pi == null)
-                    throw new ArgumentException(
-                        string.Format("Display name extraction interrupted. Field {0} not found.", prop), property);
+                    throw new ArgumentException($"Display name extraction interrupted. Field {prop} not found.", property);
             }
 
             var attrib = pi.GetAttributes<DisplayAttribute>().SingleOrDefault();
             if (attrib == null)
-                throw new ArgumentException(
-                    string.Format("No DisplayName attribute provided for {0} field.", prop), property);
+                throw new ArgumentException($"No DisplayName attribute provided for {prop} field.", property);
 
             return attrib.GetName(); // instead of .Name, to work with resources
         }
@@ -120,7 +114,7 @@ namespace ExpressiveAnnotations
         public static bool IsDateTime(this Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             return type == typeof (DateTime) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsDateTime());
         }
@@ -128,7 +122,7 @@ namespace ExpressiveAnnotations
         public static bool IsTimeSpan(this Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             return type == typeof(TimeSpan) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsTimeSpan());
         }
@@ -136,7 +130,7 @@ namespace ExpressiveAnnotations
         public static bool IsBool(this Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             return type == typeof (bool) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsBool());
         }
@@ -144,7 +138,7 @@ namespace ExpressiveAnnotations
         public static bool IsGuid(this Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             return type == typeof (Guid) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsGuid());
         }
@@ -152,7 +146,7 @@ namespace ExpressiveAnnotations
         public static bool IsString(this Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             return type == typeof (string);
         }
@@ -160,7 +154,7 @@ namespace ExpressiveAnnotations
         public static bool IsNumeric(this Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             var numericTypes = new HashSet<TypeCode>
             {
@@ -183,7 +177,7 @@ namespace ExpressiveAnnotations
         public static bool IsNullable(this Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Nullable<>);
         }
@@ -191,7 +185,7 @@ namespace ExpressiveAnnotations
         public static bool IsObject(this Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             return typeof (object) == type;
         }
@@ -199,7 +193,7 @@ namespace ExpressiveAnnotations
         public static bool IsNonNullableValueType(this Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             return !type.IsNullable() && type.IsValueType;
         }
@@ -207,7 +201,7 @@ namespace ExpressiveAnnotations
         public static bool IsNullLiteral(this Expression expr)
         {
             if (expr == null)
-                throw new ArgumentNullException("expr");
+                throw new ArgumentNullException(nameof(expr));
 
             return "null".Equals(expr.ToString());
         }
@@ -215,7 +209,7 @@ namespace ExpressiveAnnotations
         public static Type UnderlyingType(this Type type)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
 
             return type.IsNullable() ? Nullable.GetUnderlyingType(type) : type;
         }        
@@ -223,7 +217,7 @@ namespace ExpressiveAnnotations
         public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
         {
             if (assembly == null)
-                throw new ArgumentNullException("assembly");
+                throw new ArgumentNullException(nameof(assembly));
 
             try
             {
@@ -238,9 +232,9 @@ namespace ExpressiveAnnotations
         public static string GetMemberNameFromDisplayAttribute(this Type type, string displayName)
         {
             if (type == null)
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             if (displayName == null)
-                throw new ArgumentNullException("displayName");
+                throw new ArgumentNullException(nameof(displayName));
             
             // get member name from display attribute (if such an attribute exists) based on display name
             var props = type.GetProperties()
@@ -263,7 +257,7 @@ namespace ExpressiveAnnotations
         public static string TrimStart(this string input, out int line, out int column)
         {
             if (input == null)
-                throw new ArgumentNullException("input");
+                throw new ArgumentNullException(nameof(input));
 
             var output = input.TrimStart();
             input.ComputeContactLocation(output, out line, out column);
@@ -273,9 +267,9 @@ namespace ExpressiveAnnotations
         public static string Substring(this string input, int start, out int line, out int column)
         {
             if (input == null)
-                throw new ArgumentNullException("input");
+                throw new ArgumentNullException(nameof(input));
             if (start < 0)
-                throw new ArgumentOutOfRangeException("start", "Start index can not be negative.");
+                throw new ArgumentOutOfRangeException(nameof(start), "Start index can not be negative.");
 
             var output = input.Substring(start);
             input.ComputeContactLocation(output, out line, out column);
@@ -295,9 +289,9 @@ namespace ExpressiveAnnotations
         public static string RemoveSuffix(this string input, string suffix)
         {
             if (input == null)
-                throw new ArgumentNullException("input");
+                throw new ArgumentNullException(nameof(input));
             if (suffix == null)
-                throw new ArgumentNullException("suffix");
+                throw new ArgumentNullException(nameof(suffix));
 
             return input.Substring(0, input.Length - suffix.Length);
         }
@@ -305,7 +299,7 @@ namespace ExpressiveAnnotations
         public static int CountLineBreaks(this string input)
         {
             if (input == null)
-                throw new ArgumentNullException("input");
+                throw new ArgumentNullException(nameof(input));
 
             return input.Count(n => n == '\n');
         }
@@ -313,9 +307,9 @@ namespace ExpressiveAnnotations
         public static string TakeLine(this string input, int index)
         {
             if (input == null)
-                throw new ArgumentNullException("input");
+                throw new ArgumentNullException(nameof(input));
             if (index < 0)
-                throw new ArgumentOutOfRangeException("index", "Line indexes are 0-based.");
+                throw new ArgumentOutOfRangeException(nameof(index), "Line indexes are 0-based.");
 
             return input.Split('\n').Skip(index).First().TrimEnd();
         }
@@ -349,12 +343,11 @@ namespace ExpressiveAnnotations
         public static string Indicator(this string input)
         {
             if (input == null)
-                throw new ArgumentNullException("input");
+                throw new ArgumentNullException(nameof(input));
 
-            return string.Format(
-                @"
-... {0} ...
-    ^--- ", input);
+            return $@"
+... {input} ...
+    ^--- ";
         }
     }
 }

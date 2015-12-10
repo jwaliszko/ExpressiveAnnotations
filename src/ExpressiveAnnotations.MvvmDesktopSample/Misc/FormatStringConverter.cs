@@ -8,7 +8,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Misc
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var stringValue = value is DateTime ? ((DateTime) value).ToShortDateString() : value.ToString();
+            var stringValue = (value as DateTime?)?.ToShortDateString() ?? value.ToString();
 
             if (parameter == null)
                 return stringValue;

@@ -29,13 +29,13 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
 
         public void SetMode(string mode) // client, server
         {
-            var elem = _driver.FindElementByXPath(string.Format("//a[@href='/System/SetValidation?type={0}&returnUrl=%2F']", mode));
+            var elem = _driver.FindElementByXPath($"//a[@href='/System/SetValidation?type={mode}&returnUrl=%2F']");
             elem.Click();
         }
 
         public void SetLang(string code) // en, pl
         {
-            var elem = _driver.FindElementByXPath(string.Format("//a[@href='/System/SetCulture?lang={0}&returnUrl=%2F']", code));
+            var elem = _driver.FindElementByXPath($"//a[@href='/System/SetCulture?lang={code}&returnUrl=%2F']");
             elem.Click();
         }
 
@@ -47,69 +47,69 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
 
         public void ClickCheckbox(string id)
         {
-            var elem = _driver.FindElementByXPath(string.Format("//input[@id='{0}']", id));
+            var elem = _driver.FindElementByXPath($"//input[@id='{id}']");
             elem.Click();
         }
 
         public void ClickCheckbox(string name, string value)
         {
-            var elem = _driver.FindElementByXPath(string.Format("//input[@name='{0}'][@value='{1}']", name, value));
+            var elem = _driver.FindElementByXPath($"//input[@name='{name}'][@value='{value}']");
             elem.Click();
         }
 
         public void ClickRadio(string id, string value)
         {
-            var elem = _driver.FindElementByXPath(string.Format("//input[@id='{0}'][@value='{1}']", id, value));
+            var elem = _driver.FindElementByXPath($"//input[@id='{id}'][@value='{value}']");
             elem.Click();
         }
 
         public void ClickTrigger(string trigger) // change, paste, keyup
         {
-            var elem = _driver.FindElementByXPath(string.Format("//input[@id='{0}Trigger']", trigger));
+            var elem = _driver.FindElementByXPath($"//input[@id='{trigger}Trigger']");
             elem.Click();
             WaitForAjax();
         }
 
         public void Select(string id, string text)
         {
-            var elem = _driver.FindElementByXPath(string.Format("//select[@id='{0}']", id));
+            var elem = _driver.FindElementByXPath($"//select[@id='{id}']");
             var select = new SelectElement(elem);
             select.SelectByText(text);
         }
 
         public void WriteTextarea(string id, string text)
         {
-            var elem = _driver.FindElementByXPath(string.Format("//textarea[@id='{0}']", id));
+            var elem = _driver.FindElementByXPath($"//textarea[@id='{id}']");
             elem.SendKeys(text);
         }
 
         public void ClearTextarea(string id)
         {
-            var elem = _driver.FindElementByXPath(string.Format("//textarea[@id='{0}']", id));
+            var elem = _driver.FindElementByXPath($"//textarea[@id='{id}']");
             elem.Clear();
         }
 
         public void WriteInput(string id, string text)
         {
-            var elem = _driver.FindElementByXPath(string.Format("//input[@id='{0}']", id));
+            var elem = _driver.FindElementByXPath($"//input[@id='{id}']");
             elem.SendKeys(text);
         }
 
         public void SetDate(string id, string text) // simulation of datepicker instant date selection (instead of sending key characters, one after another)
         {
-            _driver.ExecuteScript(string.Format("$('#{0}').attr('value', '{1}')", id, text));
+            _driver.ExecuteScript($"$('#{id}').attr('value', '{text}')");
             _driver.ExecuteScript("$('.date').trigger('change')");
         }
 
         public void ClearInput(string id)
         {
-            var elem = _driver.FindElementByXPath(string.Format("//input[@id='{0}']", id));
+            var elem = _driver.FindElementByXPath($"//input[@id='{id}']");
             elem.Clear();
         }
 
         public string GetErrorMessage(string id)
         {
-            var elem = _driver.FindElementByXPath(string.Format("//span[@data-valmsg-for='{0}']", id));
+            var elem = _driver.FindElementByXPath($"//span[@data-valmsg-for='{id}']");
             var generated = elem.FindElements(By.TagName("span"));
             return generated.Any() ? generated.Single().Text : elem.Text;
         }

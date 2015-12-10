@@ -1,5 +1,5 @@
-﻿/* https://github.com/JaroslawWaliszko/ExpressiveAnnotations
- * Copyright (c) 2014 Jaroslaw Waliszko
+﻿/* https://github.com/jwaliszko/ExpressiveAnnotations
+ * Copyright (c) 2014 Jarosław Waliszko
  * Licensed MIT: http://opensource.org/licenses/MIT */
 
 using System;
@@ -31,9 +31,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         {
             try
             {
-                var annotatedField = string.Format("{0}.{1}", metadata.ContainerType.FullName, metadata.PropertyName).ToLowerInvariant();
-                var attribId = string.Format("{0}.{1}", attribute.TypeId, annotatedField).ToLowerInvariant();
-                FieldAttributeType = string.Format("{0}.{1}", typeof(T).FullName, annotatedField).ToLowerInvariant();
+                var annotatedField = $"{metadata.ContainerType.FullName}.{metadata.PropertyName}".ToLowerInvariant();
+                var attribId = $"{attribute.TypeId}.{annotatedField}".ToLowerInvariant();
+                FieldAttributeType = $"{typeof (T).FullName}.{annotatedField}".ToLowerInvariant();
                 FieldName = metadata.PropertyName;
 
                 var item = MapCache.GetOrAdd(attribId, _ => // map cache is based on static dictionary, set-up once for entire application instance
@@ -78,9 +78,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
             }
             catch (Exception e)
             {
-                throw new ValidationException(
-                    string.Format("{0}: validation applied to {1} field failed.", GetType().Name, metadata.PropertyName), 
-                    e);
+                throw new ValidationException($"{GetType().Name}: validation applied to {metadata.PropertyName} field failed.", e);
             }
         }
 
@@ -155,9 +153,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
             }
             catch (Exception e)
             {
-                throw new ValidationException(
-                    string.Format("{0}: collecting of client validation rules for {1} field failed.", GetType().Name, FieldName),
-                    e);
+                throw new ValidationException($"{GetType().Name}: collecting of client validation rules for {FieldName} field failed.", e);
             }
         }
 
@@ -170,7 +166,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         /// </returns>
         private string ProvideUniqueValidationType(string baseName)
         {
-            return string.Format("{0}{1}", baseName, AllocateSuffix());
+            return $"{baseName}{AllocateSuffix()}";
         }
 
         private string AllocateSuffix()
@@ -188,7 +184,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
             int level;
             if (Helper.SegmentsCollide(FieldsMap.Keys, ConstsMap.Keys, out name, out level))
                 throw new InvalidOperationException(
-                    string.Format("Naming collisions cannot be accepted by client-side - {0} part at level {1} is ambiguous.", name, level));
+                    $"Naming collisions cannot be accepted by client-side - {name} part at level {level} is ambiguous.");
         }
 
         private void AssertAttribsQuantityAllowed(int count)
@@ -196,7 +192,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
             const int max = 27;
             if (count > max)
                 throw new InvalidOperationException(
-                    string.Format("No more than {0} unique attributes of the same type can be applied for a single field or property.", max));
+                    $"No more than {max} unique attributes of the same type can be applied for a single field or property.");
         }
     }
 }

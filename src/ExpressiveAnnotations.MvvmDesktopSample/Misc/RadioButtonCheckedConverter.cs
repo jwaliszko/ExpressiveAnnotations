@@ -4,7 +4,7 @@ using System.Windows.Data;
 
 namespace ExpressiveAnnotations.MvvmDesktopSample.Misc
 {
-    public class RadioButtonCheckedConverter : IValueConverter //http://stackoverflow.com/q/397556/270315
+    public class RadioButtonCheckedConverter : IValueConverter // http://stackoverflow.com/q/397556/270315
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

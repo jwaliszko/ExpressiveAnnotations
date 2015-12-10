@@ -1,5 +1,5 @@
-﻿/* https://github.com/JaroslawWaliszko/ExpressiveAnnotations
- * Copyright (c) 2014 Jaroslaw Waliszko
+﻿/* https://github.com/jwaliszko/ExpressiveAnnotations
+ * Copyright (c) 2014 Jarosław Waliszko
  * Licensed MIT: http://opensource.org/licenses/MIT */
 
 using System.Reflection;
@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("ExpressiveAnnotations")]
-[assembly: AssemblyCopyright("Copyright © Jaroslaw Waliszko 2014")]
+[assembly: AssemblyCopyright("Copyright © Jarosław Waliszko 2014")]
 [assembly: AssemblyProduct("ExpressiveAnnotations")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

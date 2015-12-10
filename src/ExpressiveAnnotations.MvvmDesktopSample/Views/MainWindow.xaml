@@ -14,7 +14,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Margin="2,0,2,-15" HorizontalAlignment="Right" VerticalAlignment="Top">
-            <Hyperlink NavigateUri="https://github.com/JaroslawWaliszko/ExpressiveAnnotations"
+            <Hyperlink NavigateUri="https://github.com/jwaliszko/ExpressiveAnnotations"
                        TextDecorations="None"
                        RequestNavigate="Hyperlink_OnRequestNavigate">
                 [more on github]

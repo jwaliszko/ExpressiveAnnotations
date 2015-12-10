@@ -1,5 +1,5 @@
-﻿/* https://github.com/JaroslawWaliszko/ExpressiveAnnotations
- * Copyright (c) 2014 Jaroslaw Waliszko
+﻿/* https://github.com/jwaliszko/ExpressiveAnnotations
+ * Copyright (c) 2014 Jarosław Waliszko
  * Licensed MIT: http://opensource.org/licenses/MIT */
 
 using System;
@@ -58,7 +58,7 @@ namespace ExpressiveAnnotations
                     Constant = length % 2 == 0,
                     FieldPath = param.Contains(":") ? param.Substring(0, param.IndexOf(":", StringComparison.Ordinal)) : param,
                     Indicator = param.Contains(":") ? param.Substring(param.IndexOf(":", StringComparison.Ordinal) + 1) : null,
-                    Substitute = string.Format("{0}{1}{2}", leftBracesFlattened, length % 2 != 0 ? uuid.ToString() : param, rightBracesFlattened) // for odd number of braces, substitute param with respective value (just like string.Format() does)
+                    Substitute = $"{leftBracesFlattened}{(length%2 != 0 ? uuid.ToString() : param)}{rightBracesFlattened}" // for odd number of braces, substitute param with respective value (just like string.Format() does)
                 };
                 items.Add(current);
                 message.Append(current.Uuid);

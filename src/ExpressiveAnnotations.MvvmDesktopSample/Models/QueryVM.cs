@@ -40,32 +40,20 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             ContactDetails = new ContactVM();
         }
 
-        public IEnumerable<KeyValuePair<string, string>> Countries
+        public IEnumerable<KeyValuePair<string, string>> Countries => new[]
         {
-            get
-            {
-                return new[]
-                {
-                    new KeyValuePair<string, string>("Poland", "Poland"),
-                    new KeyValuePair<string, string>("Germany", "Germany"),
-                    new KeyValuePair<string, string>("France", "France"),
-                    new KeyValuePair<string, string>("Other", "Other")
-                };
-            }
-        }
+            new KeyValuePair<string, string>("Poland", "Poland"),
+            new KeyValuePair<string, string>("Germany", "Germany"),
+            new KeyValuePair<string, string>("France", "France"),
+            new KeyValuePair<string, string>("Other", "Other")
+        };
 
-        public IEnumerable<KeyValuePair<string, bool?>> Answers
+        public IEnumerable<KeyValuePair<string, bool?>> Answers => new[]
         {
-            get
-            {
-                return new[]
-                {
-                    new KeyValuePair<string, bool?>(string.Empty, null),
-                    new KeyValuePair<string, bool?>("Yes", true),
-                    new KeyValuePair<string, bool?>("No", false)
-                };
-            }
-        }
+            new KeyValuePair<string, bool?>(string.Empty, null),
+            new KeyValuePair<string, bool?>("Yes", true),
+            new KeyValuePair<string, bool?>("No", false)
+        };
 
         public IEnumerable<KeyValuePair<string, int?>> Years
         {

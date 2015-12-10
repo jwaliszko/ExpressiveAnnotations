@@ -10,9 +10,6 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "AddressDetailsFormatInvalid")]
         public string Details { get; set; }
 
-        public string StreetPrefix
-        {
-            get { return Resources.StreetPrefix; }
-        }
+        public string StreetPrefix => Resources.StreetPrefix;
     }
 }

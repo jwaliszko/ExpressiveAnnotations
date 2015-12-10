@@ -5,16 +5,16 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
 {
     public class TriggersManager
     {
-        private static readonly TriggersManager _instance = new TriggersManager();
+        static TriggersManager()
+        {
+            Instance = new TriggersManager();
+        }
 
         private TriggersManager()
         {
         }
 
-        public static TriggersManager Instance
-        {
-            get { return _instance; }
-        }
+        public static TriggersManager Instance { get; }
 
         public void Save(string events, HttpContextBase httpContext)
         {
@@ -35,7 +35,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
         private string GetValueFromCookie(HttpContextBase httpContext)
         {
             var cookie = httpContext.Request.Cookies.Get("expressiv.mvcwebsample.triggers");
-            return cookie != null ? cookie.Value : null;
+            return cookie?.Value;
         }
 
         private void SetValueToCookie(string events, HttpContextBase httpContext)

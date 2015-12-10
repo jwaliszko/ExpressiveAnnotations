@@ -5,16 +5,16 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
 {
     public class ValidationManager
     {
-        private static readonly ValidationManager _instance = new ValidationManager();
+        static ValidationManager()
+        {
+            Instance = new ValidationManager();
+        }
 
         private ValidationManager()
         {
         }
 
-        public static ValidationManager Instance
-        {
-            get { return _instance; }
-        }
+        public static ValidationManager Instance { get; }
 
         public void Save(string type, HttpContextBase httpContext)
         {
@@ -35,7 +35,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
         private string GetValueFromCookie(HttpContextBase httpContext)
         {
             var cookie = httpContext.Request.Cookies.Get("expressiv.mvcwebsample.validation");
-            return cookie != null ? cookie.Value : null;
+            return cookie?.Value;
         }
 
         private void SetValueToCookie(string type, HttpContextBase httpContext)

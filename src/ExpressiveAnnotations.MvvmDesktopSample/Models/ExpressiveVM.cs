@@ -54,15 +54,11 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             }
         }
 
-        public string Error
-        {
-            get { return null; }
-        }
-        
+        public string Error => null;
+
         protected void OnValidationStateChanged()
         {
-            if (ValidationStateChanged != null)
-                ValidationStateChanged(this, new EventArgs());
+            ValidationStateChanged?.Invoke(this, new EventArgs());
         }
 
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -87,7 +83,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
         private void UpdateValidationErrors(string propertyName, object context, IEnumerable<string> errors)
         {
             errors = errors.ToList();
-            var fullName = string.Format("{0}.{1}.{2}", GetType().FullName, propertyName, RuntimeHelpers.GetHashCode(context));
+            var fullName = $"{GetType().FullName}.{propertyName}.{RuntimeHelpers.GetHashCode(context)}";
             var before = ValidationErrorsMap.Count(x => x.Value.Any());
             ValidationErrorsMap[fullName] = errors;
             var after = ValidationErrorsMap.Count(x => x.Value.Any());

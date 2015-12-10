@@ -8,7 +8,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         protected BaseTest(DriverFixture classContext, ServerFixture assemblyContext) // called before every test method
         {
             Home = new HomePage(classContext.Driver);
-            Home.Load(string.Format("http://localhost:{0}/", assemblyContext.Port));
+            Home.Load($"http://localhost:{assemblyContext.Port}/");
         }
 
         public HomePage Home { get; private set; }
