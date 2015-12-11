@@ -72,13 +72,14 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Target Name="BeforeBuild">
+    <Error Condition="'$(Configuration)' != 'DEBUG' And !Exists('$(PRIVATE_KEY_FILE)')" Text="Assembly cannot be signed. No private keyfile exists." />
+  </Target>  
   <!-- Sign the release assembly if the environment variable is set -->
-  <PropertyGroup Condition="'$(Configuration)' != 'DEBUG' And '$(PRIVATE_KEY_FILE)' != ''">
+  <PropertyGroup Condition="'$(Configuration)' != 'DEBUG'">
     <AssemblyOriginatorKeyFile>$(PRIVATE_KEY_FILE)</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <DelaySign>false</DelaySign>
