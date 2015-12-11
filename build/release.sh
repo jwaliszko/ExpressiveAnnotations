@@ -59,6 +59,6 @@ cd ..
 "$msbuild" ../src/ExpressiveAnnotations.sln /t:Clean /p:Configuration=Release-Net40 /verbosity:quiet
 "$msbuild" ../src/ExpressiveAnnotations.sln /t:Clean /p:Configuration=Release-Net45 /verbosity:quiet
 
-#nuget setapikey ...
-#nuget push ExpressiveAnnotations.x.x.x.nupkg
-#nuget push ExpressiveAnnotations.dll.x.x.x.nupkg
+# nuget setapikey ...
+# nuget push ExpressiveAnnotations.x.x.x.nupkg
+# nuget push ExpressiveAnnotations.dll.x.x.x.nupkg

@@ -1,33 +1,45 @@
-$rootdir = (get-item -path "..\" -verbose).FullName
+$rootdir = (Get-Item -Path "..\" -Verbose).FullName
 $buildcfg = "Debug"
 
+# redefine above variables for appveyor
 if($env:APPVEYOR -eq $true) {
     $rootdir = $env:APPVEYOR_BUILD_FOLDER
     $buildcfg = $env:CONFIGURATION
 }
 
-$xunitdir = get-childitem $rootdir xunit.console.exe -recurse | select-object -first 1 | select -expand Directory
-$opencoverdir = get-childitem $rootdir OpenCover.Console.exe -recurse | select-object -first 1 | select -expand Directory
-$chutzpahdir = get-childitem $rootdir chutzpah.console.exe -recurse | select-object -first 1 | select -expand Directory
+# for sake of peace kill zombies, if any
+Get-Process -Name 'phantomjs','iisexpress' -ErrorAction Ignore | Stop-Process -Force
+
+# collect tools
+$xunitdir = Get-ChildItem $rootdir xunit.console.exe -Recurse | Select-Object -First 1 | Select -Expand Directory
+$opencoverdir = Get-ChildItem $rootdir OpenCover.Console.exe -Recurse | Select-Object -First 1 | Select -Expand Directory
+$chutzpahdir = Get-ChildItem $rootdir chutzpah.console.exe -Recurse | Select-Object -First 1 | Select -Expand Directory
 
 $xunit = "$xunitdir\xunit.console.exe"
 $opencover = "$opencoverdir\OpenCover.Console.exe"
 $chutzpah = "$chutzpahdir\chutzpah.console.exe"
 
+# collect C# tests
 $eatestdll = "$rootdir\src\ExpressiveAnnotations.Tests\bin\$buildcfg\ExpressiveAnnotations.Tests.dll"
 $vatestdll = "$rootdir\src\ExpressiveAnnotations.MvcUnobtrusive.Tests\bin\$buildcfg\ExpressiveAnnotations.MvcUnobtrusive.Tests.dll"
 $uitestdll = "$rootdir\src\ExpressiveAnnotations.MvcWebSample.UITests\bin\$buildcfg\ExpressiveAnnotations.MvcWebSample.UITests.dll"
 $webmvcbin = "$rootdir\src\ExpressiveAnnotations.MvcWebSample\bin"
 
+# collect JS tests
+$maintest = "$rootdir\src\ExpressiveAnnotations.MvcWebSample\bin"
+$formtest = "$rootdir\src\tests.html"
+
+# run tests and analyze code coverage
 $opencovercmd = "$opencover -register:user -hideskipped:All -mergebyhash '-target:$xunit' '-targetargs:$eatestdll $vatestdll $uitestdll -noshadow -appveyor' -returntargetcode '-targetdir:$webmvcbin' '-filter:+[ExpressiveAnnotations(.MvcUnobtrusive)?]*' '-output:.\csharp-coverage.xml'"
-$chutzpahcmd = "$chutzpah /path $rootdir\src\expressive.annotations.validate.test.js /path $rootdir\src\tests.html /coverage /coverageExcludes '*jquery*' /junit .\chutzpah-results.xml /lcov .\chutzpah-results.lcov"
+$chutzpahcmd = "$chutzpah /path $maintest /path $formtest /coverage /coverageExcludes '*jquery*' /junit .\chutzpah-results.xml /lcov .\chutzpah-results.lcov"
 
 Invoke-Expression $opencovercmd
 Invoke-Expression $chutzpahcmd
 
+# manually present chutzpah test results to appveyor
 if($env:APPVEYOR -eq $true) {
     $success = $true
-    $results = [xml](get-content .\chutzpah-results.xml)
+    $results = [xml](Get-Content .\chutzpah-results.xml)
 
     foreach ($testsuite in $results.testsuites.testsuite) {
         foreach ($testcase in $testsuite.testcase) {
@@ -46,9 +58,9 @@ if($env:APPVEYOR -eq $true) {
     }
 }
 
-#Invoke-Expression "reportgenerator.exe -reports:.\csharp-coverage.xml -targetdir:.\csharp-report"
+# Invoke-Expression "reportgenerator.exe -reports:.\csharp-coverage.xml -targetdir:.\csharp-report"
 
-#vsinstr.exe WebProj\bin\AnalyzeMe.dll /coverage #notice: x64 vs x86 tool version
-#vsperfcmd.exe /start:coverage /output:results.coverage
-#xunit.console.exe WebProj.UITests\bin\UITests.dll
-#vsperfcmd.exe /shutdown
+# vsinstr.exe WebProj\bin\AnalyzeMe.dll /coverage #notice: x64 vs x86 tool version
+# vsperfcmd.exe /start:coverage /output:results.coverage
+# xunit.console.exe WebProj.UITests\bin\UITests.dll
+# vsperfcmd.exe /shutdown
