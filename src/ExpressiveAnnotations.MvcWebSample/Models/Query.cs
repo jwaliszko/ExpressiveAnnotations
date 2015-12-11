@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Attributes;
+using ExpressiveAnnotations.MvcWebSample.Inheritance;
 
 namespace ExpressiveAnnotations.MvcWebSample.Models
 {
@@ -160,6 +161,11 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [ValueParser("ArrayParser")]
         [Display(ResourceType = typeof (Resources), Name = "Donation")]
         public int[] SelectedDonations { get; set; }
+
+        [LocalizedRequiredIf("GoAbroad == true")]
+        [LocalizedAssertThat("Length(Comment) > 7")]
+        [Display(ResourceType = typeof(Resources), Name = "Comment")]
+        public string Comment { get; set; }
 
         public Contact ContactDetails { get; set; }
 

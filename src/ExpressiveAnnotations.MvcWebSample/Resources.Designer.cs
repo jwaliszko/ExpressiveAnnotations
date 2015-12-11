@@ -151,6 +151,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Comment.
+        /// </summary>
+        public static string Comment {
+            get {
+                return ResourceManager.GetString("Comment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Country.
         /// </summary>
         public static string Country {
@@ -327,6 +336,24 @@ namespace ExpressiveAnnotations.MvcWebSample {
         public static string LatestSuggestedReturnDate {
             get {
                 return ResourceManager.GetString("LatestSuggestedReturnDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assertion for {0} field is not satisfied  - text &apos;{Comment}&apos; is too short..
+        /// </summary>
+        public static string LocalizedAssertThatDefaultError {
+            get {
+                return ResourceManager.GetString("LocalizedAssertThatDefaultError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {0} field is conditionally required..
+        /// </summary>
+        public static string LocalizedRequiredIfDefaultError {
+            get {
+                return ResourceManager.GetString("LocalizedRequiredIfDefaultError", resourceCulture);
             }
         }
         

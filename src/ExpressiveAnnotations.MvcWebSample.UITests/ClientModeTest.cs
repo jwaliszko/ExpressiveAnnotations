@@ -430,5 +430,45 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                 "Phone number should contain from 9 to 15 digits.",
                 Home.GetErrorMessage("ContactDetails.Phone"));
         }
+
+        [Fact]
+        public void unselect_and_reselect_go_abroad_and_verify_error_for_comment_in_client_mode()
+        {
+            Home.ClickCheckbox("GoAbroad");
+            Home.ClickCheckbox("GoAbroad");
+            Assert.Equal(
+                "The Comment field is conditionally required.",
+                Home.GetErrorMessage("Comment"));
+        }
+
+        [Fact]
+        public void change_culture_unselect_and_reselect_go_abroad_and_verify_error_for_comment_in_client_mode()
+        {
+            Home.SetLang("pl");
+            Home.ClickCheckbox("GoAbroad");
+            Home.ClickCheckbox("GoAbroad");
+            Assert.Equal(
+                "Pole Komentarz jest warunkowo wymagane.",
+                Home.GetErrorMessage("Comment"));
+        }
+
+        [Fact]
+        public void write_letters_in_comment_field_and_verify_error_for_comment_in_client_mode()
+        {
+            Home.WriteInput("Comment", "asd");
+            Assert.Equal(
+                "Assertion for Comment field is not satisfied - text 'asd' is too short.",
+                Home.GetErrorMessage("Comment"));
+        }
+
+        [Fact]
+        public void change_culture_write_letters_in_comment_field_and_verify_error_for_comment_in_client_mode()
+        {
+            Home.SetLang("pl");
+            Home.WriteInput("Comment", "asd");
+            Assert.Equal(
+                "Warunek dla pola Komentarz nie jest spełniony - tekst 'asd' jest za krótki.",
+                Home.GetErrorMessage("Comment"));
+        }
     }
 }

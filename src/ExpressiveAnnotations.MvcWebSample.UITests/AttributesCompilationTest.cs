@@ -40,7 +40,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                 @"..\..\..\ExpressiveAnnotations.MvcWebSample\bin\ExpressiveAnnotations.MvcWebSample.dll"));
             var assembly = Assembly.LoadFrom(applicationAssembly);
             var attribs = assembly.CompileExpressiveAttributes();
-            Assert.Equal(25, attribs.Count());
+            Assert.Equal(27, attribs.Count());
         }
     }
 }

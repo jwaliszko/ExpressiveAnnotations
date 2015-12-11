@@ -202,4 +202,16 @@
             @Html.ValidationMessageFor(model => model.SelectedDonations)
         </div>
     </li>
+    <li>
+        <pre class="code">
+[LocalizedRequiredIf("GoAbroad == true")]
+[LocalizedAssertThat("Length(Comment) > 7")]
+</pre>
+        <pre class="action">[show attribute]</pre>
+        <div>
+            @Html.LabelFor(model => model.Comment, new { @class = "inline prefix" })
+            @Html.EditorFor(model => model.Comment)
+            @Html.ValidationMessageFor(model => model.Comment)
+        </div>
+    </li>
 </ol>

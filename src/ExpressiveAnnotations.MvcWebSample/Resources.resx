@@ -147,6 +147,9 @@
   <data name="BloodTypeRequired" xml:space="preserve">
     <value>Blood type is required if you do extreme sports, or if you do any type of sport and plan to go abroad.</value>
   </data>
+  <data name="Comment" xml:space="preserve">
+    <value>Comment</value>
+  </data>
   <data name="Country" xml:space="preserve">
     <value>Country</value>
   </data>
@@ -206,6 +209,12 @@
   </data>
   <data name="LatestSuggestedReturnDate" xml:space="preserve">
     <value>Latest suggested return</value>
+  </data>
+  <data name="LocalizedAssertThatDefaultError" xml:space="preserve">
+    <value>Assertion for {0} field is not satisfied  - text '{Comment}' is too short.</value>
+  </data>
+  <data name="LocalizedRequiredIfDefaultError" xml:space="preserve">
+    <value>The {0} field is conditionally required.</value>
   </data>
   <data name="Low" xml:space="preserve">
     <value>Low</value>

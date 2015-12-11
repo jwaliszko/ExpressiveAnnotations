@@ -7,6 +7,7 @@ using System.Web.Routing;
 using ExpressiveAnnotations.Attributes;
 using ExpressiveAnnotations.MvcUnobtrusive.Providers;
 using ExpressiveAnnotations.MvcUnobtrusive.Validators;
+using ExpressiveAnnotations.MvcWebSample.Inheritance;
 
 namespace ExpressiveAnnotations.MvcWebSample
 {
@@ -16,15 +17,9 @@ namespace ExpressiveAnnotations.MvcWebSample
     {
         protected void Application_Start()
         {
-            //DataAnnotationsModelValidatorProvider.RegisterAdapter( // if ea validation provider is used, adapters registration is done there (therefore manual registration is redundant here)
-            //    typeof (RequiredIfAttribute), typeof (RequiredIfValidator));
-            //DataAnnotationsModelValidatorProvider.RegisterAdapter(
-            //    typeof (AssertThatAttribute), typeof (AssertThatValidator));
-
-            ModelValidatorProviders.Providers.Remove(
-                ModelValidatorProviders.Providers.FirstOrDefault(x => x is DataAnnotationsModelValidatorProvider));
-            ModelValidatorProviders.Providers.Add(new ExpressiveAnnotationsModelValidatorProvider()); // ea validation provider added here
-                                                                                                      // it automatically registers adapters for expressive validation attributes and respects their processing priorities when validation is performed
+            // RegisterExpressiveAttributes(); // required for client-side validation to be working, but redundant if built-in ea model validation provider is used (see statement below)
+            RegisterExpressiveModelValidatorProvider(); // ea model validation provider added here, it automatically registers adapters for expressive validation attributes and respects their processing priorities when validation is performed
+            RegisterRedefinedExpressiveAttributes(); // just for demo, if you redefine attributes and validators, to e.g. override global error message, register them here as well
 
             AreaRegistration.RegisterAllAreas();
 
@@ -32,6 +27,29 @@ namespace ExpressiveAnnotations.MvcWebSample
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+        }
+
+        private static void RegisterExpressiveAttributes()
+        {
+            DataAnnotationsModelValidatorProvider.RegisterAdapter(
+                typeof (RequiredIfAttribute), typeof (RequiredIfValidator));
+            DataAnnotationsModelValidatorProvider.RegisterAdapter(
+                typeof (AssertThatAttribute), typeof (AssertThatValidator));
+        }
+
+        private static void RegisterExpressiveModelValidatorProvider()
+        {
+            ModelValidatorProviders.Providers.Remove(
+                ModelValidatorProviders.Providers.FirstOrDefault(x => x is DataAnnotationsModelValidatorProvider));
+            ModelValidatorProviders.Providers.Add(new ExpressiveAnnotationsModelValidatorProvider());
+        }
+
+        private static void RegisterRedefinedExpressiveAttributes()
+        {
+            DataAnnotationsModelValidatorProvider.RegisterAdapter(
+                typeof (LocalizedRequiredIfAttribute), typeof (LocalizedRequiredIfValidator));
+            DataAnnotationsModelValidatorProvider.RegisterAdapter(
+                typeof (LocalizedAssertThatAttribute), typeof (LocalizedAssertThatValidator));
         }
     }
 }
