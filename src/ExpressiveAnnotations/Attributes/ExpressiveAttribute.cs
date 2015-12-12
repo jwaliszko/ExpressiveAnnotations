@@ -204,7 +204,7 @@ namespace ExpressiveAnnotations.Attributes
             catch (Exception e)
             {
                 throw new FormatException($"Problem with error message processing. The message is following: {ErrorMessageString}", e);
-            }            
+            }
         }
         
         /// <summary>

@@ -299,8 +299,7 @@ namespace ExpressiveAnnotations
 
         public static string ToOrdinal(this int num)
         {
-            if (num <= 0)
-                return num.ToString(CultureInfo.InvariantCulture);
+            Debug.Assert(num > 0);
 
             switch (num%100)
             {

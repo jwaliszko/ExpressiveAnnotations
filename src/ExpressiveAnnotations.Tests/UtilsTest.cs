@@ -63,7 +63,10 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(11, ExpressiveAnnotations.Helper.ExtractValue(model, "Internal.Value1"));
             Assert.Equal(null, ExpressiveAnnotations.Helper.ExtractValue(model, "Internal.Value2"));
 
-            var e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractValue(model, "Internal.Value123"));
+            var e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractValue(model, "internal"));
+            Assert.Equal("Value extraction interrupted. Field internal not found.\r\nParameter name: internal", e.Message);
+
+            e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractValue(model, "Internal.Value123"));
             Assert.Equal("Value extraction interrupted. Field Value123 not found.\r\nParameter name: Internal.Value123", e.Message);
 
             model.Internal = null;
@@ -82,7 +85,10 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("_{Value2}_", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Value2"));
             Assert.Equal("_{Value2}_", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Internal.Value2"));
 
-            var e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "Internal.Value123"));
+            var e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "internal"));
+            Assert.Equal("Display name extraction interrupted. Field internal not found.\r\nParameter name: internal", e.Message);
+
+            e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "Internal.Value123"));
             Assert.Equal("Display name extraction interrupted. Field Value123 not found.\r\nParameter name: Internal.Value123", e.Message);
 
             e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "NoName"));

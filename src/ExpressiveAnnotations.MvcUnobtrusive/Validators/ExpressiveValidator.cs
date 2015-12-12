@@ -60,15 +60,13 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                     {
                         FieldsMap = FieldsMap,
                         ConstsMap = ConstsMap,
-                        ParsersMap = ParsersMap,
-                        ErrFieldsMap = ErrFieldsMap,
+                        ParsersMap = ParsersMap
                     };
                 });
 
                 FieldsMap = item.FieldsMap;
                 ConstsMap = item.ConstsMap;
                 ParsersMap = item.ParsersMap;
-                ErrFieldsMap = item.ErrFieldsMap;
 
                 Expression = attribute.Expression;
 
@@ -137,16 +135,16 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 rule.ValidationParameters.Add("expression", Expression.ToJson());
 
                 Debug.Assert(FieldsMap != null);
-                if (FieldsMap != null && FieldsMap.Any())
+                if (FieldsMap.Any())
                     rule.ValidationParameters.Add("fieldsmap", FieldsMap.ToJson());
                 Debug.Assert(ConstsMap != null);
-                if (ConstsMap != null && ConstsMap.Any())
+                if (ConstsMap.Any())
                     rule.ValidationParameters.Add("constsmap", ConstsMap.ToJson());
                 Debug.Assert(ParsersMap != null);
-                if (ParsersMap != null && ParsersMap.Any())
+                if (ParsersMap.Any())
                     rule.ValidationParameters.Add("parsersmap", ParsersMap.ToJson());
                 Debug.Assert(ErrFieldsMap != null);
-                if (ErrFieldsMap != null && ErrFieldsMap.Any())
+                if (ErrFieldsMap.Any())
                     rule.ValidationParameters.Add("errfieldsmap", ErrFieldsMap.ToJson());
 
                 return rule;

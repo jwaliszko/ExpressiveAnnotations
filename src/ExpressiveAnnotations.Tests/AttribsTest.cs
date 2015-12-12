@@ -188,7 +188,13 @@ namespace ExpressiveAnnotations.Tests
             }.ToList().ForEach(msg =>
             {
                 var attrib = new AssertThatAttribute("true") {ErrorMessage = msg};
-                var e = Assert.Throws<FormatException>(() => attrib.FormatErrorMessage("ads", "true", null));
+                var e = Assert.Throws<FormatException>(() => attrib.FormatErrorMessage("asd", "true", null));
+                Assert.Equal($"Problem with error message processing. The message is following: {msg}", e.Message);
+                Assert.IsType<FormatException>(e.InnerException);
+                Assert.Equal("Input string was not in a correct format.", e.InnerException.Message);
+
+                IDictionary<string, Guid> errFieldsMap;
+                e = Assert.Throws<FormatException>(() => attrib.FormatErrorMessage("asd", "true", typeof(object), out errFieldsMap));
                 Assert.Equal($"Problem with error message processing. The message is following: {msg}", e.Message);
                 Assert.IsType<FormatException>(e.InnerException);
                 Assert.Equal("Input string was not in a correct format.", e.InnerException.Message);

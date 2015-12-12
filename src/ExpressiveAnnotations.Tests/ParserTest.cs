@@ -422,7 +422,11 @@ namespace ExpressiveAnnotations.Tests
         public void verify_non_bool_expression_failure()
         {
             var parser = new Parser();
+
             var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("1").Invoke(null));
+            Assert.True(e.Message.StartsWith("Parse fatal error."));
+
+            e = Assert.Throws<InvalidOperationException>(() => parser.Parse(typeof (object), "1").Invoke(null));
             Assert.True(e.Message.StartsWith("Parse fatal error."));
         }
 
@@ -862,11 +866,11 @@ namespace ExpressiveAnnotations.Tests
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>(
                     @"1 - 2
     - 6
-    + 1/x/1 == 3.50").Invoke(null));
+    + 1/x[0]/1 == 3.50").Invoke(null));
                 Assert.Equal(
                     @"Parse error on line 3, column 9:
-... x/1 == 3.50 ...
-    ^--- Only public properties, constants and enums are accepted. Identifier 'x' not known.",
+... x[0]/1 == 3.50 ...
+    ^--- Only public properties, constants and enums are accepted. Identifier 'x[0]' not known.",
                     e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("WriteLine('hello')").Invoke(null));

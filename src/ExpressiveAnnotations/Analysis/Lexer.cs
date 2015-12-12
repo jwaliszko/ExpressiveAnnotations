@@ -78,7 +78,7 @@ namespace ExpressiveAnnotations.Analysis
             lock (_locker)
             {
                 if (expression == null)
-                    throw new ArgumentNullException("expression", "Expression not provided.");
+                    throw new ArgumentNullException(nameof(expression), "Expression not provided.");
 
                 Location = new Location(line: 1, column: 1);
                 Expression = expression;

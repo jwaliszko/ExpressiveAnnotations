@@ -21,6 +21,8 @@
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,6 +33,7 @@
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Release\ExpressiveAnnotations.xml</DocumentationFile>
     <RunCodeAnalysis>true</RunCodeAnalysis>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Net40|AnyCPU'">
     <DebugType>pdbonly</DebugType>
@@ -39,6 +42,8 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <DocumentationFile>..\bin\Release-Net40\ExpressiveAnnotations.xml</DocumentationFile>
     <DefineConstants>NET40</DefineConstants>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Net45|AnyCPU'">
     <DebugType>pdbonly</DebugType>
@@ -47,6 +52,8 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <DocumentationFile>..\bin\Release-Net45\ExpressiveAnnotations.xml</DocumentationFile>
     <DefineConstants>NET45</DefineConstants>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -77,7 +84,7 @@
   -->
   <Target Name="BeforeBuild">
     <Error Condition="'$(Configuration)' != 'DEBUG' And !Exists('$(PRIVATE_KEY_FILE)')" Text="Assembly cannot be signed. No private keyfile exists." />
-  </Target>  
+  </Target>
   <!-- Sign the release assembly if the environment variable is set -->
   <PropertyGroup Condition="'$(Configuration)' != 'DEBUG'">
     <AssemblyOriginatorKeyFile>$(PRIVATE_KEY_FILE)</AssemblyOriginatorKeyFile>

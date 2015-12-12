@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -293,8 +294,7 @@ namespace ExpressiveAnnotations.Analysis
 
         private Token PeekToken(int depth = 0)
         {
-            if (depth < 0)
-                throw new ArgumentOutOfRangeException(nameof(depth), "Depth can not be negative, surprisingly.");
+            Debug.Assert(depth >= 0); // depth can not be negative
 
             return depth == 0
                 ? TokensToProcess.Peek() // for 0 depth take crrent context
