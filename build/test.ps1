@@ -26,7 +26,7 @@ $uitestdll = "$rootdir\src\ExpressiveAnnotations.MvcWebSample.UITests\bin\$build
 $webmvcbin = "$rootdir\src\ExpressiveAnnotations.MvcWebSample\bin"
 
 # collect JS tests
-$maintest = "$rootdir\src\ExpressiveAnnotations.MvcWebSample\bin"
+$maintest = "$rootdir\src\expressive.annotations.validate.test.js"
 $formtest = "$rootdir\src\tests.html"
 
 # run tests and analyze code coverage

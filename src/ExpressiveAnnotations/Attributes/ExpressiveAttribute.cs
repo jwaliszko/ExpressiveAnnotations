@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using ExpressiveAnnotations.Analysis;
@@ -239,12 +240,10 @@ namespace ExpressiveAnnotations.Attributes
         /// <returns>
         ///     An instance of the <see cref="T:System.ComponentModel.DataAnnotations.ValidationResult" /> class.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">validationContext;ValidationContext not provided.</exception>
         /// <exception cref="System.ComponentModel.DataAnnotations.ValidationException"></exception>
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
-            if (validationContext == null)
-                throw new ArgumentNullException(nameof(validationContext), "ValidationContext not provided.");
+            Debug.Assert(validationContext != null);
 
             validationContext.MemberName = validationContext.MemberName // in case member name is a null (e.g. like in older MVC versions), try workaround - get member name using display attribute
                                            ?? validationContext.ObjectType.GetMemberNameFromDisplayAttribute(validationContext.DisplayName);

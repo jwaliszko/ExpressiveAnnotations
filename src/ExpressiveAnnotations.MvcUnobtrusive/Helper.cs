@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -16,6 +17,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive
     {
         public static string GetCoarseType(Type type)
         {
+            Debug.Assert(type != null);
+
             if (type.IsTimeSpan())
                 return "timespan";
             if (type.IsDateTime())
@@ -36,6 +39,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive
         [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")] // code that deals with disposables should be consistent (and classes should be resilient to multiple Dispose() calls)
         public static string ToJson(this object data)
         {
+            Debug.Assert(data != null);
+
             var stringBuilder = new StringBuilder();
             var jsonSerializer = new JsonSerializer();
             using (var stringWriter = new StringWriter(stringBuilder))
@@ -48,6 +53,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusive
 
         public static bool SegmentsCollide(IEnumerable<string> listA, IEnumerable<string>listB, out string name, out int level)
         {
+            Debug.Assert(listA != null);
+            Debug.Assert(listB != null);
+
             name = null;
             level = -1;
 

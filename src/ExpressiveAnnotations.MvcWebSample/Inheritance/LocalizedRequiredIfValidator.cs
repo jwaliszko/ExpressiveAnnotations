@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
@@ -28,6 +29,8 @@ namespace ExpressiveAnnotations.MvcWebSample.Inheritance
         [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times")] // code that deals with disposables should be consistent (and classes should be resilient to multiple Dispose() calls)
         private static string ToJson(object data)
         {
+            Debug.Assert(data != null);
+
             var stringBuilder = new StringBuilder();
             var jsonSerializer = new JsonSerializer();
             using (var stringWriter = new StringWriter(stringBuilder))

@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -16,6 +17,8 @@ namespace ExpressiveAnnotations
 
         public static string FormatString(string input, out IList<FormatItem> items)
         {
+            Debug.Assert(input != null);
+
             items = new List<FormatItem>();
             var matches = Regex.Matches(input, _formatItemsRegex);
             var message = new StringBuilder();

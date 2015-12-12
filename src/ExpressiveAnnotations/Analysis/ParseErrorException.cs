@@ -3,6 +3,7 @@
  * Licensed MIT: http://opensource.org/licenses/MIT */
 
 using System;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 using System.Security;
 using System.Security.Permissions;
@@ -42,8 +43,7 @@ namespace ExpressiveAnnotations.Analysis
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)] // deny creating an object of this type from a data that wasn't created by this serialization code 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            if (info == null)
-                throw new ArgumentNullException(nameof(info));
+            Debug.Assert(info != null);
 
             info.AddValue("Location", Location, typeof(Location));
             base.GetObjectData(info, context);

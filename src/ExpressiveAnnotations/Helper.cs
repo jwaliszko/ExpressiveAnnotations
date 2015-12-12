@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -16,6 +17,9 @@ namespace ExpressiveAnnotations
     {
         public static void MakeTypesCompatible(Expression e1, Expression e2, out Expression oute1, out Expression oute2)
         {
+            Debug.Assert(e1 != null);
+            Debug.Assert(e2 != null);
+
             oute1 = e1;
             oute2 = e2;
 
@@ -50,10 +54,8 @@ namespace ExpressiveAnnotations
 
         public static object ExtractValue(object source, string property)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-            if (property == null)
-                throw new ArgumentNullException(nameof(property));
+            Debug.Assert(source != null);
+            Debug.Assert(property != null);
 
             var props = property.Split('.');
 
@@ -83,10 +85,8 @@ namespace ExpressiveAnnotations
 
         public static string ExtractDisplayName(Type source, string property)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-            if (property == null)
-                throw new ArgumentNullException(nameof(property));
+            Debug.Assert(source != null);
+            Debug.Assert(property != null);
 
             var props = property.Split('.');
 
@@ -113,48 +113,42 @@ namespace ExpressiveAnnotations
 
         public static bool IsDateTime(this Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+            Debug.Assert(type != null);
 
             return type == typeof (DateTime) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsDateTime());
         }
 
         public static bool IsTimeSpan(this Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+            Debug.Assert(type != null);
 
             return type == typeof(TimeSpan) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsTimeSpan());
         }
 
         public static bool IsBool(this Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+            Debug.Assert(type != null);
 
             return type == typeof (bool) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsBool());
         }
 
         public static bool IsGuid(this Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+            Debug.Assert(type != null);
 
             return type == typeof (Guid) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsGuid());
         }
 
         public static bool IsString(this Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+            Debug.Assert(type != null);
 
             return type == typeof (string);
         }
 
         public static bool IsNumeric(this Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+            Debug.Assert(type != null);
 
             var numericTypes = new HashSet<TypeCode>
             {
@@ -176,48 +170,42 @@ namespace ExpressiveAnnotations
 
         public static bool IsNullable(this Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+            Debug.Assert(type != null);
 
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Nullable<>);
         }
 
         public static bool IsObject(this Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+            Debug.Assert(type != null);
 
             return typeof (object) == type;
         }
 
         public static bool IsNonNullableValueType(this Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+            Debug.Assert(type != null);
 
             return !type.IsNullable() && type.IsValueType;
         }
 
         public static bool IsNullLiteral(this Expression expr)
         {
-            if (expr == null)
-                throw new ArgumentNullException(nameof(expr));
+            Debug.Assert(expr != null);
 
             return "null".Equals(expr.ToString());
         }
 
         public static Type UnderlyingType(this Type type)
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+            Debug.Assert(type != null);
 
             return type.IsNullable() ? Nullable.GetUnderlyingType(type) : type;
         }        
 
         public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
         {
-            if (assembly == null)
-                throw new ArgumentNullException(nameof(assembly));
+            Debug.Assert(assembly != null);
 
             try
             {
@@ -231,11 +219,9 @@ namespace ExpressiveAnnotations
 
         public static string GetMemberNameFromDisplayAttribute(this Type type, string displayName)
         {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
-            if (displayName == null)
-                throw new ArgumentNullException(nameof(displayName));
-            
+            Debug.Assert(type != null);
+            Debug.Assert(displayName != null);
+
             // get member name from display attribute (if such an attribute exists) based on display name
             var props = type.GetProperties()
                 .Where(p => p.GetAttributes<DisplayAttribute>().Any(a => a.GetName() == displayName))
@@ -247,6 +233,8 @@ namespace ExpressiveAnnotations
 
         public static IEnumerable<T> GetAttributes<T>(this MemberInfo element) where T : Attribute
         {
+            Debug.Assert(element != null);
+
 #if NET40
             return element.GetCustomAttributes(typeof (T), false).Cast<T>();
 #else
@@ -256,8 +244,7 @@ namespace ExpressiveAnnotations
 
         public static string TrimStart(this string input, out int line, out int column)
         {
-            if (input == null)
-                throw new ArgumentNullException(nameof(input));
+            Debug.Assert(input != null);
 
             var output = input.TrimStart();
             input.ComputeContactLocation(output, out line, out column);
@@ -266,10 +253,8 @@ namespace ExpressiveAnnotations
 
         public static string Substring(this string input, int start, out int line, out int column)
         {
-            if (input == null)
-                throw new ArgumentNullException(nameof(input));
-            if (start < 0)
-                throw new ArgumentOutOfRangeException(nameof(start), "Start index can not be negative.");
+            Debug.Assert(input != null);
+            Debug.Assert(start >= 0);
 
             var output = input.Substring(start);
             input.ComputeContactLocation(output, out line, out column);
@@ -278,6 +263,9 @@ namespace ExpressiveAnnotations
 
         public static void ComputeContactLocation(this string input, string output, out int line, out int column)
         {
+            Debug.Assert(input != null);
+            Debug.Assert(output != null);            
+
             var redundancy = input.RemoveSuffix(output);
             var lastLineBreak = redundancy.LastIndexOf('\n');
             column = lastLineBreak > 0
@@ -288,28 +276,23 @@ namespace ExpressiveAnnotations
 
         public static string RemoveSuffix(this string input, string suffix)
         {
-            if (input == null)
-                throw new ArgumentNullException(nameof(input));
-            if (suffix == null)
-                throw new ArgumentNullException(nameof(suffix));
+            Debug.Assert(input != null);
+            Debug.Assert(suffix != null);
 
             return input.Substring(0, input.Length - suffix.Length);
         }
 
         public static int CountLineBreaks(this string input)
         {
-            if (input == null)
-                throw new ArgumentNullException(nameof(input));
+            Debug.Assert(input != null);
 
             return input.Count(n => n == '\n');
         }
 
         public static string TakeLine(this string input, int index)
         {
-            if (input == null)
-                throw new ArgumentNullException(nameof(input));
-            if (index < 0)
-                throw new ArgumentOutOfRangeException(nameof(index), "Line indexes are 0-based.");
+            Debug.Assert(input != null);
+            Debug.Assert(index >= 0);
 
             return input.Split('\n').Skip(index).First().TrimEnd();
         }
@@ -342,8 +325,7 @@ namespace ExpressiveAnnotations
 
         public static string Indicator(this string input)
         {
-            if (input == null)
-                throw new ArgumentNullException(nameof(input));
+            Debug.Assert(input != null);
 
             return $@"
 ... {input} ...
