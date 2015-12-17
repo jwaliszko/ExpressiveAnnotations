@@ -51,7 +51,7 @@ mv ../src/bin/Release-Net45/ExpressiveAnnotations* $1/ExpressiveAnnotations/net4
 mv expressive.annotations.validate* $1/ExpressiveAnnotations
 mv *.nupkg $1
 cp ../doc/api/api.chm $1/ExpressiveAnnotations
-cd $1 && zip ExpressiveAnnotations.zip ExpressiveAnnotations/*
+cd $1 && zip -r ExpressiveAnnotations.zip ExpressiveAnnotations
 
 echo "------ cleanup..."
 cd ..
