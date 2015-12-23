@@ -1,0 +1,17 @@
+{
+  "name": "RuAnt-ExpresiveAnnotations",
+  "version": "2.6.5",
+  "homepage": "https://github.com/jwaliszko/ExpressiveAnnotations",
+  "authors": [
+    "Jarosław Waliszko"
+  ],
+  "description": "A small .NET and JavaScript library which provides annotation-based conditional validation mechanisms.",
+  "keywords": [
+    "conditional",
+    "validation",
+    "mvc"
+  ],
+  "license": "MIT",
+  "ignore": [
+  ]
+}
