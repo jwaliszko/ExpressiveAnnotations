@@ -23,6 +23,10 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                 }
             };
             _iisProcess.Start();
+
+            const string screenshots = "Screenshots";
+            if (Directory.Exists(screenshots))
+                Directory.Delete(screenshots, true); // remove existing screenshots of previously failing tests, if any
         }
 
         public int Port { get; private set; }
