@@ -245,8 +245,8 @@ namespace ExpressiveAnnotations.Attributes
         {
             Debug.Assert(validationContext != null);
 
-            validationContext.MemberName = validationContext.MemberName // in case member name is a null (e.g. like in older MVC versions), try workaround - get member name using display attribute
-                                           ?? validationContext.ObjectType.GetMemberNameFromDisplayAttribute(validationContext.DisplayName);
+            validationContext.MemberName = validationContext.MemberName // in case member name is a null (e.g. like in older MVC versions) try workaround
+                                           ?? validationContext.ObjectType.GetMemberNameByDisplayName(validationContext.DisplayName);
             try
             {
                 return IsValidInternal(value, validationContext);
