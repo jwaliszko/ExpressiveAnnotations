@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -92,14 +93,15 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("Display name extraction interrupted. Field Value123 not found.\r\nParameter name: Internal.Value123", e.Message);
 
             e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "NoName"));
-            Assert.Equal("No DisplayName attribute provided for NoName field.\r\nParameter name: NoName", e.Message);
+            Assert.Equal("No display name provided for NoName field. Use either Display attribute or DisplayName attribute.\r\nParameter name: NoName", e.Message);
         }
 
         [Fact]
-        public void name_of_field_extracted_through_its_display_name_annotation() // DisplayAttribute used as a workaround for field name extraction in older versions of MVC where MemberName was not provided in ValidationContext
+        public void verify_fields_names_extraction_based_on_their_display_names() // Display attribute or DisplayName attribute used as a workaround for field name extraction in older versions of MVC where MemberName was not provided in ValidationContext
         {
-            Assert.Equal("Value1", typeof (Model).GetMemberNameFromDisplayAttribute("Value_1"));
-            Assert.Equal("Value2", typeof (Model).GetMemberNameFromDisplayAttribute("_{Value2}_"));
+            Assert.Equal("Value1", typeof (Model).GetMemberNameByDisplayName("Value_1"));
+            Assert.Equal("Value2", typeof (Model).GetMemberNameByDisplayName("_{Value2}_"));
+            Assert.Equal("Internal", typeof (Model).GetMemberNameByDisplayName("internal"));
         }
 
         private class Model
@@ -107,11 +109,12 @@ namespace ExpressiveAnnotations.Tests
             [Display(Name = "Value_1")]
             public int? Value1 { get; set; }
 
-            [DisplayAttribute(ResourceType = typeof(Resources), Name = "Value2")]
+            [Display(ResourceType = typeof(Resources), Name = "Value2")]
             public int? Value2 { get; set; }
 
             public string NoName { get; set; }
 
+            [DisplayName("internal")]
             public Model Internal { get; set; }
         }
     }

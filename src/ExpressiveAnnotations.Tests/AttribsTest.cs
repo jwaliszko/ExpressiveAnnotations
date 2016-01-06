@@ -341,10 +341,10 @@ namespace ExpressiveAnnotations.Tests
 
         private class MsgModel
         {
-            [DisplayAttribute(Name = "_{Value1}_")]
+            [Display(Name = "_{Value1}_")]
             public int Value1 { get; set; }
 
-            [DisplayAttribute(ResourceType = typeof (Resources), Name = "Value2")]
+            [Display(ResourceType = typeof (Resources), Name = "Value2")]
             public int Value2 { get; set; }            
 
             [Display(ResourceType = typeof (Resources), Name = "Lang")]

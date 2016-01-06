@@ -4,9 +4,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -104,11 +104,17 @@ namespace ExpressiveAnnotations
                     throw new ArgumentException($"Display name extraction interrupted. Field {prop} not found.", property);
             }
 
-            var attrib = pi.GetAttributes<DisplayAttribute>().SingleOrDefault();
-            if (attrib == null)
-                throw new ArgumentException($"No DisplayName attribute provided for {prop} field.", property);
+            var displayAttrib = pi.GetAttributes<DisplayAttribute>().SingleOrDefault();
+            if (displayAttrib == null)
+            {
+                var displayNameAttrib = pi.GetAttributes<DisplayNameAttribute>().SingleOrDefault();
+                if (displayNameAttrib == null)
+                    throw new ArgumentException($"No display name provided for {prop} field. Use either Display attribute or DisplayName attribute.", property);
 
-            return attrib.GetName(); // instead of .Name, to work with resources
+                return displayNameAttrib.DisplayName;
+            }
+
+            return displayAttrib.GetName(); // instead of .Name, to work with resources
         }
 
         public static bool IsDateTime(this Type type)
@@ -217,14 +223,37 @@ namespace ExpressiveAnnotations
             }
         }
 
+        public static string GetMemberNameByDisplayName(this Type type, string displayName)
+        {
+            Debug.Assert(type != null);
+            Debug.Assert(displayName != null);
+
+            return type.GetMemberNameFromDisplayAttribute(displayName) ??
+                   type.GetMemberNameFromDisplayNameAttribute(displayName);
+        }
+
         public static string GetMemberNameFromDisplayAttribute(this Type type, string displayName)
         {
             Debug.Assert(type != null);
             Debug.Assert(displayName != null);
 
-            // get member name from display attribute (if such an attribute exists) based on display name
+            // get member name from Display attribute (if such an attribute exists) based on display name
             var props = type.GetProperties()
                 .Where(p => p.GetAttributes<DisplayAttribute>().Any(a => a.GetName() == displayName))
+                .Select(p => p.Name).ToList();
+
+            // if there is an ambiguity, return nothing
+            return props.Count == 1 ? props.SingleOrDefault() : null;
+        }
+
+        public static string GetMemberNameFromDisplayNameAttribute(this Type type, string displayName)
+        {
+            Debug.Assert(type != null);
+            Debug.Assert(displayName != null);
+
+            // get member name from DisplayName attribute (if such an attribute exists) based on display name
+            var props = type.GetProperties()
+                .Where(p => p.GetAttributes<DisplayNameAttribute>().Any(a => a.DisplayName == displayName))
                 .Select(p => p.Name).ToList();
 
             // if there is an ambiguity, return nothing
