@@ -38,9 +38,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Net40|AnyCPU'">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\bin\Release-Net40\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <DocumentationFile>..\bin\Release-Net40\ExpressiveAnnotations.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\ExpressiveAnnotations.xml</DocumentationFile>
     <DefineConstants>NET40</DefineConstants>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RunCodeAnalysis>true</RunCodeAnalysis>
@@ -48,9 +48,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Net45|AnyCPU'">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\bin\Release-Net45\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <DocumentationFile>..\bin\Release-Net45\ExpressiveAnnotations.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\ExpressiveAnnotations.xml</DocumentationFile>
     <DefineConstants>NET45</DefineConstants>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <RunCodeAnalysis>true</RunCodeAnalysis>
@@ -79,16 +79,9 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
   <Target Name="AfterBuild">
   </Target>
   -->
-  <Target Name="BeforeBuild">
-    <Error Condition="'$(Configuration)' != 'DEBUG' And !Exists('$(PRIVATE_KEY_FILE)')" Text="Assembly cannot be signed. No private keyfile exists." />
-  </Target>
-  <!-- Sign the release assembly if the environment variable is set -->
-  <PropertyGroup Condition="'$(Configuration)' != 'DEBUG'">
-    <AssemblyOriginatorKeyFile>$(PRIVATE_KEY_FILE)</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <DelaySign>false</DelaySign>
-  </PropertyGroup>
 </Project>
