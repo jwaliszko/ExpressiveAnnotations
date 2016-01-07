@@ -20,7 +20,8 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("7a61f32b-50cb-4c55-8122-6e1c8e672c29")]
-#if DEBUG
+
+#if !SIGNED
 [assembly: InternalsVisibleTo("ExpressiveAnnotations.MvcUnobtrusive.Tests")]
 #else
 [assembly: InternalsVisibleTo("ExpressiveAnnotations.MvcUnobtrusive.Tests, PublicKey=" +

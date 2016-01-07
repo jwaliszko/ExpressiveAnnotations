@@ -19,13 +19,13 @@ This package contains only single component, mainly ExpressiveAnnotations.dll co
         <tags>DataAnnotations Validation</tags>
     </metadata>
     <files>
-        <file src="..\src\bin\Release-Net40\ExpressiveAnnotations.dll" target="lib\net40\ExpressiveAnnotations.dll" />
-        <file src="..\src\bin\Release-Net40\ExpressiveAnnotations.pdb" target="lib\net40\ExpressiveAnnotations.pdb" />
-        <file src="..\src\bin\Release-Net40\ExpressiveAnnotations.xml" target="lib\net40\ExpressiveAnnotations.xml" />
+        <file src="net40\ExpressiveAnnotations.dll" target="lib\net40\ExpressiveAnnotations.dll" />
+        <file src="net40\ExpressiveAnnotations.pdb" target="lib\net40\ExpressiveAnnotations.pdb" />
+        <file src="net40\ExpressiveAnnotations.xml" target="lib\net40\ExpressiveAnnotations.xml" />
 
-        <file src="..\src\bin\Release-Net45\ExpressiveAnnotations.dll" target="lib\net45\ExpressiveAnnotations.dll" />
-        <file src="..\src\bin\Release-Net45\ExpressiveAnnotations.pdb" target="lib\net45\ExpressiveAnnotations.pdb" />
-        <file src="..\src\bin\Release-Net45\ExpressiveAnnotations.xml" target="lib\net45\ExpressiveAnnotations.xml" />
+        <file src="net45\ExpressiveAnnotations.dll" target="lib\net45\ExpressiveAnnotations.dll" />
+        <file src="net45\ExpressiveAnnotations.pdb" target="lib\net45\ExpressiveAnnotations.pdb" />
+        <file src="net45\ExpressiveAnnotations.xml" target="lib\net45\ExpressiveAnnotations.xml" />
 
         <file src="..\src\ExpressiveAnnotations\**\*.cs" target="src\ExpressiveAnnotations" exclude="..\src\ExpressiveAnnotations\obj\**" />
     </files>
