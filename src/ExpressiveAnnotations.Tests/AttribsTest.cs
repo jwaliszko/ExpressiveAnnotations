@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Globalization;
@@ -40,12 +41,10 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Fact]
-        public void verify_validation_execution_for_derived_types()
-        {
-            // just assure that no exception is thrown during validation related to types casting and cached funcs
+        public void assure_no_exception_thrown_for_derived_types_validation()
+        {            
             var firstDerived = new FirstDerived();
             var secondDerived = new SecondDerived();
-
             var firstContext = new ValidationContext(firstDerived);
             var secondContext = new ValidationContext(secondDerived);
 
@@ -62,8 +61,10 @@ namespace ExpressiveAnnotations.Tests
             // initialize annotated property value with non-null, for deep go-through of AssertThat logic
             firstDerived.Value1 = new object();
             secondDerived.Value1 = new object();
+            // put into cache different funcs...
             Validator.TryValidateObject(firstDerived, firstContext, null, true);
             Validator.TryValidateObject(secondDerived, secondContext, null, true);
+            // ...and use already cached ones accordingly
             Validator.TryValidateObject(firstDerived, firstContext, null, true);
             Validator.TryValidateObject(secondDerived, secondContext, null, true);
         }
@@ -275,6 +276,25 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("The Priority property has not been set. Use the GetPriority method to get the value.", e.Message);
         }
 
+        [Fact]
+        public void display_attribute_takes_precedence_over_displayname_attribute()
+        {
+            var model = new DisplayModel();
+            var context = new ValidationContext(model);
+
+            var results = new List<ValidationResult>();
+
+            model.Value3 = null;
+            Validator.TryValidateObject(model, context, results, true);
+            Assert.Equal("requiredif only chosen", results.Single().ErrorMessage);
+
+            results.Clear();
+
+            model.Value3 = new object();
+            Validator.TryValidateObject(model, context, results, true);
+            Assert.Equal("assertthat only chosen", results.Single().ErrorMessage);
+        }
+
         private static void AssertErrorMessage(string input, string assertThatOutput, string requiredIfOutput)
         {
             var assertThat = new AssertThatAttribute("1!=1");
@@ -351,6 +371,20 @@ namespace ExpressiveAnnotations.Tests
             public string Lang { get; set; }
 
             public MsgModel Internal { get; set; }
+        }
+
+        private class DisplayModel
+        {
+            [DisplayName("only")]
+            public int Value1 { get; set; }
+
+            [DisplayName("redundant")]
+            [Display(Name = "chosen")]
+            public int Value2 { get; set; }
+
+            [RequiredIf("1 > 0", ErrorMessage = "requiredif {Value1:n} {Value2:n}")]
+            [AssertThat("1 < 0", ErrorMessage = "assertthat {Value1:n} {Value2:n}")]
+            public object Value3 { get; set; }
         }
 
         private class BrokenModel

@@ -1,5 +1,5 @@
 $rootdir = (Get-Item -Path "..\" -Verbose).FullName
-$buildcfg = "Debug"
+$buildcfg = "Release"
 
 # redefine above variables for appveyor
 if($env:APPVEYOR -eq $true) {
@@ -36,7 +36,7 @@ $chutzpahcmd = "$chutzpah /path $maintest /path $formtest /coverage /coverageExc
 Invoke-Expression $opencovercmd
 Invoke-Expression $chutzpahcmd
 
-# manually present chutzpah test results to appveyor
+# manually submit chutzpah test results to appveyor
 if($env:APPVEYOR -eq $true) {
     $success = $true
     $results = [xml](Get-Content .\chutzpah-results.xml)
