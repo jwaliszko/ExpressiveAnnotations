@@ -344,6 +344,7 @@ namespace ExpressiveAnnotations.Tests
             model.NSpan = null;
             Assert.True(parser.Parse<Model>("NDate == null && Date != NDate").Invoke(model));
             Assert.True(parser.Parse<Model>("NSpan == null && Span != NSpan").Invoke(model));
+            Assert.True(parser.Parse<Model>("Date(1, 1, 1) == MinDate").Invoke(model));
 
             var subModel = new Model();
             var newModel = new Model {SubModel = subModel, SubModelObject = subModel};
@@ -620,6 +621,7 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.True(parser.Parse<object>("Now() > Today()").Invoke(null));
             Assert.True(parser.Parse<object>("Date(1985, 2, 20) < Date(1985, 2, 20, 0, 0, 1)").Invoke(null));
+            Assert.True(parser.Parse<object>("Date(1, 1, 1) == Date(1, 1, 1, 0, 0, 0)").Invoke(null));
 
             Assert.True(parser.Parse<object>("TimeSpan(1, 0, 0, 0) > TimeSpan(0, 1, 0, 0)").Invoke(null));
             //Assert.True(parser.Parse<object>("(TimeSpan(0, 0, 0, 0)).TotalMilliseconds == 0").Invoke(null)); // foo().Prop - to be supported?
@@ -1267,6 +1269,8 @@ namespace ExpressiveAnnotations.Tests
 
             public object SubModelObject { get; set; }
             public Model SubModel { get; set; }
+
+            public DateTime MinDate => DateTime.MinValue;
 
             public DateTime? NDate { get; set; }
             public DateTime Date { get; set; }
