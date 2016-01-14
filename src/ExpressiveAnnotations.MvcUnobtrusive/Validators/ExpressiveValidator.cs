@@ -31,12 +31,12 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         {
             try
             {
-                var annotatedField = $"{metadata.ContainerType.FullName}.{metadata.PropertyName}".ToLowerInvariant();
-                var attribId = $"{attribute.TypeId}.{annotatedField}".ToLowerInvariant();
-                FieldAttributeType = $"{typeof (T).FullName}.{annotatedField}".ToLowerInvariant();
+                var fieldId = $"{metadata.ContainerType.FullName}.{metadata.PropertyName}".ToLowerInvariant();
+                AttributeFullId = $"{attribute.TypeId}.{fieldId}".ToLowerInvariant();
+                AttributeWeakId = $"{typeof (T).FullName}.{fieldId}".ToLowerInvariant();
                 FieldName = metadata.PropertyName;
 
-                var item = MapCache.GetOrAdd(attribId, _ => // map cache is based on static dictionary, set-up once for entire application instance
+                var item = MapCache.GetOrAdd(AttributeFullId, _ => // map cache is based on static dictionary, set-up once for entire application instance
                 {                                           // (by design, no reason to recompile once compiled expressions)
                     var parser = new Parser();
                     parser.RegisterMethods();
@@ -110,7 +110,15 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         /// </summary>
         protected IDictionary<string, object> ConstsMap { get; private set; }
 
-        private string FieldAttributeType { get; set; }
+        /// <summary>
+        ///     Attribute strong identifier - attribute type identifier concatenated with annotated field identifier.
+        /// </summary>
+        private string AttributeFullId { get; set; }
+
+        /// <summary>
+        ///     Attribute partial identifier - attribute type name concatenated with annotated field identifier.
+        /// </summary>
+        private string AttributeWeakId { get; set; }
 
         private string FieldName { get; set; }
 
@@ -168,11 +176,15 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         }
 
         private string AllocateSuffix()
-        {
-            var count = RequestStorage.Get<int>(FieldAttributeType) + 1;
+        {            
+            var count = RequestStorage.Get<int>(AttributeWeakId);
+            if (!RequestStorage.Get<bool>(AttributeFullId)) // attributes of the same TypeId should be filtered out at this stage from outside, so
+            {                                               // the only reason we still encounter duplicates means, they are applied in separate models (e.g. collection processing) - adapters names differentiation should be avoided
+                count++;
+                RequestStorage.Set(AttributeFullId, true);
+            }
             AssertAttribsQuantityAllowed(count);
-
-            RequestStorage.Set(FieldAttributeType, count);
+            RequestStorage.Set(AttributeWeakId, count);
             return count == 1 ? string.Empty : char.ConvertFromUtf32(95 + count); // single lowercase letter from latin alphabet or an empty string
         }
 
