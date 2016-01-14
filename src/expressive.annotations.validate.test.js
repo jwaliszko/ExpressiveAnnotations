@@ -396,7 +396,7 @@
 
         assert.ok(m.Now() > m.Today());
         assert.ok(m.Date(1985, 2, 20) < m.Date(1985, 2, 20, 0, 0, 1));        
-        assert.equal(m.Date(1, 1, 1), -62135600400000); // 01/01/0001 00:00:00, Mon Jan 01 1 01:01:01 GMT+0100 (Central European Standard Time)
+        assert.equal(m.Date(1, 1, 1), new Date(new Date(1, 0, 1).setFullYear(1)).getTime());
         assert.equal(m.Date(1, 1, 1), m.Date(1, 1, 1, 0, 0, 0));
 
         assert.ok(m.TimeSpan(1, 0, 0, 0) > m.TimeSpan(0, 1, 0, 0));
