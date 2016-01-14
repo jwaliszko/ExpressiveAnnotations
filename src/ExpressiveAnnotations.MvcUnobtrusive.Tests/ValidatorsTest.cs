@@ -16,7 +16,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
     public class ValidatorsTest : BaseTest
     {
         [Fact]
-        public void verify_client_validation_rules_collecting()
+        public void verify_client_validation_rules_collecting_for_multiple_annotations()
         {
             var model = new Model();
             var assertAttributes = Enumerable.Range(0, 28).Select(x => new AssertThatAttribute($"Value > {x}")).ToArray();
@@ -62,6 +62,26 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             Assert.Equal(
                 "No more than 27 unique attributes of the same type can be applied for a single field or property.",
                 e.InnerException.Message);
+        }
+
+        [Fact]
+        public void verify_client_validation_rules_collecting_for_separate_model_items()
+        {
+            var models = Enumerable.Range(0, 28).Select(x => new Model()).ToArray();
+            var controllerContext = GetControllerContext();
+
+            foreach (var model in models)
+            {
+                var metadata = GetModelMetadata(model, m => m.Value);
+
+                var assertThatValidator = new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("Value > 0"));
+                var rule = assertThatValidator.GetClientValidationRules().Single();
+                Assert.Equal("assertthat", rule.ValidationType);
+
+                var requiredIfValidator = new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute("Value > 0"));
+                rule = requiredIfValidator.GetClientValidationRules().Single();
+                Assert.Equal("requiredif", rule.ValidationType);
+            }
         }
 
         [Fact]
