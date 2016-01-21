@@ -153,6 +153,12 @@
   <data name="Country" xml:space="preserve">
     <value>Country</value>
   </data>
+  <data name="CustomizedAssertThatDefaultError" xml:space="preserve">
+    <value>Assertion for {0} field is not satisfied - text '{コメント}' is too short.</value>
+  </data>
+  <data name="CustomizedRequiredIfDefaultError" xml:space="preserve">
+    <value>The {0} field is conditionally required.</value>
+  </data>
   <data name="DigitsOnlyAccepted" xml:space="preserve">
     <value>Only digits are accepted.</value>
   </data>
@@ -209,12 +215,6 @@
   </data>
   <data name="LatestSuggestedReturnDate" xml:space="preserve">
     <value>Latest suggested return</value>
-  </data>
-  <data name="LocalizedAssertThatDefaultError" xml:space="preserve">
-    <value>Assertion for {0} field is not satisfied  - text '{Comment}' is too short.</value>
-  </data>
-  <data name="LocalizedRequiredIfDefaultError" xml:space="preserve">
-    <value>The {0} field is conditionally required.</value>
   </data>
   <data name="Low" xml:space="preserve">
     <value>Low</value>

@@ -153,6 +153,12 @@
   <data name="Country" xml:space="preserve">
     <value>Kraj</value>
   </data>
+  <data name="CustomizedAssertThatDefaultError" xml:space="preserve">
+    <value>Warunek dla pola {0} nie jest spełniony - tekst '{コメント}' jest za krótki.</value>
+  </data>
+  <data name="CustomizedRequiredIfDefaultError" xml:space="preserve">
+    <value>Pole {0} jest warunkowo wymagane.</value>
+  </data>
   <data name="DigitsOnlyAccepted" xml:space="preserve">
     <value>Tylko cyfry są dozwolone.</value>
   </data>
@@ -209,12 +215,6 @@
   </data>
   <data name="LatestSuggestedReturnDate" xml:space="preserve">
     <value>Najpóźniejsza sugerowana data</value>
-  </data>
-  <data name="LocalizedAssertThatDefaultError" xml:space="preserve">
-    <value>Warunek dla pola {0} nie jest spełniony - tekst '{Comment}' jest za krótki.</value>
-  </data>
-  <data name="LocalizedRequiredIfDefaultError" xml:space="preserve">
-    <value>Pole {0} jest warunkowo wymagane.</value>
   </data>
   <data name="Low" xml:space="preserve">
     <value>Niska</value>

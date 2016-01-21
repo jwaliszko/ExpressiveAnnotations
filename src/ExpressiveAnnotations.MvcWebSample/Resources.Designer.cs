@@ -169,6 +169,24 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Assertion for {0} field is not satisfied - text &apos;{コメント}&apos; is too short..
+        /// </summary>
+        public static string CustomizedAssertThatDefaultError {
+            get {
+                return ResourceManager.GetString("CustomizedAssertThatDefaultError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {0} field is conditionally required..
+        /// </summary>
+        public static string CustomizedRequiredIfDefaultError {
+            get {
+                return ResourceManager.GetString("CustomizedRequiredIfDefaultError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Only digits are accepted..
         /// </summary>
         public static string DigitsOnlyAccepted {
@@ -336,24 +354,6 @@ namespace ExpressiveAnnotations.MvcWebSample {
         public static string LatestSuggestedReturnDate {
             get {
                 return ResourceManager.GetString("LatestSuggestedReturnDate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Assertion for {0} field is not satisfied  - text &apos;{Comment}&apos; is too short..
-        /// </summary>
-        public static string LocalizedAssertThatDefaultError {
-            get {
-                return ResourceManager.GetString("LocalizedAssertThatDefaultError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The {0} field is conditionally required..
-        /// </summary>
-        public static string LocalizedRequiredIfDefaultError {
-            get {
-                return ResourceManager.GetString("LocalizedRequiredIfDefaultError", resourceCulture);
             }
         }
         

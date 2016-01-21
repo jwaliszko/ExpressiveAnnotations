@@ -47,9 +47,9 @@ namespace ExpressiveAnnotations.MvcWebSample
         private static void RegisterRedefinedExpressiveAttributes()
         {
             DataAnnotationsModelValidatorProvider.RegisterAdapter(
-                typeof (LocalizedRequiredIfAttribute), typeof (LocalizedRequiredIfValidator));
+                typeof (CustomizedRequiredIfAttribute), typeof (CustomizedRequiredIfValidator));
             DataAnnotationsModelValidatorProvider.RegisterAdapter(
-                typeof (LocalizedAssertThatAttribute), typeof (LocalizedAssertThatValidator));
+                typeof (CustomizedAssertThatAttribute), typeof (CustomizedAssertThatValidator));
         }
     }
 }

@@ -3,16 +3,16 @@ using ExpressiveAnnotations.Attributes;
 
 namespace ExpressiveAnnotations.MvcWebSample.Inheritance
 {
-    public class LocalizedRequiredIfAttribute: ExpressiveAttribute
+    public class CustomizedRequiredIfAttribute: ExpressiveAttribute
     {
         public bool AllowEmptyStrings { get; set; }
 
-        public LocalizedRequiredIfAttribute(string expression)
+        public CustomizedRequiredIfAttribute(string expression)
             : base(expression, "The {0} field is conditionally required.") // this default message will be overriden by resources
         {
             AllowEmptyStrings = false;
             ErrorMessageResourceType = typeof(Resources);
-            ErrorMessageResourceName = "LocalizedRequiredIfDefaultError";
+            ErrorMessageResourceName = "CustomizedRequiredIfDefaultError";
         }
 
         protected override ValidationResult IsValidInternal(object value, ValidationContext validationContext)
