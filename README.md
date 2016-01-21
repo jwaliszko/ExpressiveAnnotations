@@ -183,7 +183,7 @@ Logical expressions should be built according to the syntax defined by grammar, 
 * arithmetic operators: `+`, `-`, `*`, `/`,	
 * curly brackets: `(`, `)`,
 * square brackets: `[`, `]`,
-* alphanumeric characters with the support of `,`, `.`, `_`, `'` and whitespaces, used to synthesize suitable literals:
+* unicode letters and numbers (i.e. `[L*]` and `[N*]` [categories](https://en.wikipedia.org/wiki/Unicode_character_property) respectively), with the support of `,`, `.`, `_`, `'` and whitespaces, used to synthesize suitable literals:
   * null literal: `null`, 
   * integer number literals, e.g. `123`, 
   * real number literals, e.g. `1.5` or `-0.3e-2`,

@@ -124,10 +124,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
-    <Compile Include="Inheritance\LocalizedAssertThatAttribute.cs" />
-    <Compile Include="Inheritance\LocalizedAssertThatValidator.cs" />
-    <Compile Include="Inheritance\LocalizedRequiredIfValidator.cs" />
-    <Compile Include="Inheritance\LocalizedRequiredIfAttribute.cs" />
+    <Compile Include="Inheritance\CustomizedAssertThatAttribute.cs" />
+    <Compile Include="Inheritance\CustomizedAssertThatValidator.cs" />
+    <Compile Include="Inheritance\CustomizedRequiredIfValidator.cs" />
+    <Compile Include="Inheritance\CustomizedRequiredIfAttribute.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\SystemController.cs" />
@@ -262,6 +262,7 @@
     <EmbeddedResource Include="Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

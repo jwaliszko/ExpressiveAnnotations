@@ -13,7 +13,7 @@ namespace ExpressiveAnnotations
 {
     internal static class MessageFormatter
     {
-        private const string _formatItemsRegex = @"({+)[a-zA-Z_]+(?:(?:\.[a-zA-Z_])?[a-zA-Z0-9_]*)*(?::(?:n|N))?(}+)"; // {fieldPath[:indicator]}, e.g. {field}, {field.field:n}
+        private const string _formatItemsRegex = @"({+)[_\p{L}]+(?:(?:\.[_\p{L}])?[_\p{L}\p{N}]*)*(?::(?:n|N))?(}+)"; // {fieldPath[:indicator]}, e.g. {field}, {field.field:n} (field path regex exactly as defined in lexer field)
 
         public static string FormatString(string input, out IList<FormatItem> items)
         {

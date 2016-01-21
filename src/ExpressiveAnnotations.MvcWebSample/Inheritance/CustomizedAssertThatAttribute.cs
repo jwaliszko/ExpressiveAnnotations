@@ -3,13 +3,13 @@ using ExpressiveAnnotations.Attributes;
 
 namespace ExpressiveAnnotations.MvcWebSample.Inheritance
 {
-    public class LocalizedAssertThatAttribute : ExpressiveAttribute
+    public class CustomizedAssertThatAttribute : ExpressiveAttribute
     {
-        public LocalizedAssertThatAttribute(string expression)
+        public CustomizedAssertThatAttribute(string expression)
             : base(expression, "Assertion for {0} field is not satisfied.") // this default message will be overriden by resources
         {
             ErrorMessageResourceType = typeof(Resources);
-            ErrorMessageResourceName = "LocalizedAssertThatDefaultError";
+            ErrorMessageResourceName = "CustomizedAssertThatDefaultError";
         }
 
         protected override ValidationResult IsValidInternal(object value, ValidationContext validationContext)

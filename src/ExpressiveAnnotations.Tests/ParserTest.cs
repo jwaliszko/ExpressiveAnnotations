@@ -1263,6 +1263,14 @@ namespace ExpressiveAnnotations.Tests
                 e.Message);
         }
 
+        [Fact]
+        public void assure_unicode_characters_are_supported()
+        {
+            var parser = new Parser();
+            var model = new LocalModel {ąęćłńśóźż = "ąęćłńśóźż"};
+            Assert.True(parser.Parse<LocalModel>("ąęćłńśóźż == 'ąęćłńśóźż'").Invoke(model));
+        }
+
         private class Model
         {
             public const string Const = "inside";
@@ -1381,6 +1389,11 @@ namespace ExpressiveAnnotations.Tests
         {
             public Parser Parser { get; set; }
             public Lexer Lexer { get; set; }
+        }
+
+        public class LocalModel
+        {
+            public string ąęćłńśóźż { get; set; }
         }
 
         private enum YesNo

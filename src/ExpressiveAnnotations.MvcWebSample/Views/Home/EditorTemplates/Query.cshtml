@@ -204,14 +204,14 @@
     </li>
     <li>
         <pre class="code">
-[LocalizedRequiredIf("GoAbroad == true")]
-[LocalizedAssertThat("Length(Comment) > 7")]
+[CustomizedRequiredIf("GoAbroad == true")]
+[CustomizedAssertThat("Length(コメント) > 1e1 - 1")]
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>
-            @Html.LabelFor(model => model.Comment, new { @class = "inline prefix" })
-            @Html.EditorFor(model => model.Comment)
-            @Html.ValidationMessageFor(model => model.Comment)
+            @Html.LabelFor(model => model.コメント, new { @class = "inline prefix" })
+            @Html.TextBoxFor(model => model.コメント, new { @id = "コメント" })
+            @Html.ValidationMessageFor(model => model.コメント)
         </div>
     </li>
 </ol>

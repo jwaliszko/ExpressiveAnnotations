@@ -538,7 +538,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                 Home.Submit();
                 Assert.Equal(
                     "The Comment field is conditionally required.",
-                    Home.GetErrorMessage("Comment"));
+                    Home.GetErrorMessage("コメント"));
             });
         }
 
@@ -551,7 +551,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                 Home.Submit();
                 Assert.Equal(
                     "Pole Komentarz jest warunkowo wymagane.",
-                    Home.GetErrorMessage("Comment"));
+                    Home.GetErrorMessage("コメント"));
             });
         }
 
@@ -560,11 +560,11 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         {
             Watch(() =>
             {
-                Home.WriteInput("Comment", "asd");
+                Home.WriteInput("コメント", "asd");
                 Home.Submit();
                 Assert.Equal(
                     "Assertion for Comment field is not satisfied - text 'asd' is too short.",
-                    Home.GetErrorMessage("Comment"));
+                    Home.GetErrorMessage("コメント"));
             });
         }
 
@@ -574,11 +574,11 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             Watch(() =>
             {
                 Home.SetLang("pl");
-                Home.WriteInput("Comment", "asd");
+                Home.WriteInput("コメント", "ąęćłńśóźż");
                 Home.Submit();
                 Assert.Equal(
-                    "Warunek dla pola Komentarz nie jest spełniony - tekst 'asd' jest za krótki.",
-                    Home.GetErrorMessage("Comment"));
+                    "Warunek dla pola Komentarz nie jest spełniony - tekst 'ąęćłńśóźż' jest za krótki.",
+                    Home.GetErrorMessage("コメント"));
             });
         }
     }
