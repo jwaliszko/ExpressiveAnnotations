@@ -27,11 +27,24 @@ $maintest = "$rootdir\src\expressive.annotations.validate.test.js"
 $formtest = "$rootdir\src\tests.html"
 
 # run tests and analyze code coverage
-$opencovercmd = "$opencover -register:user -hideskipped:All -mergebyhash '-target:$xunit' '-targetargs:$eatestdll $vatestdll $uitestdll -noshadow -appveyor' -returntargetcode '-targetdir:$webmvcbin' '-filter:+[ExpressiveAnnotations(.MvcUnobtrusive)?]*' '-output:.\csharp-coverage.xml'"
+$opencovercmd = "$opencover -register:user -hideskipped:All -mergebyhash '-target:$xunit' '-targetargs:$eatestdll $vatestdll $uitestdll -noshadow -appveyor' '-targetdir:$webmvcbin' '-filter:+[ExpressiveAnnotations(.MvcUnobtrusive)?]*' '-output:.\csharp-coverage.xml' -returntargetcode"
 $chutzpahcmd = "$chutzpah /path $maintest /path $formtest /coverage /coverageIgnores '*test*, *jquery*' /junit .\chutzpah-results.xml /lcov .\chutzpah-results.lcov"
 
 Invoke-Expression $opencovercmd
+if($LastExitCode -ne 0) {
+    if($env:APPVEYOR -eq $true) {
+        $host.SetShouldExit($LastExitCode)
+    }
+    throw "C# tests failed"
+}
+
 Invoke-Expression $chutzpahcmd
+if($LastExitCode -ne 0) {
+    if($env:APPVEYOR -eq $true) {
+        $host.SetShouldExit($LastExitCode)
+    }
+    throw "JS tests failed"
+}
 
 # manually submit chutzpah test results to appveyor
 if($env:APPVEYOR -eq $true) {
@@ -42,16 +55,11 @@ if($env:APPVEYOR -eq $true) {
         foreach ($testcase in $testsuite.testcase) {
             if ($testcase.failure) {
                 Add-AppveyorTest $testcase.name -Outcome Failed -FileName $testsuite.name -ErrorMessage $testcase.failure.message -Duration $testcase.time
-                $success = $false
             }
             else {
                 Add-AppveyorTest $testcase.name -Outcome Passed -FileName $testsuite.name -Duration $testcase.time
             }
         }
-    }
-
-    if ($success -eq $false) {
-        $host.SetShouldExit(1)
     }
 }
 
