@@ -228,9 +228,7 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Content\site.css" />
     <Content Include="Global.asax" />
-    <Content Include="Web.config">
-      <SubType>Designer</SubType>
-    </Content>
+    <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -281,9 +279,7 @@
     <Content Include="Views\Home\EditorTemplates\Address.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="packages.config">
-      <SubType>Designer</SubType>
-    </Content>
+    <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ExpressiveAnnotations.MvcUnobtrusive\ExpressiveAnnotations.MvcUnobtrusive.csproj">
