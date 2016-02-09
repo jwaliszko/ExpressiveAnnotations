@@ -7,9 +7,6 @@ if($env:APPVEYOR -eq $true) {
     $buildcfg = $env:CONFIGURATION
 }
 
-# for sake of peace kill zombies, if any
-Get-Process -Name 'phantomjs','iisexpress' -ErrorAction Ignore | Stop-Process -Force
-
 # collect tools
 $xunitdir = Get-ChildItem $rootdir xunit.console.exe -Recurse | Select-Object -First 1 | Select -Expand Directory
 $opencoverdir = Get-ChildItem $rootdir OpenCover.Console.exe -Recurse | Select-Object -First 1 | Select -Expand Directory
@@ -31,7 +28,7 @@ $formtest = "$rootdir\src\tests.html"
 
 # run tests and analyze code coverage
 $opencovercmd = "$opencover -register:user -hideskipped:All -mergebyhash '-target:$xunit' '-targetargs:$eatestdll $vatestdll $uitestdll -noshadow -appveyor' -returntargetcode '-targetdir:$webmvcbin' '-filter:+[ExpressiveAnnotations(.MvcUnobtrusive)?]*' '-output:.\csharp-coverage.xml'"
-$chutzpahcmd = "$chutzpah /path $maintest /path $formtest /coverage /coverageExcludes '*jquery*' /junit .\chutzpah-results.xml /lcov .\chutzpah-results.lcov"
+$chutzpahcmd = "$chutzpah /path $maintest /path $formtest /coverage /coverageIgnores '*test*, *jquery*' /junit .\chutzpah-results.xml /lcov .\chutzpah-results.lcov"
 
 Invoke-Expression $opencovercmd
 Invoke-Expression $chutzpahcmd
