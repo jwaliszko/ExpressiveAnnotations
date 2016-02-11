@@ -8,7 +8,13 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
     {
         public DriverFixture() // called before every test class
         {
-            Driver = new PhantomJSDriver(); // headless browser testing
+            var service = PhantomJSDriverService.CreateDefaultService();
+            service.IgnoreSslErrors = true;
+            service.WebSecurity = false;
+
+            var options = new PhantomJSOptions();            
+
+            Driver = new PhantomJSDriver(service, options, TimeSpan.FromSeconds(15)); // headless browser testing
         }
 
         public RemoteWebDriver Driver { get; private set; }

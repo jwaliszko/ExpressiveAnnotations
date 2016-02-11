@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
@@ -17,8 +18,8 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
 
         public void Load(string url)
         {
-            _driver.Navigate().GoToUrl(url);
             _driver.Manage().Window.Maximize();
+            _driver.Navigate().GoToUrl(url);
         }
 
         public void Clean()
@@ -30,43 +31,43 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         public void SetMode(string mode) // client, server
         {
             var elem = _driver.FindElementByXPath($"//a[@href='/System/SetValidation?type={mode}&returnUrl=%2F']");
-            elem.Click();
+            SafeClick(elem);
         }
 
         public void SetLang(string code) // en, pl
         {
             var elem = _driver.FindElementByXPath($"//a[@href='/System/SetCulture?lang={code}&returnUrl=%2F']");
-            elem.Click();
+            SafeClick(elem);
         }
 
         public void Submit()
         {
             var elem = _driver.FindElementByXPath("//input[@type='submit']");
-            elem.Click();
+            SafeClick(elem);
         }
 
         public void ClickCheckbox(string id)
         {
             var elem = _driver.FindElementByXPath($"//input[@id='{id}']");
-            elem.Click();
+            SafeClick(elem);
         }
 
         public void ClickCheckbox(string name, string value)
         {
             var elem = _driver.FindElementByXPath($"//input[@name='{name}'][@value='{value}']");
-            elem.Click();
+            SafeClick(elem);
         }
 
         public void ClickRadio(string id, string value)
         {
             var elem = _driver.FindElementByXPath($"//input[@id='{id}'][@value='{value}']");
-            elem.Click();
+            SafeClick(elem);
         }
 
         public void ClickTrigger(string trigger) // change, paste, keyup
         {
             var elem = _driver.FindElementByXPath($"//input[@id='{trigger}Trigger']");
-            elem.Click();
+            SafeClick(elem);
             WaitForAjax();
         }
 
@@ -120,12 +121,18 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             return int.Parse(elem.GetAttribute("content"));
         }
 
+        private void SafeClick(IWebElement elem)
+        {
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+            wait.Until(ExpectedConditions.ElementToBeClickable(elem)).Click();
+        }
+
         private void WaitForAjax() // wait for all ajax requests initiated by jQuery to complete
         {
             while (true)
             {
-                var ajaxIsComplete = (bool)(_driver as IJavaScriptExecutor).ExecuteScript("return jQuery.active == 0"); // $.active returns the number of active Ajax requests                    
-                if (ajaxIsComplete)
+                var ajaxIsComplete = _driver.ExecuteScript("return jQuery.active == 0"); // $.active returns the number of active Ajax requests                    
+                if ((bool) ajaxIsComplete)
                     break;
                 Thread.Sleep(100);
             }
