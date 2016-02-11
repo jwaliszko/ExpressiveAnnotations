@@ -389,23 +389,29 @@ namespace ExpressiveAnnotations.Analysis
                         oper.Location);                
             }
 
+            Expression expression = null;
             switch (oper.Type)
             {
                 case TokenType.LT:
-                    return Expression.LessThan(arg1, arg2);
+                    expression = Expression.LessThan(arg1, arg2);
+                    break;
                 case TokenType.LE:
-                    return Expression.LessThanOrEqual(arg1, arg2);
+                    expression = Expression.LessThanOrEqual(arg1, arg2);
+                    break;
                 case TokenType.GT:
-                    return Expression.GreaterThan(arg1, arg2);
+                    expression = Expression.GreaterThan(arg1, arg2);
+                    break;
                 case TokenType.GE:
-                    return Expression.GreaterThanOrEqual(arg1, arg2);
+                    expression = Expression.GreaterThanOrEqual(arg1, arg2);
+                    break;
                 case TokenType.EQ:
-                    return Expression.Equal(arg1, arg2);
+                    expression = Expression.Equal(arg1, arg2);
+                    break;
                 case TokenType.NEQ:
-                    return Expression.NotEqual(arg1, arg2);
-                default:
-                    throw new ArgumentOutOfRangeException(); // never gets here
+                    expression = Expression.NotEqual(arg1, arg2);
+                    break;
             }
+            return expression;
         }
 
         private Expression ParseNotExp()
@@ -430,12 +436,7 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseAddExp()
         {
-            var sign = UnifySign();
             var arg = ParseMulExp();
-
-            if (sign == TokenType.SUB)
-                arg = InverseNumber(arg);
-
             return ParseAddExpInternal(arg);
         }
 
@@ -445,11 +446,7 @@ namespace ExpressiveAnnotations.Analysis
                 return arg1;
             var oper = PeekToken();
             ReadToken();
-            var sign = UnifySign();
             var arg2 = ParseMulExp();
-
-            if (sign == TokenType.SUB)
-                arg2 = InverseNumber(arg2);
 
             var type1 = arg1.Type;
             var type2 = arg2.Type;
@@ -481,21 +478,23 @@ namespace ExpressiveAnnotations.Analysis
                         oper.Location);
             }
 
+            Expression expression = null;
             switch (oper.Type)
             {
                 case TokenType.ADD:
-                    return ParseAddExpInternal(
+                    expression = ParseAddExpInternal(
                         (arg1.Type.IsString() || arg2.Type.IsString())
                             ? Expression.Add(
                                 Expression.Convert(arg1, typeof (object)),
                                 Expression.Convert(arg2, typeof (object)),
                                 typeof (string).GetMethod("Concat", new[] {typeof (object), typeof (object)})) // convert string + string into a call to string.Concat
                             : Expression.Add(arg1, arg2));
+                    break;
                 case TokenType.SUB:
-                    return ParseAddExpInternal(Expression.Subtract(arg1, arg2));
-                default:
-                    throw new ArgumentOutOfRangeException(); // never gets here
+                    expression = ParseAddExpInternal(Expression.Subtract(arg1, arg2));
+                    break;
             }
+            return expression;
         }
 
         private Expression ParseMulExp()
@@ -530,15 +529,17 @@ namespace ExpressiveAnnotations.Analysis
             }
 
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
+            Expression expression = null;
             switch (oper.Type)
             {
                 case TokenType.MUL:
-                    return ParseMulExpInternal(Expression.Multiply(arg1, arg2));
+                    expression = ParseMulExpInternal(Expression.Multiply(arg1, arg2));
+                    break;
                 case TokenType.DIV:
-                    return ParseMulExpInternal(Expression.Divide(arg1, arg2));
-                default:
-                    throw new ArgumentOutOfRangeException(); // never gets here
+                    expression = ParseMulExpInternal(Expression.Divide(arg1, arg2));
+                    break;
             }
+            return expression;
         }
 
         private Expression ParseVal()
@@ -549,7 +550,9 @@ namespace ExpressiveAnnotations.Analysis
                 var arg = ParseOrExp();
                 if (PeekType() != TokenType.RIGHT_BRACKET)
                     throw new ParseErrorException(
-                        $"Closing bracket missing. Unexpected token: '{PeekValue()}'.",
+                        PeekType() == TokenType.EOF
+                            ? "Expected closing bracket. Unexpected end of expression."
+                            : $"Expected closing bracket. Unexpected token: '{PeekValue()}'.",
                         PeekToken().Location);
                 ReadToken();
                 return arg;
@@ -632,6 +635,10 @@ namespace ExpressiveAnnotations.Analysis
                 var arg = ParseOrExp();
                 if (PeekType() == TokenType.COMMA)
                     ReadToken();
+                else if (PeekType() != TokenType.RIGHT_BRACKET) // when no comma found, function exit expected
+                    throw new ParseErrorException(
+                        $"Expected comma or closing bracket. Unexpected token: '{PeekValue()}'.",
+                        PeekToken().Location);
                 args.Add(new Tuple<Expression, Location>(arg, tkn.Location));
             }
             ReadToken(); // read ")"
@@ -784,8 +791,7 @@ namespace ExpressiveAnnotations.Analysis
         private Expression FetchModelMethod(string name, IList<Tuple<Expression, Location>> args, Location funcPos)
         {
             var signatures = ContextType.GetMethods()
-                .Where(mi => name.Equals(mi.Name) && mi.GetParameters().Length == args.Count)
-                .ToList();
+                .Where(mi => name.Equals(mi.Name) && mi.GetParameters().Length == args.Count).ToList();
             if (signatures.Count == 0)
                 return null;
             AssertNonAmbiguity(signatures.Count, name, args.Count, funcPos);
@@ -807,8 +813,7 @@ namespace ExpressiveAnnotations.Analysis
 
         private InvocationExpression CreateInvocationExpression(LambdaExpression funcExpr, IList<Tuple<Expression, Location>> parsedArgs, string funcName)
         {
-            AssertParamsEquality(funcExpr.Parameters.Count, parsedArgs.Count, funcName);
-
+            Debug.Assert(funcExpr.Parameters.Count == parsedArgs.Count);
             var convertedArgs = new List<Expression>();
             for (var i = 0; i < parsedArgs.Count; i++)
             {
@@ -825,8 +830,7 @@ namespace ExpressiveAnnotations.Analysis
         private MethodCallExpression CreateMethodCallExpression(Expression contextExpression, IList<Tuple<Expression, Location>> parsedArgs, MethodInfo methodInfo)
         {
             var parameters = methodInfo.GetParameters();
-            AssertParamsEquality(parameters.Length, parsedArgs.Count, methodInfo.Name);
-
+            Debug.Assert(parameters.Length == parsedArgs.Count);
             var convertedArgs = new List<Expression>();
             for (var i = 0; i < parsedArgs.Count; i++)
             {
@@ -890,14 +894,6 @@ namespace ExpressiveAnnotations.Analysis
                 throw new ParseErrorException(
                     $"Function '{funcName}' accepting {args} argument{(args == 1 ? string.Empty : "s")} is ambiguous.",
                     funcPos);
-        }
-
-        private void AssertParamsEquality(int expected, int actual, string funcName)
-        {
-            if (expected != actual)
-                throw new ParseErrorException(
-                    $"Incorrect number of arguments provided. Function '{funcName}' expects {expected}, not {actual}.",
-                    null);
         }
 
         private void AssertArgsNotNullLiterals(Expression arg1, Expression arg2, Token oper)

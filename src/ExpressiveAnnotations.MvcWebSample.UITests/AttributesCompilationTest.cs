@@ -34,25 +34,25 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
 
     public class AttributesCompilationTest
     {
-        private static string GetAssemblyLocationFromWebSampleFolder(string assemblyName)
+        private static string GetAssemblyLocation(string assemblyName) // looks inside bin folder of sample project
         {
             return Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\ExpressiveAnnotations.MvcWebSample\bin\", assemblyName));
         }
 
-        private static Assembly LoadFromWebSampleFolder(object sender, ResolveEventArgs args)
+        private static Assembly LoadAssembly(object sender, ResolveEventArgs args)
         {
-            var assemblyPath = GetAssemblyLocationFromWebSampleFolder($"{new AssemblyName(args.Name).Name}.dll");
+            var assemblyPath = GetAssemblyLocation($"{new AssemblyName(args.Name).Name}.dll");
             return !File.Exists(assemblyPath) ? null : Assembly.LoadFrom(assemblyPath);
         }
 
         [Fact]
-        public void annotations_used_in_application_are_compiled_with_success() // reveals compile-time errors (no need to wait for application startup)
+        public void expressive_annotations_within_sample_project_compile_with_success() // reveals compile-time errors (no need to wait for application startup)
         {
             try
             {
-                AppDomain.CurrentDomain.AssemblyResolve += LoadFromWebSampleFolder;
-                var assemblyPath = GetAssemblyLocationFromWebSampleFolder("ExpressiveAnnotations.MvcWebSample.dll");
+                AppDomain.CurrentDomain.AssemblyResolve += LoadAssembly;
+                var assemblyPath = GetAssemblyLocation("ExpressiveAnnotations.MvcWebSample.dll");
                 var assembly = Assembly.LoadFrom(assemblyPath);
                 var attribs = assembly.CompileExpressiveAttributes();
 
@@ -79,7 +79,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             }
             finally
             {
-                AppDomain.CurrentDomain.AssemblyResolve -= LoadFromWebSampleFolder;
+                AppDomain.CurrentDomain.AssemblyResolve -= LoadAssembly;
             }
         }
     }

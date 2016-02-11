@@ -217,6 +217,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<object>("1+2==3").Invoke(null));
             Assert.True(parser.Parse<object>("1-2==-1").Invoke(null));
             Assert.True(parser.Parse<object>("1*2>-1").Invoke(null));
+            Assert.True(parser.Parse<object>("-1*-2>-1").Invoke(null));
             Assert.True(parser.Parse<object>("1/2==0.5").Invoke(null));
             Assert.True(parser.Parse<object>("-1*-+- -+-1==-1").Invoke(null)); // weird construction, but since C# and JavaScript allows it, our language also doesn't mind
             Assert.True(parser.Parse<object>("- - -1+'a'+'b'+null+''+'c'+1+2=='-1abc12'").Invoke(null));
@@ -432,6 +433,27 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Fact]
+        public void acceptable_methods_signatures_are_registered_correctly()
+        {
+            var parser = new Parser();
+            parser.AddFunction("M0", () => 0);
+            parser.AddFunction<int, int>("M1", i => i);
+            parser.AddFunction<int, int, int>("M2", (i, j) => i + j);
+            parser.AddFunction<int, int, int, int>("M3", (i, j, k) => i + j + k);
+            parser.AddFunction<int, int, int, int, int>("M4", (i, j, k, l) => i + j + k + l);
+            parser.AddFunction<int, int, int, int, int, int>("M5", (i, j, k, l, m) => i + j + k + l + m);
+            parser.AddFunction<int, int, int, int, int, int, int>("M6", (i, j, k, l, m, n) => i + j + k + l + m + n);
+
+            Assert.True(parser.Parse<object>("M0() == 0").Invoke(null));
+            Assert.True(parser.Parse<object>("M1(1) == 1").Invoke(null));
+            Assert.True(parser.Parse<object>("M2(1,1) == 2").Invoke(null));
+            Assert.True(parser.Parse<object>("M3(1,1,1) == 3").Invoke(null));
+            Assert.True(parser.Parse<object>("M4(1,1,1,1) == 4").Invoke(null));
+            Assert.True(parser.Parse<object>("M5(1,1,1,1,1) == 5").Invoke(null));
+            Assert.True(parser.Parse<object>("M6(1,1,1,1,1,1) == 6").Invoke(null));
+        }
+
+        [Fact]
         public void verify_methods_overloading() // overloading concept exists, when there are two methods of the same name, but different signature
         {
             // methods overloading is based on the number of arguments
@@ -526,6 +548,28 @@ namespace ExpressiveAnnotations.Tests
 ... 2) == 'utility method 1 - 2' ...
     ^--- Function 'Whoami' 2nd argument implicit conversion from 'System.Int32' to expected 'System.String' failed.",
                 e.Message);
+        }
+
+        [Fact]
+        public void function_arguments_order_identification_is_formatted_correctly()
+        {
+            var parser = new Parser();
+            var model = new Model();
+
+            var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Long('', 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)").Invoke(model));
+            Assert.EndsWith("Function 'Long' 1st argument implicit conversion from 'System.String' to expected 'System.Int32' failed.", e.Message);
+            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Long(1, '', 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)").Invoke(model));
+            Assert.EndsWith("Function 'Long' 2nd argument implicit conversion from 'System.String' to expected 'System.Int32' failed.", e.Message);
+            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Long(1, 2, '', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)").Invoke(model));
+            Assert.EndsWith("Function 'Long' 3rd argument implicit conversion from 'System.String' to expected 'System.Int32' failed.", e.Message);
+            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Long(1, 2, 3, '', 5, 6, 7, 8, 9, 10, 11, 12, 13)").Invoke(model));
+            Assert.EndsWith("Function 'Long' 4th argument implicit conversion from 'System.String' to expected 'System.Int32' failed.", e.Message);
+            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Long(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '', 12, 13)").Invoke(model));
+            Assert.EndsWith("Function 'Long' 11th argument implicit conversion from 'System.String' to expected 'System.Int32' failed.", e.Message);
+            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Long(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, '', 13)").Invoke(model));
+            Assert.EndsWith("Function 'Long' 12th argument implicit conversion from 'System.String' to expected 'System.Int32' failed.", e.Message);
+            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Long(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, '')").Invoke(model));
+            Assert.EndsWith("Function 'Long' 13th argument implicit conversion from 'System.String' to expected 'System.Int32' failed.", e.Message);
         }
 
         [Fact]
@@ -814,145 +858,194 @@ namespace ExpressiveAnnotations.Tests
                 e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("0 / null").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 1, column 3:
+            Assert.Equal(
+                @"Parse error on line 1, column 3:
 ... / null ...
     ^--- Operator '/' cannot be applied to operands of type 'System.Int32' and 'null'.",
-                    e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("true && null").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 1, column 6:
+            Assert.Equal(
+                @"Parse error on line 1, column 6:
 ... && null ...
     ^--- Operator '&&' cannot be applied to operands of type 'System.Boolean' and 'null'.",
-                    e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("true || null").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 1, column 6:
+            Assert.Equal(
+                @"Parse error on line 1, column 6:
 ... || null ...
     ^--- Operator '||' cannot be applied to operands of type 'System.Boolean' and 'null'.",
-                    e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("!null").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 1, column 1:
+            Assert.Equal(
+                @"Parse error on line 1, column 1:
 ... !null ...
     ^--- Operator '!' cannot be applied to operand of type 'null'.",
-                    e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("'abc' * 'abc'").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 1, column 7:
+            Assert.Equal(
+                @"Parse error on line 1, column 7:
 ... * 'abc' ...
     ^--- Operator '*' cannot be applied to operands of type 'System.String' and 'System.String'.",
-                    e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("1 + 2 + 'abc' - 'abc' > 0").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 1, column 15:
+            Assert.Equal(
+                @"Parse error on line 1, column 15:
 ... - 'abc' > 0 ...
     ^--- Operator '-' cannot be applied to operands of type 'System.String' and 'System.String'.",
-                    e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>(
-                    @"1 - 2
+                @"1 - 2
     - (6 / ((2*'1.5' - 1) + 1)) * -2 
     + 1/2/1 == 3.50").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 2, column 15:
+            Assert.Equal(
+                @"Parse error on line 2, column 15:
 ... *'1.5' - 1) + 1)) * -2 ...
     ^--- Operator '*' cannot be applied to operands of type 'System.Int32' and 'System.String'.",
-                    e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>(
-                    @"1 - 2
+                @"1 - 2
     - 6
     + 1/x[0]/1 == 3.50").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 3, column 9:
+            Assert.Equal(
+                @"Parse error on line 3, column 9:
 ... x[0]/1 == 3.50 ...
     ^--- Only public properties, constants and enums are accepted. Identifier 'x[0]' not known.",
-                    e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("WriteLine('hello')").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 1, column 1:
+            Assert.Equal(
+                @"Parse error on line 1, column 1:
 ... WriteLine('hello') ...
     ^--- Function 'WriteLine' not known.",
-                    e.Message);
+                e.Message);
+
+            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("1 2").Invoke(null));
+            Assert.Equal(
+                @"Parse error on line 1, column 3:
+... 2 ...
+    ^--- Unexpected token: '2'.",
+                e.Message);
+
+            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("(").Invoke(null));
+            Assert.Equal(
+                @"Parse error on line 1, column 2:
+...  ...
+    ^--- Expected ""null"", int, float, bool, string or func. Unexpected end of expression.",
+                e.Message);
+
+            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("(1+1").Invoke(null));
+            Assert.Equal(
+                @"Parse error on line 1, column 5:
+...  ...
+    ^--- Expected closing bracket. Unexpected end of expression.",
+                e.Message);
+
+            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("()").Invoke(null));
+            Assert.Equal(
+                @"Parse error on line 1, column 2:
+... ) ...
+    ^--- Expected ""null"", int, float, bool, string or func. Unexpected token: ')'.",
+                e.Message);
+
+            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("Max(").Invoke(null));
+            Assert.Equal(
+                @"Parse error on line 1, column 5:
+...  ...
+    ^--- Expected ""null"", int, float, bool, string or func. Unexpected end of expression.",
+                e.Message);
+
+            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("Max(1 2").Invoke(null));
+            Assert.Equal(
+                @"Parse error on line 1, column 7:
+... 2 ...
+    ^--- Expected comma or closing bracket. Unexpected token: '2'.",
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("Max(1.1)").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 1, column 1:
+            Assert.Equal(
+                @"Parse error on line 1, column 1:
 ... Max(1.1) ...
     ^--- Function 'Max' accepting 1 argument not found.",
-                    e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("Max(1.1, 1.2, 'a')").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 1, column 1:
+            Assert.Equal(
+                @"Parse error on line 1, column 1:
 ... Max(1.1, 1.2, 'a') ...
     ^--- Function 'Max' accepting 3 arguments not found.",
-                    e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>(
-                    @"Max(1, 
+                @"Max(1, 
       Max(1, 'a')) == 1.1").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 2, column 14:
+            Assert.Equal(
+                @"Parse error on line 2, column 14:
 ... 'a')) == 1.1 ...
     ^--- Function 'Max' 2nd argument implicit conversion from 'System.String' to expected 'System.Int32' failed.",
-                    e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("Now() && Today()").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 1, column 7:
+            Assert.Equal(
+                @"Parse error on line 1, column 7:
 ... && Today() ...
     ^--- Operator '&&' cannot be applied to operands of type 'System.DateTime' and 'System.DateTime'.",
-                    e.Message);
+                e.Message);
+
+            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("1 || 2").Invoke(null));
+            Assert.Equal(
+                @"Parse error on line 1, column 3:
+... || 2 ...
+    ^--- Operator '||' cannot be applied to operands of type 'System.Int32' and 'System.Int32'.",
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("'a' >= 'b'").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 1, column 5:
+            Assert.Equal(
+                @"Parse error on line 1, column 5:
 ... >= 'b' ...
     ^--- Operator '>=' cannot be applied to operands of type 'System.String' and 'System.String'.",
-                    e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("!'a'").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 1, column 1:
+            Assert.Equal(
+                @"Parse error on line 1, column 1:
 ... !'a' ...
     ^--- Operator '!' cannot be applied to operand of type 'System.String'.",
-                    e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("!! Today()").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 1, column 2:
+            Assert.Equal(
+                @"Parse error on line 1, column 2:
 ... ! Today() ...
     ^--- Operator '!' cannot be applied to operand of type 'System.DateTime'.",
-                    e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("0 == '0'").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 1, column 3:
+            Assert.Equal(
+                @"Parse error on line 1, column 3:
 ... == '0' ...
     ^--- Operator '==' cannot be applied to operands of type 'System.Int32' and 'System.String'.",
-                    e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("0.1 != '0'").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 1, column 5:
+            Assert.Equal(
+                @"Parse error on line 1, column 5:
 ... != '0' ...
     ^--- Operator '!=' cannot be applied to operands of type 'System.Double' and 'System.String'.",
-                    e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("'asd' > null").Invoke(null));
-                Assert.Equal(
-                    @"Parse error on line 1, column 7:
+            Assert.Equal(
+                @"Parse error on line 1, column 7:
 ... > null ...
     ^--- Operator '>' cannot be applied to operands of type 'System.String' and 'null'.",
-                    e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() =>
             {
@@ -963,7 +1056,7 @@ namespace ExpressiveAnnotations.Tests
                 @"Parse error on line 1, column 6:
 ... + Date ...
     ^--- Operator '+' cannot be applied to operands of type 'System.DateTime' and 'System.DateTime'.",
-               e.Message);
+                e.Message);
 
             e = Assert.Throws<InvalidOperationException>(() =>
             {
@@ -1261,10 +1354,21 @@ namespace ExpressiveAnnotations.Tests
 ... Items[0] != null ...
     ^--- Identifier 'Items' either does not represent an array type or does not declare indexer.",
                 e.Message);
-        }
+
+            e = Assert.Throws<InvalidOperationException>(() =>
+            {
+                var model = new Model();
+                parser.Parse<Model>("Long(1)").Invoke(model);
+            });
+            Assert.Equal(
+                @"Parse error on line 1, column 1:
+... Long(1) ...
+    ^--- Function 'Long' accepting 1 argument not found.",
+                e.Message);
+        }        
 
         [Fact]
-        public void assure_unicode_characters_are_supported()
+        public void unicode_characters_are_supported()
         {
             var parser = new Parser();
             var model = new LocalModel {ąęćłńśóźż = "ąęćłńśóźż"};
@@ -1325,18 +1429,20 @@ namespace ExpressiveAnnotations.Tests
             {
                 return --number;
             }
+
+            public void Long(int i, int j, int k, int l, int m, int n, int o, int p, int r, int s, int t, int u, int v) { }
         }
 
         private class ModelWithAmbiguousMethods
         {
             public string Whoami(string s)
             {
-                return string.Format("model method {0}", s);
+                return $"model method {s}";
             }
 
             public string Whoami(int i)
             {
-                return string.Format("model method {0}", i);
+                return $"model method {i}";
             }
         }
 
@@ -1349,7 +1455,7 @@ namespace ExpressiveAnnotations.Tests
 
             public string Whoami(int i)
             {
-                return string.Format("model method {0}", i);
+                return $"model method {i}";
             }
         }
 

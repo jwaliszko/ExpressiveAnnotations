@@ -48,7 +48,6 @@ if($LastExitCode -ne 0) {
 
 # manually submit chutzpah test results to appveyor
 if($env:APPVEYOR -eq $true) {
-    $success = $true
     $results = [xml](Get-Content .\chutzpah-results.xml)
 
     foreach ($testsuite in $results.testsuites.testsuite) {

@@ -41,7 +41,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Fact]
-        public void assure_no_exception_thrown_for_derived_types_validation()
+        public void no_errors_during_derived_types_validation()
         {            
             var firstDerived = new FirstDerived();
             var secondDerived = new SecondDerived();
