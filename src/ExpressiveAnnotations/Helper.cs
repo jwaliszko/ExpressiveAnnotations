@@ -13,6 +13,22 @@ using System.Reflection;
 
 namespace ExpressiveAnnotations
 {
+    internal interface ITypeProvider
+    {
+        IEnumerable<Type> GetTypes();
+    }
+
+    internal class AssemblyTypeProvider : ITypeProvider
+    {
+        public AssemblyTypeProvider(Assembly assembly)
+        {
+            Assembly = assembly;
+        }
+
+        private Assembly Assembly { get; set; }
+        public IEnumerable<Type> GetTypes() { return Assembly.GetTypes(); }
+    }
+
     internal static class Helper
     {
         public static void MakeTypesCompatible(Expression e1, Expression e2, out Expression oute1, out Expression oute2)
@@ -209,13 +225,13 @@ namespace ExpressiveAnnotations
             return type.IsNullable() ? Nullable.GetUnderlyingType(type) : type;
         }        
 
-        public static IEnumerable<Type> GetLoadableTypes(this Assembly assembly)
+        public static IEnumerable<Type> GetLoadableTypes(this ITypeProvider provider)
         {
-            Debug.Assert(assembly != null);
+            Debug.Assert(provider != null);
 
             try
             {
-                return assembly.GetTypes();
+                return provider.GetTypes();
             }
             catch (ReflectionTypeLoadException e)
             {

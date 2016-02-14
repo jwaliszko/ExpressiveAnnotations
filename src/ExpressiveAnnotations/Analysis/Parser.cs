@@ -389,29 +389,22 @@ namespace ExpressiveAnnotations.Analysis
                         oper.Location);                
             }
 
-            Expression expression = null;
             switch (oper.Type)
             {
                 case TokenType.LT:
-                    expression = Expression.LessThan(arg1, arg2);
-                    break;
+                    return Expression.LessThan(arg1, arg2);
                 case TokenType.LE:
-                    expression = Expression.LessThanOrEqual(arg1, arg2);
-                    break;
+                    return Expression.LessThanOrEqual(arg1, arg2);
                 case TokenType.GT:
-                    expression = Expression.GreaterThan(arg1, arg2);
-                    break;
+                    return Expression.GreaterThan(arg1, arg2);
                 case TokenType.GE:
-                    expression = Expression.GreaterThanOrEqual(arg1, arg2);
-                    break;
+                    return Expression.GreaterThanOrEqual(arg1, arg2);
                 case TokenType.EQ:
-                    expression = Expression.Equal(arg1, arg2);
-                    break;
-                case TokenType.NEQ:
-                    expression = Expression.NotEqual(arg1, arg2);
-                    break;
+                    return Expression.Equal(arg1, arg2);
+                default: // assures full branch coverage
+                    Debug.Assert(oper.Type == TokenType.NEQ); // http://stackoverflow.com/a/1468385/270315
+                    return Expression.NotEqual(arg1, arg2);
             }
-            return expression;
         }
 
         private Expression ParseNotExp()
@@ -478,23 +471,20 @@ namespace ExpressiveAnnotations.Analysis
                         oper.Location);
             }
 
-            Expression expression = null;
             switch (oper.Type)
             {
                 case TokenType.ADD:
-                    expression = ParseAddExpInternal(
+                    return ParseAddExpInternal(
                         (arg1.Type.IsString() || arg2.Type.IsString())
                             ? Expression.Add(
                                 Expression.Convert(arg1, typeof (object)),
                                 Expression.Convert(arg2, typeof (object)),
                                 typeof (string).GetMethod("Concat", new[] {typeof (object), typeof (object)})) // convert string + string into a call to string.Concat
                             : Expression.Add(arg1, arg2));
-                    break;
-                case TokenType.SUB:
-                    expression = ParseAddExpInternal(Expression.Subtract(arg1, arg2));
-                    break;
+                default:
+                    Debug.Assert(oper.Type == TokenType.SUB);
+                    return ParseAddExpInternal(Expression.Subtract(arg1, arg2));
             }
-            return expression;
         }
 
         private Expression ParseMulExp()
@@ -529,17 +519,14 @@ namespace ExpressiveAnnotations.Analysis
             }
 
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
-            Expression expression = null;
             switch (oper.Type)
             {
                 case TokenType.MUL:
-                    expression = ParseMulExpInternal(Expression.Multiply(arg1, arg2));
-                    break;
-                case TokenType.DIV:
-                    expression = ParseMulExpInternal(Expression.Divide(arg1, arg2));
-                    break;
+                    return ParseMulExpInternal(Expression.Multiply(arg1, arg2));
+                default:
+                    Debug.Assert(oper.Type == TokenType.DIV);
+                    return ParseMulExpInternal(Expression.Divide(arg1, arg2));
             }
-            return expression;
         }
 
         private Expression ParseVal()
@@ -720,7 +707,7 @@ namespace ExpressiveAnnotations.Analysis
             {
                 var enumTypeName = string.Join(".", parts.Take(parts.Length - 1).ToList());
                 var enumTypes = AppDomain.CurrentDomain.GetAssemblies()
-                    .SelectMany(a => a.GetLoadableTypes())
+                    .SelectMany(a => new AssemblyTypeProvider(a).GetLoadableTypes())
                     .Where(t => t.IsEnum && string.Concat(".", t.FullName.Replace("+", ".")).EndsWith(string.Concat(".", enumTypeName)))
                     .ToList();
 
@@ -748,10 +735,10 @@ namespace ExpressiveAnnotations.Analysis
             {
                 var constTypeName = string.Join(".", parts.Take(parts.Length - 1).ToList());
                 var constants = AppDomain.CurrentDomain.GetAssemblies()
-                    .SelectMany(a => a.GetLoadableTypes())
+                    .SelectMany(a => new AssemblyTypeProvider(a).GetLoadableTypes())
                     .Where(t => string.Concat(".", t.FullName.Replace("+", ".")).EndsWith(string.Concat(".", constTypeName)))
                     .SelectMany(t => t.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
-                        .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name.Equals(parts.Last())))                    
+                        .Where(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name.Equals(parts.Last())))
                     .ToList();
 
                 if (constants.Count > 1)
