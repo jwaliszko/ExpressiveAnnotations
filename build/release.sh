@@ -20,7 +20,11 @@ targets=( v4.0 v4.5 )
 rm -fr $productVersion net* *.js
 
 echo -e "\n------ package restoration..."
-./nuget.exe restore ../src/ExpressiveAnnotations.sln -MSBuildVersion $msbuildVersion
+./nuget.exe restore ../src/ExpressiveAnnotations.sln -MSBuildVersion $msbuildVersion -verbosity quiet
+
+if [ $? -ne 0 ]; then
+    exit 1
+fi
 
 for target in "${targets[@]}"
 do

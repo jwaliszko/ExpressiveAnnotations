@@ -16,7 +16,7 @@ namespace ExpressiveAnnotations.Tests
             High,
             Low,
             Uncertain
-        }        
+        }
     }
 
     public class Tools

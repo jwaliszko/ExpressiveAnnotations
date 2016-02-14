@@ -2,8 +2,11 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using ExpressiveAnnotations.Analysis;
+using Moq;
 using Xunit;
 
 namespace ExpressiveAnnotations.Tests
@@ -102,6 +105,21 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("Value1", typeof (Model).GetMemberNameByDisplayName("Value_1"));
             Assert.Equal("Value2", typeof (Model).GetMemberNameByDisplayName("_{Value2}_"));
             Assert.Equal("Internal", typeof (Model).GetMemberNameByDisplayName("internal"));
+        }
+
+        [Fact]
+        public void type_load_exceptions_are_handled_and_null_type_instances_are_filtered_out()
+        {
+            var typeProviderMock = new Mock<ITypeProvider>();
+
+            typeProviderMock.Setup(p => p.GetTypes()).Throws(new ReflectionTypeLoadException(new Type[] {}, null));
+            Assert.Empty(typeProviderMock.Object.GetLoadableTypes());
+
+            typeProviderMock.Setup(p => p.GetTypes()).Throws(new ReflectionTypeLoadException(new Type[] {null}, null));
+            Assert.Empty(typeProviderMock.Object.GetLoadableTypes());
+
+            typeProviderMock.Setup(p => p.GetTypes()).Throws(new ReflectionTypeLoadException(new[] {typeof (object), null}, null));
+            Assert.Equal(1, typeProviderMock.Object.GetLoadableTypes().Count());
         }
 
         private class Model

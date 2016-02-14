@@ -1,25 +1,26 @@
-$rootdir = (Get-Item -Path "..\" -Verbose).FullName
+$rootdir  = (Get-Item -Path ".." -Verbose).FullName
 $buildcfg = "Release"
 
 # redefine above variables for appveyor
 if($env:APPVEYOR -eq $true) {
-    $rootdir = $env:APPVEYOR_BUILD_FOLDER
+    $rootdir  = $env:APPVEYOR_BUILD_FOLDER
     $buildcfg = $env:CONFIGURATION
 }
 
 # collect tools
-$xunitdir = Get-ChildItem $rootdir xunit.console.exe -Recurse | Select-Object -First 1 | Select -Expand Directory
-$opencoverdir = Get-ChildItem $rootdir OpenCover.Console.exe -Recurse | Select-Object -First 1 | Select -Expand Directory
-$chutzpahdir = Get-ChildItem $rootdir chutzpah.console.exe -Recurse | Select-Object -First 1 | Select -Expand Directory
+$xunitdir     = Get-ChildItem $rootdir xunit.console.exe -Recurse | Select-Object -First 1 | Select -Expand Directory
+$opencoverdir = Get-ChildItem $rootdir opencover.console.exe -Recurse | Select-Object -First 1 | Select -Expand Directory
+$chutzpahdir  = Get-ChildItem $rootdir chutzpah.console.exe -Recurse | Select-Object -First 1 | Select -Expand Directory
 
-$xunit = "$xunitdir\xunit.console.exe"
-$opencover = "$opencoverdir\OpenCover.Console.exe"
-$chutzpah = "$chutzpahdir\chutzpah.console.exe"
+$xunit     = "$xunitdir\xunit.console.exe"
+$opencover = "$opencoverdir\opencover.console.exe"
+$chutzpah  = "$chutzpahdir\chutzpah.console.exe"
 
 # collect C# tests
 $eatestdll = "$rootdir\src\ExpressiveAnnotations.Tests\bin\$buildcfg\ExpressiveAnnotations.Tests.dll"
 $vatestdll = "$rootdir\src\ExpressiveAnnotations.MvcUnobtrusive.Tests\bin\$buildcfg\ExpressiveAnnotations.MvcUnobtrusive.Tests.dll"
 $uitestdll = "$rootdir\src\ExpressiveAnnotations.MvcWebSample.UITests\bin\$buildcfg\ExpressiveAnnotations.MvcWebSample.UITests.dll"
+$testdlls  = "`"`"$eatestdll`"`" `"`"$vatestdll`"`" `"`"$uitestdll`"`""
 $webmvcbin = "$rootdir\src\ExpressiveAnnotations.MvcWebSample\bin"
 
 # collect JS tests
@@ -27,18 +28,17 @@ $maintest = "$rootdir\src\expressive.annotations.validate.test.js"
 $formtest = "$rootdir\src\tests.html"
 
 # run tests and analyze code coverage
-$opencovercmd = "$opencover -register:user -hideskipped:All -mergebyhash '-target:$xunit' '-targetargs:$eatestdll $vatestdll $uitestdll -noshadow -appveyor' '-targetdir:$webmvcbin' '-filter:+[ExpressiveAnnotations(.MvcUnobtrusive)?]*' '-output:.\csharp-coverage.xml' -returntargetcode"
-$chutzpahcmd = "$chutzpah /path $maintest /path $formtest /coverage /coverageIgnores '*test*, *jquery*' /junit .\chutzpah-results.xml /lcov .\chutzpah-results.lcov"
+& $opencover -register:user "-target:$xunit" "-targetargs:$testdlls -nologo -noshadow -appveyor" "-targetdir:$webmvcbin" "-filter:+[ExpressiveAnnotations(.MvcUnobtrusive)?]*" -output:csharp-coverage.xml -hideskipped:All -mergebyhash -returntargetcode
 
-Invoke-Expression $opencovercmd
 if($LastExitCode -ne 0) {
     if($env:APPVEYOR -eq $true) {
         $host.SetShouldExit($LastExitCode)
     }
     throw "C# tests failed"
 }
+    
+& $chutzpah /nologo /path $maintest /path $formtest /junit chutzpah-tests.xml /coverage /coverageIgnores "*test*, *jquery*" /coveragehtml javascript-coverage.htm
 
-Invoke-Expression $chutzpahcmd
 if($LastExitCode -ne 0) {
     if($env:APPVEYOR -eq $true) {
         $host.SetShouldExit($LastExitCode)
@@ -48,7 +48,7 @@ if($LastExitCode -ne 0) {
 
 # manually submit chutzpah test results to appveyor
 if($env:APPVEYOR -eq $true) {
-    $results = [xml](Get-Content .\chutzpah-results.xml)
+    $results = [xml](Get-Content chutzpah-tests.xml)
 
     foreach ($testsuite in $results.testsuites.testsuite) {
         foreach ($testcase in $testsuite.testcase) {
@@ -62,7 +62,9 @@ if($env:APPVEYOR -eq $true) {
     }
 }
 
-# Invoke-Expression "reportgenerator.exe -reports:.\csharp-coverage.xml -targetdir:.\csharp-report"
+# reportgenerator.exe -reports:csharp-coverage.xml -targetdir:csharp-coverage
+# start csharp-coverage\index.htm
+# start javascript-coverage.htm
 
 # vsinstr.exe WebProj\bin\AnalyzeMe.dll /coverage #notice: x64 vs x86 tool version
 # vsperfcmd.exe /start:coverage /output:results.coverage
