@@ -159,7 +159,6 @@ namespace ExpressiveAnnotations.Tests
                 "field: #{Value1}#, expr: 1==1 | Value1: 0_{Value1}_, Internal.Internal.Value1: 2, _{Value2}_");
             AssertErrorMessage( // all escaped
                 "field: {{0}}, expr: {{1}} | Value1: {{Value1}}{{Value1:n}}, Internal.Internal.Value1: {{Internal.Internal.Value1}}, {{Internal.Internal.Value2:N}}",
-                "field: {0}, expr: {1} | Value1: {Value1}{Value1:n}, Internal.Internal.Value1: {Internal.Internal.Value1}, {Internal.Internal.Value2:N}",
                 "field: {0}, expr: {1} | Value1: {Value1}{Value1:n}, Internal.Internal.Value1: {Internal.Internal.Value1}, {Internal.Internal.Value2:N}");
             AssertErrorMessage(
                 "field: {{{0}}}, expr: {{{1}}} | Value1: {{{Value1}}}{{{Value1:n}}}, Internal.Internal.Value1: {{{Internal.Internal.Value1}}}, {{{Internal.Internal.Value2:N}}}",
@@ -167,7 +166,6 @@ namespace ExpressiveAnnotations.Tests
                 "field: {#{Value1}#}, expr: {1==1} | Value1: {0}{_{Value1}_}, Internal.Internal.Value1: {2}, {_{Value2}_}");
             AssertErrorMessage(  // all double-escaped
                 "field: {{{{0}}}}, expr: {{{{1}}}} | Value1: {{{{Value1}}}}{{{{Value1:n}}}}, Internal.Internal.Value1: {{{{Internal.Internal.Value1}}}}, {{{{Internal.Internal.Value2:N}}}}",
-                "field: {{0}}, expr: {{1}} | Value1: {{Value1}}{{Value1:n}}, Internal.Internal.Value1: {{Internal.Internal.Value1}}, {{Internal.Internal.Value2:N}}",
                 "field: {{0}}, expr: {{1}} | Value1: {{Value1}}{{Value1:n}}, Internal.Internal.Value1: {{Internal.Internal.Value1}}, {{Internal.Internal.Value2:N}}");
 
             //string.Format("{{0", 1); -> {0
@@ -175,8 +173,13 @@ namespace ExpressiveAnnotations.Tests
 
             AssertErrorMessage(
                 "field: {{0, expr: {{1 | Value1: {{Value1{{Value1:n, Internal.Internal.Value1: Internal.Internal.Value1}}, Internal.Internal.Value2:N}}",
-                "field: {0, expr: {1 | Value1: {Value1{Value1:n, Internal.Internal.Value1: Internal.Internal.Value1}, Internal.Internal.Value2:N}",
                 "field: {0, expr: {1 | Value1: {Value1{Value1:n, Internal.Internal.Value1: Internal.Internal.Value1}, Internal.Internal.Value2:N}");
+        }
+
+        [Fact]
+        public void custom_error_message_tolerates_null_value()
+        {
+            AssertErrorMessage("lang: '{Lang}'", "lang: ''");
         }
 
         [Fact]
@@ -205,13 +208,13 @@ namespace ExpressiveAnnotations.Tests
         [Fact]
         public void verify_that_culture_change_affects_validation_message()
         {
-            AssertErrorMessage("{Lang:n}", "default", "default");
+            AssertErrorMessage("{Lang:n}", "default");
 
             // change culture
             var culture = Thread.CurrentThread.CurrentUICulture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture("pl");
 
-            AssertErrorMessage("{Lang:n}", "polski", "polski");
+            AssertErrorMessage("{Lang:n}", "polski");
 
             // restore culture
             Thread.CurrentThread.CurrentUICulture = culture;
@@ -295,6 +298,11 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("assertthat only chosen", results.Single().ErrorMessage);
         }
 
+        private static void AssertErrorMessage(string input, string output)
+        {
+            AssertErrorMessage(input, output, output);
+        }
+
         private static void AssertErrorMessage(string input, string assertThatOutput, string requiredIfOutput)
         {
             var assertThat = new AssertThatAttribute("1!=1");
@@ -303,7 +311,7 @@ namespace ExpressiveAnnotations.Tests
             var isValid = typeof (ExpressiveAttribute).GetMethod("IsValid", BindingFlags.NonPublic | BindingFlags.Instance);
             var context = new ValidationContext(new MsgModel
             {
-                Value1 = 0,
+                Value1 = 0,                
                 Internal = new MsgModel
                 {
                     Value1 = 1,

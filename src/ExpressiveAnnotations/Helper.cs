@@ -39,6 +39,9 @@ namespace ExpressiveAnnotations
             oute1 = e1;
             oute2 = e2;
 
+            if (oute1.Type.IsEnum && oute2.Type.IsEnum && oute1.Type.UnderlyingType() != oute2.Type.UnderlyingType())
+                return;
+
             // promote numeric values to double - do all computations with higher precision (to be compatible with JavaScript, e.g. notation 1/2, should give 0.5 double not 0 int)
             if (oute1.Type != typeof (double) && oute1.Type != typeof (double?) && oute1.Type.IsNumeric())
                 oute1 = oute1.Type.IsNullable()
