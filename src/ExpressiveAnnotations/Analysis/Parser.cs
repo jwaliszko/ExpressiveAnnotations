@@ -360,6 +360,13 @@ namespace ExpressiveAnnotations.Analysis
             var type2 = arg2.Type;
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
 
+            if (arg1.Type != arg2.Type
+                && !arg1.IsNullLiteral() && !arg2.IsNullLiteral()
+                && !arg1.Type.IsObject() && !arg2.Type.IsObject())
+                throw new ParseErrorException(
+                    $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.",
+                    oper.Location);
+
             if (oper.Type == TokenType.EQ || oper.Type == TokenType.NEQ)
             {
                 if (type1.IsNonNullableValueType() && arg2.IsNullLiteral())
@@ -369,13 +376,6 @@ namespace ExpressiveAnnotations.Analysis
                 if (arg1.IsNullLiteral() && type2.IsNonNullableValueType())
                     throw new ParseErrorException(
                         $"Operator '{oper.Value}' cannot be applied to operands of type 'null' and '{type2}'.",
-                        oper.Location);
-
-                if (arg1.Type != arg2.Type
-                    && !arg1.IsNullLiteral() && !arg2.IsNullLiteral()
-                    && !arg1.Type.IsObject() && !arg2.Type.IsObject())
-                    throw new ParseErrorException(
-                        $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.",
                         oper.Location);
             }
             else
