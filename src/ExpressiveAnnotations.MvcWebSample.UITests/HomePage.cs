@@ -31,43 +31,43 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         public void SetMode(string mode) // client, server
         {
             var elem = _driver.FindElementByXPath($"//a[@href='/System/SetValidation?type={mode}&returnUrl=%2F']");
-            SafeClick(elem);
+            elem.Click();
         }
 
         public void SetLang(string code) // en, pl
         {
             var elem = _driver.FindElementByXPath($"//a[@href='/System/SetCulture?lang={code}&returnUrl=%2F']");
-            SafeClick(elem);
+            elem.Click();
         }
 
         public void Submit()
         {
             var elem = _driver.FindElementByXPath("//input[@type='submit']");
-            SafeClick(elem);
+            elem.Click();
         }
 
         public void ClickCheckbox(string id)
         {
             var elem = _driver.FindElementByXPath($"//input[@id='{id}']");
-            SafeClick(elem);
+            elem.Click();
         }
 
         public void ClickCheckbox(string name, string value)
         {
             var elem = _driver.FindElementByXPath($"//input[@name='{name}'][@value='{value}']");
-            SafeClick(elem);
+            elem.Click();
         }
 
         public void ClickRadio(string id, string value)
         {
             var elem = _driver.FindElementByXPath($"//input[@id='{id}'][@value='{value}']");
-            SafeClick(elem);
+            elem.Click();
         }
 
         public void ClickTrigger(string trigger) // change, paste, keyup
         {
             var elem = _driver.FindElementByXPath($"//input[@id='{trigger}Trigger']");
-            SafeClick(elem);
+            elem.Click();
             WaitForAjax();
         }
 
@@ -119,12 +119,6 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         {
             var elem = _driver.FindElementByXPath("//meta[@name='postbacks']");
             return int.Parse(elem.GetAttribute("content"));
-        }
-
-        private void SafeClick(IWebElement elem)
-        {
-            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
-            wait.Until(ExpectedConditions.ElementToBeClickable(elem)).Click();
         }
 
         private void WaitForAjax() // wait for all ajax requests initiated by jQuery to complete

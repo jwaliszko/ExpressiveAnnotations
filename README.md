@@ -506,13 +506,13 @@ Simplest way is using the [NuGet](https://www.nuget.org) Package Manager Console
 
 * [complete package](https://www.nuget.org/packages/ExpressiveAnnotations) - both assemblies and the script included (allows [complete MVC validation](#what-about-the-support-of-aspnet-mvc-client-side-validation)):
 
-    [![NuGet complete](https://img.shields.io/nuget/dt/ExpressiveAnnotations.svg)](http://nuget.org/packages/ExpressiveAnnotations)
+    [![NuGet complete](https://img.shields.io/nuget/v/ExpressiveAnnotations.svg)](http://nuget.org/packages/ExpressiveAnnotations)
 
     ###`PM> Install-Package ExpressiveAnnotations`
 
 * [minimal package](https://www.nuget.org/packages/ExpressiveAnnotations.dll) - core assembly only (MVC-related client-side coating components excluded):
 
-    [![NuGet minimal](https://img.shields.io/nuget/dt/ExpressiveAnnotations.dll.svg)](http://nuget.org/packages/ExpressiveAnnotations.dll)
+    [![NuGet minimal](https://img.shields.io/nuget/v/ExpressiveAnnotations.dll.svg)](http://nuget.org/packages/ExpressiveAnnotations.dll)
 
     ###`PM> Install-Package ExpressiveAnnotations.dll`
 
