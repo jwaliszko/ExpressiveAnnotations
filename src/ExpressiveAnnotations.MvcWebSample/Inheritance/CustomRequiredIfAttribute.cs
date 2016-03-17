@@ -3,11 +3,11 @@ using ExpressiveAnnotations.Attributes;
 
 namespace ExpressiveAnnotations.MvcWebSample.Inheritance
 {
-    public class CustomizedRequiredIfAttribute: ExpressiveAttribute
+    public class CustomRequiredIfAttribute: ExpressiveAttribute
     {
         public bool AllowEmptyStrings { get; set; }
 
-        public CustomizedRequiredIfAttribute(string expression)
+        public CustomRequiredIfAttribute(string expression)
             : base(expression, "The {0} field is conditionally required.") // this default message will be overriden by resources
         {
             AllowEmptyStrings = false;

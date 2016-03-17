@@ -27,7 +27,23 @@ namespace ExpressiveAnnotations.Attributes
         /// <param name="errorMessage">The error message to associate with a validation control.</param>
         /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
         protected ExpressiveAttribute(string expression, string errorMessage)
-            : base(errorMessage)
+            : this(expression, () => errorMessage)
+        {
+        }
+
+        /// <summary>
+        ///     Constructor for expressive validation attribute.
+        /// </summary>
+        /// <param name="expression">The logical expression based on which specified condition is computed.</param>
+        /// <param name="errorMessageAccessor">The error message accessor, allowing the error message to be provided dynamically.</param>
+        /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
+        /// <remarks>
+        ///     Allows for providing a resource accessor function that will be used to retrieve the error message.
+        ///     An example would be to have something like, e.g.
+        ///     CustomAttribute() : base( () =&gt; MyResources.MyErrorMessage ) {}.
+        /// </remarks>
+        protected ExpressiveAttribute(string expression, Func<string> errorMessageAccessor)
+            : base(errorMessageAccessor)
         {
             if (expression == null)
                 throw new ArgumentNullException(nameof(expression), "Expression not provided.");
@@ -156,7 +172,7 @@ namespace ExpressiveAnnotations.Attributes
         ///     This method interprets custom format specifiers, provided to error message string, for which values or display names of model fields are extracted. Specifiers should be given
         ///     in braces (curly brackets), i.e. {fieldPath[:indicator]}, e.g. {field}, {field.field:n}. Braces can be escaped by double-braces, i.e. to output a { use {{ and to output a } use }}.
         /// </remarks>
-        public string FormatErrorMessage(string displayName, string expression, object objectInstance)
+        public virtual string FormatErrorMessage(string displayName, string expression, object objectInstance)
         {
             try
             {
@@ -188,7 +204,7 @@ namespace ExpressiveAnnotations.Attributes
         ///     This method interprets custom format specifiers, provided to error message string, for which values or display names of model fields are extracted. Specifiers should be given
         ///     in braces (curly brackets), i.e. {fieldPath[:indicator]}, e.g. {field}, {field.field:n}. Braces can be escaped by double-braces, i.e. to output a { use {{ and to output a } use }}.
         /// </remarks>
-        public string FormatErrorMessage(string displayName, string expression, Type objectType, out IDictionary<string, Guid> fieldsMap)
+        public virtual string FormatErrorMessage(string displayName, string expression, Type objectType, out IDictionary<string, Guid> fieldsMap)
         {
             try
             {

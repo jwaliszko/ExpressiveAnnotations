@@ -4,9 +4,9 @@ using ExpressiveAnnotations.MvcUnobtrusive.Validators;
 
 namespace ExpressiveAnnotations.MvcWebSample.Inheritance
 {
-    public class CustomizedAssertThatValidator : ExpressiveValidator<CustomizedAssertThatAttribute>
+    public class CustomAssertThatValidator : ExpressiveValidator<CustomAssertThatAttribute>
     {
-        public CustomizedAssertThatValidator(ModelMetadata metadata, ControllerContext context, CustomizedAssertThatAttribute attribute)
+        public CustomAssertThatValidator(ModelMetadata metadata, ControllerContext context, CustomAssertThatAttribute attribute)
             : base(metadata, context, attribute)
         {
         }

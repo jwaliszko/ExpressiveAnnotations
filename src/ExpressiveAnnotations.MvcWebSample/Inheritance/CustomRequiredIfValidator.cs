@@ -9,9 +9,9 @@ using Newtonsoft.Json;
 
 namespace ExpressiveAnnotations.MvcWebSample.Inheritance
 {
-    public class CustomizedRequiredIfValidator : ExpressiveValidator<CustomizedRequiredIfAttribute>
+    public class CustomRequiredIfValidator : ExpressiveValidator<CustomRequiredIfAttribute>
     {
-        public CustomizedRequiredIfValidator(ModelMetadata metadata, ControllerContext context, CustomizedRequiredIfAttribute attribute)
+        public CustomRequiredIfValidator(ModelMetadata metadata, ControllerContext context, CustomRequiredIfAttribute attribute)
             : base(metadata, context, attribute)
         {
             AllowEmpty = attribute.AllowEmptyStrings;

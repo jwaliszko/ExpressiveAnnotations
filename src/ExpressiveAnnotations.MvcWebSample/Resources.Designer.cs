@@ -349,6 +349,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Just a few characters more....
+        /// </summary>
+        public static string JustAFewCharsMore {
+            get {
+                return ResourceManager.GetString("JustAFewCharsMore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Latest suggested return.
         /// </summary>
         public static string LatestSuggestedReturnDate {
