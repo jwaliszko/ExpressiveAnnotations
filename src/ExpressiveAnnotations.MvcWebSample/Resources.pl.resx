@@ -213,6 +213,9 @@
   <data name="ImmediateContactRequired" xml:space="preserve">
     <value>Czy powinniśmy się skontaktować jak najszybciej?</value>
   </data>
+  <data name="JustAFewCharsMore" xml:space="preserve">
+    <value>Jeszcze kilka znaków więcej...</value>
+  </data>
   <data name="LatestSuggestedReturnDate" xml:space="preserve">
     <value>Najpóźniejsza sugerowana data</value>
   </data>

@@ -556,20 +556,47 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         }
 
         [Fact]
-        public void write_letters_in_comment_field_and_verify_error_for_comment_in_server_mode()
+        public void write_a_few_letters_in_comment_field_and_verify_less_priority_error_for_comment_in_server_mode()
         {
             Watch(() =>
             {
-                Home.WriteInput("コメント", "asd");
+                Home.WriteInput("コメント", "1234");
                 Home.Submit();
                 Assert.Equal(
-                    "Assertion for Comment field is not satisfied - text 'asd' is too short.",
+                    "Just a few characters more... !?",
                     Home.GetErrorMessage("コメント"));
             });
         }
 
         [Fact]
-        public void change_culture_write_letters_in_comment_field_and_verify_error_for_comment_in_server_mode()
+        public void change_culture_write_a_few_letters_in_comment_field_and_verify_less_priority_error_for_comment_in_server_mode()
+        {
+            Watch(() =>
+            {
+                Home.SetLang("pl");
+                Home.WriteInput("コメント", "1234");
+                Home.Submit();
+                Assert.Equal(
+                    "Jeszcze kilka znaków więcej... !?",
+                    Home.GetErrorMessage("コメント"));
+            });
+        }
+
+        [Fact]
+        public void write_a_bit_more_letters_in_comment_field_and_verify_higher_priority_error_for_comment_in_server_mode()
+        {
+            Watch(() =>
+            {
+                Home.WriteInput("コメント", "12345");
+                Home.Submit();
+                Assert.Equal(
+                    "Assertion for Comment field is not satisfied - text '12345' is too short. !?",
+                    Home.GetErrorMessage("コメント"));
+            });
+        }
+
+        [Fact]
+        public void change_culture_write_a_bit_more_letters_in_comment_field_and_verify_higher_priority_error_for_comment_in_server_mode()
         {
             Watch(() =>
             {
@@ -577,7 +604,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                 Home.WriteInput("コメント", "ąęćłńśóźż");
                 Home.Submit();
                 Assert.Equal(
-                    "Warunek dla pola Komentarz nie jest spełniony - tekst 'ąęćłńśóźż' jest za krótki.",
+                    "Warunek dla pola Komentarz nie jest spełniony - tekst 'ąęćłńśóźż' jest za krótki. !?",
                     Home.GetErrorMessage("コメント"));
             });
         }

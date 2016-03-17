@@ -124,10 +124,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
-    <Compile Include="Inheritance\CustomizedAssertThatAttribute.cs" />
-    <Compile Include="Inheritance\CustomizedAssertThatValidator.cs" />
-    <Compile Include="Inheritance\CustomizedRequiredIfValidator.cs" />
-    <Compile Include="Inheritance\CustomizedRequiredIfAttribute.cs" />
+    <Compile Include="Inheritance\CustomExpressiveAnnotationsModelValidatorProvider.cs" />
+    <Compile Include="Inheritance\CustomAssertThatAttribute.cs" />
+    <Compile Include="Inheritance\CustomAssertThatValidator.cs" />
+    <Compile Include="Inheritance\CustomRequiredIfValidator.cs" />
+    <Compile Include="Inheritance\CustomRequiredIfAttribute.cs" />
     <Compile Include="Controllers\BaseController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\SystemController.cs" />

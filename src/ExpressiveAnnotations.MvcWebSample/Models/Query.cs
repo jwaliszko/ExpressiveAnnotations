@@ -162,8 +162,10 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "Donation")]
         public int[] SelectedDonations { get; set; }
 
-        [CustomizedRequiredIf("GoAbroad == true")]
-        [CustomizedAssertThat("Length(コメント) > 1e1 - 1")]
+        [CustomRequiredIf("GoAbroad == true")]
+        [CustomAssertThat("Length(コメント) > 1e1 - 1", Priority = 2)]
+        [CustomAssertThat("Length(コメント) > 1e1 - 6", Priority = 1, 
+            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "JustAFewCharsMore")]
         [Display(ResourceType = typeof (Resources), Name = "Comment")]
         public string コメント { get; set; }
 
