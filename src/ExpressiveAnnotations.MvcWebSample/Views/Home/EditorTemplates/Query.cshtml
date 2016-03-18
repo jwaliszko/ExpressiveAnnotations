@@ -204,8 +204,9 @@
     </li>
     <li>
         <pre class="code">
-[CustomizedRequiredIf("GoAbroad == true")]
-[CustomizedAssertThat("Length(コメント) > 1e1 - 1")]
+[CustomRequiredIf("GoAbroad == true")]
+[CustomAssertThat("Length(コメント) > 1e1 - 1", Priority = 2)]
+[CustomAssertThat("Length(コメント) > 1e1 - 6", Priority = 1)]
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>
