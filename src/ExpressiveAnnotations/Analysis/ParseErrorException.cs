@@ -27,7 +27,7 @@ namespace ExpressiveAnnotations.Analysis
             Location = location;
         }
 
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         protected ParseErrorException(SerializationInfo info, StreamingContext context) // protected for unsealed classes, private for sealed classes
             : base(info, context)
         {
@@ -40,7 +40,7 @@ namespace ExpressiveAnnotations.Analysis
         public Location Location { get; private set; }
 
         [SecurityCritical]
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)] // deny creating an object of this type from a data that wasn't created by this serialization code 
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)] // deny creating an object of this type from a data that wasn't created by this serialization code 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             Debug.Assert(info != null);

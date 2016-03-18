@@ -108,6 +108,11 @@
             // ----- do some other stuff, not related to ea directly -----
 
             $(document).ready(function() {
+                var validator = $("form").data("validator"); // get validator asociated with the form (association established by jquery.validate.unobtrusive.js)
+                validator.settings.onkeyup = function(element) { // execute validation of current field on keyup event
+                    $(element).valid();
+                }
+
                 $('#triggers input[type="checkbox"]').on('click', function() {
                     // disable some excessive activity if you wish, and e.g. trigger dependent fields validation only when field 'change' event is fired -
                     // - when all triggers are disabled, validation will be fired on form submit attempt only
