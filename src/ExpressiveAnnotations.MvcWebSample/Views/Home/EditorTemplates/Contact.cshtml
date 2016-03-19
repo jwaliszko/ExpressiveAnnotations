@@ -30,13 +30,7 @@
 @for (var i = 0; i < Model.Addresses.Count; i++)
 {
     <li>
-        <pre class="code">
-[AssertThat("StartsWith(Details, StreetPrefix)")]
-</pre>
-        <pre class="action">[show attribute]</pre>
-        <div>
-            @Html.EditorFor(model => Model.Addresses[i])
-        </div>
+        @Html.EditorFor(model => Model.Addresses[i])
     </li>
 }
 
