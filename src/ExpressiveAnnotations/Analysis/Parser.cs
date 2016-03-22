@@ -49,6 +49,7 @@ namespace ExpressiveAnnotations.Analysis
 
         private Stack<Token> TokensToProcess { get; set; }
         private Stack<Token> TokensProcessed { get; set; }
+        private string Expr { get; set; }
         private Type ContextType { get; set; }
         private Expression ContextExpression { get; set; }
         private IDictionary<string, Type> Fields { get; set; }
@@ -63,9 +64,13 @@ namespace ExpressiveAnnotations.Analysis
         /// <returns>
         ///     A delegate containing the compiled version of the lambda expression described by created expression tree.
         /// </returns>
-        /// <exception cref="System.InvalidOperationException"></exception>
+        /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
+        /// <exception cref="ParseErrorException"></exception>
         public Func<TContext, bool> Parse<TContext>(string expression)
         {
+            if (expression == null)
+                throw new ArgumentNullException(nameof(expression), "Expression not provided.");
+
             lock (_locker)
             {
                 try
@@ -74,18 +79,18 @@ namespace ExpressiveAnnotations.Analysis
                     ContextType = typeof (TContext);
                     var param = Expression.Parameter(typeof (TContext));
                     ContextExpression = param;
-                    Tokenize(expression);
+                    Expr = expression;
                     var expressionTree = ParseExpression();
                     var lambda = Expression.Lambda<Func<TContext, bool>>(expressionTree, param);
                     return lambda.Compile();
                 }
-                catch (ParseErrorException e)
+                catch (ParseErrorException)
                 {
-                    throw new InvalidOperationException(BuildParseError(e, expression), e);
+                    throw;
                 }
                 catch (Exception e)
                 {
-                    throw new InvalidOperationException($"Parse fatal error. {e.Message}", e);
+                    throw new ParseErrorException($"Parse fatal error. {e.Message}", e);
                 }
             }
         }
@@ -98,9 +103,13 @@ namespace ExpressiveAnnotations.Analysis
         /// <returns>
         ///     A delegate containing the compiled version of the lambda expression described by created expression tree.
         /// </returns>
-        /// <exception cref="System.InvalidOperationException"></exception>
+        /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
+        /// <exception cref="ParseErrorException"></exception>
         public Func<object, bool> Parse(Type context, string expression)
         {
+            if (expression == null)
+                throw new ArgumentNullException(nameof(expression), "Expression not provided.");
+
             lock (_locker)
             {
                 try
@@ -109,18 +118,18 @@ namespace ExpressiveAnnotations.Analysis
                     ContextType = context;
                     var param = Expression.Parameter(typeof (object));
                     ContextExpression = Expression.Convert(param, context);
-                    Tokenize(expression);
+                    Expr = expression;
                     var expressionTree = ParseExpression();
                     var lambda = Expression.Lambda<Func<object, bool>>(expressionTree, param);
                     return lambda.Compile();
                 }
-                catch (ParseErrorException e)
+                catch (ParseErrorException)
                 {
-                    throw new InvalidOperationException(BuildParseError(e, expression));
+                    throw;
                 }
                 catch (Exception e)
                 {
-                    throw new InvalidOperationException($"Parse fatal error. {e.Message}", e);
+                    throw new ParseErrorException($"Parse fatal error. {e.Message}", e);
                 }
             }
         }
@@ -261,20 +270,12 @@ namespace ExpressiveAnnotations.Analysis
             Consts.Clear();
         }
 
-        private void Tokenize(string expression)
+        private void Tokenize()
         {
             var lexer = new Lexer();
-            var tokens = lexer.Analyze(expression);
+            var tokens = lexer.Analyze(Expr);
             TokensToProcess = new Stack<Token>(tokens.Reverse());
             TokensProcessed = new Stack<Token>();
-        }
-
-        private string BuildParseError(ParseErrorException e, string expression)
-        {
-            var pos = e.Location;
-            return pos == null
-                ? $"Parse error: {e.Message}"
-                : $"Parse error on line {pos.Line}, column {pos.Column}:{expression.TakeLine(pos.Line - 1).Substring(pos.Column - 1).Indicator()}{e.Message}";
         }
 
         private TokenType PeekType()
@@ -303,11 +304,11 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseExpression()
         {
+            Tokenize();
             var expr = ParseOrExp();
             if (PeekType() != TokenType.EOF)
                 throw new ParseErrorException(
-                    $"Unexpected token: '{PeekValue()}'.",
-                    PeekToken().Location);
+                    $"Unexpected token: '{PeekValue()}'.", Expr, PeekToken().Location);
             return expr;
         }
 
@@ -323,8 +324,7 @@ namespace ExpressiveAnnotations.Analysis
             AssertArgsNotNullLiterals(arg1, arg2, oper);
             if (!arg1.Type.IsBool() || !arg2.Type.IsBool())
                 throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.",
-                    oper.Location);
+                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
 
             return Expression.OrElse(arg1, arg2); // short-circuit evaluation
         }
@@ -341,8 +341,7 @@ namespace ExpressiveAnnotations.Analysis
             AssertArgsNotNullLiterals(arg1, arg2, oper);
             if (!arg1.Type.IsBool() || !arg2.Type.IsBool())
                 throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.",
-                    oper.Location);
+                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
 
             return Expression.AndAlso(arg1, arg2); // short-circuit evaluation
         }
@@ -364,29 +363,25 @@ namespace ExpressiveAnnotations.Analysis
                 && !arg1.IsNullLiteral() && !arg2.IsNullLiteral()
                 && !arg1.Type.IsObject() && !arg2.Type.IsObject())
                 throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.",
-                    oper.Location);
+                    $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
 
             if (oper.Type == TokenType.EQ || oper.Type == TokenType.NEQ)
             {
                 if (type1.IsNonNullableValueType() && arg2.IsNullLiteral())
                     throw new ParseErrorException(
-                        $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and 'null'.",
-                        oper.Location);
+                        $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and 'null'.", Expr, oper.Location);
                 if (arg1.IsNullLiteral() && type2.IsNonNullableValueType())
                     throw new ParseErrorException(
-                        $"Operator '{oper.Value}' cannot be applied to operands of type 'null' and '{type2}'.",
-                        oper.Location);
+                        $"Operator '{oper.Value}' cannot be applied to operands of type 'null' and '{type2}'.", Expr, oper.Location);
             }
             else
             {
                 AssertArgsNotNullLiterals(arg1, type1, arg2, type2, oper);
-                if (!(arg1.Type.IsNumeric() && arg2.Type.IsNumeric()) 
-                    && !(arg1.Type.IsDateTime() && arg2.Type.IsDateTime()) 
+                if (!(arg1.Type.IsNumeric() && arg2.Type.IsNumeric())
+                    && !(arg1.Type.IsDateTime() && arg2.Type.IsDateTime())
                     && !(arg1.Type.IsTimeSpan() && arg2.Type.IsTimeSpan()))
                     throw new ParseErrorException(
-                        $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.",
-                        oper.Location);                
+                        $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
             }
 
             switch (oper.Type)
@@ -417,12 +412,10 @@ namespace ExpressiveAnnotations.Analysis
 
             if (arg.IsNullLiteral())
                 throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operand of type 'null'.",
-                    oper.Location);            
+                    $"Operator '{oper.Value}' cannot be applied to operand of type 'null'.", Expr, oper.Location);
             if (!arg.Type.IsBool())
                 throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operand of type '{arg.Type}'.",
-                    oper.Location);
+                    $"Operator '{oper.Value}' cannot be applied to operand of type '{arg.Type}'.", Expr, oper.Location);
 
             return Expression.Not(arg);
         }
@@ -448,27 +441,24 @@ namespace ExpressiveAnnotations.Analysis
             if (!arg1.Type.IsString() && !arg2.Type.IsString())
             {
                 AssertArgsNotNullLiterals(arg1, type1, arg2, type2, oper);
-                if (!(arg1.Type.IsNumeric() && arg2.Type.IsNumeric()) 
-                    && !(arg1.Type.IsDateTime() && arg2.Type.IsDateTime()) 
-                    && !(arg1.Type.IsTimeSpan() && arg2.Type.IsTimeSpan()) 
+                if (!(arg1.Type.IsNumeric() && arg2.Type.IsNumeric())
+                    && !(arg1.Type.IsDateTime() && arg2.Type.IsDateTime())
+                    && !(arg1.Type.IsTimeSpan() && arg2.Type.IsTimeSpan())
                     && !(arg1.Type.IsDateTime() && arg2.Type.IsTimeSpan()))
                     throw new ParseErrorException(
-                        $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.",
-                        oper.Location);
+                        $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
             }
 
             if (oper.Type == TokenType.ADD)
                 if (arg1.Type.IsDateTime() && arg2.Type.IsDateTime())
                     throw new ParseErrorException(
-                        $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.",
-                        oper.Location);
+                        $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
             if (oper.Type == TokenType.SUB)
             {
                 AssertArgsNotNullLiterals(arg1, type1, arg2, type2, oper);
                 if (arg1.Type.IsString() && arg2.Type.IsString())
                     throw new ParseErrorException(
-                        $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.",
-                        oper.Location);
+                        $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
             }
 
             switch (oper.Type)
@@ -514,8 +504,7 @@ namespace ExpressiveAnnotations.Analysis
             {
                 AssertArgsNotNullLiterals(arg1, arg2, oper);
                 throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.",
-                    oper.Location);
+                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
             }
 
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
@@ -539,8 +528,8 @@ namespace ExpressiveAnnotations.Analysis
                     throw new ParseErrorException(
                         PeekType() == TokenType.EOF
                             ? "Expected closing bracket. Unexpected end of expression."
-                            : $"Expected closing bracket. Unexpected token: '{PeekValue()}'.",
-                        PeekToken().Location);
+                            : $"Expected closing bracket. Unexpected token: '{PeekValue()}'.", 
+                        Expr, PeekToken().Location);
                 ReadToken();
                 return arg;
             }
@@ -561,12 +550,10 @@ namespace ExpressiveAnnotations.Analysis
                     return ParseFunc();
                 case TokenType.EOF:
                     throw new ParseErrorException(
-                        "Expected \"null\", int, float, bool, string or func. Unexpected end of expression.",
-                        PeekToken().Location);
+                        "Expected \"null\", int, float, bool, string or func. Unexpected end of expression.", Expr, PeekToken().Location);
                 default:
                     throw new ParseErrorException(
-                        $"Expected \"null\", int, float, bool, string or func. Unexpected token: '{PeekValue()}'.",
-                        PeekToken().Location);
+                        $"Expected \"null\", int, float, bool, string or func. Unexpected token: '{PeekValue()}'.", Expr, PeekToken().Location);
             }
         }
 
@@ -624,8 +611,7 @@ namespace ExpressiveAnnotations.Analysis
                     ReadToken();
                 else if (PeekType() != TokenType.RIGHT_BRACKET) // when no comma found, function exit expected
                     throw new ParseErrorException(
-                        $"Expected comma or closing bracket. Unexpected token: '{PeekValue()}'.",
-                        PeekToken().Location);
+                        $"Expected comma or closing bracket. Unexpected token: '{PeekValue()}'.", Expr, PeekToken().Location);
                 args.Add(new Tuple<Expression, Location>(arg, tkn.Location));
             }
             ReadToken(); // read ")"
@@ -638,8 +624,7 @@ namespace ExpressiveAnnotations.Analysis
             var expression = FetchPropertyValue(name) ?? FetchEnumValue(name) ?? FetchConstValue(name);
             if (expression == null)
                 throw new ParseErrorException(
-                    $"Only public properties, constants and enums are accepted. Identifier '{name}' not known.",
-                    PeekToken(1).Location);
+                    $"Only public properties, constants and enums are accepted. Identifier '{name}' not known.", Expr, PeekToken(1).Location);
 
             return expression;
         }
@@ -685,7 +670,7 @@ namespace ExpressiveAnnotations.Analysis
 
                     throw new ParseErrorException(
                         $"Identifier '{name.Substring(0, name.Length - 2 - idx.ToString().Length)}' either does not represent an array type or does not declare indexer.",
-                        PeekToken(1).Location);
+                        Expr, PeekToken(1).Location);
                 }
 
                 pi = type.GetProperty(part);
@@ -714,7 +699,7 @@ namespace ExpressiveAnnotations.Analysis
                 if (enumTypes.Count > 1)
                     throw new ParseErrorException(
                         $"Enum '{enumTypeName}' is ambiguous, found following:{Environment.NewLine}{string.Join("," + Environment.NewLine, enumTypes.Select(x => $"'{x.FullName}'"))}.",
-                        PeekToken(1).Location);
+                        Expr, PeekToken(1).Location);
 
                 var type = enumTypes.SingleOrDefault();
                 if (type != null)
@@ -744,7 +729,7 @@ namespace ExpressiveAnnotations.Analysis
                 if (constants.Count > 1)
                     throw new ParseErrorException(
                         $"Constant '{name}' is ambiguous, found following:{Environment.NewLine}{string.Join("," + Environment.NewLine, constants.Select(x => x.ReflectedType != null ? $"'{x.ReflectedType.FullName}.{x.Name}'" : $"'{x.Name}'"))}.",
-                        PeekToken(1).Location);
+                        Expr, PeekToken(1).Location);
 
                 constant = constants.SingleOrDefault();
                 
@@ -769,8 +754,7 @@ namespace ExpressiveAnnotations.Analysis
             var expression = FetchModelMethod(name, args, funcPos) ?? FetchToolchainMethod(name, args, funcPos); // firstly, try to take method from model context - if not found, take one from toolchain
             if (expression == null)
                 throw new ParseErrorException(
-                    $"Function '{name}' accepting {args.Count} argument{(args.Count == 1 ? string.Empty : "s")} not found.",
-                    funcPos);
+                    $"Function '{name}' accepting {args.Count} argument{(args.Count == 1 ? string.Empty : "s")} not found.", Expr, funcPos);
 
             return expression;
         }
@@ -841,7 +825,7 @@ namespace ExpressiveAnnotations.Analysis
             {
                 throw new ParseErrorException(
                     $"Function '{funcName}' {argIdx.ToOrdinal()} argument implicit conversion from '{arg.Type}' to expected '{type}' failed.",
-                    argPos);
+                    Expr, argPos);
             }
         }
 
@@ -871,16 +855,14 @@ namespace ExpressiveAnnotations.Analysis
         {
             if (!Functions.ContainsKey(name) && !ContextType.GetMethods().Any(mi => name.Equals(mi.Name)))
                 throw new ParseErrorException(
-                    $"Function '{name}' not known.",
-                    funcPos);
+                    $"Function '{name}' not known.", Expr, funcPos);
         }
 
         private void AssertNonAmbiguity(int signatures, string funcName, int args, Location funcPos)
         {
             if (signatures > 1)
                 throw new ParseErrorException(
-                    $"Function '{funcName}' accepting {args} argument{(args == 1 ? string.Empty : "s")} is ambiguous.",
-                    funcPos);
+                    $"Function '{funcName}' accepting {args} argument{(args == 1 ? string.Empty : "s")} is ambiguous.", Expr, funcPos);
         }
 
         private void AssertArgsNotNullLiterals(Expression arg1, Expression arg2, Token oper)
@@ -892,16 +874,13 @@ namespace ExpressiveAnnotations.Analysis
         {
             if (arg1.IsNullLiteral() && arg2.IsNullLiteral())
                 throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type 'null' and 'null'.",
-                    oper.Location);
+                    $"Operator '{oper.Value}' cannot be applied to operands of type 'null' and 'null'.", Expr, oper.Location);
             if (!arg1.IsNullLiteral() && arg2.IsNullLiteral())
                 throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and 'null'.",
-                    oper.Location);
+                    $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and 'null'.", Expr, oper.Location);
             if (arg1.IsNullLiteral() && !arg2.IsNullLiteral())
                 throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type 'null' and '{type2}'.",
-                    oper.Location);
+                    $"Operator '{oper.Value}' cannot be applied to operands of type 'null' and '{type2}'.", Expr, oper.Location);
         }
     }
 }

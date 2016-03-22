@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Web;
+using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
 using ExpressiveAnnotations.MvcUnobtrusive.Validators;
 using Newtonsoft.Json;
@@ -126,7 +127,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             Assert.Equal(
                 "AssertThatValidator: validation applied to Value field failed.",
                 e.Message);
-            Assert.IsType<InvalidOperationException>(e.InnerException);
+            Assert.IsType<ParseErrorException>(e.InnerException);
             Assert.Equal(
                 @"Parse error on line 1, column 9:
 ... # ...
@@ -137,7 +138,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             Assert.Equal(
                 "RequiredIfValidator: validation applied to Value field failed.",
                 e.Message);                
-            Assert.IsType<InvalidOperationException>(e.InnerException);
+            Assert.IsType<ParseErrorException>(e.InnerException);
             Assert.Equal(
                 @"Parse error on line 1, column 9:
 ... # ...

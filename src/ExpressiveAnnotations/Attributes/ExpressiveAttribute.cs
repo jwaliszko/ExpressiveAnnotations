@@ -147,6 +147,7 @@ namespace ExpressiveAnnotations.Attributes
         /// </summary>
         /// <param name="validationContextType">The type of the object to be validated.</param>
         /// <param name="force">Flag indicating whether parsing should be rerun despite the fact compiled lambda already exists.</param>
+        /// <exception cref="ParseErrorException"></exception>
         public void Compile(Type validationContextType, bool force = false)
         {
             if (force)
@@ -185,7 +186,8 @@ namespace ExpressiveAnnotations.Attributes
             }
             catch (Exception e)
             {
-                throw new FormatException($"Problem with error message processing. The message is following: {ErrorMessageString}", e);
+                throw new FormatException(
+                    $"Problem with error message processing. The message is following: {ErrorMessageString}", e);
             }            
         }
 
@@ -219,7 +221,8 @@ namespace ExpressiveAnnotations.Attributes
             }
             catch (Exception e)
             {
-                throw new FormatException($"Problem with error message processing. The message is following: {ErrorMessageString}", e);
+                throw new FormatException(
+                    $"Problem with error message processing. The message is following: {ErrorMessageString}", e);
             }
         }
         
@@ -269,7 +272,8 @@ namespace ExpressiveAnnotations.Attributes
             }
             catch (Exception e)
             {
-                throw new ValidationException($"{GetType().Name}: validation applied to {validationContext.MemberName} field failed.", e);
+                throw new ValidationException(
+                    $"{GetType().Name}: validation applied to {validationContext.MemberName} field failed.", e);
             }
         }
 

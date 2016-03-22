@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using ExpressiveAnnotations.Analysis;
 
 namespace ExpressiveAnnotations
 {
@@ -368,6 +369,11 @@ namespace ExpressiveAnnotations
                 default:
                     return num + "th";
             }
+        }
+
+        public static Location Clone(this Location location)
+        {
+            return new Location(location.Line, location.Column);
         }
 
         public static string Indicator(this string input)

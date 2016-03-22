@@ -14,39 +14,73 @@ namespace ExpressiveAnnotations.Tests
     public class UtilsTest
     {
         [Fact]
-        public void verify_serialization_of_parse_exception() // not really required since this exception is not expected to travel through various app domains (nevertheless implemented to satisfy good practices)
+        public void verify_serialization_of_basic_parse_exception() // exception is expected to travel through various app domains
         {
-            var ex = new ParseErrorException("Operator '!' cannot be applied to operand of type 'System.String'", new Location(1, 5));
+            var e = new ParseErrorException(@"Operator '!' cannot be applied to operand of type 'System.String'.", new ParseErrorException());
 
-            // sanity check: make sure custom properties are set before serialization
-            Assert.Equal("Operator '!' cannot be applied to operand of type 'System.String'", ex.Message);
-            Assert.NotNull(ex.Location);
-            Assert.Equal(1, ex.Location.Line);
-            Assert.Equal(5, ex.Location.Column);
-
-            // save the full ToString() value, including the exception message and stack trace.
-            var exceptionToString = ex.ToString();
+            // save the full ToString() value, including the exception message and stack trace
+            var exceptionToString = e.ToString();
 
             // round-trip the exception: serialize and de-serialize with a BinaryFormatter
             using (var ms = new MemoryStream())
             {
                 var bf = new BinaryFormatter();
                 // "save" object state
-                bf.Serialize(ms, ex);
+                bf.Serialize(ms, e);
                 // re-use the same stream for de-serialization
                 ms.Seek(0, 0);
                 // replace the original exception with de-serialized one
-                ex = (ParseErrorException)bf.Deserialize(ms);
+                e = (ParseErrorException) bf.Deserialize(ms);
+            }
+
+            // double-check that the exception message and stack trace (owned by the base Exception) are preserved
+            Assert.Equal(exceptionToString, e.ToString());
+        }
+
+        [Fact]
+        public void verify_serialization_of_complete_parse_exception()
+        {
+            var e = new ParseErrorException("Operator '!' cannot be applied to operand of type 'System.String'.", "true && !'false'", new Location(1, 9), new ParseErrorException("other"));
+
+            // sanity check: make sure custom properties are set before serialization
+            Assert.Equal(
+                @"Parse error on line 1, column 9:
+... !'false' ...
+    ^--- Operator '!' cannot be applied to operand of type 'System.String'.",
+                e.Message);
+            Assert.Equal("Operator '!' cannot be applied to operand of type 'System.String'.", e.Error);
+            Assert.Equal("true && !'false'", e.Expression);
+            Assert.NotNull(e.Location);
+            Assert.Equal(1, e.Location.Line);
+            Assert.Equal(9, e.Location.Column);
+            Assert.NotNull(e.InnerException);
+            Assert.Equal("other", e.InnerException.Message);
+
+            var exceptionToString = e.ToString();
+
+            using (var ms = new MemoryStream())
+            {
+                var bf = new BinaryFormatter();
+                bf.Serialize(ms, e);
+                ms.Seek(0, 0);
+                e = (ParseErrorException) bf.Deserialize(ms);
             }
 
             // make sure custom properties are preserved after serialization
-            Assert.Equal("Operator '!' cannot be applied to operand of type 'System.String'", ex.Message);
-            Assert.NotNull(ex.Location);
-            Assert.Equal(1, ex.Location.Line);
-            Assert.Equal(5, ex.Location.Column);
+            Assert.Equal(
+                @"Parse error on line 1, column 9:
+... !'false' ...
+    ^--- Operator '!' cannot be applied to operand of type 'System.String'.",
+                e.Message);
+            Assert.Equal("Operator '!' cannot be applied to operand of type 'System.String'.", e.Error);
+            Assert.Equal("true && !'false'", e.Expression);
+            Assert.NotNull(e.Location);
+            Assert.Equal(1, e.Location.Line);
+            Assert.Equal(9, e.Location.Column);
+            Assert.NotNull(e.InnerException);
+            Assert.Equal("other", e.InnerException.Message);
 
-            // double-check that the exception message and stack trace (owned by the base Exception) are preserved
-            Assert.Equal(exceptionToString, ex.ToString());
+            Assert.Equal(exceptionToString, e.ToString());
         }
 
         [Fact]
