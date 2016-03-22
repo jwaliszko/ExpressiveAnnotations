@@ -76,7 +76,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
             }
             catch (Exception e)
             {
-                throw new ValidationException($"{GetType().Name}: validation applied to {metadata.PropertyName} field failed.", e);
+                throw new ValidationException(
+                    $"{GetType().Name}: validation applied to {metadata.PropertyName} field failed.", e);
             }
         }
 
@@ -159,7 +160,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
             }
             catch (Exception e)
             {
-                throw new ValidationException($"{GetType().Name}: collecting of client validation rules for {FieldName} field failed.", e);
+                throw new ValidationException(
+                    $"{GetType().Name}: collecting of client validation rules for {FieldName} field failed.", e);
             }
         }
 

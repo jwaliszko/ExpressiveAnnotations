@@ -62,7 +62,8 @@ namespace ExpressiveAnnotations.Analysis
 
         private Token Token { get; set; }
         private Location Location { get; set; }
-        private string Expression { get; set; }
+        private string Expr { get; set; }
+        private string RemainingExpression { get; set; }        
         private IDictionary<TokenType, Regex> RegexMap { get; set; }
 
         /// <summary>
@@ -73,15 +74,16 @@ namespace ExpressiveAnnotations.Analysis
         ///     A sequence of extracted tokens.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
+        /// <exception cref="ParseErrorException"></exception>
         public IEnumerable<Token> Analyze(string expression)
         {
+            if (expression == null)
+                throw new ArgumentNullException(nameof(expression), "Expression not provided.");
+
             lock (_locker)
             {
-                if (expression == null)
-                    throw new ArgumentNullException(nameof(expression), "Expression not provided.");
-
-                Location = new Location(line: 1, column: 1);
-                Expression = expression;
+                Location = new Location(1, 1);
+                Expr = RemainingExpression = expression;
 
                 var tokens = new List<Token>();
                 while (Next())
@@ -90,7 +92,7 @@ namespace ExpressiveAnnotations.Analysis
                 }
 
                 // once we've reached the end of the string, EOF token is returned - thus, parser's lookahead does not have to worry about running out of tokens
-                tokens.Add(new Token(TokenType.EOF, string.Empty, new Location(Location)));
+                tokens.Add(new Token(TokenType.EOF, string.Empty, Location.Clone()));
                 return tokens;
             }
         }
@@ -98,29 +100,29 @@ namespace ExpressiveAnnotations.Analysis
         private bool Next()
         {
             int line, column;
-            Expression = Expression.TrimStart(out line, out column);
+            RemainingExpression = RemainingExpression.TrimStart(out line, out column);
             Location.Line += line;
             Location.Column = line > 0 ? column : Location.Column + column;
 
-            if (Expression.Length == 0)
+            if (RemainingExpression.Length == 0)
                 return false;
 
             foreach (var kvp in RegexMap)
             {
                 var regex = kvp.Value;
-                var match = regex.Match(Expression);
+                var match = regex.Match(RemainingExpression);
                 if (!match.Success) 
                     continue;
                 
                 var value = match.Value;
-                Token = new Token(kvp.Key, ConvertTokenValue(kvp.Key, value), new Location(Location));
+                Token = new Token(kvp.Key, ConvertTokenValue(kvp.Key, value), Location.Clone());
 
-                Expression = Expression.Substring(value.Length, out line, out column);
+                RemainingExpression = RemainingExpression.Substring(value.Length, out line, out column);
                 Location.Line += line;
                 Location.Column = line > 0 ? column : Location.Column + column;
                 return true;
             }
-            throw new ParseErrorException("Invalid token.", new Location(Location));
+            throw new ParseErrorException("Invalid token.", Expr, Location);
         }
 
         private object ConvertTokenValue(TokenType type, string value)

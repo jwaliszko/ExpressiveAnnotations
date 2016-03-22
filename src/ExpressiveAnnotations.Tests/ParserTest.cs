@@ -429,11 +429,23 @@ namespace ExpressiveAnnotations.Tests
         {
             var parser = new Parser();
 
-            var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("1").Invoke(null));
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("1").Invoke(null));
             Assert.True(e.Message.StartsWith("Parse fatal error."));
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse(typeof (object), "1").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse(typeof (object), "1").Invoke(null));
             Assert.True(e.Message.StartsWith("Parse fatal error."));
+        }
+
+        [Fact]
+        public void verify_parser_parse_invalid_parameter()
+        {
+            var parser = new Parser();
+
+            var e = Assert.Throws<ArgumentNullException>(() => parser.Parse<object>(null).Invoke(null));
+            Assert.Equal("Expression not provided.\r\nParameter name: expression", e.Message);
+
+            e = Assert.Throws<ArgumentNullException>(() => parser.Parse(typeof (object), null).Invoke(null));
+            Assert.Equal("Expression not provided.\r\nParameter name: expression", e.Message);
         }
 
         [Fact]
@@ -499,14 +511,14 @@ namespace ExpressiveAnnotations.Tests
             parser.AddFunction<string, string, string>("Glue", (s1, s2) => string.Concat(s1, s2));
             parser.AddFunction<int, int, string>("Glue", (i1, i2) => string.Concat(i1, i2));
 
-            var e = Assert.Throws<InvalidOperationException>(() => Assert.True(parser.Parse<object>("Whoami(0) == 'utility method 0'").Invoke(null)));
+            var e = Assert.Throws<ParseErrorException>(() => Assert.True(parser.Parse<object>("Whoami(0) == 'utility method 0'").Invoke(null)));
             Assert.Equal(
                 @"Parse error on line 1, column 1:
 ... Whoami(0) == 'utility method 0' ...
     ^--- Function 'Whoami' accepting 1 argument is ambiguous.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("Glue('a', 'b') == 'ab'").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("Glue('a', 'b') == 'ab'").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 1:
 ... Glue('a', 'b') == 'ab' ...
@@ -521,7 +533,7 @@ namespace ExpressiveAnnotations.Tests
             var parser = new Parser();
             var model = new ModelWithAmbiguousMethods();
 
-            var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<ModelWithAmbiguousMethods>("Whoami(0) == 'model method 0'").Invoke(model));
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<ModelWithAmbiguousMethods>("Whoami(0) == 'model method 0'").Invoke(model));
             Assert.Equal(
                 @"Parse error on line 1, column 1:
 ... Whoami(0) == 'model method 0' ...
@@ -539,14 +551,14 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<object>("Whoami('0') == 'utility method 0'").Invoke(null)); // successful conversion from String to Object
             Assert.True(parser.Parse<object>("Whoami(1, '2') == 'utility method 1 - 2'").Invoke(null)); // types matched, no conversion needed
 
-            var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("Whoami('1', '2') == 'utility method 1 - 2'").Invoke(null));
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("Whoami('1', '2') == 'utility method 1 - 2'").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 8:
 ... '1', '2') == 'utility method 1 - 2' ...
     ^--- Function 'Whoami' 1st argument implicit conversion from 'System.String' to expected 'System.Int32' failed.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("Whoami(1, 2) == 'utility method 1 - 2'").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("Whoami(1, 2) == 'utility method 1 - 2'").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 11:
 ... 2) == 'utility method 1 - 2' ...
@@ -560,19 +572,19 @@ namespace ExpressiveAnnotations.Tests
             var parser = new Parser();
             var model = new Model();
 
-            var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Long('', 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)").Invoke(model));
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Long('', 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)").Invoke(model));
             Assert.EndsWith("Function 'Long' 1st argument implicit conversion from 'System.String' to expected 'System.Int32' failed.", e.Message);
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Long(1, '', 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)").Invoke(model));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Long(1, '', 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)").Invoke(model));
             Assert.EndsWith("Function 'Long' 2nd argument implicit conversion from 'System.String' to expected 'System.Int32' failed.", e.Message);
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Long(1, 2, '', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)").Invoke(model));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Long(1, 2, '', 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)").Invoke(model));
             Assert.EndsWith("Function 'Long' 3rd argument implicit conversion from 'System.String' to expected 'System.Int32' failed.", e.Message);
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Long(1, 2, 3, '', 5, 6, 7, 8, 9, 10, 11, 12, 13)").Invoke(model));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Long(1, 2, 3, '', 5, 6, 7, 8, 9, 10, 11, 12, 13)").Invoke(model));
             Assert.EndsWith("Function 'Long' 4th argument implicit conversion from 'System.String' to expected 'System.Int32' failed.", e.Message);
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Long(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '', 12, 13)").Invoke(model));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Long(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '', 12, 13)").Invoke(model));
             Assert.EndsWith("Function 'Long' 11th argument implicit conversion from 'System.String' to expected 'System.Int32' failed.", e.Message);
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Long(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, '', 13)").Invoke(model));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Long(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, '', 13)").Invoke(model));
             Assert.EndsWith("Function 'Long' 12th argument implicit conversion from 'System.String' to expected 'System.Int32' failed.", e.Message);
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Long(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, '')").Invoke(model));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Long(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, '')").Invoke(model));
             Assert.EndsWith("Function 'Long' 13th argument implicit conversion from 'System.String' to expected 'System.Int32' failed.", e.Message);
         }
 
@@ -597,7 +609,7 @@ namespace ExpressiveAnnotations.Tests
             
             // ensure that this doesn't consider Dog and HotDog enums to be ambiguous
             Assert.True(parser.Parse<object>("Dog.Collie == 0").Invoke(null));
-            var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("Stability.High == 0").Invoke(null));
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("Stability.High == 0").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 1:
 ... Stability.High == 0 ...
@@ -614,7 +626,7 @@ namespace ExpressiveAnnotations.Tests
 
             // ensure that this doesn't consider Dogs.Const and HotDogs.Const constants to be ambiguous
             Assert.True(parser.Parse<object>("Dogs.Const == 0").Invoke(null));
-            var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("Utility.Const == 'outside1'").Invoke(null));
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("Utility.Const == 'outside1'").Invoke(null));
             Assert.Equal(
                     @"Parse error on line 1, column 1:
 ... Utility.Const == 'outside1' ...
@@ -630,7 +642,7 @@ namespace ExpressiveAnnotations.Tests
             var parser = new Parser();
             var model = new Model();
 
-            var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("NotMe == 0").Invoke(model));
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("NotMe == 0").Invoke(model));
             Assert.Equal(
                 @"Parse error on line 1, column 1:
 ... NotMe == 0 ...
@@ -838,35 +850,35 @@ namespace ExpressiveAnnotations.Tests
             var parser = new Parser();
             parser.RegisterMethods();
 
-            var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>($"true {oper} null").Invoke(null));
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"true {oper} null").Invoke(null));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} null ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.Boolean' and 'null'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>($"Now() {oper} Today()").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"Now() {oper} Today()").Invoke(null));
             Assert.Equal(
                 $@"Parse error on line 1, column 7:
 ... {oper} Today() ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.DateTime' and 'System.DateTime'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>($"1 {oper} 2").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"1 {oper} 2").Invoke(null));
             Assert.Equal(
                 $@"Parse error on line 1, column 3:
 ... {oper} 2 ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.Int32' and 'System.Int32'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"YesNo.Yes {oper} YesNo.No").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"YesNo.Yes {oper} YesNo.No").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 11:
 ... {oper} YesNo.No ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'ExpressiveAnnotations.Tests.ParserTest+YesNo' and 'ExpressiveAnnotations.Tests.ParserTest+YesNo'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"null {oper} null").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"null {oper} null").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} null ...
@@ -886,63 +898,63 @@ namespace ExpressiveAnnotations.Tests
             var parser = new Parser();
             parser.RegisterMethods();
 
-            var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>($"0 {oper} '0'").Invoke(null));
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"0 {oper} '0'").Invoke(null));
             Assert.Equal(
                 $@"Parse error on line 1, column 3:
 ... {oper} '0' ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.Int32' and 'System.String'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>($"0.1 {oper} '0'").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"0.1 {oper} '0'").Invoke(null));
             Assert.Equal(
                 $@"Parse error on line 1, column 5:
 ... {oper} '0' ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.Double' and 'System.String'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"Date {oper} 0").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"Date {oper} 0").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} 0 ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.DateTime' and 'System.Int32'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"Date {oper} 'asd'").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"Date {oper} 'asd'").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} 'asd' ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.DateTime' and 'System.String'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"NDate {oper} 'asd'").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"NDate {oper} 'asd'").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 7:
 ... {oper} 'asd' ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.Nullable`1[System.DateTime]' and 'System.String'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Bag>($"Lexer {oper} Parser").Invoke(new Bag { Lexer = new Lexer(), Parser = new Parser() }));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Bag>($"Lexer {oper} Parser").Invoke(new Bag { Lexer = new Lexer(), Parser = new Parser() }));
             Assert.Equal(
                 $@"Parse error on line 1, column 7:
 ... {oper} Parser ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'ExpressiveAnnotations.Analysis.Lexer' and 'ExpressiveAnnotations.Analysis.Parser'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"null {oper} 0").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"null {oper} 0").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} 0 ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'null' and 'System.Int32'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"Cash {oper} null").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"Cash {oper} null").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} null ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.Decimal' and 'null'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>($"Utility.Stability.High {oper} YesNo.Yes").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"Utility.Stability.High {oper} YesNo.Yes").Invoke(null));
             Assert.Equal(
                 $@"Parse error on line 1, column 24:
 ... {oper} YesNo.Yes ...
@@ -962,98 +974,98 @@ namespace ExpressiveAnnotations.Tests
             var parser = new Parser();
             parser.RegisterMethods();
 
-            var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>($"'a' {oper} 'b'").Invoke(null));
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"'a' {oper} 'b'").Invoke(null));
             Assert.Equal(
                 $@"Parse error on line 1, column 5:
 ... {oper} 'b' ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.String' and 'System.String'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>($"'asd' {oper} null").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"'asd' {oper} null").Invoke(null));
             Assert.Equal(
                 $@"Parse error on line 1, column 7:
 ... {oper} null ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.String' and 'null'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"Date {oper} 0").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"Date {oper} 0").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} 0 ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.DateTime' and 'System.Int32'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"Date {oper} null").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"Date {oper} null").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} null ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.DateTime' and 'null'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"Date {oper} SubModelObject").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"Date {oper} SubModelObject").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} SubModelObject ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.DateTime' and 'System.Object'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"NDate {oper} SubModelObject").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"NDate {oper} SubModelObject").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 7:
 ... {oper} SubModelObject ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.Nullable`1[System.DateTime]' and 'System.Object'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"NDate {oper} null").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"NDate {oper} null").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 7:
 ... {oper} null ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.Nullable`1[System.DateTime]' and 'null'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"SubModelObject {oper} SubModelObject").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"SubModelObject {oper} SubModelObject").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 16:
 ... {oper} SubModelObject ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.Object' and 'System.Object'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"null {oper} null").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"null {oper} null").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} null ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'null' and 'null'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"null {oper} 0").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"null {oper} 0").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} 0 ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'null' and 'System.Int32'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"0 {oper} SubModelObject").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"0 {oper} SubModelObject").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 3:
 ... {oper} SubModelObject ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.Int32' and 'System.Object'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"Date {oper} SubModelObject").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"Date {oper} SubModelObject").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} SubModelObject ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.DateTime' and 'System.Object'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"Span {oper} SubModelObject").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"Span {oper} SubModelObject").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} SubModelObject ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.TimeSpan' and 'System.Object'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>($"Utility.Stability.High {oper} YesNo.Yes").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"Utility.Stability.High {oper} YesNo.Yes").Invoke(null));
             Assert.Equal(
                 $@"Parse error on line 1, column 24:
 ... {oper} YesNo.Yes ...
@@ -1073,63 +1085,63 @@ namespace ExpressiveAnnotations.Tests
             var parser = new Parser();
             parser.RegisterMethods();
 
-            var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>($"0 {oper} null").Invoke(null));
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"0 {oper} null").Invoke(null));
             Assert.Equal(
                 $@"Parse error on line 1, column 3:
 ... {oper} null ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.Int32' and 'null'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"null {oper} null").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"null {oper} null").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} null ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'null' and 'null'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"Date {oper} 0").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"Date {oper} 0").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} 0 ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.DateTime' and 'System.Int32'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"NDate {oper} 0").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"NDate {oper} 0").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 7:
 ... {oper} 0 ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.Nullable`1[System.DateTime]' and 'System.Int32'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"Span {oper} 0").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"Span {oper} 0").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} 0 ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.TimeSpan' and 'System.Int32'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"NSpan {oper} 0").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"NSpan {oper} 0").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 7:
 ... {oper} 0 ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.Nullable`1[System.TimeSpan]' and 'System.Int32'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"0 {oper} SubModelObject").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"0 {oper} SubModelObject").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 3:
 ... {oper} SubModelObject ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.Int32' and 'System.Object'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"Date {oper} SubModelObject").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"Date {oper} SubModelObject").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} SubModelObject ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.DateTime' and 'System.Object'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"Span {oper} SubModelObject").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"Span {oper} SubModelObject").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} SubModelObject ...
@@ -1149,21 +1161,21 @@ namespace ExpressiveAnnotations.Tests
             var parser = new Parser();
             parser.RegisterMethods();
 
-            var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>($"0 {oper} null").Invoke(null));
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"0 {oper} null").Invoke(null));
             Assert.Equal(
                 $@"Parse error on line 1, column 3:
 ... {oper} null ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.Int32' and 'null'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>($"'abc' {oper} 'abc'").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"'abc' {oper} 'abc'").Invoke(null));
             Assert.Equal(
                 $@"Parse error on line 1, column 7:
 ... {oper} 'abc' ...
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.String' and 'System.String'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>(
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>(
                 $@"1 - 2
     - (6 / ((2{oper}'1.5' - 1) + 1)) * -2 
     + 1/2/1 == 3.50").Invoke(null));
@@ -1173,7 +1185,7 @@ namespace ExpressiveAnnotations.Tests
     ^--- Operator '{oper}' cannot be applied to operands of type 'System.Int32' and 'System.String'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>($"null {oper} null").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"null {oper} null").Invoke(new Model()));
             Assert.Equal(
                 $@"Parse error on line 1, column 6:
 ... {oper} null ...
@@ -1187,21 +1199,21 @@ namespace ExpressiveAnnotations.Tests
             var parser = new Parser();
             parser.RegisterMethods();
 
-            var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Date + Date").Invoke(new Model()));
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Date + Date").Invoke(new Model()));
             Assert.Equal(
                 @"Parse error on line 1, column 6:
 ... + Date ...
     ^--- Operator '+' cannot be applied to operands of type 'System.DateTime' and 'System.DateTime'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("NDate + NDate").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("NDate + NDate").Invoke(new Model()));
             Assert.Equal(
                 @"Parse error on line 1, column 7:
 ... + NDate ...
     ^--- Operator '+' cannot be applied to operands of type 'System.Nullable`1[System.DateTime]' and 'System.Nullable`1[System.DateTime]'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Date + NDate").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Date + NDate").Invoke(new Model()));
             Assert.Equal(
                 @"Parse error on line 1, column 6:
 ... + NDate ...
@@ -1215,21 +1227,21 @@ namespace ExpressiveAnnotations.Tests
             var parser = new Parser();
             parser.RegisterMethods();
 
-            var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("'abc' - 'abc'").Invoke(null));
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("'abc' - 'abc'").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 7:
 ... - 'abc' ...
     ^--- Operator '-' cannot be applied to operands of type 'System.String' and 'System.String'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("1 + 2 + 'abc' - 'abc' > 0").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("1 + 2 + 'abc' - 'abc' > 0").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 15:
 ... - 'abc' > 0 ...
     ^--- Operator '-' cannot be applied to operands of type 'System.String' and 'System.String'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("'asd' - null").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("'asd' - null").Invoke(new Model()));
             Assert.Equal(
                 @"Parse error on line 1, column 7:
 ... - null ...
@@ -1243,21 +1255,21 @@ namespace ExpressiveAnnotations.Tests
             var parser = new Parser();
             parser.RegisterMethods();
 
-            var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("!null").Invoke(null));
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("!null").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 1:
 ... !null ...
     ^--- Operator '!' cannot be applied to operand of type 'null'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("!'a'").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("!'a'").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 1:
 ... !'a' ...
     ^--- Operator '!' cannot be applied to operand of type 'System.String'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("!! Today()").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("!! Today()").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 2:
 ... ! Today() ...
@@ -1272,21 +1284,21 @@ namespace ExpressiveAnnotations.Tests
             parser.RegisterMethods();
             parser.AddFunction<int, int, int>("Max", (x, y) => Math.Max(x, y));
 
-            var e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("1++ +1==2").Invoke(null));
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("1++ +1==2").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 2:
 ... ++ +1==2 ...
     ^--- Unexpected token: '++'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("true # false").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("true # false").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 6:
 ... # false ...
     ^--- Invalid token.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>(
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>(
                 @"1 - 2
     - 6
     + 1/x[0]/1 == 3.50").Invoke(null));
@@ -1296,70 +1308,70 @@ namespace ExpressiveAnnotations.Tests
     ^--- Only public properties, constants and enums are accepted. Identifier 'x[0]' not known.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("WriteLine('hello')").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("WriteLine('hello')").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 1:
 ... WriteLine('hello') ...
     ^--- Function 'WriteLine' not known.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("1 2").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("1 2").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 3:
 ... 2 ...
     ^--- Unexpected token: '2'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("(").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("(").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 2:
 ...  ...
     ^--- Expected ""null"", int, float, bool, string or func. Unexpected end of expression.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("(1+1").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("(1+1").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 5:
 ...  ...
     ^--- Expected closing bracket. Unexpected end of expression.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("()").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("()").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 2:
 ... ) ...
     ^--- Expected ""null"", int, float, bool, string or func. Unexpected token: ')'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("Max(").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("Max(").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 5:
 ...  ...
     ^--- Expected ""null"", int, float, bool, string or func. Unexpected end of expression.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("Max(1 2").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("Max(1 2").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 7:
 ... 2 ...
     ^--- Expected comma or closing bracket. Unexpected token: '2'.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("Max(1.1)").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("Max(1.1)").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 1:
 ... Max(1.1) ...
     ^--- Function 'Max' accepting 1 argument not found.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>("Max(1.1, 1.2, 'a')").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("Max(1.1, 1.2, 'a')").Invoke(null));
             Assert.Equal(
                 @"Parse error on line 1, column 1:
 ... Max(1.1, 1.2, 'a') ...
     ^--- Function 'Max' accepting 3 arguments not found.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<object>(
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>(
                 @"Max(1, 
       Max(1, 'a')) == 1.1").Invoke(null));
             Assert.Equal(
@@ -1368,14 +1380,14 @@ namespace ExpressiveAnnotations.Tests
     ^--- Function 'Max' 2nd argument implicit conversion from 'System.String' to expected 'System.Int32' failed.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Items[0] != null").Invoke(new Model {Items = new List<Model> {new Model()}}));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Items[0] != null").Invoke(new Model {Items = new List<Model> {new Model()}}));
             Assert.Equal(
                 @"Parse error on line 1, column 1:
 ... Items[0] != null ...
     ^--- Identifier 'Items' either does not represent an array type or does not declare indexer.",
                 e.Message);
 
-            e = Assert.Throws<InvalidOperationException>(() => parser.Parse<Model>("Long(1)").Invoke(new Model()));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Long(1)").Invoke(new Model()));
             Assert.Equal(
                 @"Parse error on line 1, column 1:
 ... Long(1) ...

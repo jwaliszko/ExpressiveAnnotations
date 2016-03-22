@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
 using Xunit;
 
@@ -116,7 +117,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(
                 "AssertThatAttribute: validation applied to Value field failed.", 
                 e.Message);
-            Assert.IsType<InvalidOperationException>(e.InnerException);
+            Assert.IsType<ParseErrorException>(e.InnerException);
             Assert.Equal(
                 @"Parse error on line 1, column 9:
 ... # ...
@@ -128,7 +129,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(
                 "RequiredIfAttribute: validation applied to Value field failed.", 
                 e.Message);
-            Assert.IsType<InvalidOperationException>(e.InnerException);
+            Assert.IsType<ParseErrorException>(e.InnerException);
             Assert.Equal(
                 @"Parse error on line 1, column 9:
 ... # ...
