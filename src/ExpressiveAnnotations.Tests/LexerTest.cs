@@ -148,25 +148,16 @@ namespace ExpressiveAnnotations.Tests
             var lexer = new Lexer();
 
             var e = Assert.Throws<ParseErrorException>(() => lexer.Analyze("true # false"));
-            Assert.Equal(
-                @"Parse error on line 1, column 6:
-... # false ...
-    ^--- Invalid token.",
-                e.Message);
+            Assert.Equal("Invalid token.", e.Error);
+            Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => lexer.Analyze("true\r\n&& ^"));
-            Assert.Equal(
-                @"Parse error on line 2, column 4:
-... ^ ...
-    ^--- Invalid token.",
-                e.Message);
+            Assert.Equal("Invalid token.", e.Error);
+            Assert.Equal(new Location(2, 4), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => lexer.Analyze("'John's cat'"));
-            Assert.Equal(
-                @"Parse error on line 1, column 12:
-... ' ...
-    ^--- Invalid token.",
-                e.Message);
+            Assert.Equal("Invalid token.", e.Error);
+            Assert.Equal(new Location(1, 12), e.Location, new LocationComparer());
         }
 
         [Fact]

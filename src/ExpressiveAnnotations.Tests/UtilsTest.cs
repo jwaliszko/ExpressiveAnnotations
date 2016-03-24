@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
@@ -154,6 +155,54 @@ namespace ExpressiveAnnotations.Tests
 
             typeProviderMock.Setup(p => p.GetTypes()).Throws(new ReflectionTypeLoadException(new[] {typeof (object), null}, null));
             Assert.Equal(1, typeProviderMock.Object.GetLoadableTypes().Count());
+        }
+
+        public static IEnumerable<object[]> ErrorData => new[]
+        {
+            new object[] {new Location(1,1), "abcde", "abcde" },
+            new object[] {new Location(1,3), "cde", "abcde" },
+            new object[] {new Location(1,5), "e", "abcde" },
+            new object[] {new Location(2,1), "abcde", "12345\r\nabcde" },
+            new object[] {new Location(2,3), "cde", "12345\r\nabcde" },
+            new object[] {new Location(2,5), "e", "12345\r\nabcde" },
+            new object[] {new Location(1,1), new string('a', 100), new string('a', 100) },
+            new object[] {new Location(1,1), new string('a', 100), new string('a', 101) } // max 100 chars of expression is displayed
+        };
+
+        [Theory]
+        [MemberData("ErrorData")]
+        public void verify_error_message_construction(Location location, string indication, string expression)
+        {
+            Assert.Equal(
+                $@"Parse error on line {location.Line}, column {location.Column}:
+... {indication} ...
+    ^--- error message",
+                location.BuildParseError("error message", expression));
+        }
+
+        public static IEnumerable<object[]> BoundaryErrorData => new[]
+{
+            new object[] {new Location(1,6), "abcde" },
+            new object[] {new Location(1,6), "12345    \r\nabcde" },
+            new object[] {new Location(2,6), "12345\r\nabcde" }
+        };
+
+        [Theory]
+        [MemberData("BoundaryErrorData")]
+        public void verify_error_message_construction_for_boundary_conditions(Location location, string expression)
+        {
+            Assert.Equal(
+                $@"Parse error on line {location.Line}, last column: error message",
+                location.BuildParseError("error message", expression));
+        }
+
+        [Fact]
+        public void throw_when_non_positive_parameters_are_provided_for_error_message_construction()
+        {
+            var e = Assert.Throws<ArgumentOutOfRangeException>(() => new Location(0, 1));
+            Assert.Equal("Line number should be positive.\r\nParameter name: line", e.Message);
+            e = Assert.Throws<ArgumentOutOfRangeException>(() => new Location(1, 0));
+            Assert.Equal("Column number should be positive.\r\nParameter name: column", e.Message);
         }
 
         private class Model
