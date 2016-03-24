@@ -20,8 +20,18 @@ namespace ExpressiveAnnotations.Analysis
         /// </summary>
         /// <param name="line">The line number.</param>
         /// <param name="column">The column number.</param>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// Line number should be positive.
+        /// or
+        /// Column number should be positive.
+        /// </exception>
         public Location(int line, int column)
         {
+            if (line < 1)
+                throw new ArgumentOutOfRangeException(nameof(line), "Line number should be positive.");
+            if (column < 1)
+                throw new ArgumentOutOfRangeException(nameof(column), "Column number should be positive.");
+
             Line = line;
             Column = column;
         }
@@ -35,15 +45,5 @@ namespace ExpressiveAnnotations.Analysis
         ///     Gets or sets the column number.
         /// </summary>
         public int Column { get; set; }
-
-        /// <summary>
-        ///     Builds the parse error.
-        /// </summary>
-        /// <param name="message">The error message.</param>
-        /// <param name="expression">The expression.</param>
-        public string BuildParseError(string message, string expression)
-        {
-            return $"Parse error on line {Line}, column {Column}:{expression.TakeLine(Line - 1).Substring(Column - 1).Indicator()}{message}";
-        }
     }
 }

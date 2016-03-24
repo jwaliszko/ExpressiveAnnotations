@@ -611,7 +611,10 @@ namespace ExpressiveAnnotations.Analysis
                     ReadToken();
                 else if (PeekType() != TokenType.RIGHT_BRACKET) // when no comma found, function exit expected
                     throw new ParseErrorException(
-                        $"Expected comma or closing bracket. Unexpected token: '{PeekValue()}'.", Expr, PeekToken().Location);
+                        PeekType() == TokenType.EOF
+                            ? $"Function '{name}', expected comma or closing bracket. Unexpected end of expression."
+                            : $"Function '{name}', expected comma or closing bracket. Unexpected token: '{PeekValue()}'.",
+                        Expr, PeekToken().Location);
                 args.Add(new Tuple<Expression, Location>(arg, tkn.Location));
             }
             ReadToken(); // read ")"

@@ -343,7 +343,10 @@ namespace ExpressiveAnnotations
             Debug.Assert(input != null);
             Debug.Assert(index >= 0);
 
-            return input.Split('\n').Skip(index).First().TrimEnd();
+            var lines = input.Split('\n');
+            Debug.Assert(lines.Length > index);
+
+            return lines.Skip(index).First().TrimEnd();
         }
 
         public static string ToOrdinal(this int num)
@@ -373,15 +376,31 @@ namespace ExpressiveAnnotations
 
         public static Location Clone(this Location location)
         {
+            Debug.Assert(location != null);
+
             return new Location(location.Line, location.Column);
         }
 
-        public static string Indicator(this string input)
+        public static string BuildParseError(this Location location, string message, string expression)
+        {
+            Debug.Assert(location != null);
+            Debug.Assert(message != null);
+            Debug.Assert(expression != null);
+
+            var line = expression.TakeLine(location.Line - 1);
+            var suffix = line.Substring(location.Column - 1);
+
+            return suffix.Length == 0
+                ? $"Parse error on line {location.Line}, last column: {message}"
+                : $"Parse error on line {location.Line}, column {location.Column}:{suffix.Indicator(100)}{message}";
+        }
+
+        public static string Indicator(this string input, int max)
         {
             Debug.Assert(input != null);
 
             return $@"
-... {input} ...
+... {input.Substring(0, input.Length > max ? max : input.Length)} ...
     ^--- ";
         }
     }
