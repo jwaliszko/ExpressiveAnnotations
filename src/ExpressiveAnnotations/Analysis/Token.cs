@@ -14,11 +14,13 @@ namespace ExpressiveAnnotations.Analysis
         /// </summary>
         /// <param name="type">The token type.</param>
         /// <param name="value">The token value.</param>
+        /// <param name="rawValue">The token raw value.</param>
         /// <param name="location">The token location within a specified expression.</param>
-        public Token(TokenType type, object value, Location location)
+        public Token(TokenType type, object value, string rawValue, Location location)
         {
             Type = type;
             Value = value;
+            RawValue = rawValue;
             Location = location;
         }
 
@@ -28,9 +30,14 @@ namespace ExpressiveAnnotations.Analysis
         public TokenType Type { get; private set; }
 
         /// <summary>
-        ///     Gets the token value.
+        ///     Gets the token value (converted to appropriate type).
         /// </summary>
         public object Value { get; private set; }
+
+        /// <summary>
+        ///     Gets the token raw value (not converted expression string).
+        /// </summary>
+        public string RawValue { get; private set; }
 
         /// <summary>
         ///     Gets or sets the token location within a specified expression.

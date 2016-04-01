@@ -182,9 +182,16 @@ namespace ExpressiveAnnotations.Tests
         [Fact]
         public void verify_float_token_extraction()
         {
-            AssertToken("1.0", 1.0, TokenType.FLOAT);
-            AssertToken("0.3e-2", 0.3e-2, TokenType.FLOAT);
+            AssertToken("0e0", 0e0, TokenType.FLOAT);
+            AssertToken(".2", .2, TokenType.FLOAT);
+            AssertToken("3.14", 3.14, TokenType.FLOAT);
+            AssertToken("5e6", 5e6, TokenType.FLOAT);
+            AssertToken("5e-6", 5e-6, TokenType.FLOAT);
+            AssertToken("5e+6", 5e+6, TokenType.FLOAT);
+            AssertToken("9.0E-10", 9.0E-10, TokenType.FLOAT);
+            AssertToken(".11e10", .11e10, TokenType.FLOAT);
 
+            AssertNotToken("1.1.1", TokenType.FLOAT);
             AssertNotToken("1", TokenType.FLOAT);
             AssertNotToken("a", TokenType.FLOAT);
         }
@@ -233,6 +240,8 @@ namespace ExpressiveAnnotations.Tests
             AssertToken("_[0].a[1].a1[2]", "_[0].a[1].a1[2]", TokenType.FUNC);
 
             AssertNotToken("1", TokenType.FUNC);
+            AssertNotToken("1.1", TokenType.FUNC);
+            AssertNotToken("1.1.1", TokenType.FUNC);
             AssertNotToken("a.", TokenType.FUNC);
             AssertNotToken("a..a", TokenType.FUNC);
             AssertNotToken("a.1", TokenType.FUNC);

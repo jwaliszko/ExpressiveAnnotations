@@ -1181,6 +1181,10 @@ namespace ExpressiveAnnotations.Tests
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>(@"Max(1").Invoke(new Model()));
             Assert.Equal("Function 'Max', expected comma or closing bracket. Unexpected end of expression.", e.Error);
             Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("1.1.1").Invoke(null));
+            Assert.Equal("Unexpected token: '.1'.", e.Error); // "unexpected" is not "invalid" - token is valid, but used in wrong context
+            Assert.Equal(new Location(1, 4), e.Location, new LocationComparer());
         }
 
         [Fact]
