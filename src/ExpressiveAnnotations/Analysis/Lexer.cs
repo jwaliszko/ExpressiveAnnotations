@@ -29,10 +29,10 @@ namespace ExpressiveAnnotations.Analysis
             // https://msdn.microsoft.com/en-us/library/4edbef7e(v=vs.110).aspx, http://www.regular-expressions.info/refcharclass.html
             var patterns = new Dictionary<TokenType, string>
             {
-                {TokenType.AND, @"&&"},
-                {TokenType.OR, @"\|\|"},
-                {TokenType.LEFT_BRACKET, @"\("},
-                {TokenType.RIGHT_BRACKET, @"\)"},
+                {TokenType.L_AND, @"&&"},
+                {TokenType.L_OR, @"\|\|"},
+                {TokenType.L_BRACKET, @"\("},
+                {TokenType.R_BRACKET, @"\)"},
                 {TokenType.GE, @">="},
                 {TokenType.LE, @"<="},
                 {TokenType.GT, @">"},
@@ -48,6 +48,8 @@ namespace ExpressiveAnnotations.Analysis
                 {TokenType.SUB, @"-"},
                 {TokenType.MUL, @"\*"},
                 {TokenType.DIV, @"/"},
+                {TokenType.BIN, @"0b[0-1]+"},
+                {TokenType.HEX, @"0x[0-9a-fA-F]+"},
                 {TokenType.FLOAT, @"(?:(?:[0-9]+[eE][+-]?[0-9]+)|(?:[0-9]*\.[0-9]+(?:[eE][+-]?[0-9]+)?))"}, // 1e5, 1.0, 0.3e-2
                 {TokenType.INT, @"[0-9]+"},
                 {TokenType.BOOL, @"(?:true|false)"},
@@ -127,20 +129,31 @@ namespace ExpressiveAnnotations.Analysis
 
         private object ConvertTokenValue(TokenType type, string value)
         {
-            switch (type)
+            try
             {
-                case TokenType.NULL:
-                    return null;
-                case TokenType.INT:
-                    return int.Parse(value, CultureInfo.InvariantCulture);
-                case TokenType.FLOAT:
-                    return double.Parse(value, CultureInfo.InvariantCulture); // By default, treat real numeric literals as 64-bit floating binary point values (as C#
-                case TokenType.BOOL:                                          // does, gives better precision than float). What's more, InvariantCulture means no matter
-                    return bool.Parse(value);                                 // the current culture, dot is always accepted in double literal to be succesfully parsed.
-                case TokenType.STRING:
-                    return ParseStringLiteral(value);
-                default:
-                    return value;
+                switch (type)
+                {
+                    case TokenType.NULL:
+                        return null;
+                    case TokenType.INT:
+                        return int.Parse(value, CultureInfo.InvariantCulture);
+                    case TokenType.BIN:
+                        return Convert.ToInt32(value.Substring(2), 2);
+                    case TokenType.HEX:
+                        return Convert.ToInt32(value.Substring(2), 16);
+                    case TokenType.FLOAT:
+                        return double.Parse(value, CultureInfo.InvariantCulture); // By default, treat real numeric literals as 64-bit floating binary point values (as C#
+                    case TokenType.BOOL:                                          // does, gives better precision than float). What's more, InvariantCulture means no matter
+                        return bool.Parse(value);                                 // the current culture, dot is always accepted in double literal to be succesfully parsed.
+                    case TokenType.STRING:
+                        return ParseStringLiteral(value);
+                    default:
+                        return value;
+                }
+            }
+            catch (OverflowException e)
+            {
+                throw new ParseErrorException("Integral constant is too large.", Expr, Location, e);
             }
         }
 

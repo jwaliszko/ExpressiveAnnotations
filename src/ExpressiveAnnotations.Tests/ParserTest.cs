@@ -214,6 +214,12 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<object>("9.0E-10 == 9E-10").Invoke(null));
             Assert.True(parser.Parse<object>(".11e10 == 1100000000").Invoke(null));
 
+            Assert.True(parser.Parse<object>("0b0 == 0").Invoke(null));
+            Assert.True(parser.Parse<object>("0b11111111 == 255").Invoke(null));
+            Assert.True(parser.Parse<object>("0x0 == 0").Invoke(null));
+            Assert.True(parser.Parse<object>("0xFF == 255").Invoke(null));
+            Assert.True(parser.Parse<object>("0xff == 255").Invoke(null));
+
             Assert.True(parser.Parse<object>("1+2==3").Invoke(null));
             Assert.True(parser.Parse<object>("1-2==-1").Invoke(null));
             Assert.True(parser.Parse<object>("1*2>-1").Invoke(null));
@@ -430,10 +436,10 @@ namespace ExpressiveAnnotations.Tests
             var parser = new Parser();
 
             var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("1").Invoke(null));
-            Assert.True(e.Message.StartsWith("Parse fatal error."));
+            Assert.Equal("Parse fatal error.", e.Message);
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse(typeof (object), "1").Invoke(null));
-            Assert.True(e.Message.StartsWith("Parse fatal error."));
+            Assert.Equal("Parse fatal error.", e.Message);
         }
 
         [Fact]
@@ -1185,6 +1191,30 @@ namespace ExpressiveAnnotations.Tests
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("1.1.1").Invoke(null));
             Assert.Equal("Unexpected token: '.1'.", e.Error); // "unexpected" is not "invalid" - token is valid, but used in wrong context
             Assert.Equal(new Location(1, 4), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("0z").Invoke(null));
+            Assert.Equal("Unexpected token: 'z'.", e.Error);
+            Assert.Equal(new Location(1, 2), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("0b").Invoke(null));
+            Assert.Equal("Unexpected token: 'b'.", e.Error);
+            Assert.Equal(new Location(1, 2), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("0x").Invoke(null));
+            Assert.Equal("Unexpected token: 'x'.", e.Error);
+            Assert.Equal(new Location(1, 2), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("0b2").Invoke(null));
+            Assert.Equal("Unexpected token: 'b2'.", e.Error);
+            Assert.Equal(new Location(1, 2), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("0xG").Invoke(null));
+            Assert.Equal("Unexpected token: 'xG'.", e.Error);
+            Assert.Equal(new Location(1, 2), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("0xffffffffffff").Invoke(null));
+            Assert.Equal("Integral constant is too large.", e.Error);
+            Assert.Equal(new Location(1, 1), e.Location, new LocationComparer());
         }
 
         [Fact]

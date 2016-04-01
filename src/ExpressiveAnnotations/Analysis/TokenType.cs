@@ -12,12 +12,12 @@ namespace ExpressiveAnnotations.Analysis
         /// <summary>
         ///     Logical conjunction (i.e. &amp;&amp;).
         /// </summary>
-        AND,
+        L_AND,
 
         /// <summary>
         ///     Logical disjunction (i.e. ||).
         /// </summary>
-        OR,
+        L_OR,
 
         /// <summary>
         ///     Logical negation (i.e. !).
@@ -87,12 +87,12 @@ namespace ExpressiveAnnotations.Analysis
         /// <summary>
         ///     Left bracket (i.e. ().
         /// </summary>
-        LEFT_BRACKET,
+        L_BRACKET,
 
         /// <summary>
         ///     Right bracket (i.e. )).
         /// </summary>
-        RIGHT_BRACKET,
+        R_BRACKET,
 
         /// <summary>
         ///     Comma (i.e. ,).
@@ -105,19 +105,29 @@ namespace ExpressiveAnnotations.Analysis
         NULL,
 
         /// <summary>
-        ///     Integer value (e.g. 123).
+        ///     Integer literal (e.g. 123).
         /// </summary>
         INT,
 
         /// <summary>
-        ///     Boolean value (i.e. true, false).
+        ///     Boolean literal (i.e. true, false).
         /// </summary>
         BOOL,
 
         /// <summary>
-        ///     Float value (e.g. 1.5, -0.3e-2).
+        ///     Float literal (e.g. 1.5, -0.3e-2).
         /// </summary>
         FLOAT,
+
+        /// <summary>
+        ///     Binary literal (e.g. 0b101).
+        /// </summary>
+        BIN,
+
+        /// <summary>
+        ///     Hexadecimal literal (e.g. 0xFF).
+        /// </summary>
+        HEX,
 
         /// <summary>
         ///     String (e.g. 'in single quotes').

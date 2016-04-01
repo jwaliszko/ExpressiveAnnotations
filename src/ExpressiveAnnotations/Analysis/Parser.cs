@@ -90,7 +90,7 @@ namespace ExpressiveAnnotations.Analysis
                 }
                 catch (Exception e)
                 {
-                    throw new ParseErrorException($"Parse fatal error. {e.Message}", e);
+                    throw new ParseErrorException("Parse fatal error.", e);
                 }
             }
         }
@@ -129,7 +129,7 @@ namespace ExpressiveAnnotations.Analysis
                 }
                 catch (Exception e)
                 {
-                    throw new ParseErrorException($"Parse fatal error. {e.Message}", e);
+                    throw new ParseErrorException("Parse fatal error.", e);
                 }
             }
         }
@@ -320,7 +320,7 @@ namespace ExpressiveAnnotations.Analysis
         private Expression ParseOrExp()
         {
             var arg1 = ParseAndExp();
-            if (PeekType() != TokenType.OR)
+            if (PeekType() != TokenType.L_OR)
                 return arg1;
             var oper = PeekToken();
             ReadToken();
@@ -337,7 +337,7 @@ namespace ExpressiveAnnotations.Analysis
         private Expression ParseAndExp()
         {
             var arg1 = ParseRelExp();
-            if (PeekType() != TokenType.AND)
+            if (PeekType() != TokenType.L_AND)
                 return arg1;
             var oper = PeekToken();
             ReadToken();
@@ -525,11 +525,11 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseVal()
         {
-            if (PeekType() == TokenType.LEFT_BRACKET)
+            if (PeekType() == TokenType.L_BRACKET)
             {
                 ReadToken();
                 var arg = ParseOrExp();
-                if (PeekType() != TokenType.RIGHT_BRACKET)
+                if (PeekType() != TokenType.R_BRACKET)
                     throw new ParseErrorException(
                         PeekType() == TokenType.EOF
                             ? "Expected closing bracket. Unexpected end of expression."
@@ -544,6 +544,8 @@ namespace ExpressiveAnnotations.Analysis
                 case TokenType.NULL:
                     return ParseNull();
                 case TokenType.INT:
+                case TokenType.BIN:
+                case TokenType.HEX:
                     return ParseInt();
                 case TokenType.FLOAT:
                     return ParseFloat();
@@ -602,19 +604,19 @@ namespace ExpressiveAnnotations.Analysis
             var name = func.Value.ToString();
             ReadToken(); // read name
 
-            if (PeekType() != TokenType.LEFT_BRACKET)
+            if (PeekType() != TokenType.L_BRACKET)
                 return ExtractFieldExpression(name); // get property or enum
 
             // parse a function call
             ReadToken(); // read "("
             var args = new List<Tuple<Expression, Location>>();
-            while (PeekType() != TokenType.RIGHT_BRACKET) // read comma-separated arguments until we hit ")"
+            while (PeekType() != TokenType.R_BRACKET) // read comma-separated arguments until we hit ")"
             {
                 var tkn = PeekToken();
                 var arg = ParseOrExp();
                 if (PeekType() == TokenType.COMMA)
                     ReadToken();
-                else if (PeekType() != TokenType.RIGHT_BRACKET) // when no comma found, function exit expected
+                else if (PeekType() != TokenType.R_BRACKET) // when no comma found, function exit expected
                     throw new ParseErrorException(
                         PeekType() == TokenType.EOF
                             ? $"Function '{name}', expected comma or closing bracket. Unexpected end of expression."
