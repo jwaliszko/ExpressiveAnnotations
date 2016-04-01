@@ -92,7 +92,7 @@ namespace ExpressiveAnnotations.Analysis
                 }
 
                 // once we've reached the end of the string, EOF token is returned - thus, parser's lookahead does not have to worry about running out of tokens
-                tokens.Add(new Token(TokenType.EOF, string.Empty, Location.Clone()));
+                tokens.Add(new Token(TokenType.EOF, string.Empty, string.Empty, Location.Clone()));
                 return tokens;
             }
         }
@@ -115,7 +115,7 @@ namespace ExpressiveAnnotations.Analysis
                     continue;
                 
                 var value = match.Value;
-                Token = new Token(kvp.Key, ConvertTokenValue(kvp.Key, value), Location.Clone());
+                Token = new Token(kvp.Key, ConvertTokenValue(kvp.Key, value), value, Location.Clone());
 
                 RemainingExpression = RemainingExpression.Substring(value.Length, out line, out column);
                 Location.Line += line;

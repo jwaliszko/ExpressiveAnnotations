@@ -288,6 +288,11 @@ namespace ExpressiveAnnotations.Analysis
             return TokensToProcess.Peek().Value;
         }
 
+        private object PeekRawValue() // to be displayed in error messages, e.g. instead of converted 0.1 gets raw .1
+        {
+            return TokensToProcess.Peek().RawValue;
+        }
+
         private void ReadToken()
         {
             TokensProcessed.Push(TokensToProcess.Pop());
@@ -308,7 +313,7 @@ namespace ExpressiveAnnotations.Analysis
             var expr = ParseOrExp();
             if (PeekType() != TokenType.EOF)
                 throw new ParseErrorException(
-                    $"Unexpected token: '{PeekValue()}'.", Expr, PeekToken().Location);
+                    $"Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
             return expr;
         }
 
@@ -528,7 +533,7 @@ namespace ExpressiveAnnotations.Analysis
                     throw new ParseErrorException(
                         PeekType() == TokenType.EOF
                             ? "Expected closing bracket. Unexpected end of expression."
-                            : $"Expected closing bracket. Unexpected token: '{PeekValue()}'.", 
+                            : $"Expected closing bracket. Unexpected token: '{PeekRawValue()}'.", 
                         Expr, PeekToken().Location);
                 ReadToken();
                 return arg;
@@ -553,7 +558,7 @@ namespace ExpressiveAnnotations.Analysis
                         "Expected \"null\", int, float, bool, string or func. Unexpected end of expression.", Expr, PeekToken().Location);
                 default:
                     throw new ParseErrorException(
-                        $"Expected \"null\", int, float, bool, string or func. Unexpected token: '{PeekValue()}'.", Expr, PeekToken().Location);
+                        $"Expected \"null\", int, float, bool, string or func. Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
             }
         }
 
@@ -613,7 +618,7 @@ namespace ExpressiveAnnotations.Analysis
                     throw new ParseErrorException(
                         PeekType() == TokenType.EOF
                             ? $"Function '{name}', expected comma or closing bracket. Unexpected end of expression."
-                            : $"Function '{name}', expected comma or closing bracket. Unexpected token: '{PeekValue()}'.",
+                            : $"Function '{name}', expected comma or closing bracket. Unexpected token: '{PeekRawValue()}'.",
                         Expr, PeekToken().Location);
                 args.Add(new Tuple<Expression, Location>(arg, tkn.Location));
             }
