@@ -41,11 +41,11 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(true, tokens[2].Value);
             Assert.Equal(TokenType.BOOL, tokens[2].Type);
             Assert.Equal("&&", tokens[3].Value);
-            Assert.Equal(TokenType.AND, tokens[3].Type);
+            Assert.Equal(TokenType.L_AND, tokens[3].Type);
             Assert.Equal("(", tokens[4].Value);
-            Assert.Equal(TokenType.LEFT_BRACKET, tokens[4].Type);
+            Assert.Equal(TokenType.L_BRACKET, tokens[4].Type);
             Assert.Equal("(", tokens[5].Value);
-            Assert.Equal(TokenType.LEFT_BRACKET, tokens[5].Type);
+            Assert.Equal(TokenType.L_BRACKET, tokens[5].Type);
             Assert.Equal("NextCountry", tokens[6].Value);
             Assert.Equal(TokenType.FUNC, tokens[6].Type);
             Assert.Equal("!=", tokens[7].Value);
@@ -53,11 +53,11 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("european country", tokens[8].Value);
             Assert.Equal(TokenType.STRING, tokens[8].Type);
             Assert.Equal("&&", tokens[9].Value);
-            Assert.Equal(TokenType.AND, tokens[9].Type);
+            Assert.Equal(TokenType.L_AND, tokens[9].Type);
             Assert.Equal("Compare", tokens[10].Value);
             Assert.Equal(TokenType.FUNC, tokens[10].Type);
             Assert.Equal("(", tokens[11].Value);
-            Assert.Equal(TokenType.LEFT_BRACKET, tokens[11].Type);
+            Assert.Equal(TokenType.L_BRACKET, tokens[11].Type);
             Assert.Equal("NextCountry", tokens[12].Value);
             Assert.Equal(TokenType.FUNC, tokens[12].Type);
             Assert.Equal(",", tokens[13].Value);
@@ -65,17 +65,17 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("Country.Name", tokens[14].Value);
             Assert.Equal(TokenType.FUNC, tokens[14].Type);
             Assert.Equal(")", tokens[15].Value);
-            Assert.Equal(TokenType.RIGHT_BRACKET, tokens[15].Type);
+            Assert.Equal(TokenType.R_BRACKET, tokens[15].Type);
             Assert.Equal("==", tokens[16].Value);
             Assert.Equal(TokenType.EQ, tokens[16].Type);
             Assert.Equal(0, tokens[17].Value);
             Assert.Equal(TokenType.INT, tokens[17].Type);
             Assert.Equal(")", tokens[18].Value);
-            Assert.Equal(TokenType.RIGHT_BRACKET, tokens[18].Type);
+            Assert.Equal(TokenType.R_BRACKET, tokens[18].Type);
             Assert.Equal("||", tokens[19].Value);
-            Assert.Equal(TokenType.OR, tokens[19].Type);
+            Assert.Equal(TokenType.L_OR, tokens[19].Type);
             Assert.Equal("(", tokens[20].Value);
-            Assert.Equal(TokenType.LEFT_BRACKET, tokens[20].Type);
+            Assert.Equal(TokenType.L_BRACKET, tokens[20].Type);
             Assert.Equal("Age", tokens[21].Value);
             Assert.Equal(TokenType.FUNC, tokens[21].Type);
             Assert.Equal(">", tokens[22].Value);
@@ -83,7 +83,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(24, tokens[23].Value);
             Assert.Equal(TokenType.INT, tokens[23].Type);
             Assert.Equal("&&", tokens[24].Value);
-            Assert.Equal(TokenType.AND, tokens[24].Type);
+            Assert.Equal(TokenType.L_AND, tokens[24].Type);
             Assert.Equal("Age", tokens[25].Value);
             Assert.Equal(TokenType.FUNC, tokens[25].Type);
             Assert.Equal("<=", tokens[26].Value);
@@ -91,11 +91,11 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(55.5d, tokens[27].Value);
             Assert.Equal(TokenType.FLOAT, tokens[27].Type);
             Assert.Equal(")", tokens[28].Value);
-            Assert.Equal(TokenType.RIGHT_BRACKET, tokens[28].Type);
+            Assert.Equal(TokenType.R_BRACKET, tokens[28].Type);
             Assert.Equal("&&", tokens[29].Value);
-            Assert.Equal(TokenType.AND, tokens[29].Type);
+            Assert.Equal(TokenType.L_AND, tokens[29].Type);
             Assert.Equal("(", tokens[30].Value);
-            Assert.Equal(TokenType.LEFT_BRACKET, tokens[30].Type);
+            Assert.Equal(TokenType.L_BRACKET, tokens[30].Type);
             Assert.Equal(1.1, tokens[31].Value);
             Assert.Equal(TokenType.FLOAT, tokens[31].Type);
             Assert.Equal("+", tokens[32].Value);
@@ -127,9 +127,9 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("'\r\na\r\n b\r\nc\r\n'", tokens[45].Value); // used alternatively to verbatim string (new line \n in expression has been replaced by windows \r\n)
             Assert.Equal(TokenType.STRING, tokens[45].Type);
             Assert.Equal(")", tokens[46].Value);
-            Assert.Equal(TokenType.RIGHT_BRACKET, tokens[46].Type);
+            Assert.Equal(TokenType.R_BRACKET, tokens[46].Type);
             Assert.Equal(")", tokens[47].Value);
-            Assert.Equal(TokenType.RIGHT_BRACKET, tokens[47].Type);
+            Assert.Equal(TokenType.R_BRACKET, tokens[47].Type);
             Assert.Equal(string.Empty, tokens[48].Value);
             Assert.Equal(TokenType.EOF, tokens[48].Type);
         }
@@ -177,6 +177,33 @@ namespace ExpressiveAnnotations.Tests
             }
 
             Thread.CurrentThread.CurrentCulture = current;
+        }
+
+        [Fact]
+        public void verify_bin_token_extraction()
+        {
+            AssertToken("0b0", 0, TokenType.BIN);
+            AssertToken("0b1", 1, TokenType.BIN);
+            AssertToken("0b11111111", 255, TokenType.BIN);
+
+            AssertNotToken("0b", TokenType.BIN);
+            AssertNotToken("b0", TokenType.BIN);
+            AssertNotToken("0b2", TokenType.INT);
+        }
+
+        [Fact]
+        public void verify_hex_token_extraction()
+        {
+            AssertToken("0x0", 0x0, TokenType.HEX);
+            AssertToken("0x01234", 0x01234, TokenType.HEX);
+            AssertToken("0x56789", 0x56789, TokenType.HEX);
+            AssertToken("0xFF", 0xFF, TokenType.HEX);
+            AssertToken("0xff", 0xff, TokenType.HEX);
+            AssertToken("0xaBcDeF", 0xaBcDeF, TokenType.HEX);
+
+            AssertNotToken("0x", TokenType.HEX);
+            AssertNotToken("xF", TokenType.HEX);
+            AssertNotToken("0xG", TokenType.HEX);
         }
 
         [Fact]
