@@ -14,17 +14,22 @@ namespace ExpressiveAnnotations.Analysis
 {
     /* EBNF GRAMMAR:
      * 
-     * expression => or-exp
-     * or-exp     => and-exp [ "||" or-exp ]
-     * and-exp    => rel-exp [ "&&" and-exp ]
-     * rel-exp    => not-exp [ rel-op not-exp ]
-     * not-exp    => add-exp | "!" not-exp
+     * expression => l-or-exp
+     * l-or-exp   => l-and-exp [ "||" l-or-exp ]
+     * l-and-exp  => b-or-exp [ "&&" l-and-exp ]
+     * b-or-exp   => xor-exp [ "|" b-or-exp ]
+     * xor-exp    => b-and-exp [ "^" xor-exp ]
+     * b-and-exp  => eq-exp [ "&" b-and-exp ]     
+     * eq-exp     => rel-exp [ eq-op eq-exp ]
+     * rel-exp    => l-not-exp [ rel-op l-not-exp ]
+     * l-not-exp  => add-exp | "!" l-not-exp
      * add-exp    => mul-exp add-exp'
      * add-exp'   => "+" add-exp | "-" add-exp
      * mul-exp    => val mul-exp'
      * mul-exp'   => "*" mul-exp | "/" mul-exp
-     * rel-op     => "==" | "!=" | ">" | ">=" | "<" | "<="
-     * val        => "null" | int | float | bool | string | func | "(" or-exp ")"
+     * eq-op      => "==" | "!="
+     * rel-op     => ">" | ">=" | "<" | "<="
+     * val        => "null" | int | bin | hex | float | bool | string | func | "(" or-exp ")"
      */
 
     /// <summary>
@@ -310,51 +315,141 @@ namespace ExpressiveAnnotations.Analysis
         private Expression ParseExpression()
         {
             Tokenize();
-            var expr = ParseOrExp();
+            var expr = ParseLogicalOrExp();
             if (PeekType() != TokenType.EOF)
                 throw new ParseErrorException(
                     $"Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
             return expr;
         }
 
-        private Expression ParseOrExp()
+        private Expression ParseLogicalOrExp()
         {
-            var arg1 = ParseAndExp();
+            var arg1 = ParseLogicalAndExp();
             if (PeekType() != TokenType.L_OR)
                 return arg1;
             var oper = PeekToken();
             ReadToken();
-            var arg2 = ParseOrExp();
+            var arg2 = ParseLogicalOrExp();
 
             AssertArgsNotNullLiterals(arg1, arg2, oper);
-            if (!arg1.Type.IsBool() || !arg2.Type.IsBool())
+            if (!(arg1.Type.IsBool() && arg2.Type.IsBool()))
                 throw new ParseErrorException(
                     $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
 
             return Expression.OrElse(arg1, arg2); // short-circuit evaluation
         }
 
-        private Expression ParseAndExp()
+        private Expression ParseLogicalAndExp()
         {
-            var arg1 = ParseRelExp();
+            var arg1 = ParseBitwiseOrExp();
             if (PeekType() != TokenType.L_AND)
                 return arg1;
             var oper = PeekToken();
             ReadToken();
-            var arg2 = ParseAndExp();
+            var arg2 = ParseLogicalAndExp();
 
             AssertArgsNotNullLiterals(arg1, arg2, oper);
-            if (!arg1.Type.IsBool() || !arg2.Type.IsBool())
+            if (!(arg1.Type.IsBool() && arg2.Type.IsBool()))
                 throw new ParseErrorException(
                     $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
 
             return Expression.AndAlso(arg1, arg2); // short-circuit evaluation
         }
 
-        private Expression ParseRelExp()
+        private Expression ParseBitwiseOrExp()
+        {
+            var arg1 = ParseXorExp();
+            if (PeekType() != TokenType.B_OR)
+                return arg1;
+            var oper = PeekToken();
+            ReadToken();
+            var arg2 = ParseBitwiseOrExp();
+
+            AssertArgsNotNullLiterals(arg1, arg2, oper);
+            if (!(arg1.Type.IsBool() && arg2.Type.IsBool())
+                && !(arg1.Type.IsInteger() && arg2.Type.IsInteger()))
+                throw new ParseErrorException(
+                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
+
+            return Expression.Or(arg1, arg2); // no short-circuit evaluation
+        }
+
+        private Expression ParseXorExp()
+        {
+            var arg1 = ParseBitwiseAndExp();
+            if (PeekType() != TokenType.XOR)
+                return arg1;
+            var oper = PeekToken();
+            ReadToken();
+            var arg2 = ParseXorExp();
+
+            AssertArgsNotNullLiterals(arg1, arg2, oper);
+            if (!(arg1.Type.IsBool() && arg2.Type.IsBool())
+                && !(arg1.Type.IsInteger() && arg2.Type.IsInteger()))
+                throw new ParseErrorException(
+                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
+
+            return Expression.ExclusiveOr(arg1, arg2);
+        }
+
+        private Expression ParseBitwiseAndExp()
+        {
+            var arg1 = ParseEqualityExp();
+            if (PeekType() != TokenType.B_AND)
+                return arg1;
+            var oper = PeekToken();
+            ReadToken();
+            var arg2 = ParseBitwiseAndExp();
+
+            AssertArgsNotNullLiterals(arg1, arg2, oper);
+            if (!(arg1.Type.IsBool() && arg2.Type.IsBool())
+                && !(arg1.Type.IsInteger() && arg2.Type.IsInteger()))
+                throw new ParseErrorException(
+                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
+
+            return Expression.And(arg1, arg2); // no short-circuit evaluation
+        }
+
+        private Expression ParseEqualityExp()
+        {
+            var arg1 = ParseRelationalExp();
+            if (!new[] {TokenType.EQ, TokenType.NEQ}.Contains(PeekType()))
+                return arg1;
+            var oper = PeekToken();
+            ReadToken();
+            var arg2 = ParseEqualityExp();
+
+            var type1 = arg1.Type;
+            var type2 = arg2.Type;
+            Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
+
+            if (arg1.Type != arg2.Type
+                && !arg1.IsNullLiteral() && !arg2.IsNullLiteral()
+                && !arg1.Type.IsObject() && !arg2.Type.IsObject())
+                throw new ParseErrorException(
+                    $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
+
+            if (type1.IsNonNullableValueType() && arg2.IsNullLiteral())
+                throw new ParseErrorException(
+                    $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and 'null'.", Expr, oper.Location);
+            if (arg1.IsNullLiteral() && type2.IsNonNullableValueType())
+                throw new ParseErrorException(
+                    $"Operator '{oper.Value}' cannot be applied to operands of type 'null' and '{type2}'.", Expr, oper.Location);
+
+            switch (oper.Type)
+            {
+                case TokenType.EQ:
+                    return Expression.Equal(arg1, arg2);
+                default: // assures full branch coverage
+                    Debug.Assert(oper.Type == TokenType.NEQ); // http://stackoverflow.com/a/1468385/270315
+                    return Expression.NotEqual(arg1, arg2);
+            }
+        }
+
+        private Expression ParseRelationalExp()
         {
             var arg1 = ParseNotExp();
-            if (!new[] {TokenType.LT, TokenType.LE, TokenType.GT, TokenType.GE, TokenType.EQ, TokenType.NEQ}.Contains(PeekType()))
+            if (!new[] {TokenType.LT, TokenType.LE, TokenType.GT, TokenType.GE}.Contains(PeekType()))
                 return arg1;
             var oper = PeekToken();
             ReadToken();
@@ -370,24 +465,12 @@ namespace ExpressiveAnnotations.Analysis
                 throw new ParseErrorException(
                     $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
 
-            if (oper.Type == TokenType.EQ || oper.Type == TokenType.NEQ)
-            {
-                if (type1.IsNonNullableValueType() && arg2.IsNullLiteral())
-                    throw new ParseErrorException(
-                        $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and 'null'.", Expr, oper.Location);
-                if (arg1.IsNullLiteral() && type2.IsNonNullableValueType())
-                    throw new ParseErrorException(
-                        $"Operator '{oper.Value}' cannot be applied to operands of type 'null' and '{type2}'.", Expr, oper.Location);
-            }
-            else
-            {
-                AssertArgsNotNullLiterals(arg1, type1, arg2, type2, oper);
-                if (!(arg1.Type.IsNumeric() && arg2.Type.IsNumeric())
-                    && !(arg1.Type.IsDateTime() && arg2.Type.IsDateTime())
-                    && !(arg1.Type.IsTimeSpan() && arg2.Type.IsTimeSpan()))
-                    throw new ParseErrorException(
-                        $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
-            }
+            AssertArgsNotNullLiterals(arg1, type1, arg2, type2, oper);
+            if (!(arg1.Type.IsNumeric() && arg2.Type.IsNumeric())
+                && !(arg1.Type.IsDateTime() && arg2.Type.IsDateTime())
+                && !(arg1.Type.IsTimeSpan() && arg2.Type.IsTimeSpan()))
+                throw new ParseErrorException(
+                    $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
 
             switch (oper.Type)
             {
@@ -397,19 +480,15 @@ namespace ExpressiveAnnotations.Analysis
                     return Expression.LessThanOrEqual(arg1, arg2);
                 case TokenType.GT:
                     return Expression.GreaterThan(arg1, arg2);
-                case TokenType.GE:
+                default:
+                    Debug.Assert(oper.Type == TokenType.GE);
                     return Expression.GreaterThanOrEqual(arg1, arg2);
-                case TokenType.EQ:
-                    return Expression.Equal(arg1, arg2);
-                default: // assures full branch coverage
-                    Debug.Assert(oper.Type == TokenType.NEQ); // http://stackoverflow.com/a/1468385/270315
-                    return Expression.NotEqual(arg1, arg2);
             }
         }
 
         private Expression ParseNotExp()
         {
-            if (PeekType() != TokenType.NOT)
+            if (PeekType() != TokenType.L_NOT)
                 return ParseAddExp();
             var oper = PeekToken();
             ReadToken();
@@ -528,7 +607,7 @@ namespace ExpressiveAnnotations.Analysis
             if (PeekType() == TokenType.L_BRACKET)
             {
                 ReadToken();
-                var arg = ParseOrExp();
+                var arg = ParseLogicalOrExp();
                 if (PeekType() != TokenType.R_BRACKET)
                     throw new ParseErrorException(
                         PeekType() == TokenType.EOF
@@ -613,7 +692,7 @@ namespace ExpressiveAnnotations.Analysis
             while (PeekType() != TokenType.R_BRACKET) // read comma-separated arguments until we hit ")"
             {
                 var tkn = PeekToken();
-                var arg = ParseOrExp();
+                var arg = ParseLogicalOrExp();
                 if (PeekType() == TokenType.COMMA)
                     ReadToken();
                 else if (PeekType() != TokenType.R_BRACKET) // when no comma found, function exit expected
