@@ -31,6 +31,9 @@ namespace ExpressiveAnnotations.Analysis
             {
                 {TokenType.L_AND, @"&&"},
                 {TokenType.L_OR, @"\|\|"},
+                {TokenType.B_AND, @"&"},
+                {TokenType.B_OR, @"\|"},
+                {TokenType.XOR, @"\^"},
                 {TokenType.L_BRACKET, @"\("},
                 {TokenType.R_BRACKET, @"\)"},
                 {TokenType.GE, @">="},
@@ -39,7 +42,8 @@ namespace ExpressiveAnnotations.Analysis
                 {TokenType.LT, @"<"},
                 {TokenType.EQ, @"=="},
                 {TokenType.NEQ, @"!="},
-                {TokenType.NOT, @"!"},
+                {TokenType.L_NOT, @"!"},
+                {TokenType.B_NOT, @"~"},
                 {TokenType.NULL, @"null"},
                 {TokenType.COMMA, @","},
                 {TokenType.INC, @"\+{2}"}, // Despite the fact our language does not support ++ and -- prefix/postfix operations yet, these unary tokens are explicitly designated as illegal. We're detecting them to prevent unification which is done for consecutive plus or minus operators (e.g. + + - - +-+- => +).

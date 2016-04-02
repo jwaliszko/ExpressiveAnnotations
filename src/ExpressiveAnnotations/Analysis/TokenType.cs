@@ -20,9 +20,29 @@ namespace ExpressiveAnnotations.Analysis
         L_OR,
 
         /// <summary>
+        ///     Bitwise AND (i.e. &amp;).
+        /// </summary>
+        B_AND,
+
+        /// <summary>
+        ///     Bitwise OR (i.e. |).
+        /// </summary>
+        B_OR,
+
+        /// <summary>
+        ///     Exclusive OR (i.e. ^).
+        /// </summary>
+        XOR,
+
+        /// <summary>
         ///     Logical negation (i.e. !).
         /// </summary>
-        NOT,
+        L_NOT,
+
+        /// <summary>
+        ///     Bitwise NOT (i.e. ~).
+        /// </summary>
+        B_NOT,
 
         /// <summary>
         ///     Greater than or equal to (i.e. &gt;=).

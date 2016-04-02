@@ -208,6 +208,13 @@ namespace ExpressiveAnnotations
             return typeof (object) == type;
         }
 
+        public static bool IsInteger(this Type type)
+        {
+            Debug.Assert(type != null);
+
+            return typeof (int) == type;
+        }
+
         public static bool IsNonNullableValueType(this Type type)
         {
             Debug.Assert(type != null);

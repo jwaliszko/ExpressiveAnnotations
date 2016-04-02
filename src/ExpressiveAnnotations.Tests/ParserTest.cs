@@ -153,6 +153,21 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.True(parser.Parse<object>("(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false").Invoke(null));
             Assert.True(parser.Parse<object>("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))").Invoke(null));
+            
+            Assert.True(parser.Parse<object>("(0b0101 & 0b1100) == 0b0100").Invoke(null));            
+            Assert.True(parser.Parse<object>("(0b0101 | 0b1100) == 0b1101").Invoke(null));            
+            Assert.True(parser.Parse<object>("(0b0101 ^ 0b1100) == 0b1001").Invoke(null));
+            Assert.True(parser.Parse<object>("(5 & 12) == 4").Invoke(null));
+            Assert.True(parser.Parse<object>("(5 | 12) == 13").Invoke(null));
+            Assert.True(parser.Parse<object>("(5 ^ 12) == 9").Invoke(null));
+
+            Assert.False(parser.Parse<object>("true && true && false").Invoke(null));
+            Assert.True(parser.Parse<object>("false || false || true").Invoke(null));
+
+            Assert.False(parser.Parse<object>("true & true & false").Invoke(null));
+            Assert.True(parser.Parse<object>("false | false | true").Invoke(null));
+
+            Assert.True(parser.Parse<object>("true ^ true ^ true").Invoke(null));
 
             Assert.True(parser.Parse<object>("0 == 0 && 1 < 2").Invoke(null));
 
