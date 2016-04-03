@@ -63,7 +63,7 @@ namespace ExpressiveAnnotations.Analysis
                 {TokenType.INT, @"[0-9]+"},
                 {TokenType.BOOL, @"(?:true|false)"},
                 {TokenType.STRING, @"(['])(?:\\\1|.)*?\1"}, // '1234', 'John\'s cat'
-                {TokenType.FUNC, @"[_\p{L}]+(?:(?:(?:\[[0-9]+\])?\.[_\p{L}])?[_\p{L}\p{N}]*)*(?:\[[0-9]+\])?"} // field, field.field, arr[0], func(...), see also http://www.fileformat.info/info/unicode/category/index.htm, https://msdn.microsoft.com/en-us/library/aa664670.aspx
+                {TokenType.FUNC, @"[_\p{L}]+(?:(?:(?:\[[0-9]+\])?\.[_\p{L}])?[_\p{L}\p{N}]*)*(?:\[[0-9]+\])?"} // field, field.field, arr[0], func - see also http://www.fileformat.info/info/unicode/category/index.htm, https://msdn.microsoft.com/en-us/library/aa664670.aspx
             };
 
             RegexMap = patterns.ToDictionary(

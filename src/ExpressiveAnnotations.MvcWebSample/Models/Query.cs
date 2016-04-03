@@ -149,14 +149,16 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "ImmediateContact")]
         public bool? ImmediateContact { get; set; }
 
-        [AssertThat(@"FlightId != Guid('00000000-0000-0000-0000-000000000000') || GoAbroad == false",
+        [AssertThat(@"FlightId != Guid('00000000-0000-0000-0000-000000000000') || !GoAbroad",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FlightIdentifierInvalid")]        
         [Display(ResourceType = typeof (Resources), Name = "FlightId")]
         public Guid FlightId { get; set; }
 
         [RequiredIf("GoAbroad == true",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]
-        [AssertThat("ArrayLength(SelectedDonations) > 1",
+        [AssertThat(@"GoAbroad
+                          ? ArrayLength(SelectedDonations) > 2
+                          : ArrayLength(SelectedDonations) > 1",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "NotEnoughDonations")]
         [ValueParser("ArrayParser")]
         [Display(ResourceType = typeof (Resources), Name = "Donation")]

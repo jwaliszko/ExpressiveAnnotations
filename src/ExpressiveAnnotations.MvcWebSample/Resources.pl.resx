@@ -241,7 +241,7 @@
     <value>Rekreacyjny</value>
   </data>
   <data name="NotEnoughDonations" xml:space="preserve">
-    <value>Przynajmniej dwie oddzielne darowizny są wymagane</value>
+    <value>Większa ilość oddzielnych darowizn jest wymagana: jeśli pole {GoAbroad:N} jest zaznaczone - przynajmniej 3, w przeciwnym wypadku - przynajmniej 2.</value>
   </data>
   <data name="OfficeAddress" xml:space="preserve">
     <value>Adres służbowy</value>
