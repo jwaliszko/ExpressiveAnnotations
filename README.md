@@ -162,39 +162,47 @@ Note above covers almost exhaustively what is actually needed to work with EA. N
 
 Implementation core is based on top-down recursive descent [logical expressions parser](src/ExpressiveAnnotations/Analysis/Parser.cs?raw=true), with a single token of lookahead ([LL(1)](http://en.wikipedia.org/wiki/LL_parser)), which runs on the following [EBNF-like](http://en.wikipedia.org/wiki/Extended_Backus–Naur_Form) grammar:
 ```
-expression => or-exp
-or-exp     => and-exp [ "||" or-exp ]
-and-exp    => rel-exp [ "&&" and-exp ]
-rel-exp    => not-exp [ rel-op not-exp ]
-not-exp    => add-exp | "!" not-exp
+expression => cond-exp
+cond-exp   => l-or-exp [ "?" cond-exp ":" cond-exp ]
+l-or-exp   => l-and-exp [ "||" l-or-exp ]
+l-and-exp  => b-or-exp [ "&&" l-and-exp ]
+b-or-exp   => xor-exp [ "|" b-or-exp ]
+xor-exp    => b-and-exp [ "^" xor-exp ]
+b-and-exp  => eq-exp [ "&" b-and-exp ]
+eq-exp     => rel-exp [ "==" | "!=" eq-exp ]
+rel-exp    => shift-exp [ ">" | ">=" | "<" | "<=" rel-exp ]
+shift-exp  => add-exp [ "<<" | ">>" shift-exp ]
 add-exp    => mul-exp add-exp'
 add-exp'   => "+" add-exp | "-" add-exp
-mul-exp    => val mul-exp'
-mul-exp'   => "*" mul-exp | "/" mul-exp
-rel-op     => "==" | "!=" | ">" | ">=" | "<" | "<="
-val        => "null" | int | float | bool | string | func | "(" or-exp ")"
+mul-exp    => unary-exp mul-exp'
+mul-exp'   => "*" mul-exp | "/" mul-exp | "%" mul-exp
+unary-exp  => val [ "+" | "-" | "!" | "~" unary-exp ]
+val        => "null" | int | bin | hex | float | bool | string | func | "(" cond-exp ")"
 ```
-Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar except for *int*, *float*, *bool*, *string* and *func*, which are assumed to be implicitly defined (*func* can be an enum value as well as constant, property or function name).
+Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar except for *int*, *bin*, *hex*, *float*, *bool*, *string* and *func*, which are assumed to be implicitly defined (*func* identifier specifies either array access, function, enum, constant, or property name).
 
 Logical expressions should be built according to the syntax defined by grammar, with the usage of following components:
 
-* binary operators: `||`, `&&`, `!`,
-* relational operators: `==`, `!=`,`<`, `<=`, `>`, `>=`,
-* arithmetic operators: `+`, `-`, `*`, `/`,	
-* curly brackets: `(`, `)`,
-* square brackets: `[`, `]`,
+* conditional (ternary) operator: `?:`,
+* logical operators: `||`, `&&`, `!`,
+* bitwise operators: `|`, `&`, `^`, `~`, `<<`, `>>`,
+* comparison operators: `==`, `!=`, `<`, `<=`, `>`, `>=`,
+* arithmetic operators: `+`, `-`, `*`, `/`,	`%`,
+* curly and square brackets: `(`, `)`, `[`, `]`,
 * unicode letters and numbers (i.e. `[L*]` and `[N*]` [categories](https://en.wikipedia.org/wiki/Unicode_character_property) respectively), with the support of `,`, `.`, `_`, `'` and whitespaces, used to synthesize suitable literals:
   * null literal: `null`, 
-  * integer number literals, e.g. `123`, 
-  * real number literals, e.g. `1.5` or `-0.3e-2`,
+  * integer literals, e.g. `123`, 
+  * real literals, e.g. `1.5` or `-0.3e-2`,
+  * binary literals (`0b` prefix), e.g. `0b1010`,
+  * hexadecimal literals (`0x` prefix), e.g. `0xFF`,
   * boolean literals: `true` and `false`,
   * string literals: `'in single quotes'` (internal quote escape sequence is `\'`, character representing new line is `\n`),
   * func literals:
-      * property names, e.g. `SomeProperty`,
-	  * constants, e.g. `SomeType.CONST`,
-      * enum values, e.g. `SomeEnumType.SomeValue`,
-	  * arrays indexing, e.g. `SomeArray[0]`,
-	  * function invocations, e.g. `SomeFunction(...)`.
+	  * arrays indexing, e.g. `Arr[0]`,
+	  * function names, e.g. `Foo`,
+      * property names, e.g. `Prop`,
+	  * constants, e.g. `Type.Const`,
+      * enum values, e.g. `EnumType.Val`.
 
 Specified expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object. As a result of expression evaluation, boolean flag is returned, indicating that expression is true or false.
 
@@ -204,7 +212,7 @@ When working with ASP.NET MVC stack, unobtrusive client-side validation mechanis
 
 #####<a id="traps">Traps (discrepancies between C# and JavaScript)</a>
 
-Because client-side handles expressions in its unchanged form (as provided to attribute), attention is needed when dealing with `null` keyword - there are discrepancies between C# and JavaScript, e.g.
+Because client-side handles expressions in its unchanged form (as provided to attribute), attention is needed when dealing with `null` keyword - there are discrepancies between EA parser (mostly follows C# rules) and JavaScript, e.g.
 
 * `null + "text"` - in C# `"text"`, in JS `"nulltext"`,
 * `2 * null`      - in C# `null`  , in JS `0`,

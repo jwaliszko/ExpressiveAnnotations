@@ -430,7 +430,7 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to At least two separate donations are required..
+        ///   Looks up a localized string similar to More separate donations are required: if {GoAbroad:N} field is checked - at least 3, otherwise - at least 2..
         /// </summary>
         public static string NotEnoughDonations {
             get {

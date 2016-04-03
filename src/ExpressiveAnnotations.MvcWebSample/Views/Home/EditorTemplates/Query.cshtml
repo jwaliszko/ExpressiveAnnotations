@@ -180,7 +180,7 @@
     </li>
     <li>
         <pre class="code">
-[AssertThat("FlightId != Guid('00000000-0000-0000-0000-000000000000') || GoAbroad == false")]
+[AssertThat("FlightId != Guid('00000000-0000-0000-0000-000000000000') || !GoAbroad")]
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>
@@ -192,7 +192,9 @@
     <li>
         <pre class="code">
 [RequiredIf("GoAbroad == true")]
-[AssertThat("ArrayLength(SelectedDonations) > 1")]
+[AssertThat("GoAbroad
+                 ? ArrayLength(SelectedDonations) > 2
+                 : ArrayLength(SelectedDonations) > 1")]
 [ValueParser("ArrayParser")]
 </pre>
         <pre class="action">[show attribute]</pre>

@@ -241,7 +241,7 @@
     <value>Normal</value>
   </data>
   <data name="NotEnoughDonations" xml:space="preserve">
-    <value>At least two separate donations are required.</value>
+    <value>More separate donations are required: if {GoAbroad:N} field is checked - at least 3, otherwise - at least 2.</value>
   </data>
   <data name="OfficeAddress" xml:space="preserve">
     <value>Office address</value>

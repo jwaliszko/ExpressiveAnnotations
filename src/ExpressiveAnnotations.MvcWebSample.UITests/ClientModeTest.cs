@@ -512,24 +512,40 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         }
 
         [Fact]
-        public void select_one_donation_and_verify_error_for_donations_in_client_mode()
+        public void select_two_donations_if_not_going_abroad_and_verify_no_error_for_donations_in_client_mode()
         {
             Watch(() =>
             {
+                Home.ClickCheckbox("GoAbroad");
                 Home.ClickCheckbox("SelectedDonations", "1");
+                Home.ClickCheckbox("SelectedDonations", "4");
                 Assert.Equal(
-                    "At least two separate donations are required.",
+                    string.Empty,
                     Home.GetErrorMessage("SelectedDonations"));
             });
         }
 
         [Fact]
-        public void select_two_donations_and_verify_no_error_for_donations_in_client_mode()
+        public void select_two_donations_if_going_abroad_and_verify_error_for_donations_in_client_mode()
         {
             Watch(() =>
             {
                 Home.ClickCheckbox("SelectedDonations", "1");
                 Home.ClickCheckbox("SelectedDonations", "4");
+                Assert.Equal(
+                    "More separate donations are required: if I am going abroad field is checked - at least 3, otherwise - at least 2.",
+                    Home.GetErrorMessage("SelectedDonations"));
+            });
+        }
+
+        [Fact]
+        public void select_three_donations_if_going_abroad_and_verify_no_error_for_donations_in_client_mode()
+        {
+            Watch(() =>
+            {
+                Home.ClickCheckbox("SelectedDonations", "1");
+                Home.ClickCheckbox("SelectedDonations", "4");
+                Home.ClickCheckbox("SelectedDonations", "25");
                 Assert.Equal(
                     string.Empty,
                     Home.GetErrorMessage("SelectedDonations"));
