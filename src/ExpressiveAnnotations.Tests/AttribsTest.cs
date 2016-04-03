@@ -77,7 +77,16 @@ namespace ExpressiveAnnotations.Tests
             var model = new WorkModel();
             var context = new ValidationContext(model);
 
+            model.Value = 0; // tests asserthat
             var nonCached = MeasureExecutionTime(() => Validator.TryValidateObject(model, context, null, true));
+            for (var i = 0; i < testLoops; i++)
+            {
+                var cached = MeasureExecutionTime(() => Validator.TryValidateObject(model, context, null, true));
+                Assert.True(nonCached > cached);
+            }
+
+            model.Value = null; // tests requiredif
+            nonCached = MeasureExecutionTime(() => Validator.TryValidateObject(model, context, null, true));
             for (var i = 0; i < testLoops; i++)
             {
                 var cached = MeasureExecutionTime(() => Validator.TryValidateObject(model, context, null, true));
@@ -410,7 +419,7 @@ namespace ExpressiveAnnotations.Tests
 
             [RequiredIf(HeavyExpression)]
             [AssertThat(HeavyExpression)]
-            public int Value { get; set; }
+            public int? Value { get; set; }
         }
     }
 
