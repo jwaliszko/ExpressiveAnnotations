@@ -37,7 +37,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 FieldName = metadata.PropertyName;
 
                 var item = MapCache.GetOrAdd(AttributeFullId, _ => // map cache is based on static dictionary, set-up once for entire application instance
-                {                                           // (by design, no reason to recompile once compiled expressions)
+                {                                                  // (by design, no reason to recompile once compiled expressions)
                     var parser = new Parser();
                     parser.RegisterMethods();
                     parser.Parse(metadata.ContainerType, attribute.Expression);
@@ -54,7 +54,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                         .ToDictionary(x => x.PropertyName, x => x.ParserAttribute.ParserName);
 
                     AssertNoNamingCollisionsAtCorrespondingSegments();
-                    attribute.Compile(metadata.ContainerType);
+                    attribute.Compile(metadata.ContainerType); // compile expressions in attributes (to be cached for subsequent invocations)
 
                     return new CacheItem
                     {
