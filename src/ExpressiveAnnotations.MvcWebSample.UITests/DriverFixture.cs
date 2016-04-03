@@ -1,4 +1,5 @@
 ﻿using System;
+using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.PhantomJS;
 using OpenQA.Selenium.Remote;
 
@@ -8,13 +9,13 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
     {
         public DriverFixture() // called before every test class
         {
-            var service = PhantomJSDriverService.CreateDefaultService();
-            service.IgnoreSslErrors = true;
-            service.WebSecurity = false;
+            //var service = PhantomJSDriverService.CreateDefaultService();
+            //service.IgnoreSslErrors = true;
+            //service.WebSecurity = false;
+            //var options = new PhantomJSOptions();            
+            //Driver = new PhantomJSDriver(service, options, TimeSpan.FromSeconds(15)); // headless browser testing
 
-            var options = new PhantomJSOptions();            
-
-            Driver = new PhantomJSDriver(service, options, TimeSpan.FromSeconds(15)); // headless browser testing
+            Driver = new FirefoxDriver();
         }
 
         public RemoteWebDriver Driver { get; private set; }
