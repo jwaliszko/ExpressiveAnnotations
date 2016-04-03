@@ -151,7 +151,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("Invalid token.", e.Error);
             Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
 
-            e = Assert.Throws<ParseErrorException>(() => lexer.Analyze("true\r\n&& ?"));
+            e = Assert.Throws<ParseErrorException>(() => lexer.Analyze("true\r\n&& @"));
             Assert.Equal("Invalid token.", e.Error);
             Assert.Equal(new Location(2, 4), e.Location, new LocationComparer());
 

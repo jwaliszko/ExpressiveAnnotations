@@ -46,8 +46,10 @@ namespace ExpressiveAnnotations.Analysis
                 {TokenType.NEQ, @"!="},
                 {TokenType.L_NOT, @"!"},
                 {TokenType.B_NOT, @"~"},
-                {TokenType.NULL, @"null"},
+                {TokenType.QMARK, @"\?"},
+                {TokenType.COLON, @":"},
                 {TokenType.COMMA, @","},
+                {TokenType.NULL, @"null"},
                 {TokenType.INC, @"\+{2}"}, // Despite the fact our language does not support ++ and -- prefix/postfix operations yet, these unary tokens are explicitly designated as illegal. We're detecting them to prevent unification which is done for consecutive plus or minus operators (e.g. + + - - +-+- => +).
                 {TokenType.DEC, @"-{2}"},  // Unification of such unary operators breaks compatibility - such mixed 1++ + 2 operations are illegal in both C# and JavaScript (since we control C# side there is not pain here, but JavaScript would fail since we're sending raw expressions to client-side).
                 {TokenType.ADD, @"\+"},
