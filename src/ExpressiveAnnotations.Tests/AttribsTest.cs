@@ -89,19 +89,19 @@ namespace ExpressiveAnnotations.Tests
         public void verify_attributes_compilation_caching_directly()
         {
             const int testLoops = 10;
-            List<ExpressiveAttribute> compiled = null;
+            List<ExpressiveAttribute> attribs = null;
 
-            var nonCached = MeasureExecutionTime(() => compiled = typeof (WorkModel).CompileExpressiveAttributes().ToList());
+            var nonCached = MeasureExecutionTime(() => attribs = typeof (WorkModel).CompileExpressiveAttributes().ToList());
             for (var i = 0; i < testLoops; i++)
             {
-                var cached = MeasureExecutionTime(() => compiled.ForEach(x => x.Compile(typeof (WorkModel))));
+                var cached = MeasureExecutionTime(() => attribs.ForEach(x => x.Compile(typeof (WorkModel))));
                 Assert.True(nonCached > cached);
             }
 
-            nonCached = MeasureExecutionTime(() => compiled.ForEach(x => x.Compile(typeof (WorkModel), force: true))); // forcibly recompile already compiled expressions
+            nonCached = MeasureExecutionTime(() => attribs.ForEach(x => x.Compile(typeof (WorkModel), force: true))); // forcibly recompile already compiled expressions
             for (var i = 0; i < testLoops; i++)
             {
-                var cached = MeasureExecutionTime(() => compiled.ForEach(x => x.Compile(typeof (WorkModel))));
+                var cached = MeasureExecutionTime(() => attribs.ForEach(x => x.Compile(typeof (WorkModel))));
                 Assert.True(nonCached > cached);
             }
         }
@@ -405,8 +405,11 @@ namespace ExpressiveAnnotations.Tests
 
         private class WorkModel
         {
-            [RequiredIf("(((1 > 0*0) && 1 > 0*0) && 1 > 0*0)")] // some random calculations, give the parser some work
-            [AssertThat("(((1 > 0*0) && 1 > 0*0) && 1 > 0*0)")]
+            private const string HeavyExpression = // give the parser some work (deep dive)
+                "((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((!(1 < 0*~0) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0)) && !(1 < 0*~0))";
+
+            [RequiredIf(HeavyExpression)]
+            [AssertThat(HeavyExpression)]
             public int Value { get; set; }
         }
     }

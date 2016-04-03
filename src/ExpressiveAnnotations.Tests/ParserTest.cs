@@ -169,6 +169,10 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.True(parser.Parse<object>("true ^ true ^ true").Invoke(null));
 
+            Assert.True(parser.Parse<object>("~+5 == -6").Invoke(null));
+            Assert.True(parser.Parse<object>("~~5 == 5").Invoke(null));
+            Assert.True(parser.Parse<object>("~-6 == 5").Invoke(null));
+
             Assert.True(parser.Parse<object>("0 == 0 && 1 < 2").Invoke(null));
 
             Assert.False(parser.Parse<object>("0 != 0").Invoke(null));

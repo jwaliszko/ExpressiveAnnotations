@@ -316,8 +316,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
         public void verify_validators_caching()
         {
             const int testLoops = 10;
-            var generatedCode = Enumerable.Repeat(0, 100).Select(x => "true")
-                .Aggregate("true", (accumulator, item) => $"({accumulator} && {item} && !false)"); // give the parser some work (deep dive)
+            var generatedCode = Enumerable.Repeat(0, 100).Select(x => "!(1 < 0*~0)")
+                .Aggregate("!(1 < 0*~0)", (accumulator, item) => $"({accumulator} && {item})"); // give the parser some work (deep dive)
             
             var model = new Model();
             var metadata = GetModelMetadata(model, m => m.Value);

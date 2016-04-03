@@ -21,12 +21,13 @@ namespace ExpressiveAnnotations.Analysis
      * xor-exp    => b-and-exp [ "^" xor-exp ]
      * b-and-exp  => eq-exp [ "&" b-and-exp ]     
      * eq-exp     => rel-exp [ eq-op eq-exp ]
-     * rel-exp    => l-not-exp [ rel-op l-not-exp ]
-     * l-not-exp  => add-exp | "!" l-not-exp
+     * rel-exp    => rel-op add-exp
      * add-exp    => mul-exp add-exp'
      * add-exp'   => "+" add-exp | "-" add-exp
-     * mul-exp    => val mul-exp'
+     * mul-exp    => unary-exp mul-exp'
      * mul-exp'   => "*" mul-exp | "/" mul-exp
+     * unary-exp  => val [ unary-op unary-exp ]
+     * unary-op   => "+" | "-" | "!" | "~"
      * eq-op      => "==" | "!="
      * rel-op     => ">" | ">=" | "<" | "<="
      * val        => "null" | int | bin | hex | float | bool | string | func | "(" or-exp ")"
@@ -371,7 +372,7 @@ namespace ExpressiveAnnotations.Analysis
                 throw new ParseErrorException(
                     $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
 
-            return Expression.Or(arg1, arg2); // no short-circuit evaluation
+            return Expression.Or(arg1, arg2); // non-short-circuit evaluation
         }
 
         private Expression ParseXorExp()
@@ -407,7 +408,7 @@ namespace ExpressiveAnnotations.Analysis
                 throw new ParseErrorException(
                     $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
 
-            return Expression.And(arg1, arg2); // no short-circuit evaluation
+            return Expression.And(arg1, arg2); // non-short-circuit evaluation
         }
 
         private Expression ParseEqualityExp()
@@ -448,12 +449,12 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseRelationalExp()
         {
-            var arg1 = ParseNotExp();
+            var arg1 = ParseAddExp();
             if (!new[] {TokenType.LT, TokenType.LE, TokenType.GT, TokenType.GE}.Contains(PeekType()))
                 return arg1;
             var oper = PeekToken();
             ReadToken();
-            var arg2 = ParseNotExp();
+            var arg2 = ParseAddExp();
 
             var type1 = arg1.Type;
             var type2 = arg2.Type;
@@ -484,24 +485,6 @@ namespace ExpressiveAnnotations.Analysis
                     Debug.Assert(oper.Type == TokenType.GE);
                     return Expression.GreaterThanOrEqual(arg1, arg2);
             }
-        }
-
-        private Expression ParseNotExp()
-        {
-            if (PeekType() != TokenType.L_NOT)
-                return ParseAddExp();
-            var oper = PeekToken();
-            ReadToken();
-            var arg = ParseNotExp(); // allow multiple negations
-
-            if (arg.IsNullLiteral())
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operand of type 'null'.", Expr, oper.Location);
-            if (!arg.Type.IsBool())
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operand of type '{arg.Type}'.", Expr, oper.Location);
-
-            return Expression.Not(arg);
         }
 
         private Expression ParseAddExp()
@@ -563,12 +546,7 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseMulExp()
         {
-            var sgn = UnifySign();
-            var arg = ParseVal();
-
-            if (sgn == TokenType.SUB)
-                arg = InverseNumber(arg);
-
+            var arg = ParseUnaryExp();
             return ParseMulExpInternal(arg);
         }
 
@@ -578,11 +556,7 @@ namespace ExpressiveAnnotations.Analysis
                 return arg1;
             var oper = PeekToken();
             ReadToken();
-            var sign = UnifySign();
-            var arg2 = ParseVal();
-
-            if (sign == TokenType.SUB)
-                arg2 = InverseNumber(arg2);
+            var arg2 = ParseUnaryExp();
 
             if (!arg1.Type.IsNumeric() || !arg2.Type.IsNumeric())
             {
@@ -599,6 +573,38 @@ namespace ExpressiveAnnotations.Analysis
                 default:
                     Debug.Assert(oper.Type == TokenType.DIV);
                     return ParseMulExpInternal(Expression.Divide(arg1, arg2));
+            }
+        }
+
+        private Expression ParseUnaryExp()
+        {
+            if (!new[] {TokenType.ADD, TokenType.SUB, TokenType.L_NOT, TokenType.B_NOT}.Contains(PeekType()))
+                return ParseVal();
+            var oper = PeekToken();
+            ReadToken();
+            var arg = ParseUnaryExp(); // allow multiple negations
+
+            if (arg.IsNullLiteral())
+                throw new ParseErrorException(
+                    $"Operator '{oper.Value}' cannot be applied to operand of type 'null'.", Expr, oper.Location);
+            if (oper.Type == TokenType.L_NOT && !arg.Type.IsBool())
+                throw new ParseErrorException(
+                    $"Operator '{oper.Value}' cannot be applied to operand of type '{arg.Type}'.", Expr, oper.Location);
+            if (oper.Type == TokenType.B_NOT && !arg.Type.IsBool() && !arg.Type.IsInteger())
+                throw new ParseErrorException(
+                    $"Operator '{oper.Value}' cannot be applied to operand of type '{arg.Type}'.", Expr, oper.Location);
+
+            switch (oper.Type)
+            {
+                case TokenType.ADD:
+                    return arg;
+                case TokenType.SUB:
+                    return Expression.Negate(arg);
+                case TokenType.L_NOT:
+                    return Expression.Not(arg);
+                default:
+                    Debug.Assert(oper.Type == TokenType.B_NOT);
+                    return Expression.OnesComplement(arg);
             }
         }
 
@@ -916,28 +922,6 @@ namespace ExpressiveAnnotations.Analysis
                     $"Function '{funcName}' {argIdx.ToOrdinal()} argument implicit conversion from '{arg.Type}' to expected '{type}' failed.",
                     Expr, argPos);
             }
-        }
-
-        private TokenType UnifySign()
-        {
-            var operators = new List<TokenType>();
-            while (true)
-            {
-                if (!new[] {TokenType.ADD, TokenType.SUB}.Contains(PeekType()))
-                    return operators.Count(x => x.Equals(TokenType.SUB))%2 == 1
-                        ? TokenType.SUB
-                        : TokenType.ADD;
-
-                operators.Add(PeekType());
-                ReadToken();
-            }
-        }
-
-        private Expression InverseNumber(Expression arg)
-        {
-            Expression zero = Expression.Constant(0);
-            Helper.MakeTypesCompatible(zero, arg, out zero, out arg);
-            return Expression.Subtract(zero, arg);
         }
 
         private void AssertMethodNameExistence(string name, Location funcPos)
