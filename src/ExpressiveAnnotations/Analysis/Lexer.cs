@@ -34,6 +34,8 @@ namespace ExpressiveAnnotations.Analysis
                 {TokenType.B_AND, @"&"},
                 {TokenType.B_OR, @"\|"},
                 {TokenType.XOR, @"\^"},
+                {TokenType.L_SHIFT, @"<<"},
+                {TokenType.R_SHIFT, @">>"},
                 {TokenType.L_BRACKET, @"\("},
                 {TokenType.R_BRACKET, @"\)"},
                 {TokenType.GE, @">="},
@@ -52,6 +54,7 @@ namespace ExpressiveAnnotations.Analysis
                 {TokenType.SUB, @"-"},
                 {TokenType.MUL, @"\*"},
                 {TokenType.DIV, @"/"},
+                {TokenType.MOD, @"%"},
                 {TokenType.BIN, @"0b[0-1]+"},
                 {TokenType.HEX, @"0x[0-9a-fA-F]+"},
                 {TokenType.FLOAT, @"(?:(?:[0-9]+[eE][+-]?[0-9]+)|(?:[0-9]*\.[0-9]+(?:[eE][+-]?[0-9]+)?))"}, // 1e5, 1.0, 0.3e-2
