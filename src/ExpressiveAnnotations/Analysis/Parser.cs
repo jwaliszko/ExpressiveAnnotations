@@ -20,16 +20,14 @@ namespace ExpressiveAnnotations.Analysis
      * b-or-exp   => xor-exp [ "|" b-or-exp ]
      * xor-exp    => b-and-exp [ "^" xor-exp ]
      * b-and-exp  => eq-exp [ "&" b-and-exp ]     
-     * eq-exp     => rel-exp [ eq-op eq-exp ]
-     * rel-exp    => rel-op add-exp
+     * eq-exp     => rel-exp [ "==" | "!=" eq-exp ]
+     * rel-exp    => shift-exp [ ">" | ">=" | "<" | "<=" rel-exp ]
+     * shift-exp  => add-exp [ "<<" | ">>" shift-exp ]
      * add-exp    => mul-exp add-exp'
      * add-exp'   => "+" add-exp | "-" add-exp
      * mul-exp    => unary-exp mul-exp'
-     * mul-exp'   => "*" mul-exp | "/" mul-exp
-     * unary-exp  => val [ unary-op unary-exp ]
-     * unary-op   => "+" | "-" | "!" | "~"
-     * eq-op      => "==" | "!="
-     * rel-op     => ">" | ">=" | "<" | "<="
+     * mul-exp'   => "*" mul-exp | "/" mul-exp | "%" mul-exp
+     * unary-exp  => val [ "+" | "-" | "!" | "~" unary-exp ]
      * val        => "null" | int | bin | hex | float | bool | string | func | "(" or-exp ")"
      */
 
@@ -449,12 +447,12 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseRelationalExp()
         {
-            var arg1 = ParseAddExp();
+            var arg1 = ParseShiftExp();
             if (!new[] {TokenType.LT, TokenType.LE, TokenType.GT, TokenType.GE}.Contains(PeekType()))
                 return arg1;
             var oper = PeekToken();
             ReadToken();
-            var arg2 = ParseAddExp();
+            var arg2 = ParseRelationalExp();
 
             var type1 = arg1.Type;
             var type2 = arg2.Type;
@@ -487,19 +485,43 @@ namespace ExpressiveAnnotations.Analysis
             }
         }
 
-        private Expression ParseAddExp()
+        private Expression ParseShiftExp()
         {
-            var arg = ParseMulExp();
-            return ParseAddExpInternal(arg);
+            var arg1 = ParseAdditiveExp();
+            if (!new[] {TokenType.L_SHIFT, TokenType.R_SHIFT}.Contains(PeekType()))
+                return arg1;
+            var oper = PeekToken();
+            ReadToken();
+            var arg2 = ParseShiftExp();
+
+            AssertArgsNotNullLiterals(arg1, arg2, oper);
+            if (!(arg1.Type.IsInteger() && arg2.Type.IsInteger()))
+                throw new ParseErrorException(
+                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
+
+            switch (oper.Type)
+            {
+                case TokenType.L_SHIFT:
+                    return Expression.LeftShift(arg1, arg2);
+                default:
+                    Debug.Assert(oper.Type == TokenType.R_SHIFT);
+                    return Expression.RightShift(arg1, arg2);
+            }
         }
 
-        private Expression ParseAddExpInternal(Expression arg1)
+        private Expression ParseAdditiveExp()
+        {
+            var arg = ParseMultiplicativeExp();
+            return ParseAdditiveExpInternal(arg);
+        }
+
+        private Expression ParseAdditiveExpInternal(Expression arg1)
         {
             if (!new[] {TokenType.ADD, TokenType.SUB}.Contains(PeekType()))
                 return arg1;
             var oper = PeekToken();
             ReadToken();
-            var arg2 = ParseMulExp();
+            var arg2 = ParseMultiplicativeExp();
 
             var type1 = arg1.Type;
             var type2 = arg2.Type;
@@ -531,7 +553,7 @@ namespace ExpressiveAnnotations.Analysis
             switch (oper.Type)
             {
                 case TokenType.ADD:
-                    return ParseAddExpInternal(
+                    return ParseAdditiveExpInternal(
                         (arg1.Type.IsString() || arg2.Type.IsString())
                             ? Expression.Add(
                                 Expression.Convert(arg1, typeof (object)),
@@ -540,19 +562,19 @@ namespace ExpressiveAnnotations.Analysis
                             : Expression.Add(arg1, arg2));
                 default:
                     Debug.Assert(oper.Type == TokenType.SUB);
-                    return ParseAddExpInternal(Expression.Subtract(arg1, arg2));
+                    return ParseAdditiveExpInternal(Expression.Subtract(arg1, arg2));
             }
         }
 
-        private Expression ParseMulExp()
+        private Expression ParseMultiplicativeExp()
         {
             var arg = ParseUnaryExp();
-            return ParseMulExpInternal(arg);
+            return ParseMultiplicativeExpInternal(arg);
         }
 
-        private Expression ParseMulExpInternal(Expression arg1)
+        private Expression ParseMultiplicativeExpInternal(Expression arg1)
         {
-            if (!new[] {TokenType.MUL, TokenType.DIV}.Contains(PeekType()))
+            if (!new[] {TokenType.MUL, TokenType.DIV, TokenType.MOD}.Contains(PeekType()))
                 return arg1;
             var oper = PeekToken();
             ReadToken();
@@ -569,10 +591,12 @@ namespace ExpressiveAnnotations.Analysis
             switch (oper.Type)
             {
                 case TokenType.MUL:
-                    return ParseMulExpInternal(Expression.Multiply(arg1, arg2));
+                    return ParseMultiplicativeExpInternal(Expression.Multiply(arg1, arg2));
+                case TokenType.DIV:
+                    return ParseMultiplicativeExpInternal(Expression.Divide(arg1, arg2));
                 default:
-                    Debug.Assert(oper.Type == TokenType.DIV);
-                    return ParseMulExpInternal(Expression.Divide(arg1, arg2));
+                    Debug.Assert(oper.Type == TokenType.MOD);
+                    return ParseMultiplicativeExpInternal(Expression.Modulo(arg1, arg2));
             }
         }
 

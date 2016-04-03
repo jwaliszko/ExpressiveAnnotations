@@ -173,6 +173,10 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<object>("~~5 == 5").Invoke(null));
             Assert.True(parser.Parse<object>("~-6 == 5").Invoke(null));
 
+            Assert.True(parser.Parse<object>("2 << 2 == 8").Invoke(null));
+            Assert.True(parser.Parse<object>("8 >> 2 == 2").Invoke(null));
+            Assert.True(parser.Parse<object>("8 >> 2 >> 1 << 1 << 2 == 8").Invoke(null));
+
             Assert.True(parser.Parse<object>("0 == 0 && 1 < 2").Invoke(null));
 
             Assert.False(parser.Parse<object>("0 != 0").Invoke(null));
@@ -218,6 +222,9 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<object>("4 / 2 / 2 == 1").Invoke(null));
             Assert.True(parser.Parse<object>("2 * 2 / 2 == 2").Invoke(null));
             Assert.True(parser.Parse<object>("4 / 2 * 2 == 4").Invoke(null));
+
+            Assert.True(parser.Parse<object>("5 % 2 == 1").Invoke(null));
+            Assert.True(parser.Parse<object>("5 % 2 % 1 == 0").Invoke(null));
 
             Assert.True(parser.Parse<object>("1.2 * 2 == 2.4").Invoke(null));
             Assert.True(parser.Parse<object>("1.2 / 2 == 0.6").Invoke(null));
@@ -923,13 +930,13 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(new Location(1, 24), e.Location, new LocationComparer());
         }
 
-        public static IEnumerable<object[]> InequalityOperators
+        public static IEnumerable<object[]> RelationalOperators
         {
             get { return new[] {">", ">=", "<", "<="}.Select(x => new object[] {x}); }
         }
 
         [Theory]
-        [MemberData("InequalityOperators")]
+        [MemberData("RelationalOperators")]
         public void verify_type_mismatch_errors_for_inequality_operators(string oper)
         {
             var parser = new Parser();
@@ -992,13 +999,13 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(new Location(1, 24), e.Location, new LocationComparer());
         }
 
-        public static IEnumerable<object[]> AddSubOperators
+        public static IEnumerable<object[]> AdditiveOperators
         {
             get { return new[] {"+", "-"}.Select(x => new object[] {x}); }
         }
 
         [Theory]
-        [MemberData("AddSubOperators")]
+        [MemberData("AdditiveOperators")]
         public void verify_type_mismatch_errors_for_addition_and_subtraction_operators(string oper)
         {
             var parser = new Parser();
@@ -1041,13 +1048,13 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
         }
 
-        public static IEnumerable<object[]> MulDivOperators
+        public static IEnumerable<object[]> MultiplicativeOperators
         {
-            get { return new[] {"*", "/"}.Select(x => new object[] {x}); }
+            get { return new[] {"*", "/", "%"}.Select(x => new object[] {x}); }
         }
 
         [Theory]
-        [MemberData("MulDivOperators")]
+        [MemberData("MultiplicativeOperators")]
         public void verify_type_mismatch_errors_for_multiplication_and_division_operators(string oper)
         {
             var parser = new Parser();

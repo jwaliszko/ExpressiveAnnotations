@@ -25,12 +25,12 @@ namespace ExpressiveAnnotations.Analysis
         B_AND,
 
         /// <summary>
-        ///     Bitwise OR (i.e. |).
+        ///     Bitwise inclusive OR (i.e. |).
         /// </summary>
         B_OR,
 
         /// <summary>
-        ///     Exclusive OR (i.e. ^).
+        ///     Bitwise exclusive OR (i.e. ^).
         /// </summary>
         XOR,
 
@@ -43,6 +43,16 @@ namespace ExpressiveAnnotations.Analysis
         ///     Bitwise NOT (i.e. ~).
         /// </summary>
         B_NOT,
+
+        /// <summary>
+        ///     Bitwise left shift (i.e. &lt;&lt;)
+        /// </summary>
+        L_SHIFT,
+
+        /// <summary>
+        ///     Bitwise right shift (i.e. &gt;&gt;)
+        /// </summary>
+        R_SHIFT,
 
         /// <summary>
         ///     Greater than or equal to (i.e. &gt;=).
@@ -93,6 +103,11 @@ namespace ExpressiveAnnotations.Analysis
         ///     Division (i.e. /).
         /// </summary>
         DIV,
+
+        /// <summary>
+        ///     Modulo (i.e. %).
+        /// </summary>
+        MOD,
 
         /// <summary>
         ///     Prefix/postfix inc (i.e. ++).
