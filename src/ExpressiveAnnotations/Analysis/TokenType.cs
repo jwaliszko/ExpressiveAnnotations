@@ -45,12 +45,12 @@ namespace ExpressiveAnnotations.Analysis
         B_NOT,
 
         /// <summary>
-        ///     Bitwise left shift (i.e. &lt;&lt;)
+        ///     Bitwise left shift (i.e. &lt;&lt;).
         /// </summary>
         L_SHIFT,
 
         /// <summary>
-        ///     Bitwise right shift (i.e. &gt;&gt;)
+        ///     Bitwise right shift (i.e. &gt;&gt;).
         /// </summary>
         R_SHIFT,
 
@@ -128,6 +128,16 @@ namespace ExpressiveAnnotations.Analysis
         ///     Right bracket (i.e. )).
         /// </summary>
         R_BRACKET,
+
+        /// <summary>
+        ///     Question mark (i.e. ?).
+        /// </summary>
+        QMARK,
+
+        /// <summary>
+        ///     Colon (i.e. :).
+        /// </summary>
+        COLON,
 
         /// <summary>
         ///     Comma (i.e. ,).

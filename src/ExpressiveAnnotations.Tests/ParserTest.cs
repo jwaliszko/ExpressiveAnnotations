@@ -262,6 +262,18 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<object>("0 == YesNo.Yes").Invoke(null));
             Assert.True(parser.Parse<object>("YesNo.Yes == 0").Invoke(null));
             Assert.True(parser.Parse<object>("YesNo.Yes != YesNo.No").Invoke(null));
+
+            Assert.True(parser.Parse<object>("true ? true : false").Invoke(null));
+            Assert.True(parser.Parse<object>("false ? false : true").Invoke(null));
+
+            Assert.True(parser.Parse<object>("(true ? 1 : 2) == 1").Invoke(null));
+            Assert.True(parser.Parse<object>("(false ? 1 : 2) == 2").Invoke(null));
+
+            Assert.True(parser.Parse<object>("(1 > 0 ? true : false) ? (1 > 0 ? true : false) : (false ? false : false)").Invoke(null));
+            Assert.True(parser.Parse<object>("(1 > 0 ? false : true) ? (false ? false : false) : (1 > 0 ? true : false)").Invoke(null));
+
+            Assert.True(parser.Parse<object>("1 > 0 ? true : false ? 1 > 0 ? true : false : false ? false : false").Invoke(null));
+            Assert.True(parser.Parse<object>("1 > 0 ? true : false ? false ? false : false : 1 > 0 ? true : false").Invoke(null));
         }
 
         [Fact]

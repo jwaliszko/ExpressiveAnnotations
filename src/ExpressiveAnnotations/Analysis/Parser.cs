@@ -14,7 +14,8 @@ namespace ExpressiveAnnotations.Analysis
 {
     /* EBNF GRAMMAR:
      * 
-     * expression => l-or-exp
+     * expression => cond-exp
+     * cond-exp   => l-or-exp [ "?" cond-exp ":" cond-exp ]
      * l-or-exp   => l-and-exp [ "||" l-or-exp ]
      * l-and-exp  => b-or-exp [ "&&" l-and-exp ]
      * b-or-exp   => xor-exp [ "|" b-or-exp ]
@@ -28,7 +29,7 @@ namespace ExpressiveAnnotations.Analysis
      * mul-exp    => unary-exp mul-exp'
      * mul-exp'   => "*" mul-exp | "/" mul-exp | "%" mul-exp
      * unary-exp  => val [ "+" | "-" | "!" | "~" unary-exp ]
-     * val        => "null" | int | bin | hex | float | bool | string | func | "(" or-exp ")"
+     * val        => "null" | int | bin | hex | float | bool | string | func | "(" cond-exp ")"
      */
 
     /// <summary>
@@ -314,11 +315,27 @@ namespace ExpressiveAnnotations.Analysis
         private Expression ParseExpression()
         {
             Tokenize();
-            var expr = ParseLogicalOrExp();
+            var expr = ParseConditionalExpression();
             if (PeekType() != TokenType.EOF)
                 throw new ParseErrorException(
                     $"Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
             return expr;
+        }
+
+        private Expression ParseConditionalExpression()
+        {
+            var arg1 = ParseLogicalOrExp();
+            if (PeekType() != TokenType.QMARK)
+                return arg1;
+            ReadToken();
+            var arg2 = ParseConditionalExpression();
+            if (PeekType() != TokenType.COLON)
+                throw new ParseErrorException(
+                    $"Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
+            ReadToken();
+            var arg3 = ParseConditionalExpression();
+
+            return Expression.Condition(arg1, arg2, arg3);
         }
 
         private Expression ParseLogicalOrExp()
@@ -637,7 +654,7 @@ namespace ExpressiveAnnotations.Analysis
             if (PeekType() == TokenType.L_BRACKET)
             {
                 ReadToken();
-                var arg = ParseLogicalOrExp();
+                var arg = ParseConditionalExpression();
                 if (PeekType() != TokenType.R_BRACKET)
                     throw new ParseErrorException(
                         PeekType() == TokenType.EOF
@@ -722,7 +739,7 @@ namespace ExpressiveAnnotations.Analysis
             while (PeekType() != TokenType.R_BRACKET) // read comma-separated arguments until we hit ")"
             {
                 var tkn = PeekToken();
-                var arg = ParseLogicalOrExp();
+                var arg = ParseConditionalExpression();
                 if (PeekType() == TokenType.COMMA)
                     ReadToken();
                 else if (PeekType() != TokenType.R_BRACKET) // when no comma found, function exit expected
