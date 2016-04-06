@@ -17,7 +17,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
     public class ValidatorsTest : BaseTest
     {
         [Fact]
-        public void verify_client_validation_rules_collecting_for_multiple_annotations()
+        public void verify_client_validation_rules_collecting_for_single_model_with_multiple_annotations()
         {
             var model = new Model();
             var assertAttributes = Enumerable.Range(0, 28).Select(x => new AssertThatAttribute($"Value > {x}")).ToArray();
@@ -26,17 +26,22 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             var metadata = GetModelMetadata(model, m => m.Value);
             var controllerContext = GetControllerContext();
 
+            var assertValidators = assertAttributes.Select(attribute => new AssertThatValidator(metadata, controllerContext, attribute)).ToList();
+            var requirValidators = requirAttributes.Select(attribute => new RequiredIfValidator(metadata, controllerContext, attribute)).ToList();
+
+            var i = 0;
             var e = Assert.Throws<ValidationException>(() =>
             {
-                for (var i = 0; i < assertAttributes.Length; i++)
+                while (i < assertValidators.Count)
                 {
-                    var attribute = assertAttributes[i];
-                    var validator = new AssertThatValidator(metadata, controllerContext, attribute);
+                    var validator = assertValidators[i];
                     var rule = validator.GetClientValidationRules().Single();
                     var suffix = i == 0 ? string.Empty : char.ConvertFromUtf32(96 + i);
                     Assert.Equal($"assertthat{suffix}", rule.ValidationType);
+                    i++;
                 }
             });
+            Assert.Equal(27, i); // 27 attributes passed
             Assert.Equal(
                 "AssertThatValidator: collecting of client validation rules for Value field failed.",
                 e.Message);                
@@ -44,18 +49,20 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             Assert.Equal(
                 "No more than 27 unique attributes of the same type can be applied for a single field or property.",
                 e.InnerException.Message);
-            
+
+            var j = 0;
             e = Assert.Throws<ValidationException>(() =>
             {
-                for (var i = 0; i < requirAttributes.Length; i++)
+                while (j < requirValidators.Count)
                 {
-                    var attribute = requirAttributes[i];
-                    var validator = new RequiredIfValidator(metadata, controllerContext, attribute);
+                    var validator = requirValidators[j];
                     var rule = validator.GetClientValidationRules().Single();
-                    var suffix = i == 0 ? string.Empty : char.ConvertFromUtf32(96 + i);
+                    var suffix = j == 0 ? string.Empty : char.ConvertFromUtf32(96 + j);
                     Assert.Equal($"requiredif{suffix}", rule.ValidationType);
+                    j++;
                 }
             });
+            Assert.Equal(27, j); // 27 attributes passed
             Assert.Equal(
                 "RequiredIfValidator: collecting of client validation rules for Value field failed.",
                 e.Message);
@@ -66,30 +73,96 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
         }
 
         [Fact]
-        public void verify_client_validation_rules_collecting_for_separate_model_items()
+        public void verify_client_validation_rules_collecting_for_multiple_models_with_single_annotation()
         {
-            var models = Enumerable.Range(0, 28).Select(x => new Model()).ToArray();
+            var models = Enumerable.Range(0, 28).Select(x => new Model()).ToList();
             var controllerContext = GetControllerContext();
 
-            foreach (var model in models)
+            models.ForEach(model =>
             {
                 var metadata = GetModelMetadata(model, m => m.Value);
-
-                var assertThatValidator = new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("Value > 0"));
-                var rule = assertThatValidator.GetClientValidationRules().Single();
+                var validator = new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("Value > 0"));
+                var rule = validator.GetClientValidationRules().Single();
                 Assert.Equal("assertthat", rule.ValidationType);
+            });
 
-                var requiredIfValidator = new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute("Value > 0"));
-                rule = requiredIfValidator.GetClientValidationRules().Single();
+            models.ForEach(model =>
+            {
+                var metadata = GetModelMetadata(model, m => m.Value);
+                var validator = new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute("Value > 0"));
+                var rule = validator.GetClientValidationRules().Single();
                 Assert.Equal("requiredif", rule.ValidationType);
-            }
+            });
         }
 
         [Fact]
-        public void throw_when_no_httpcontext_is_available()
+        public void verify_client_validation_rules_collecting_for_multiple_models_with_multiple_annotations()
         {
-            HttpContext.Current = null;
+            var models = Enumerable.Range(0, 28).Select(x => new Model()).ToList();
 
+            var assertAttributes = Enumerable.Range(0, 28).Select(x => new AssertThatAttribute($"Value > {x}")).ToArray();
+            var requirAttributes = Enumerable.Range(0, 28).Select(x => new RequiredIfAttribute($"Value > {x}")).ToArray();
+
+            models.ForEach(model =>
+            {
+                var metadata = GetModelMetadata(model, m => m.Value);
+                var controllerContext = GetControllerContext();
+                var assertValidators = assertAttributes.Select(attribute => new AssertThatValidator(metadata, controllerContext, attribute)).ToList();
+
+                var i = 0;
+                var e = Assert.Throws<ValidationException>(() =>
+                {
+                    while (i < assertValidators.Count)
+                    {
+                        var validator = assertValidators[i];
+                        var rule = validator.GetClientValidationRules().Single();
+                        var suffix = i == 0 ? string.Empty : char.ConvertFromUtf32(96 + i);
+                        Assert.Equal($"assertthat{suffix}", rule.ValidationType);
+                        i++;
+                    }
+                });
+                Assert.Equal(27, i); // 27 attributes passed
+                Assert.Equal(
+                    "AssertThatValidator: collecting of client validation rules for Value field failed.",
+                    e.Message);
+                Assert.IsType<InvalidOperationException>(e.InnerException);
+                Assert.Equal(
+                    "No more than 27 unique attributes of the same type can be applied for a single field or property.",
+                    e.InnerException.Message);
+            });
+
+            models.ForEach(model =>
+            {
+                var metadata = GetModelMetadata(model, m => m.Value);
+                var controllerContext = GetControllerContext();
+                var requirValidators = requirAttributes.Select(attribute => new RequiredIfValidator(metadata, controllerContext, attribute)).ToList();
+
+                var j = 0;
+                var e = Assert.Throws<ValidationException>(() =>
+                {
+                    while (j < requirValidators.Count)
+                    {
+                        var validator = requirValidators[j];
+                        var rule = validator.GetClientValidationRules().Single();
+                        var suffix = j == 0 ? string.Empty : char.ConvertFromUtf32(96 + j);
+                        Assert.Equal($"requiredif{suffix}", rule.ValidationType);
+                        j++;
+                    }
+                });
+                Assert.Equal(27, j); // 27 attributes passed
+                Assert.Equal(
+                    "RequiredIfValidator: collecting of client validation rules for Value field failed.",
+                    e.Message);
+                Assert.IsType<InvalidOperationException>(e.InnerException);
+                Assert.Equal(
+                    "No more than 27 unique attributes of the same type can be applied for a single field or property.",
+                    e.InnerException.Message);
+            });
+        }
+
+        [Fact]
+        public void throw_for_client_validation_rules_collecting_when_no_httpcontext_is_available()
+        {
             var model = new Model();
             var assertAttribute = new AssertThatAttribute("true");
             var requirAttribute = new RequiredIfAttribute("true");
@@ -97,7 +170,13 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             var metadata = GetModelMetadata(model, m => m.Value);
             var controllerContext = GetControllerContext();
 
-            var e = Assert.Throws<ValidationException>(() => new AssertThatValidator(metadata, controllerContext, assertAttribute).GetClientValidationRules().Single());
+            var context = HttpContext.Current;
+            var e = Assert.Throws<ValidationException>(() =>
+            {
+                var validator = new AssertThatValidator(metadata, controllerContext, assertAttribute);
+                HttpContext.Current = null;
+                validator.GetClientValidationRules().Single();
+            });
             Assert.Equal(
                 "AssertThatValidator: collecting of client validation rules for Value field failed.",
                 e.Message);
@@ -106,9 +185,47 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
                 "HttpContext not available.",
                 e.InnerException.Message);
 
-            e = Assert.Throws<ValidationException>(() => new RequiredIfValidator(metadata, controllerContext, requirAttribute).GetClientValidationRules().Single());
+            HttpContext.Current = context;
+            e = Assert.Throws<ValidationException>(() =>
+            {
+                var validator = new RequiredIfValidator(metadata, controllerContext, requirAttribute);
+                HttpContext.Current = null;
+                validator.GetClientValidationRules().Single();
+
+            });
             Assert.Equal(
                 "RequiredIfValidator: collecting of client validation rules for Value field failed.",
+                e.Message);
+            Assert.IsType<ApplicationException>(e.InnerException);
+            Assert.Equal(
+                "HttpContext not available.",
+                e.InnerException.Message);
+        }
+
+        [Fact]
+        public void throw_for_validators_creation_when_no_httpcontext_is_available()
+        {
+            var model = new Model();
+            var assertAttribute = new AssertThatAttribute("true");
+            var requirAttribute = new RequiredIfAttribute("true");
+
+            var metadata = GetModelMetadata(model, m => m.Value);
+            var controllerContext = GetControllerContext();
+
+            HttpContext.Current = null;
+
+            var e = Assert.Throws<ValidationException>(() => new AssertThatValidator(metadata, controllerContext, assertAttribute));
+            Assert.Equal(
+                "AssertThatValidator: validation applied to Value field failed.",
+                e.Message);
+            Assert.IsType<ApplicationException>(e.InnerException);
+            Assert.Equal(
+                "HttpContext not available.",
+                e.InnerException.Message);
+
+            e = Assert.Throws<ValidationException>(() => new RequiredIfValidator(metadata, controllerContext, requirAttribute));
+            Assert.Equal(
+                "RequiredIfValidator: validation applied to Value field failed.",
                 e.Message);
             Assert.IsType<ApplicationException>(e.InnerException);
             Assert.Equal(

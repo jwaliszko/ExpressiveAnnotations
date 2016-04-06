@@ -70,6 +70,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Provide more characters than &apos;{StreetPrefix}&apos; prefix only....
+        /// </summary>
+        public static string AddressDetailsTooShort {
+            get {
+                return ResourceManager.GetString("AddressDetailsTooShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Age.
         /// </summary>
         public static string Age {

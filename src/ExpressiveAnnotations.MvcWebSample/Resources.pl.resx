@@ -120,6 +120,9 @@
   <data name="AddressDetailsFormatInvalid" xml:space="preserve">
     <value>Format adresu powinien zaczynać się od prefixu 'Ulica'.</value>
   </data>
+  <data name="AddressDetailsTooShort" xml:space="preserve">
+    <value>Wprowadź więcej znaków niż tylko prefix '{StreetPrefix}'...</value>
+  </data>
   <data name="Age" xml:space="preserve">
     <value>Wiek</value>
   </data>

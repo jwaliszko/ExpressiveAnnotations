@@ -34,5 +34,10 @@ namespace ExpressiveAnnotations.MvcUnobtrusive
         {
             Items[key] = value;
         }
+
+        public static void Remove(string key)
+        {
+            Items.Remove(key);
+        }
     }
 }

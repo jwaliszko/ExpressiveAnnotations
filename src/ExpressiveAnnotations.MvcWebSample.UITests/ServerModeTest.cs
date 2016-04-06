@@ -369,11 +369,24 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         }
 
         [Fact]
-        public void write_correct_prefix_in_home_address_and_verify_no_error_for_home_address_in_server_mode()
+        public void write_correct_prefix_in_home_address_and_verify_second_priority_error_for_home_address_in_server_mode()
         {
             Watch(() =>
             {
                 Home.WriteInput("ContactDetails_Addresses_0__Details", "Street");
+                Home.Submit();
+                Assert.Equal(
+                    "Provide more characters than 'Street' prefix only...",
+                    Home.GetErrorMessage("ContactDetails.Addresses[0].Details"));
+            });
+        }
+
+        [Fact]
+        public void write_sufficient_value_in_home_address_and_verify_no_error_for_home_address_in_server_mode()
+        {
+            Watch(() =>
+            {
+                Home.WriteInput("ContactDetails_Addresses_0__Details", "Street a");
                 Home.Submit();
                 Assert.Equal(
                     string.Empty,
@@ -396,12 +409,12 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         }
 
         [Fact]
-        public void change_culture_write_correct_prefix_in_home_address_and_verify_no_error_for_home_address_in_server_mode()
+        public void change_culture_write_sufficient_value_in_home_address_and_verify_no_error_for_home_address_in_server_mode()
         {
             Watch(() =>
             {
                 Home.SetLang("pl");
-                Home.WriteInput("ContactDetails_Addresses_0__Details", "Ulica");
+                Home.WriteInput("ContactDetails_Addresses_0__Details", "Ulica a");
                 Home.Submit();
                 Assert.Equal(
                     string.Empty,
