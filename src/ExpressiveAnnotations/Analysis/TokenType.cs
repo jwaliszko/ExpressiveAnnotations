@@ -120,12 +120,22 @@ namespace ExpressiveAnnotations.Analysis
         DEC,
 
         /// <summary>
-        ///     Left bracket (i.e. ().
+        ///     Left parenthesis (i.e. ().
+        /// </summary>
+        L_PAR,
+
+        /// <summary>
+        ///     Right parenthesis (i.e. )).
+        /// </summary>
+        R_PAR,
+
+        /// <summary>
+        ///     Left bracket (i.e. [).
         /// </summary>
         L_BRACKET,
 
         /// <summary>
-        ///     Right bracket (i.e. )).
+        ///     Right bracket (i.e. ]).
         /// </summary>
         R_BRACKET,
 
@@ -145,6 +155,11 @@ namespace ExpressiveAnnotations.Analysis
         COMMA,
 
         /// <summary>
+        ///     Period (i.e. .).
+        /// </summary>
+        PERIOD,
+
+        /// <summary>
         ///     NULL (i.e. null).
         /// </summary>
         NULL,
@@ -155,12 +170,12 @@ namespace ExpressiveAnnotations.Analysis
         INT,
 
         /// <summary>
-        ///     Boolean literal (i.e. true, false).
+        ///     Boolean literal (i.e. true or false).
         /// </summary>
         BOOL,
 
         /// <summary>
-        ///     Float literal (e.g. 1.5, -0.3e-2).
+        ///     Float literal (e.g. 1.5, 0.3e-2).
         /// </summary>
         FLOAT,
 
@@ -180,9 +195,9 @@ namespace ExpressiveAnnotations.Analysis
         STRING,
 
         /// <summary>
-        ///     Function (i.e. SomeProperty, SomeType.CONST, SomeEnumType.SomeValue, SomeArray[0], SomeFunction(...)).
+        ///     Identifier (i.e. names of arrays, functions, properties, constants and enums).
         /// </summary>
-        FUNC,
+        ID,
 
         /// <summary>
         ///     End of expression.

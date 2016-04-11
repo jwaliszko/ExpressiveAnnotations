@@ -7,7 +7,7 @@ namespace ExpressiveAnnotations.Analysis
     /// <summary>
     ///     Token definition.
     /// </summary>
-    public sealed class Token
+    public class Token
     {
         /// <summary>
         ///     Initializes a new instance of the <see cref="Token" /> class.

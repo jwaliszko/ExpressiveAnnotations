@@ -1181,7 +1181,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(new Location(1, 3), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("(").Invoke(null));
-            Assert.Equal("Expected \"null\", int, float, bool, string or func. Unexpected end of expression.", e.Error);
+            Assert.Equal("Expected \"null\", int, float, bool, bin, hex, string or id. Unexpected end of expression.", e.Error);
             Assert.Equal(new Location(1, 2), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("(1+1").Invoke(null));
@@ -1189,11 +1189,11 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(new Location(1, 5), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("()").Invoke(null));
-            Assert.Equal("Expected \"null\", int, float, bool, string or func. Unexpected token: ')'.", e.Error);
+            Assert.Equal("Expected \"null\", int, float, bool, bin, hex, string or id. Unexpected token: ')'.", e.Error);
             Assert.Equal(new Location(1, 2), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("Max(").Invoke(null));
-            Assert.Equal("Expected \"null\", int, float, bool, string or func. Unexpected end of expression.", e.Error);
+            Assert.Equal("Expected \"null\", int, float, bool, bin, hex, string or id. Unexpected end of expression.", e.Error);
             Assert.Equal(new Location(1, 5), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("Max(1 2").Invoke(null));

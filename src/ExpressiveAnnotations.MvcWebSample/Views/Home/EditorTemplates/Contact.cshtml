@@ -9,7 +9,7 @@
         <pre class="action">[show attribute]</pre>
         <div>
             @Html.LabelFor(model => model.Email, new { @class = "inline prefix" })
-            @Html.EditorFor(model => model.Email)
+            @Html.TextBoxFor(model => model.Email)
             @Html.ValidationMessageFor(model => model.Email)
         </div>
     </li>
@@ -22,7 +22,7 @@
         <pre class="action">[show attribute]</pre>
         <div>
             @Html.LabelFor(model => model.Phone, new {@class = "inline prefix"})
-            @Html.EditorFor(model => model.Phone)
+            @Html.TextBoxFor(model => model.Phone)
             @Html.ValidationMessageFor(model => model.Phone)
         </div>
     </li>

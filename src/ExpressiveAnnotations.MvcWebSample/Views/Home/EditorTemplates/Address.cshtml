@@ -7,7 +7,7 @@
     <pre class="action">[show attribute]</pre>
     <div>
         @Html.Label(Model.Type, new { @class = "inline prefix" })
-        @Html.EditorFor(model => model.Details)
+        @Html.TextBoxFor(model => model.Details)
         @Html.ValidationMessageFor(model => model.Details)
 
         @*hidden backing fields*@

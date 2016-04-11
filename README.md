@@ -16,9 +16,11 @@ A small .NET and JavaScript library which provides annotation-based conditional 
  - [Declarative vs. imperative programming - what is it about?](#declarative-vs-imperative-programming---what-is-it-about)
  - [How to construct conditional validation attributes?](#how-to-construct-conditional-validation-attributes)
    - [Signatures description](#signatures)
-   - [Implementation details outline](#implementation)
-   - [Traps (discrepancies between C# and JavaScript)](#traps)
+   - [Grammar definition](#grammar)
+   - [Operators precedence](#opprecedence)
+   - [Implementation details](#implementation)
    - [Built-in functions (methods ready to be used by expressions)](#built-in-functions)
+   - [Traps (discrepancies between server- and client-side expressions evaluation)](#traps)   
  - [What about the support of ASP.NET MVC client-side validation?](#what-about-the-support-of-aspnet-mvc-client-side-validation)
  - [Frequently asked questions](#frequently-asked-questions)
    - [Is it possible to compile all usages of annotations at once?](#is-it-possible-to-compile-all-usages-of-annotations-at-once) <sup>(re server-side)</sup>
@@ -158,66 +160,189 @@ ErrorMessage      - Gets or sets an explicit error message string. A difference 
 
 Note above covers almost exhaustively what is actually needed to work with EA. Nevertheless, the full API documentation, generated with [Sandcastle](https://sandcastle.codeplex.com/) (with the support of [SHFB](http://shfb.codeplex.com/)), can be downloaded (in the form of compiled HTML help file) from [here](doc/api/api.chm?raw=true) (includes only C# API, no JavaScript part there).
 
-#####<a id="implementation">Implementation details outline</a>
+#####<a id="grammar">Grammar definition</a>
 
-Implementation core is based on top-down recursive descent [logical expressions parser](src/ExpressiveAnnotations/Analysis/Parser.cs?raw=true), with a single token of lookahead ([LL(1)](http://en.wikipedia.org/wiki/LL_parser)), which runs on the following [EBNF-like](http://en.wikipedia.org/wiki/Extended_Backus–Naur_Form) grammar:
+Valid logical expressions handled by EA parser comply with syntax defined by the following grammar:
+
 ```
-expression => cond-exp
-cond-exp   => l-or-exp [ "?" cond-exp ":" cond-exp ]
-l-or-exp   => l-and-exp [ "||" l-or-exp ]
-l-and-exp  => b-or-exp [ "&&" l-and-exp ]
-b-or-exp   => xor-exp [ "|" b-or-exp ]
-xor-exp    => b-and-exp [ "^" xor-exp ]
-b-and-exp  => eq-exp [ "&" b-and-exp ]
-eq-exp     => rel-exp [ "==" | "!=" eq-exp ]
-rel-exp    => shift-exp [ ">" | ">=" | "<" | "<=" rel-exp ]
-shift-exp  => add-exp [ "<<" | ">>" shift-exp ]
-add-exp    => mul-exp add-exp'
-add-exp'   => "+" add-exp | "-" add-exp
-mul-exp    => unary-exp mul-exp'
-mul-exp'   => "*" mul-exp | "/" mul-exp | "%" mul-exp
-unary-exp  => val [ "+" | "-" | "!" | "~" unary-exp ]
-val        => "null" | int | bin | hex | float | bool | string | func | "(" cond-exp ")"
+expression  => cond-exp
+cond-exp    => l-or-exp [ "?" cond-exp ":" cond-exp ]
+l-or-exp    => l-and-exp [ "||" l-or-exp ]
+l-and-exp   => b-or-exp [ "&&" l-and-exp ]
+b-or-exp    => xor-exp [ "|" b-or-exp ]
+xor-exp     => b-and-exp [ "^" xor-exp ]
+b-and-exp   => eq-exp [ "&" b-and-exp ]
+eq-exp      => rel-exp [ "==" | "!=" eq-exp ]
+rel-exp     => shift-exp [ ">" | ">=" | "<" | "<=" rel-exp ]
+shift-exp   => add-exp [ "<<" | ">>" shift-exp ]
+add-exp     => mul-exp add-exp'
+add-exp'    => "+" | "-" add-exp
+mul-exp     => unary-exp mul-exp'
+mul-exp'    => "*" | "/" | "%" mul-exp
+unary-exp   => primary-exp [ "+" | "-" | "!" | "~" unary-exp ]
+primary-exp => "null" | "true" | "false" | int | float | bin | hex | string | 
+               func-call | subscrit | mem-access | "(" cond-exp ")"
+func-call   => id "(" cond-exp [ "," cond-exp ] ")"
+subscript   => id "[" int "]"
+mem-access  => id [ "." id ]
 ```
-Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar except for *int*, *bin*, *hex*, *float*, *bool*, *string* and *func*, which are assumed to be implicitly defined (*func* identifier specifies either array access, function, enum, constant, or property name).
+Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar except for *int*, *float*, *bin*, *hex*, *string* and *id*, which are assumed to be implicitly defined (*id* identifier specifies names of arrays, functions, properties, constants and enums).
 
-Logical expressions should be built according to the syntax defined by grammar, with the usage of following components:
+Expressions are built of unicode letters and numbers (i.e. `[L*]` and `[N*]` [categories](https://en.wikipedia.org/wiki/Unicode_character_property) respectively) with the usage of following components:
 
-* conditional (ternary) operator: `?:`,
-* logical operators: `||`, `&&`, `!`,
-* bitwise operators: `|`, `&`, `^`, `~`, `<<`, `>>`,
-* comparison operators: `==`, `!=`, `<`, `<=`, `>`, `>=`,
-* arithmetic operators: `+`, `-`, `*`, `/`,	`%`,
-* curly and square brackets: `(`, `)`, `[`, `]`,
-* unicode letters and numbers (i.e. `[L*]` and `[N*]` [categories](https://en.wikipedia.org/wiki/Unicode_character_property) respectively), with the support of `,`, `.`, `_`, `'` and whitespaces, used to synthesize suitable literals:
-  * null literal: `null`, 
-  * integer literals, e.g. `123`, 
-  * real literals, e.g. `1.5` or `-0.3e-2`,
-  * binary literals (`0b` prefix), e.g. `0b1010`,
-  * hexadecimal literals (`0x` prefix), e.g. `0xFF`,
-  * boolean literals: `true` and `false`,
-  * string literals: `'in single quotes'` (internal quote escape sequence is `\'`, character representing new line is `\n`),
-  * func literals:
-	  * arrays indexing, e.g. `Arr[0]`,
-	  * function names, e.g. `Foo`,
-      * property names, e.g. `Prop`,
-	  * constants, e.g. `Type.Const`,
-      * enum values, e.g. `EnumType.Val`.
+* logical operators: `!a`, `a||b`, `a&&b`,
+* comparison operators: `a==b`, `a!=b`, `a<b`, `a<=b`, `a>b`, `a>=b`,
+* arithmetic operators: `+a`, `-a`, `a+b`, `a-b`, `a*b`, `a/b`, `a%b`, `~a`, `a&b`, `a^b`, `a|b`, `a<<b`, `a>>b`,
+* other operators: `a()`, `a[]`, `a.b`, `a?b:c`, `a,b`,
+* literals:
+  * null, i.e. `null`,
+  * boolean, i.e. `true` and `false`,
+  * integer, e.g. `123`,
+  * float, e.g. `1.5` or `0.3e-2`,
+  * binary (with `0b` prefix), e.g. `0b1010`,
+  * hexadecimal (with `0x` prefix), e.g. `0xFF`,
+  * string, e.g. `'in single quotes'` (internal quote escape sequence is `\'`, character representing new line is `\n`),
+  * id, i.e. names of arrays, functions, properties, constants and enums.
+
+#####<a id="opprecedence">Operators precedence</a>
+
+The following table lists the precedence and associativity of operators (listed top to bottom, in descending precedence):
+
+<table>
+	<thead>
+		<tr>
+			<th>Precedence</th>
+			<th>Operator</th>
+			<th>Description</th>
+			<th>Associativity</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td valign="top" rowspan="3">1</td>
+			<td>
+				<code>()</code><br />
+			</td>
+			<td>Function call (postfix)</td>
+			<td valign="top" rowspan="3">Left to right</td>
+		</tr>
+		<tr>
+			<td>
+				<code>[]</code><br />
+			</td>
+			<td>Subscript (postfix)</td>
+		</tr>
+		<tr>
+			<td>
+				<code>.</code>
+			</td>
+			<td>Member access (postfix)</td>
+		</tr>
+		<tr>
+			<td valign="top" rowspan="2">2</td>
+			<td>
+				<code>+</code> <code>-</code>
+			</td>
+			<td>Unary plus and minus</td>
+			<td valign="top" rowspan="2">Right to left</td>
+		</tr>
+		<tr>
+			<td>
+				<code>!</code> <code>~</code>
+			</td>
+			<td>Logical NOT and bitwise NOT (one's complement)</td>
+		</tr>
+		<tr>
+			<td>3</td>
+			<td>
+				<code>*</code> <code>/</code> <code>%</code>
+			</td>
+			<td>Multiplication, division, and remainder</td>
+			<td valign="top" rowspan="11">Left to right</td>
+		</tr>
+		<tr>
+			<td>4</td>
+			<td>
+				<code>+</code> <code>-</code>
+			</td>
+			<td>Addition and subtraction</td>
+		</tr>
+		<tr>
+			<td>5</td>
+			<td>
+				<code>&lt;&lt;</code> <code>&gt;&gt;</code>
+			</td>
+			<td>Bitwise left shift and right shift</td>
+		</tr>
+		<tr>
+			<td valign="top" rowspan="2">6</td>
+			<td>
+				<code>&lt;</code> <code>&lt;=</code>
+			</td>
+			<td>Relational operators &lt; and ≤ respectively</td>
+		</tr>
+		<tr>
+			<td>
+				<code>&gt;</code> <code>&gt;=</code>
+			</td>
+			<td>Relational operators &gt; and ≥ respectively</td>
+		</tr>
+		<tr>
+			<td>7</td>
+			<td>
+				<code>==</code> <code>!=</code>
+			</td>
+			<td>Equality operators = and ≠ respectively</td>
+		</tr>
+		<tr>
+			<td>8</td>
+			<td><code>&amp;</code></td>
+			<td>Bitwise AND</td>
+		</tr>
+		<tr>
+			<td>9</td>
+			<td><code>^</code></td>
+			<td>Bitwise XOR (exclusive OR)</td>
+		</tr>
+		<tr>
+			<td>10</td>
+			<td><code>|</code></td>
+			<td>Bitwise OR (incluseve OR)</td>
+		</tr>
+		<tr>
+			<td>11</td>
+			<td><code>&amp;&amp;</code></td>
+			<td>Logical AND</td>
+		</tr>
+		<tr>
+			<td>12</td>
+			<td><code>||</code></td>
+			<td>Logical OR</td>
+		</tr>
+		<tr>
+			<td>13</td>
+			<td><code>?:</code></td>
+			<td>Ternary conditional</td>
+			<td>Right to left</td>
+		</tr>
+		<tr>
+			<td>14</td>
+			<td><code>,</code></td>
+			<td>Comma</td>
+			<td>Left to right</td>
+		</tr>
+	</tbody>
+</table>
+
+#####<a id="implementation">Implementation details</a>
+
+Implementation core is based on top-down recursive descent [logical expressions parser](src/ExpressiveAnnotations/Analysis/Parser.cs?raw=true), with a single token of lookahead ([LL(1)](http://en.wikipedia.org/wiki/LL_parser)), which runs on the [EBNF-like](http://en.wikipedia.org/wiki/Extended_Backus–Naur_Form) grammar shown above.
 
 Specified expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object. As a result of expression evaluation, boolean flag is returned, indicating that expression is true or false.
 
 For the sake of performance optimization, expressions provided to attributes are compiled only once. Such compiled lambdas are then cached inside attributes instances and invoked for any subsequent validation requests without recompilation.
 
 When working with ASP.NET MVC stack, unobtrusive client-side validation mechanism is [additionally available](#what-about-the-support-of-aspnet-mvc-client-side-validation). Client receives unchanged expression string from server. Such an expression is then evaluated using JavaScript [`eval()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) method within the context of reflected model object. Such a model, analogously to the server-side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
-
-#####<a id="traps">Traps (discrepancies between C# and JavaScript)</a>
-
-Because client-side handles expressions in its unchanged form (as provided to attribute), attention is needed when dealing with `null` keyword - there are discrepancies between EA parser (mostly follows C# rules) and JavaScript, e.g.
-
-* `null + "text"` - in C# `"text"`, in JS `"nulltext"`,
-* `2 * null`      - in C# `null`  , in JS `0`,
-* `null > -1`     - in C# `false` , in JS `true`,
-* and more...
 
 #####<a id="built-in-functions">Built-in functions (methods ready to be used by expressions)</a>
 
@@ -280,6 +405,15 @@ Toolchain functions available out of the box at server- and client-side:
     * Indicates whether the regular expression finds a match in the input string (null-safe).
 * `Guid Guid(string str)`
     * Initializes a new instance of the Guid structure by using the value represented by a specified string.
+
+#####<a id="traps">Traps (discrepancies between server- and client-side expressions evaluation)</a>
+
+Because client-side handles expressions in its unchanged form (as provided to attribute), attention is needed when dealing with `null` keyword - there are discrepancies between EA parser (mostly follows C# rules) and JavaScript, e.g.
+
+* `null + "text"` - in C# `"text"`, in JS `"nulltext"`,
+* `2 * null`      - in C# `null`  , in JS `0`,
+* `null > -1`     - in C# `false` , in JS `true`,
+* and more...
 
 ###<a id="what-about-the-support-of-aspnet-mvc-client-side-validation">What about the support of ASP.NET MVC client-side validation?</a>
 

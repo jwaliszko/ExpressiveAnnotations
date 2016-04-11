@@ -20,118 +20,89 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Fact]
-        public void verify_complex_expression_analysis()
+        public void verify_valid_tokens_extraction()
         {
             const string expression =
-                @"GoAbroad == true
-                      && (
-                             (NextCountry != 'european country' && Compare(NextCountry, Country.Name) == 0)
-                             || (Age > 24 && Age <= 55.5)
-
-                             &&(1.1+2*2>1-2/2+Array[0].Value=='\'\na\n b\nc\n\'')
-                         )";
+                @"! || && == != < <= > >= + - * / % ~ & ^ | << >> () [] . ? :
+                  null true false 123 0.3e-2 0b1010 0xFF '\'\na\n b\nc\n\'' メidメ";
 
             var lexer = new Lexer();
             var tokens = lexer.Analyze(expression).ToArray();
-            Assert.Equal(49, tokens.Length);
-            Assert.Equal("GoAbroad", tokens[0].Value);
-            Assert.Equal(TokenType.FUNC, tokens[0].Type);
-            Assert.Equal("==", tokens[1].Value);
-            Assert.Equal(TokenType.EQ, tokens[1].Type);
-            Assert.Equal(true, tokens[2].Value);
-            Assert.Equal(TokenType.BOOL, tokens[2].Type);
-            Assert.Equal("&&", tokens[3].Value);
-            Assert.Equal(TokenType.L_AND, tokens[3].Type);
-            Assert.Equal("(", tokens[4].Value);
-            Assert.Equal(TokenType.L_BRACKET, tokens[4].Type);
-            Assert.Equal("(", tokens[5].Value);
-            Assert.Equal(TokenType.L_BRACKET, tokens[5].Type);
-            Assert.Equal("NextCountry", tokens[6].Value);
-            Assert.Equal(TokenType.FUNC, tokens[6].Type);
-            Assert.Equal("!=", tokens[7].Value);
-            Assert.Equal(TokenType.NEQ, tokens[7].Type);
-            Assert.Equal("european country", tokens[8].Value);
-            Assert.Equal(TokenType.STRING, tokens[8].Type);
-            Assert.Equal("&&", tokens[9].Value);
-            Assert.Equal(TokenType.L_AND, tokens[9].Type);
-            Assert.Equal("Compare", tokens[10].Value);
-            Assert.Equal(TokenType.FUNC, tokens[10].Type);
-            Assert.Equal("(", tokens[11].Value);
-            Assert.Equal(TokenType.L_BRACKET, tokens[11].Type);
-            Assert.Equal("NextCountry", tokens[12].Value);
-            Assert.Equal(TokenType.FUNC, tokens[12].Type);
-            Assert.Equal(",", tokens[13].Value);
-            Assert.Equal(TokenType.COMMA, tokens[13].Type);
-            Assert.Equal("Country.Name", tokens[14].Value);
-            Assert.Equal(TokenType.FUNC, tokens[14].Type);
-            Assert.Equal(")", tokens[15].Value);
-            Assert.Equal(TokenType.R_BRACKET, tokens[15].Type);
-            Assert.Equal("==", tokens[16].Value);
-            Assert.Equal(TokenType.EQ, tokens[16].Type);
-            Assert.Equal(0, tokens[17].Value);
-            Assert.Equal(TokenType.INT, tokens[17].Type);
-            Assert.Equal(")", tokens[18].Value);
-            Assert.Equal(TokenType.R_BRACKET, tokens[18].Type);
-            Assert.Equal("||", tokens[19].Value);
-            Assert.Equal(TokenType.L_OR, tokens[19].Type);
+            Assert.Equal(37, tokens.Length);
+            Assert.Equal("!", tokens[0].Value);
+            Assert.Equal(TokenType.L_NOT, tokens[0].Type);
+            Assert.Equal("||", tokens[1].Value);
+            Assert.Equal(TokenType.L_OR, tokens[1].Type);
+            Assert.Equal("&&", tokens[2].Value);
+            Assert.Equal(TokenType.L_AND, tokens[2].Type);
+            Assert.Equal("==", tokens[3].Value);
+            Assert.Equal(TokenType.EQ, tokens[3].Type);
+            Assert.Equal("!=", tokens[4].Value);
+            Assert.Equal(TokenType.NEQ, tokens[4].Type);
+            Assert.Equal("<", tokens[5].Value);
+            Assert.Equal(TokenType.LT, tokens[5].Type);
+            Assert.Equal("<=", tokens[6].Value);
+            Assert.Equal(TokenType.LE, tokens[6].Type);
+            Assert.Equal(">", tokens[7].Value);
+            Assert.Equal(TokenType.GT, tokens[7].Type);
+            Assert.Equal(">=", tokens[8].Value);
+            Assert.Equal(TokenType.GE, tokens[8].Type);
+            Assert.Equal("+", tokens[9].Value);
+            Assert.Equal(TokenType.ADD, tokens[9].Type);
+            Assert.Equal("-", tokens[10].Value);
+            Assert.Equal(TokenType.SUB, tokens[10].Type);
+            Assert.Equal("*", tokens[11].Value);
+            Assert.Equal(TokenType.MUL, tokens[11].Type);
+            Assert.Equal("/", tokens[12].Value);
+            Assert.Equal(TokenType.DIV, tokens[12].Type);
+            Assert.Equal("%", tokens[13].Value);
+            Assert.Equal(TokenType.MOD, tokens[13].Type);
+            Assert.Equal("~", tokens[14].Value);
+            Assert.Equal(TokenType.B_NOT, tokens[14].Type);
+            Assert.Equal("&", tokens[15].Value);
+            Assert.Equal(TokenType.B_AND, tokens[15].Type);
+            Assert.Equal("^", tokens[16].Value);
+            Assert.Equal(TokenType.XOR, tokens[16].Type);
+            Assert.Equal("|", tokens[17].Value);
+            Assert.Equal(TokenType.B_OR, tokens[17].Type);
+            Assert.Equal("<<", tokens[18].Value);
+            Assert.Equal(TokenType.L_SHIFT, tokens[18].Type);
+            Assert.Equal(">>", tokens[19].Value);
+            Assert.Equal(TokenType.R_SHIFT, tokens[19].Type);
             Assert.Equal("(", tokens[20].Value);
-            Assert.Equal(TokenType.L_BRACKET, tokens[20].Type);
-            Assert.Equal("Age", tokens[21].Value);
-            Assert.Equal(TokenType.FUNC, tokens[21].Type);
-            Assert.Equal(">", tokens[22].Value);
-            Assert.Equal(TokenType.GT, tokens[22].Type);
-            Assert.Equal(24, tokens[23].Value);
-            Assert.Equal(TokenType.INT, tokens[23].Type);
-            Assert.Equal("&&", tokens[24].Value);
-            Assert.Equal(TokenType.L_AND, tokens[24].Type);
-            Assert.Equal("Age", tokens[25].Value);
-            Assert.Equal(TokenType.FUNC, tokens[25].Type);
-            Assert.Equal("<=", tokens[26].Value);
-            Assert.Equal(TokenType.LE, tokens[26].Type);
-            Assert.Equal(55.5d, tokens[27].Value);
-            Assert.Equal(TokenType.FLOAT, tokens[27].Type);
-            Assert.Equal(")", tokens[28].Value);
-            Assert.Equal(TokenType.R_BRACKET, tokens[28].Type);
-            Assert.Equal("&&", tokens[29].Value);
-            Assert.Equal(TokenType.L_AND, tokens[29].Type);
-            Assert.Equal("(", tokens[30].Value);
-            Assert.Equal(TokenType.L_BRACKET, tokens[30].Type);
-            Assert.Equal(1.1, tokens[31].Value);
+            Assert.Equal(TokenType.L_PAR, tokens[20].Type);
+            Assert.Equal(")", tokens[21].Value);
+            Assert.Equal(TokenType.R_PAR, tokens[21].Type);
+            Assert.Equal("[", tokens[22].Value);
+            Assert.Equal(TokenType.L_BRACKET, tokens[22].Type);
+            Assert.Equal("]", tokens[23].Value);
+            Assert.Equal(TokenType.R_BRACKET, tokens[23].Type);
+            Assert.Equal(".", tokens[24].Value);
+            Assert.Equal(TokenType.PERIOD, tokens[24].Type);
+            Assert.Equal("?", tokens[25].Value);
+            Assert.Equal(TokenType.QMARK, tokens[25].Type);
+            Assert.Equal(":", tokens[26].Value);
+            Assert.Equal(TokenType.COLON, tokens[26].Type);
+            Assert.Equal(null, tokens[27].Value);
+            Assert.Equal(TokenType.NULL, tokens[27].Type);
+            Assert.Equal(true, tokens[28].Value);
+            Assert.Equal(TokenType.BOOL, tokens[28].Type);
+            Assert.Equal(false, tokens[29].Value);
+            Assert.Equal(TokenType.BOOL, tokens[29].Type);
+            Assert.Equal(123, tokens[30].Value);
+            Assert.Equal(TokenType.INT, tokens[30].Type);
+            Assert.Equal(0.3e-2, tokens[31].Value);
             Assert.Equal(TokenType.FLOAT, tokens[31].Type);
-            Assert.Equal("+", tokens[32].Value);
-            Assert.Equal(TokenType.ADD, tokens[32].Type);
-            Assert.Equal(2, tokens[33].Value);
-            Assert.Equal(TokenType.INT, tokens[33].Type);
-            Assert.Equal("*", tokens[34].Value);
-            Assert.Equal(TokenType.MUL, tokens[34].Type);
-            Assert.Equal(2, tokens[35].Value);
-            Assert.Equal(TokenType.INT, tokens[35].Type);
-            Assert.Equal(">", tokens[36].Value);
-            Assert.Equal(TokenType.GT, tokens[36].Type);
-            Assert.Equal(1, tokens[37].Value);
-            Assert.Equal(TokenType.INT, tokens[37].Type);
-            Assert.Equal("-", tokens[38].Value);
-            Assert.Equal(TokenType.SUB, tokens[38].Type);
-            Assert.Equal(2, tokens[39].Value);
-            Assert.Equal(TokenType.INT, tokens[39].Type);
-            Assert.Equal("/", tokens[40].Value);
-            Assert.Equal(TokenType.DIV, tokens[40].Type);
-            Assert.Equal(2, tokens[41].Value);
-            Assert.Equal(TokenType.INT, tokens[41].Type);
-            Assert.Equal("+", tokens[42].Value);
-            Assert.Equal(TokenType.ADD, tokens[42].Type);
-            Assert.Equal("Array[0].Value", tokens[43].Value);
-            Assert.Equal(TokenType.FUNC, tokens[43].Type);
-            Assert.Equal("==", tokens[44].Value);
-            Assert.Equal(TokenType.EQ, tokens[44].Type);
-            Assert.Equal("'\r\na\r\n b\r\nc\r\n'", tokens[45].Value); // used alternatively to verbatim string (new line \n in expression has been replaced by windows \r\n)
-            Assert.Equal(TokenType.STRING, tokens[45].Type);
-            Assert.Equal(")", tokens[46].Value);
-            Assert.Equal(TokenType.R_BRACKET, tokens[46].Type);
-            Assert.Equal(")", tokens[47].Value);
-            Assert.Equal(TokenType.R_BRACKET, tokens[47].Type);
-            Assert.Equal(string.Empty, tokens[48].Value);
-            Assert.Equal(TokenType.EOF, tokens[48].Type);
+            Assert.Equal(10, tokens[32].Value);
+            Assert.Equal(TokenType.BIN, tokens[32].Type);
+            Assert.Equal(255, tokens[33].Value);
+            Assert.Equal(TokenType.HEX, tokens[33].Type);
+            Assert.Equal("'\r\na\r\n b\r\nc\r\n'", tokens[34].Value); // used alternatively to verbatim string (new line \n in expression has been replaced by windows \r\n)
+            Assert.Equal(TokenType.STRING, tokens[34].Type);
+            Assert.Equal("メidメ", tokens[35].Value);
+            Assert.Equal(TokenType.ID, tokens[35].Type);          
+            Assert.Equal(string.Empty, tokens[36].Value);
+            Assert.Equal(TokenType.EOF, tokens[36].Type);
         }
 
         [Fact]
@@ -243,42 +214,29 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Fact]
-        public void verify_func_token_extraction()
+        public void verify_id_token_extraction()
         {
-            AssertToken("_", "_", TokenType.FUNC);
-            AssertToken("__", "__", TokenType.FUNC);
-            AssertToken("a", "a", TokenType.FUNC);
-            AssertToken("asd", "asd", TokenType.FUNC);
-            AssertToken("a_a", "a_a", TokenType.FUNC);
-            AssertToken("a.a", "a.a", TokenType.FUNC);
-            AssertToken("_a.a_", "_a.a_", TokenType.FUNC);
-            AssertToken("A", "A", TokenType.FUNC);
-            AssertToken("_._", "_._", TokenType.FUNC);
-            AssertToken("a1", "a1", TokenType.FUNC);
-            AssertToken("a12.a12", "a12.a12", TokenType.FUNC);
-            AssertToken("a1.a2.a3", "a1.a2.a3", TokenType.FUNC);
-            AssertToken("_._._", "_._._", TokenType.FUNC);
-            AssertToken("_123", "_123", TokenType.FUNC);
-            AssertToken("arr[0]", "arr[0]", TokenType.FUNC);
-            AssertToken("a[0]._", "a[0]._", TokenType.FUNC);
-            AssertToken("a[0].a", "a[0].a", TokenType.FUNC);
-            AssertToken("a[0].a1", "a[0].a1", TokenType.FUNC);
-            AssertToken("__[0].__[1]", "__[0].__[1]", TokenType.FUNC);
-            AssertToken("_[0].a[1].a1[2]", "_[0].a[1].a1[2]", TokenType.FUNC);
+            AssertToken("_", "_", TokenType.ID);
+            AssertToken("__", "__", TokenType.ID);
+            AssertToken("a", "a", TokenType.ID);
+            AssertToken("asd", "asd", TokenType.ID);
+            AssertToken("a_a", "a_a", TokenType.ID);
+            AssertToken("A", "A", TokenType.ID);
+            AssertToken("a1", "a1", TokenType.ID);
+            AssertToken("_123", "_123", TokenType.ID);
+            AssertToken("メ", "メ", TokenType.ID);
 
-            AssertNotToken("1", TokenType.FUNC);
-            AssertNotToken("1.1", TokenType.FUNC);
-            AssertNotToken("1.1.1", TokenType.FUNC);
-            AssertNotToken("a.", TokenType.FUNC);
-            AssertNotToken("a..a", TokenType.FUNC);
-            AssertNotToken("a.1", TokenType.FUNC);
-            AssertNotToken("a.+", TokenType.FUNC);
-            AssertNotToken("foo()", TokenType.FUNC); // brackets are not part of the token
-            AssertNotToken("[]", TokenType.FUNC);
-            AssertNotToken("[0]", TokenType.FUNC);
-            AssertNotToken("_[0].1", TokenType.FUNC);
-            AssertNotToken("_[0]_", TokenType.FUNC);
-            AssertNotToken("_[0][0]", TokenType.FUNC);
+            AssertNotToken("1", TokenType.ID);
+            AssertNotToken("1.1", TokenType.ID);
+            AssertNotToken("a.", TokenType.ID);
+            AssertNotToken("a..a", TokenType.ID);
+            AssertNotToken("a.1", TokenType.ID);
+            AssertNotToken("foo()", TokenType.ID); // brackets are not part of the token
+            AssertNotToken("[]", TokenType.ID);
+            AssertNotToken("[0]", TokenType.ID);
+            AssertNotToken("_[0].1", TokenType.ID);
+            AssertNotToken("_[0]_", TokenType.ID);
+            AssertNotToken("_[0][0]", TokenType.ID);
         }
 
         private static void AssertToken(string expression, object value, TokenType type)

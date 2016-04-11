@@ -56,7 +56,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                 var assembly = Assembly.LoadFrom(assemblyPath);
                 var attribs = assembly.CompileExpressiveAttributes();
 
-                Assert.Equal(28, attribs.Count());
+                Assert.Equal(29, attribs.Count());
             }
             catch (ReflectionTypeLoadException e)
             {

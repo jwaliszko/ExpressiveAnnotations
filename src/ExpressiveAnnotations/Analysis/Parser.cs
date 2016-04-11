@@ -8,28 +8,33 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ExpressiveAnnotations.Analysis
 {
     /* EBNF GRAMMAR:
      * 
-     * expression => cond-exp
-     * cond-exp   => l-or-exp [ "?" cond-exp ":" cond-exp ]
-     * l-or-exp   => l-and-exp [ "||" l-or-exp ]
-     * l-and-exp  => b-or-exp [ "&&" l-and-exp ]
-     * b-or-exp   => xor-exp [ "|" b-or-exp ]
-     * xor-exp    => b-and-exp [ "^" xor-exp ]
-     * b-and-exp  => eq-exp [ "&" b-and-exp ]     
-     * eq-exp     => rel-exp [ "==" | "!=" eq-exp ]
-     * rel-exp    => shift-exp [ ">" | ">=" | "<" | "<=" rel-exp ]
-     * shift-exp  => add-exp [ "<<" | ">>" shift-exp ]
-     * add-exp    => mul-exp add-exp'
-     * add-exp'   => "+" add-exp | "-" add-exp
-     * mul-exp    => unary-exp mul-exp'
-     * mul-exp'   => "*" mul-exp | "/" mul-exp | "%" mul-exp
-     * unary-exp  => val [ "+" | "-" | "!" | "~" unary-exp ]
-     * val        => "null" | int | bin | hex | float | bool | string | func | "(" cond-exp ")"
+     * expression  => cond-exp
+     * cond-exp    => l-or-exp [ "?" cond-exp ":" cond-exp ]
+     * l-or-exp    => l-and-exp [ "||" l-or-exp ]
+     * l-and-exp   => b-or-exp [ "&&" l-and-exp ]
+     * b-or-exp    => xor-exp [ "|" b-or-exp ]
+     * xor-exp     => b-and-exp [ "^" xor-exp ]
+     * b-and-exp   => eq-exp [ "&" b-and-exp ]     
+     * eq-exp      => rel-exp [ "==" | "!=" eq-exp ]
+     * rel-exp     => shift-exp [ ">" | ">=" | "<" | "<=" rel-exp ]
+     * shift-exp   => add-exp [ "<<" | ">>" shift-exp ]
+     * add-exp     => mul-exp add-exp'
+     * add-exp'    => "+" | "-" add-exp
+     * mul-exp     => unary-exp mul-exp'
+     * mul-exp'    => "*" | "/" | "%" mul-exp
+     * unary-exp   => primary-exp [ "+" | "-" | "!" | "~" unary-exp ]
+     * primary-exp => "null" | "true" | "false" | int | float | bin | hex | string | 
+	 *                func-call | subscrit | mem-access | "(" cond-exp ")"
+     * func-call   => id "(" cond-exp [ "," cond-exp ] ")"
+     * subscript   => id "[" int "]"
+     * mem-access  => id [ "." id ]
      */
 
     /// <summary>
@@ -293,7 +298,7 @@ namespace ExpressiveAnnotations.Analysis
             return TokensToProcess.Peek().Value;
         }
 
-        private object PeekRawValue() // to be displayed in error messages, e.g. instead of converted 0.1 gets raw .1
+        private string PeekRawValue() // to be displayed in error messages, e.g. instead of converted 0.1 gets raw .1
         {
             return TokensToProcess.Peek().RawValue;
         }
@@ -555,21 +560,12 @@ namespace ExpressiveAnnotations.Analysis
                         $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
             }
 
-            if (oper.Type == TokenType.ADD)
-                if (arg1.Type.IsDateTime() && arg2.Type.IsDateTime())
-                    throw new ParseErrorException(
-                        $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
-            if (oper.Type == TokenType.SUB)
-            {
-                AssertArgsNotNullLiterals(arg1, type1, arg2, type2, oper);
-                if (arg1.Type.IsString() && arg2.Type.IsString())
-                    throw new ParseErrorException(
-                        $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
-            }
-
             switch (oper.Type)
             {
                 case TokenType.ADD:
+                    if (arg1.Type.IsDateTime() && arg2.Type.IsDateTime())
+                        throw new ParseErrorException(
+                            $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
                     return ParseAdditiveExpInternal(
                         (arg1.Type.IsString() || arg2.Type.IsString())
                             ? Expression.Add(
@@ -579,6 +575,10 @@ namespace ExpressiveAnnotations.Analysis
                             : Expression.Add(arg1, arg2));
                 default:
                     Debug.Assert(oper.Type == TokenType.SUB);
+                    AssertArgsNotNullLiterals(arg1, type1, arg2, type2, oper);
+                    if (arg1.Type.IsString() && arg2.Type.IsString())
+                        throw new ParseErrorException(
+                            $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
                     return ParseAdditiveExpInternal(Expression.Subtract(arg1, arg2));
             }
         }
@@ -620,7 +620,7 @@ namespace ExpressiveAnnotations.Analysis
         private Expression ParseUnaryExp()
         {
             if (!new[] {TokenType.ADD, TokenType.SUB, TokenType.L_NOT, TokenType.B_NOT}.Contains(PeekType()))
-                return ParseVal();
+                return ParsePrimaryExp();
             var oper = PeekToken();
             ReadToken();
             var arg = ParseUnaryExp(); // allow multiple negations
@@ -649,22 +649,8 @@ namespace ExpressiveAnnotations.Analysis
             }
         }
 
-        private Expression ParseVal()
+        private Expression ParsePrimaryExp()
         {
-            if (PeekType() == TokenType.L_BRACKET)
-            {
-                ReadToken();
-                var arg = ParseConditionalExpression();
-                if (PeekType() != TokenType.R_BRACKET)
-                    throw new ParseErrorException(
-                        PeekType() == TokenType.EOF
-                            ? "Expected closing bracket. Unexpected end of expression."
-                            : $"Expected closing bracket. Unexpected token: '{PeekRawValue()}'.", 
-                        Expr, PeekToken().Location);
-                ReadToken();
-                return arg;
-            }
-
             switch (PeekType())
             {
                 case TokenType.NULL:
@@ -679,14 +665,25 @@ namespace ExpressiveAnnotations.Analysis
                     return ParseBool();
                 case TokenType.STRING:
                     return ParseString();
-                case TokenType.FUNC:
-                    return ParseFunc();
+                case TokenType.ID:
+                    return ParseId();
+                case TokenType.L_PAR:
+                    ReadToken();
+                    var arg = ParseConditionalExpression();
+                    if (PeekType() != TokenType.R_PAR)
+                        throw new ParseErrorException(
+                            PeekType() == TokenType.EOF
+                                ? "Expected closing bracket. Unexpected end of expression."
+                                : $"Expected closing bracket. Unexpected token: '{PeekRawValue()}'.",
+                            Expr, PeekToken().Location);
+                    ReadToken();
+                    return arg;
                 case TokenType.EOF:
                     throw new ParseErrorException(
-                        "Expected \"null\", int, float, bool, string or func. Unexpected end of expression.", Expr, PeekToken().Location);
+                        "Expected \"null\", int, float, bool, bin, hex, string or id. Unexpected end of expression.", Expr, PeekToken().Location);                
                 default:
                     throw new ParseErrorException(
-                        $"Expected \"null\", int, float, bool, string or func. Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
+                        $"Expected \"null\", int, float, bool, bin, hex, string or id. Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
             }
         }
 
@@ -724,25 +721,32 @@ namespace ExpressiveAnnotations.Analysis
             return Expression.Constant(value, typeof (string));
         }
 
-        private Expression ParseFunc()
+        private Expression ParseId()
         {
             var func = PeekToken();
-            var name = func.Value.ToString();
             ReadToken(); // read name
 
-            if (PeekType() != TokenType.L_BRACKET)
-                return ExtractFieldExpression(name); // get property or enum
+            switch (PeekType())
+            {
+                case TokenType.L_PAR:
+                    return ParseFuncCall(func);
+                default:
+                    return ParseMemberAccess(func);
+            }
+        }
 
-            // parse a function call
+        private Expression ParseFuncCall(Token func)
+        {
+            var name = func.RawValue;
             ReadToken(); // read "("
             var args = new List<Tuple<Expression, Location>>();
-            while (PeekType() != TokenType.R_BRACKET) // read comma-separated arguments until we hit ")"
+            while (PeekType() != TokenType.R_PAR) // read comma-separated arguments until we hit ")"
             {
                 var tkn = PeekToken();
                 var arg = ParseConditionalExpression();
                 if (PeekType() == TokenType.COMMA)
                     ReadToken();
-                else if (PeekType() != TokenType.R_BRACKET) // when no comma found, function exit expected
+                else if (PeekType() != TokenType.R_PAR) // when no comma found, function exit expected
                     throw new ParseErrorException(
                         PeekType() == TokenType.EOF
                             ? $"Function '{name}', expected comma or closing bracket. Unexpected end of expression."
@@ -755,17 +759,65 @@ namespace ExpressiveAnnotations.Analysis
             return ExtractMethodExpression(name, args, func.Location); // get method call
         }
 
-        private Expression ExtractFieldExpression(string name)
+        private Expression ParseMemberAccess(Token prop)
         {
-            var expression = FetchPropertyValue(name) ?? FetchEnumValue(name) ?? FetchConstValue(name);
+            var name = prop.RawValue;
+            var builder = new StringBuilder(name);
+            while (new[] {TokenType.L_BRACKET, TokenType.PERIOD}.Contains(PeekType()))
+            {
+                switch (PeekType())
+                {
+                    case TokenType.PERIOD: // parse member access
+                        builder.Append(PeekValue());
+                        ReadToken(); // read "."
+                        if(PeekType() != TokenType.ID)
+                            throw new ParseErrorException(
+                                PeekType() == TokenType.EOF
+                                    ? $"Member '{name}', expected subproperty. Unexpected end of expression."
+                                    : $"Member '{name}', expected subproperty. Unexpected token: '{PeekRawValue()}'.",
+                                Expr, PeekToken().Location);
+                        name = PeekRawValue();
+                        builder.Append(name);
+                        ReadToken();
+                        break;
+                    default: // parse subscrit
+                        Debug.Assert(PeekType() == TokenType.L_BRACKET);
+                        builder.Append(PeekValue());
+                        ReadToken(); // read "["
+                        if (PeekType() != TokenType.INT)
+                            throw new ParseErrorException(
+                                PeekType() == TokenType.EOF
+                                    ? $"Array '{name}', expected integral index. Unexpected end of expression."
+                                    : $"Array '{name}', expected integral index. Unexpected token: '{PeekRawValue()}'.",
+                                Expr, PeekToken().Location);
+                        builder.Append(PeekValue());
+                        ReadToken();
+                        if (PeekType() != TokenType.R_BRACKET)
+                            throw new ParseErrorException(
+                                PeekType() == TokenType.EOF
+                                    ? $"Array '{name}', expected closing bracket. Unexpected end of expression."
+                                    : $"Array '{name}', expected closing bracket. Unexpected token: '{PeekRawValue()}'.",
+                                Expr, PeekToken().Location);
+                        builder.Append(PeekValue());
+                        ReadToken(); // read "]"
+                        break;
+                }
+            }
+
+            return ExtractMemberExpression(builder.ToString(), prop.Location);
+        }
+
+        private Expression ExtractMemberExpression(string name, Location pos)
+        {
+            var expression = FetchPropertyValue(name, pos) ?? FetchEnumValue(name, pos) ?? FetchConstValue(name, pos);
             if (expression == null)
                 throw new ParseErrorException(
-                    $"Only public properties, constants and enums are accepted. Identifier '{name}' not known.", Expr, PeekToken(1).Location);
+                    $"Only public properties, constants and enums are accepted. Identifier '{name}' not known.", Expr, pos);
 
             return expression;
         }
 
-        private Expression FetchPropertyValue(string name)
+        private Expression FetchPropertyValue(string name, Location pos)
         {
             var type = ContextType;
             var expr = ContextExpression;
@@ -806,7 +858,7 @@ namespace ExpressiveAnnotations.Analysis
 
                     throw new ParseErrorException(
                         $"Identifier '{name.Substring(0, name.Length - 2 - idx.ToString().Length)}' either does not represent an array type or does not declare indexer.",
-                        Expr, PeekToken(1).Location);
+                        Expr, pos);
                 }
 
                 pi = type.GetProperty(part);
@@ -821,7 +873,7 @@ namespace ExpressiveAnnotations.Analysis
             return expr;
         }
 
-        private Expression FetchEnumValue(string name)
+        private Expression FetchEnumValue(string name, Location pos)
         {
             var parts = name.Split('.');
             if (parts.Length > 1)
@@ -835,7 +887,7 @@ namespace ExpressiveAnnotations.Analysis
                 if (enumTypes.Count > 1)
                     throw new ParseErrorException(
                         $"Enum '{enumTypeName}' is ambiguous, found following:{Environment.NewLine}{string.Join("," + Environment.NewLine, enumTypes.Select(x => $"'{x.FullName}'"))}.",
-                        Expr, PeekToken(1).Location);
+                        Expr, pos);
 
                 var type = enumTypes.SingleOrDefault();
                 if (type != null)
@@ -848,7 +900,7 @@ namespace ExpressiveAnnotations.Analysis
             return null;
         }
 
-        private Expression FetchConstValue(string name)
+        private Expression FetchConstValue(string name, Location pos)
         {
             FieldInfo constant;
             var parts = name.Split('.');
@@ -865,7 +917,7 @@ namespace ExpressiveAnnotations.Analysis
                 if (constants.Count > 1)
                     throw new ParseErrorException(
                         $"Constant '{name}' is ambiguous, found following:{Environment.NewLine}{string.Join("," + Environment.NewLine, constants.Select(x => x.ReflectedType != null ? $"'{x.ReflectedType.FullName}.{x.Name}'" : $"'{x.Name}'"))}.",
-                        Expr, PeekToken(1).Location);
+                        Expr, pos);
 
                 constant = constants.SingleOrDefault();
                 
