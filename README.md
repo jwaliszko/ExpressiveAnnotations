@@ -14,12 +14,13 @@ A small .NET and JavaScript library which provides annotation-based conditional 
  - [`RequiredIf` vs. `AssertThat` - where is the difference?](#requiredif-vs-assertthat---where-is-the-difference)
  - [What are brief examples of usage?](#what-are-brief-examples-of-usage)
  - [Declarative vs. imperative programming - what is it about?](#declarative-vs-imperative-programming---what-is-it-about)
+ - [EA expressions specification](#expressions-specification)
+   - [Grammar definition](#grammar-definition)
+   - [Operators precedence](#operators-precedence)
+   - [Built-in functions (methods ready to be used by expressions)](#built-in-functions)
  - [How to construct conditional validation attributes?](#how-to-construct-conditional-validation-attributes)
    - [Signatures description](#signatures)
-   - [Grammar definition](#grammar)
-   - [Operators precedence](#opprecedence)
-   - [Implementation details](#implementation)
-   - [Built-in functions (methods ready to be used by expressions)](#built-in-functions)
+   - [Implementation details outline](#implementation)   
    - [Traps (discrepancies between server- and client-side expressions evaluation)](#traps)   
  - [What about the support of ASP.NET MVC client-side validation?](#what-about-the-support-of-aspnet-mvc-client-side-validation)
  - [Frequently asked questions](#frequently-asked-questions)
@@ -122,43 +123,7 @@ If we choose this way instead of model fields decoration, it has negative impact
 ```
 Here instead, we're saying "If condition is met, return some view. Otherwise, add error message to state container. Return other view."
 
-###<a id="how-to-construct-conditional-validation-attributes">How to construct conditional validation attributes?</a>
-
-#####<a id="signatures">Signatures description</a>
-
-```
-RequiredIfAttribute(
-    string expression,
-    [bool AllowEmptyStrings], 
-	[int Priority]           
-	[string ErrorMessage]    ...) - Validation attribute which indicates that annotated 
-                                    field is required when computed result of given logical 
-                                    expression is true.
-AssertThatAttribute(
-    string expression,
-	[int Priority]           
-	[string ErrorMessage]    ...) - Validation attribute, executed for non-null annotated 
-                                    field, which indicates that assertion given in logical 
-                                    expression has to be satisfied, for such field to be 
-                                    considered as valid.
-
-expression        - The logical expression based on which specified condition is computed.
-AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should allow empty 
-                    or whitespace strings. False by default.
-Priority          - Gets or sets the hint, available for any concerned external components, 
-                    indicating the order in which this attribute should be executed among 
-                    others of its kind, i.e. ExpressiveAttribute. Value is optional and not
-					set by default, which means that execution order is undefined.
-ErrorMessage      - Gets or sets an explicit error message string. A difference to default 
-					behavior is awareness of new format items, i.e. {fieldPath[:indicator]}. 
-					Given in curly brackets, can be used to extract values of specified 
-					fields, e.g. {field}, {field.field}, within current model context or 
-					display names of such fields, e.g. {field:n}. Braces can be escaped by 
-					double-braces, i.e. to output a { use {{ and to output a } use }}. The 
-					same logic works for messages provided in resources.
-```
-
-Note above covers almost exhaustively what is actually needed to work with EA. Nevertheless, the full API documentation, generated with [Sandcastle](https://sandcastle.codeplex.com/) (with the support of [SHFB](http://shfb.codeplex.com/)), can be downloaded (in the form of compiled HTML help file) from [here](doc/api/api.chm?raw=true) (includes only C# API, no JavaScript part there).
+###<a id="expressions-specification">EA expressions specification</a>
 
 #####<a id="grammar">Grammar definition</a>
 
@@ -204,145 +169,135 @@ Expressions are built of unicode letters and numbers (i.e. `[L*]` and `[N*]` [ca
   * string, e.g. `'in single quotes'` (internal quote escape sequence is `\'`, character representing new line is `\n`),
   * id, i.e. names of arrays, functions, properties, constants and enums.
 
-#####<a id="opprecedence">Operators precedence</a>
+#####<a id="operators-precedence">Operators precedence</a>
 
 The following table lists the precedence and associativity of operators (listed top to bottom, in descending precedence):
 
 <table>
-	<thead>
-		<tr>
-			<th>Precedence</th>
-			<th>Operator</th>
-			<th>Description</th>
-			<th>Associativity</th>
-		</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<td valign="top" rowspan="3">1</td>
-			<td>
-				<code>()</code><br />
-			</td>
-			<td>Function call (postfix)</td>
-			<td valign="top" rowspan="3">Left to right</td>
-		</tr>
-		<tr>
-			<td>
-				<code>[]</code><br />
-			</td>
-			<td>Subscript (postfix)</td>
-		</tr>
-		<tr>
-			<td>
-				<code>.</code>
-			</td>
-			<td>Member access (postfix)</td>
-		</tr>
-		<tr>
-			<td valign="top" rowspan="2">2</td>
-			<td>
-				<code>+</code> <code>-</code>
-			</td>
-			<td>Unary plus and minus</td>
-			<td valign="top" rowspan="2">Right to left</td>
-		</tr>
-		<tr>
-			<td>
-				<code>!</code> <code>~</code>
-			</td>
-			<td>Logical NOT and bitwise NOT (one's complement)</td>
-		</tr>
-		<tr>
-			<td>3</td>
-			<td>
-				<code>*</code> <code>/</code> <code>%</code>
-			</td>
-			<td>Multiplication, division, and remainder</td>
-			<td valign="top" rowspan="11">Left to right</td>
-		</tr>
-		<tr>
-			<td>4</td>
-			<td>
-				<code>+</code> <code>-</code>
-			</td>
-			<td>Addition and subtraction</td>
-		</tr>
-		<tr>
-			<td>5</td>
-			<td>
-				<code>&lt;&lt;</code> <code>&gt;&gt;</code>
-			</td>
-			<td>Bitwise left shift and right shift</td>
-		</tr>
-		<tr>
-			<td valign="top" rowspan="2">6</td>
-			<td>
-				<code>&lt;</code> <code>&lt;=</code>
-			</td>
-			<td>Relational operators &lt; and ≤ respectively</td>
-		</tr>
-		<tr>
-			<td>
-				<code>&gt;</code> <code>&gt;=</code>
-			</td>
-			<td>Relational operators &gt; and ≥ respectively</td>
-		</tr>
-		<tr>
-			<td>7</td>
-			<td>
-				<code>==</code> <code>!=</code>
-			</td>
-			<td>Equality operators = and ≠ respectively</td>
-		</tr>
-		<tr>
-			<td>8</td>
-			<td><code>&amp;</code></td>
-			<td>Bitwise AND</td>
-		</tr>
-		<tr>
-			<td>9</td>
-			<td><code>^</code></td>
-			<td>Bitwise XOR (exclusive OR)</td>
-		</tr>
-		<tr>
-			<td>10</td>
-			<td><code>|</code></td>
-			<td>Bitwise OR (incluseve OR)</td>
-		</tr>
-		<tr>
-			<td>11</td>
-			<td><code>&amp;&amp;</code></td>
-			<td>Logical AND</td>
-		</tr>
-		<tr>
-			<td>12</td>
-			<td><code>||</code></td>
-			<td>Logical OR</td>
-		</tr>
-		<tr>
-			<td>13</td>
-			<td><code>?:</code></td>
-			<td>Ternary conditional</td>
-			<td>Right to left</td>
-		</tr>
-		<tr>
-			<td>14</td>
-			<td><code>,</code></td>
-			<td>Comma</td>
-			<td>Left to right</td>
-		</tr>
-	</tbody>
+    <thead>
+        <tr>
+            <th>Precedence</th>
+            <th>Operator</th>
+            <th>Description</th>
+            <th>Associativity</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td valign="top" rowspan="3">1</td>
+            <td>
+                <code>()</code><br />
+            </td>
+            <td>Function call (postfix)</td>
+            <td valign="top" rowspan="3">Left to right</td>
+        </tr>
+        <tr>
+            <td>
+                <code>[]</code><br />
+            </td>
+            <td>Subscript (postfix)</td>
+        </tr>
+        <tr>
+            <td>
+                <code>.</code>
+            </td>
+            <td>Member access (postfix)</td>
+        </tr>
+        <tr>
+            <td valign="top" rowspan="2">2</td>
+            <td>
+                <code>+</code> <code>-</code>
+            </td>
+            <td>Unary plus and minus</td>
+            <td valign="top" rowspan="2">Right to left</td>
+        </tr>
+        <tr>
+            <td>
+                <code>!</code> <code>~</code>
+            </td>
+            <td>Logical NOT and bitwise NOT (one's complement)</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>
+                <code>*</code> <code>/</code> <code>%</code>
+            </td>
+            <td>Multiplication, division, and remainder</td>
+            <td valign="top" rowspan="11">Left to right</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>
+                <code>+</code> <code>-</code>
+            </td>
+            <td>Addition and subtraction</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>
+                <code>&lt;&lt;</code> <code>&gt;&gt;</code>
+            </td>
+            <td>Bitwise left shift and right shift</td>
+        </tr>
+        <tr>
+            <td valign="top" rowspan="2">6</td>
+            <td>
+                <code>&lt;</code> <code>&lt;=</code>
+            </td>
+            <td>Relational operators &lt; and ≤ respectively</td>
+        </tr>
+        <tr>
+            <td>
+                <code>&gt;</code> <code>&gt;=</code>
+            </td>
+            <td>Relational operators &gt; and ≥ respectively</td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td>
+                <code>==</code> <code>!=</code>
+            </td>
+            <td>Equality operators = and ≠ respectively</td>
+        </tr>
+        <tr>
+            <td>8</td>
+            <td><code>&amp;</code></td>
+            <td>Bitwise AND</td>
+        </tr>
+        <tr>
+            <td>9</td>
+            <td><code>^</code></td>
+            <td>Bitwise XOR (exclusive OR)</td>
+        </tr>
+        <tr>
+            <td>10</td>
+            <td><code>|</code></td>
+            <td>Bitwise OR (incluseve OR)</td>
+        </tr>
+        <tr>
+            <td>11</td>
+            <td><code>&amp;&amp;</code></td>
+            <td>Logical AND</td>
+        </tr>
+        <tr>
+            <td>12</td>
+            <td><code>||</code></td>
+            <td>Logical OR</td>
+        </tr>
+        <tr>
+            <td>13</td>
+            <td><code>?:</code></td>
+            <td>Ternary conditional</td>
+            <td>Right to left</td>
+        </tr>
+        <tr>
+            <td>14</td>
+            <td><code>,</code></td>
+            <td>Comma</td>
+            <td>Left to right</td>
+        </tr>
+    </tbody>
 </table>
-
-#####<a id="implementation">Implementation details</a>
-
-Implementation core is based on top-down recursive descent [logical expressions parser](src/ExpressiveAnnotations/Analysis/Parser.cs?raw=true), with a single token of lookahead ([LL(1)](http://en.wikipedia.org/wiki/LL_parser)), which runs on the [EBNF-like](http://en.wikipedia.org/wiki/Extended_Backus–Naur_Form) grammar shown above.
-
-Specified expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object. As a result of expression evaluation, boolean flag is returned, indicating that expression is true or false.
-
-For the sake of performance optimization, expressions provided to attributes are compiled only once. Such compiled lambdas are then cached inside attributes instances and invoked for any subsequent validation requests without recompilation.
-
-When working with ASP.NET MVC stack, unobtrusive client-side validation mechanism is [additionally available](#what-about-the-support-of-aspnet-mvc-client-side-validation). Client receives unchanged expression string from server. Such an expression is then evaluated using JavaScript [`eval()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) method within the context of reflected model object. Such a model, analogously to the server-side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
 
 #####<a id="built-in-functions">Built-in functions (methods ready to be used by expressions)</a>
 
@@ -406,6 +361,54 @@ Toolchain functions available out of the box at server- and client-side:
 * `Guid Guid(string str)`
     * Initializes a new instance of the Guid structure by using the value represented by a specified string.
 
+###<a id="how-to-construct-conditional-validation-attributes">How to construct conditional validation attributes?</a>
+
+#####<a id="signatures">Signatures description</a>
+
+```
+RequiredIfAttribute(
+    string expression,
+    [bool AllowEmptyStrings], 
+    [int Priority]           
+    [string ErrorMessage]    ...) - Validation attribute which indicates that annotated 
+                                    field is required when computed result of given logical 
+                                    expression is true.
+AssertThatAttribute(
+    string expression,
+    [int Priority]           
+    [string ErrorMessage]    ...) - Validation attribute, executed for non-null annotated 
+                                    field, which indicates that assertion given in logical 
+                                    expression has to be satisfied, for such field to be 
+                                    considered as valid.
+
+expression        - The logical expression based on which specified condition is computed.
+AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should allow empty 
+                    or whitespace strings. False by default.
+Priority          - Gets or sets the hint, available for any concerned external components, 
+                    indicating the order in which this attribute should be executed among 
+                    others of its kind, i.e. ExpressiveAttribute. Value is optional and not
+                    set by default, which means that execution order is undefined.
+ErrorMessage      - Gets or sets an explicit error message string. A difference to default 
+                    behavior is awareness of new format items, i.e. {fieldPath[:indicator]}. 
+                    Given in curly brackets, can be used to extract values of specified 
+                    fields, e.g. {field}, {field.field}, within current model context or 
+                    display names of such fields, e.g. {field:n}. Braces can be escaped by 
+                    double-braces, i.e. to output a { use {{ and to output a } use }}. The 
+                    same logic works for messages provided in resources.
+```
+
+Note above covers almost exhaustively what is actually needed to work with EA. Nevertheless, the full API documentation, generated with [Sandcastle](https://sandcastle.codeplex.com/) (with the support of [SHFB](http://shfb.codeplex.com/)), can be downloaded (in the form of compiled HTML help file) from [here](doc/api/api.chm?raw=true) (includes only C# API, no JavaScript part there).
+
+#####<a id="implementation">Implementation details outline</a>
+
+Implementation core is based on top-down recursive descent [logical expressions parser](src/ExpressiveAnnotations/Analysis/Parser.cs?raw=true), with a single token of lookahead ([LL(1)](http://en.wikipedia.org/wiki/LL_parser)), which runs on the [EBNF-like](http://en.wikipedia.org/wiki/Extended_Backus–Naur_Form) grammar [shown above](#grammar-definition).
+
+Specified expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object. As a result of expression evaluation, boolean flag is returned, indicating that expression is true or false.
+
+For the sake of performance optimization, expressions provided to attributes are compiled only once. Such compiled lambdas are then cached inside attributes instances and invoked for any subsequent validation requests without recompilation.
+
+When working with ASP.NET MVC stack, unobtrusive client-side validation mechanism is [additionally available](#what-about-the-support-of-aspnet-mvc-client-side-validation). Client receives unchanged expression string from server. Such an expression is then evaluated using JavaScript [`eval()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) method within the context of reflected model object. Such a model, analogously to the server-side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
+
 #####<a id="traps">Traps (discrepancies between server- and client-side expressions evaluation)</a>
 
 Because client-side handles expressions in its unchanged form (as provided to attribute), attention is needed when dealing with `null` keyword - there are discrepancies between EA parser (mostly follows C# rules) and JavaScript, e.g.
@@ -433,19 +436,19 @@ Client-side validation is fully supported. Enable it for your web project within
         DataAnnotationsModelValidatorProvider.RegisterAdapter(
             typeof (AssertThatAttribute), typeof (AssertThatValidator));
     ```
-	Alternatively, use predefined `ExpressiveAnnotationsModelValidatorProvider` (recommended):
-	```C#
-	using ExpressiveAnnotations.MvcUnobtrusive.Providers;
-	
+    Alternatively, use predefined `ExpressiveAnnotationsModelValidatorProvider` (recommended):
+    ```C#
+    using ExpressiveAnnotations.MvcUnobtrusive.Providers;
+    
     protected void Application_Start()
     {
-	    ModelValidatorProviders.Providers.Remove(
+        ModelValidatorProviders.Providers.Remove(
             ModelValidatorProviders.Providers
-		        .FirstOrDefault(x => x is DataAnnotationsModelValidatorProvider));
+                .FirstOrDefault(x => x is DataAnnotationsModelValidatorProvider));
         ModelValidatorProviders.Providers.Add(
-	        new ExpressiveAnnotationsModelValidatorProvider());
-	```
-	Despite the fact this provider automatically registers adapters for expressive validation attributes, it additionally respects their processing priorities when validation is performed (i.e. the [`Priority`](#signatures) property actually means something in practice).
+            new ExpressiveAnnotationsModelValidatorProvider());
+    ```
+    Despite the fact this provider automatically registers adapters for expressive validation attributes, it additionally respects their processing priorities when validation is performed (i.e. the [`Priority`](#signatures) property actually means something in practice).
 3. Include [**expressive.annotations.validate.js**](src/expressive.annotations.validate.js?raw=true) script in your page (it should be included in bundle below jQuery validation files):
 
     ```JavaScript
@@ -466,16 +469,16 @@ Yes, a complete list of types with annotations can be retrieved and compiled col
 ```
 public static IEnumerable<ExpressiveAttribute> CompileExpressiveAttributes(this Type type)
 {
-	var properties = type.GetProperties()
-		.Where(p => Attribute.IsDefined(p, typeof (ExpressiveAttribute)));
-	var attributes = new List<ExpressiveAttribute>();
-	foreach (var prop in properties)
-	{
-		var attribs = prop.GetCustomAttributes<ExpressiveAttribute>().ToList();
-		attribs.ForEach(x => x.Compile(prop.DeclaringType));
-		attributes.AddRange(attribs);
-	}
-	return attributes;
+    var properties = type.GetProperties()
+        .Where(p => Attribute.IsDefined(p, typeof (ExpressiveAttribute)));
+    var attributes = new List<ExpressiveAttribute>();
+    foreach (var prop in properties)
+    {
+        var attribs = prop.GetCustomAttributes<ExpressiveAttribute>().ToList();
+        attribs.ForEach(x => x.Compile(prop.DeclaringType));
+        attributes.AddRange(attribs);
+    }
+    return attributes;
 }
 ```
 with the succeeding usage manner:
@@ -486,12 +489,12 @@ var compiled = typeof (SomeModel).CompileExpressiveAttributes().ToList();
 
 // ... or for current assembly:
 compiled = Assembly.GetExecutingAssembly().GetTypes()
-	.SelectMany(t => t.CompileExpressiveAttributes()).ToList();
+    .SelectMany(t => t.CompileExpressiveAttributes()).ToList();
 
 // ... or for all assemblies within current domain:
 compiled = AppDomain.CurrentDomain.GetAssemblies()
-	.SelectMany(a => a.GetTypes()
-		.SelectMany(t => t.CompileExpressiveAttributes())).ToList();
+    .SelectMany(a => a.GetTypes()
+        .SelectMany(t => t.CompileExpressiveAttributes())).ToList();
 ```
 Notice that such compiled lambdas will be cached inside attributes instances stored in `compiled` list.
 That means that subsequent compilation requests:
@@ -543,26 +546,26 @@ If you need to handle value string extracted from DOM field in any non built-in 
     ```C#
     class Model
     {
-	    [ValueParser('customparser')]
-	    public CustomType SomeField { get; set; }
+        [ValueParser('customparser')]
+        public CustomType SomeField { get; set; }
     ```
 
 * at client-side register such a parser:
     ```JavaScript
     <script>
         ea.addValueParser('customparser', function(value, field) {
-		    // parameters: value - raw data string extracted by default from DOM element
+            // parameters: value - raw data string extracted by default from DOM element
             //             field - DOM element name for which parser was invoked
-		    return ... // handle exctracted field value string on your own
+            return ... // handle exctracted field value string on your own
         });
     ```
 
 Finally, there is a possibility to override built-in conversion globally. In this case, use the type name to register your value parser - all fields of such a type will be intercepted by it, e.g.
 ```JavaScript
 <script>
-	ea.addValueParser('typename', function (value) {
-		return ... // handle specified type (numeric, datetime, etc.) parsing on your own
-	});
+    ea.addValueParser('typename', function (value) {
+        return ... // handle specified type (numeric, datetime, etc.) parsing on your own
+    });
 ```
 If you redefine default mechanism, you can still have the `ValueParser` annotation on any fields you consider exceptional - annotation gives the highest parsing priority.
 
@@ -576,16 +579,16 @@ When some non-standard format needs to be handled, simply override the default b
 ```C#
 class Model
 {
-	[ValueParser('ukdateparser')]
-	public DateTime SomeField { get; set; }
+    [ValueParser('ukdateparser')]
+    public DateTime SomeField { get; set; }
 ```
 ```JavaScript
 <script>
     ea.addValueParser('ukdateparser', function(value) {
-		var arr = value.split('/');
-		var date = new Date(arr[2], arr[1] - 1, arr[0]);
-		return date.getTime(); // return msecs since January 1, 1970, 00:00:00 UTC
-	});
+        var arr = value.split('/');
+        var date = new Date(arr[2], arr[1] - 1, arr[0]);
+        return date.getTime(); // return msecs since January 1, 1970, 00:00:00 UTC
+    });
 ```
 
 #####<a id="what-if-ea-variable-is-already-used-by-another-library">What if `ea` variable is already used by another library?</a>
@@ -613,8 +616,8 @@ Default value is *'change keyup'* (for more information check `eventType` parame
 Alternatively, to enforce re-binding of already attached validation handlers, use following construction:
 ```JavaScript
 <script>
-	ea.settings.apply({
-		dependencyTriggers: 'new set of events'
+    ea.settings.apply({
+        dependencyTriggers: 'new set of events'
     });
 ```
 
@@ -624,7 +627,7 @@ If you need more insightful overview of what client-side script is doing (includ
 ```JavaScript
 <script>
     ea.settings.debug = true; // output debug messages to the web console 
-							  // (should be disabled for release code)
+                              // (should be disabled for release code)
 ```
 
 #####<a id="#how-to-fetch-field-value-or-display-name-in-error-message">How to fetch field value or display name in error message?</a>

@@ -31,7 +31,7 @@ namespace ExpressiveAnnotations.Analysis
      * mul-exp'    => "*" | "/" | "%" mul-exp
      * unary-exp   => primary-exp [ "+" | "-" | "!" | "~" unary-exp ]
      * primary-exp => "null" | "true" | "false" | int | float | bin | hex | string | 
-	 *                func-call | subscrit | mem-access | "(" cond-exp ")"
+     *                func-call | subscrit | mem-access | "(" cond-exp ")"
      * func-call   => id "(" cond-exp [ "," cond-exp ] ")"
      * subscript   => id "[" int "]"
      * mem-access  => id [ "." id ]
@@ -60,6 +60,7 @@ namespace ExpressiveAnnotations.Analysis
         private Stack<Token> TokensToProcess { get; set; }
         private Stack<Token> TokensProcessed { get; set; }
         private string Expr { get; set; }
+        private TypeWall Wall { get; set; }
         private Type ContextType { get; set; }
         private Expression ContextExpression { get; set; }
         private IDictionary<string, Type> Fields { get; set; }
@@ -90,6 +91,7 @@ namespace ExpressiveAnnotations.Analysis
                     var param = Expression.Parameter(typeof (TContext));
                     ContextExpression = param;
                     Expr = expression;
+                    Wall = new TypeWall(expression);
                     var expressionTree = ParseExpression();
                     var lambda = Expression.Lambda<Func<TContext, bool>>(expressionTree, param);
                     return lambda.Compile();
@@ -129,6 +131,7 @@ namespace ExpressiveAnnotations.Analysis
                     var param = Expression.Parameter(typeof (object));
                     ContextExpression = Expression.Convert(param, context);
                     Expr = expression;
+                    Wall = new TypeWall(expression);
                     var expressionTree = ParseExpression();
                     var lambda = Expression.Lambda<Func<object, bool>>(expressionTree, param);
                     return lambda.Compile();
@@ -352,10 +355,7 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken();
             var arg2 = ParseLogicalOrExp();
 
-            AssertArgsNotNullLiterals(arg1, arg2, oper);
-            if (!(arg1.Type.IsBool() && arg2.Type.IsBool()))
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
+            Wall.LOr(arg1, arg2, oper);
 
             return Expression.OrElse(arg1, arg2); // short-circuit evaluation
         }
@@ -369,10 +369,7 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken();
             var arg2 = ParseLogicalAndExp();
 
-            AssertArgsNotNullLiterals(arg1, arg2, oper);
-            if (!(arg1.Type.IsBool() && arg2.Type.IsBool()))
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
+            Wall.LAnd(arg1, arg2, oper);
 
             return Expression.AndAlso(arg1, arg2); // short-circuit evaluation
         }
@@ -386,11 +383,7 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken();
             var arg2 = ParseBitwiseOrExp();
 
-            AssertArgsNotNullLiterals(arg1, arg2, oper);
-            if (!(arg1.Type.IsBool() && arg2.Type.IsBool())
-                && !(arg1.Type.IsInteger() && arg2.Type.IsInteger()))
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
+            Wall.BOr(arg1, arg2, oper);
 
             return Expression.Or(arg1, arg2); // non-short-circuit evaluation
         }
@@ -404,11 +397,7 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken();
             var arg2 = ParseXorExp();
 
-            AssertArgsNotNullLiterals(arg1, arg2, oper);
-            if (!(arg1.Type.IsBool() && arg2.Type.IsBool())
-                && !(arg1.Type.IsInteger() && arg2.Type.IsInteger()))
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
+            Wall.Xor(arg1, arg2, oper);
 
             return Expression.ExclusiveOr(arg1, arg2);
         }
@@ -422,11 +411,7 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken();
             var arg2 = ParseBitwiseAndExp();
 
-            AssertArgsNotNullLiterals(arg1, arg2, oper);
-            if (!(arg1.Type.IsBool() && arg2.Type.IsBool())
-                && !(arg1.Type.IsInteger() && arg2.Type.IsInteger()))
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
+            Wall.BAnd(arg1, arg2, oper);
 
             return Expression.And(arg1, arg2); // non-short-circuit evaluation
         }
@@ -443,19 +428,7 @@ namespace ExpressiveAnnotations.Analysis
             var type1 = arg1.Type;
             var type2 = arg2.Type;
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
-
-            if (arg1.Type != arg2.Type
-                && !arg1.IsNullLiteral() && !arg2.IsNullLiteral()
-                && !arg1.Type.IsObject() && !arg2.Type.IsObject())
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
-
-            if (type1.IsNonNullableValueType() && arg2.IsNullLiteral())
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and 'null'.", Expr, oper.Location);
-            if (arg1.IsNullLiteral() && type2.IsNonNullableValueType())
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type 'null' and '{type2}'.", Expr, oper.Location);
+            Wall.Eq(arg1, arg2, type1, type2, oper);
 
             switch (oper.Type)
             {
@@ -479,19 +452,7 @@ namespace ExpressiveAnnotations.Analysis
             var type1 = arg1.Type;
             var type2 = arg2.Type;
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
-
-            if (arg1.Type != arg2.Type
-                && !arg1.IsNullLiteral() && !arg2.IsNullLiteral()
-                && !arg1.Type.IsObject() && !arg2.Type.IsObject())
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
-
-            AssertArgsNotNullLiterals(arg1, type1, arg2, type2, oper);
-            if (!(arg1.Type.IsNumeric() && arg2.Type.IsNumeric())
-                && !(arg1.Type.IsDateTime() && arg2.Type.IsDateTime())
-                && !(arg1.Type.IsTimeSpan() && arg2.Type.IsTimeSpan()))
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
+            Wall.Rel(arg1, arg2, type1, type2, oper);
 
             switch (oper.Type)
             {
@@ -516,10 +477,7 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken();
             var arg2 = ParseShiftExp();
 
-            AssertArgsNotNullLiterals(arg1, arg2, oper);
-            if (!(arg1.Type.IsInteger() && arg2.Type.IsInteger()))
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
+            Wall.Shift(arg1, arg2, oper);
 
             switch (oper.Type)
             {
@@ -548,24 +506,11 @@ namespace ExpressiveAnnotations.Analysis
             var type1 = arg1.Type;
             var type2 = arg2.Type;
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
-            
-            if (!arg1.Type.IsString() && !arg2.Type.IsString())
-            {
-                AssertArgsNotNullLiterals(arg1, type1, arg2, type2, oper);
-                if (!(arg1.Type.IsNumeric() && arg2.Type.IsNumeric())
-                    && !(arg1.Type.IsDateTime() && arg2.Type.IsDateTime())
-                    && !(arg1.Type.IsTimeSpan() && arg2.Type.IsTimeSpan())
-                    && !(arg1.Type.IsDateTime() && arg2.Type.IsTimeSpan()))
-                    throw new ParseErrorException(
-                        $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
-            }
+            Wall.Add(arg1, arg2, type1, type2, oper);
 
             switch (oper.Type)
             {
                 case TokenType.ADD:
-                    if (arg1.Type.IsDateTime() && arg2.Type.IsDateTime())
-                        throw new ParseErrorException(
-                            $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
                     return ParseAdditiveExpInternal(
                         (arg1.Type.IsString() || arg2.Type.IsString())
                             ? Expression.Add(
@@ -575,10 +520,6 @@ namespace ExpressiveAnnotations.Analysis
                             : Expression.Add(arg1, arg2));
                 default:
                     Debug.Assert(oper.Type == TokenType.SUB);
-                    AssertArgsNotNullLiterals(arg1, type1, arg2, type2, oper);
-                    if (arg1.Type.IsString() && arg2.Type.IsString())
-                        throw new ParseErrorException(
-                            $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and '{type2}'.", Expr, oper.Location);
                     return ParseAdditiveExpInternal(Expression.Subtract(arg1, arg2));
             }
         }
@@ -597,14 +538,9 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken();
             var arg2 = ParseUnaryExp();
 
-            if (!arg1.Type.IsNumeric() || !arg2.Type.IsNumeric())
-            {
-                AssertArgsNotNullLiterals(arg1, arg2, oper);
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
-            }
-
+            Wall.Mul(arg1, arg2, oper);
             Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2);
+
             switch (oper.Type)
             {
                 case TokenType.MUL:
@@ -625,15 +561,7 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken();
             var arg = ParseUnaryExp(); // allow multiple negations
 
-            if (arg.IsNullLiteral())
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operand of type 'null'.", Expr, oper.Location);
-            if (oper.Type == TokenType.L_NOT && !arg.Type.IsBool())
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operand of type '{arg.Type}'.", Expr, oper.Location);
-            if (oper.Type == TokenType.B_NOT && !arg.Type.IsBool() && !arg.Type.IsInteger())
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operand of type '{arg.Type}'.", Expr, oper.Location);
+            Wall.Unary(arg, oper);
 
             switch (oper.Type)
             {
@@ -1029,24 +957,6 @@ namespace ExpressiveAnnotations.Analysis
             if (signatures > 1)
                 throw new ParseErrorException(
                     $"Function '{funcName}' accepting {args} argument{(args == 1 ? string.Empty : "s")} is ambiguous.", Expr, funcPos);
-        }
-
-        private void AssertArgsNotNullLiterals(Expression arg1, Expression arg2, Token oper)
-        {
-            AssertArgsNotNullLiterals(arg1, arg1.Type, arg2, arg2.Type, oper);
-        }
-
-        private void AssertArgsNotNullLiterals(Expression arg1, Type type1, Expression arg2, Type type2, Token oper)
-        {
-            if (arg1.IsNullLiteral() && arg2.IsNullLiteral())
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type 'null' and 'null'.", Expr, oper.Location);
-            if (!arg1.IsNullLiteral() && arg2.IsNullLiteral())
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{type1}' and 'null'.", Expr, oper.Location);
-            if (arg1.IsNullLiteral() && !arg2.IsNullLiteral())
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type 'null' and '{type2}'.", Expr, oper.Location);
         }
     }
 }

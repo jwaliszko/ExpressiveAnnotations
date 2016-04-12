@@ -64,6 +64,7 @@
     <Compile Include="Analysis\ParseErrorException.cs" />
     <Compile Include="Analysis\Location.cs" />
     <Compile Include="Analysis\TokenType.cs" />
+    <Compile Include="Analysis\TypeWall.cs" />
     <Compile Include="Attributes\AssertThatAttribute.cs" />
     <Compile Include="Analysis\Token.cs" />
     <Compile Include="Analysis\Lexer.cs" />
