@@ -339,7 +339,10 @@ namespace ExpressiveAnnotations.Analysis
             var arg2 = ParseConditionalExpression();
             if (PeekType() != TokenType.COLON)
                 throw new ParseErrorException(
-                    $"Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
+                    PeekType() == TokenType.EOF
+                        ? "Expected colon of ternary operator. Unexpected end of expression."
+                        : $"Expected colon of ternary operator. Unexpected token: '{PeekRawValue()}'.",
+                    Expr, PeekToken().Location);
             ReadToken();
             var arg3 = ParseConditionalExpression();
 
@@ -596,7 +599,7 @@ namespace ExpressiveAnnotations.Analysis
                 case TokenType.ID:
                     return ParseId();
                 case TokenType.L_PAR:
-                    ReadToken();
+                    ReadToken(); // read "("
                     var arg = ParseConditionalExpression();
                     if (PeekType() != TokenType.R_PAR)
                         throw new ParseErrorException(
@@ -604,7 +607,7 @@ namespace ExpressiveAnnotations.Analysis
                                 ? "Expected closing bracket. Unexpected end of expression."
                                 : $"Expected closing bracket. Unexpected token: '{PeekRawValue()}'.",
                             Expr, PeekToken().Location);
-                    ReadToken();
+                    ReadToken(); // read ")"
                     return arg;
                 case TokenType.EOF:
                     throw new ParseErrorException(
@@ -677,8 +680,8 @@ namespace ExpressiveAnnotations.Analysis
                 else if (PeekType() != TokenType.R_PAR) // when no comma found, function exit expected
                     throw new ParseErrorException(
                         PeekType() == TokenType.EOF
-                            ? $"Function '{name}', expected comma or closing bracket. Unexpected end of expression."
-                            : $"Function '{name}', expected comma or closing bracket. Unexpected token: '{PeekRawValue()}'.",
+                            ? $"Function '{name}' expects comma or closing bracket. Unexpected end of expression."
+                            : $"Function '{name}' expects comma or closing bracket. Unexpected token: '{PeekRawValue()}'.",
                         Expr, PeekToken().Location);
                 args.Add(new Tuple<Expression, Location>(arg, tkn.Location));
             }
@@ -701,8 +704,8 @@ namespace ExpressiveAnnotations.Analysis
                         if(PeekType() != TokenType.ID)
                             throw new ParseErrorException(
                                 PeekType() == TokenType.EOF
-                                    ? $"Member '{name}', expected subproperty. Unexpected end of expression."
-                                    : $"Member '{name}', expected subproperty. Unexpected token: '{PeekRawValue()}'.",
+                                    ? $"Member '{name}' expects subproperty identifier. Unexpected end of expression."
+                                    : $"Member '{name}' expects subproperty identifier. Unexpected token: '{PeekRawValue()}'.",
                                 Expr, PeekToken().Location);
                         name = PeekRawValue();
                         builder.Append(name);
@@ -715,16 +718,16 @@ namespace ExpressiveAnnotations.Analysis
                         if (PeekType() != TokenType.INT)
                             throw new ParseErrorException(
                                 PeekType() == TokenType.EOF
-                                    ? $"Array '{name}', expected integral index. Unexpected end of expression."
-                                    : $"Array '{name}', expected integral index. Unexpected token: '{PeekRawValue()}'.",
+                                    ? $"Array '{name}' expects integral index. Unexpected end of expression."
+                                    : $"Array '{name}' expects integral index. Unexpected token: '{PeekRawValue()}'.",
                                 Expr, PeekToken().Location);
                         builder.Append(PeekValue());
                         ReadToken();
                         if (PeekType() != TokenType.R_BRACKET)
                             throw new ParseErrorException(
                                 PeekType() == TokenType.EOF
-                                    ? $"Array '{name}', expected closing bracket. Unexpected end of expression."
-                                    : $"Array '{name}', expected closing bracket. Unexpected token: '{PeekRawValue()}'.",
+                                    ? $"Array '{name}' expects closing bracket. Unexpected end of expression."
+                                    : $"Array '{name}' expects closing bracket. Unexpected token: '{PeekRawValue()}'.",
                                 Expr, PeekToken().Location);
                         builder.Append(PeekValue());
                         ReadToken(); // read "]"

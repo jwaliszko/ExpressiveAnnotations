@@ -372,6 +372,8 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<Model>("Span + NSpan == NSpan + Span").Invoke(model));
             Assert.True(parser.Parse<Model>("Now() - Span > Date - NSpan").Invoke(model));
             Assert.True(parser.Parse<Model>("Now() - Span > NDate - Span").Invoke(model));
+            Assert.True(parser.Parse<Model>("-NSpan == -NSpan").Invoke(model));
+            Assert.True(parser.Parse<Model>("+NSpan == +NSpan").Invoke(model));
 
             Assert.True(parser.Parse<Model>("DecNumber(SubModel.Number) == Number").Invoke(model));
             Assert.True(parser.Parse<Model>("DecNumber(Number) == 0").Invoke(model.SubModel));
@@ -860,6 +862,54 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("Guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).", e.Message);
         }
 
+        public static IEnumerable<object[]> BitwiseOperators
+        {
+            get { return new[] {"&", "|", "^", "<<", ">>"}.Select(x => new object[] {x}); }
+        }
+
+        [Theory]
+        [MemberData("BitwiseOperators")]
+        public void verify_type_mismatch_errors_for_bitwise_operators(string oper)
+        {
+            var parser = new Parser();
+            parser.RegisterMethods();
+
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"true {oper} null").Invoke(null));
+            Assert.Equal($"Operator '{oper}' cannot be applied to operands of type 'System.Boolean' and 'null'.", e.Error);
+            Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"Now() {oper} Today()").Invoke(null));
+            Assert.Equal($"Operator '{oper}' cannot be applied to operands of type 'System.DateTime' and 'System.DateTime'.", e.Error);
+            Assert.Equal(new Location(1, 7), e.Location, new LocationComparer());
+            
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"YesNo.Yes {oper} YesNo.No").Invoke(new Model()));
+            Assert.Equal($"Operator '{oper}' cannot be applied to operands of type 'ExpressiveAnnotations.Tests.ParserTest+YesNo' and 'ExpressiveAnnotations.Tests.ParserTest+YesNo'.", e.Error);
+            Assert.Equal(new Location(1, 11), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"null {oper} null").Invoke(new Model()));
+            Assert.Equal($"Operator '{oper}' cannot be applied to operands of type 'null' and 'null'.", e.Error);
+            Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"1.1 {oper} 1").Invoke(new Model()));
+            Assert.Equal($"Operator '{oper}' cannot be applied to operands of type 'System.Double' and 'System.Int32'.", e.Error);
+            Assert.Equal(new Location(1, 5), e.Location, new LocationComparer());
+        }
+
+        [Fact]
+        public void verify_remaining_type_mismatch_errors_for_shift_operators()
+        {
+            var parser = new Parser();
+            parser.RegisterMethods();
+
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("true >> false").Invoke(new Model()));
+            Assert.Equal("Operator '>>' cannot be applied to operands of type 'System.Boolean' and 'System.Boolean'.", e.Error);
+            Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("true << false").Invoke(new Model()));
+            Assert.Equal("Operator '<<' cannot be applied to operands of type 'System.Boolean' and 'System.Boolean'.", e.Error);
+            Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
+        }
+
         public static IEnumerable<object[]> LogicalOperators
         {
             get { return new[] {"&&", "||"}.Select(x => new object[] {x}); }
@@ -1058,6 +1108,10 @@ namespace ExpressiveAnnotations.Tests
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"Span {oper} SubModelObject").Invoke(new Model()));
             Assert.Equal($"Operator '{oper}' cannot be applied to operands of type 'System.TimeSpan' and 'System.Object'.", e.Error);
             Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>($"{oper} true").Invoke(new Model()));
+            Assert.Equal($"Operator '{oper}' cannot be applied to operand of type 'System.Boolean'.", e.Error);
+            Assert.Equal(new Location(1, 1), e.Location, new LocationComparer());
         }
 
         public static IEnumerable<object[]> MultiplicativeOperators
@@ -1093,7 +1147,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Fact]
-        public void verify_type_mismatch_errors_for_addition_operator()
+        public void verify_remaining_type_mismatch_errors_for_addition_operator()
         {
             var parser = new Parser();
             parser.RegisterMethods();
@@ -1112,7 +1166,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Fact]
-        public void verify_type_mismatch_errors_for_subtraction_operator()
+        public void verify_remaining_type_mismatch_errors_for_subtraction_operator()
         {
             var parser = new Parser();
             parser.RegisterMethods();
@@ -1130,23 +1184,29 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(new Location(1, 7), e.Location, new LocationComparer());
         }
 
-        [Fact]
-        public void verify_type_mismatch_errors_for_negation_operator()
+        public static IEnumerable<object[]> UnaryOperators
+        {
+            get { return new[] {"!", "~", "+", "-"}.Select(x => new object[] {x}); }
+        }
+
+        [Theory]
+        [MemberData("UnaryOperators")]
+        public void verify_type_mismatch_errors_for_unary_operators(string oper)
         {
             var parser = new Parser();
             parser.RegisterMethods();
 
-            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("!null").Invoke(null));
-            Assert.Equal("Operator '!' cannot be applied to operand of type 'null'.", e.Error);
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"{oper}null").Invoke(null));
+            Assert.Equal($"Operator '{oper}' cannot be applied to operand of type 'null'.", e.Error);
             Assert.Equal(new Location(1, 1), e.Location, new LocationComparer());
 
-            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("!'a'").Invoke(null));
-            Assert.Equal("Operator '!' cannot be applied to operand of type 'System.String'.", e.Error);
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"{oper}'a'").Invoke(null));
+            Assert.Equal($"Operator '{oper}' cannot be applied to operand of type 'System.String'.", e.Error);
             Assert.Equal(new Location(1, 1), e.Location, new LocationComparer());
 
-            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("!! Today()").Invoke(null));
-            Assert.Equal("Operator '!' cannot be applied to operand of type 'System.DateTime'.", e.Error);
-            Assert.Equal(new Location(1, 2), e.Location, new LocationComparer());
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"{oper}Today()").Invoke(null));
+            Assert.Equal($"Operator '{oper}' cannot be applied to operand of type 'System.DateTime'.", e.Error);
+            Assert.Equal(new Location(1, 1), e.Location, new LocationComparer());
         }
 
         [Fact]
@@ -1197,7 +1257,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(new Location(1, 5), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("Max(1 2").Invoke(null));
-            Assert.Equal("Function 'Max', expected comma or closing bracket. Unexpected token: '2'.", e.Error);
+            Assert.Equal("Function 'Max' expects comma or closing bracket. Unexpected token: '2'.", e.Error);
             Assert.Equal(new Location(1, 7), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("Max(1.1)").Invoke(null));
@@ -1214,16 +1274,12 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("Function 'Max' 2nd argument implicit conversion from 'System.String' to expected 'System.Int32' failed.", e.Error);
             Assert.Equal(new Location(2, 14), e.Location, new LocationComparer());
 
-            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Items[0] != null").Invoke(new Model {Items = new List<Model> {new Model()}}));
-            Assert.Equal("Identifier 'Items' either does not represent an array type or does not declare indexer.", e.Error);
-            Assert.Equal(new Location(1, 1), e.Location, new LocationComparer());
-
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Long(1)").Invoke(new Model()));
             Assert.Equal("Function 'Long' accepting 1 argument not found.", e.Error);
             Assert.Equal(new Location(1, 1), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>(@"Max(1").Invoke(new Model()));
-            Assert.Equal("Function 'Max', expected comma or closing bracket. Unexpected end of expression.", e.Error);
+            Assert.Equal("Function 'Max' expects comma or closing bracket. Unexpected end of expression.", e.Error);
             Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("1.1.1").Invoke(null));
@@ -1253,6 +1309,38 @@ namespace ExpressiveAnnotations.Tests
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("0xffffffffffff").Invoke(null));
             Assert.Equal("Integral constant is too large.", e.Error);
             Assert.Equal(new Location(1, 1), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("true ? true ").Invoke(null));
+            Assert.Equal("Expected colon of ternary operator. Unexpected end of expression.", e.Error);
+            Assert.Equal(new Location(1, 13), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("true ? true . false").Invoke(null));
+            Assert.Equal("Expected colon of ternary operator. Unexpected token: '.'.", e.Error);
+            Assert.Equal(new Location(1, 13), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Items[0]").Invoke(new Model {Items = new List<Model> {new Model()}}));
+            Assert.Equal("Identifier 'Items' either does not represent an array type or does not declare indexer.", e.Error);
+            Assert.Equal(new Location(1, 1), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Items[1.0]").Invoke(new Model()));
+            Assert.Equal("Array 'Items' expects integral index. Unexpected token: '1.0'.", e.Error);
+            Assert.Equal(new Location(1, 7), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Items[0").Invoke(new Model()));
+            Assert.Equal("Array 'Items' expects closing bracket. Unexpected end of expression.", e.Error);
+            Assert.Equal(new Location(1, 8), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Items[0+").Invoke(new Model()));
+            Assert.Equal("Array 'Items' expects closing bracket. Unexpected token: '+'.", e.Error);
+            Assert.Equal(new Location(1, 8), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Prop.+").Invoke(new Model()));
+            Assert.Equal("Member 'Prop' expects subproperty identifier. Unexpected token: '+'.", e.Error);
+            Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Prop.").Invoke(new Model()));
+            Assert.Equal("Member 'Prop' expects subproperty identifier. Unexpected end of expression.", e.Error);
+            Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
         }
 
         [Fact]

@@ -182,11 +182,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         private string AllocateSuffix()
         {
             var count = RequestStorage.Get<int>(AttributeWeakId);
-            if (!RequestStorage.Get<bool>(AttributeFullId)) // attributes of the same TypeId should be filtered out at this stage from outside, so
-            {                                               // the only reason we still encounter duplicates means, they are applied in separate models (e.g. collection processing) - adapters names differentiation should be avoided
-                count++;
-                RequestStorage.Set(AttributeFullId, true);
-            }
+            count++;
             AssertAttribsQuantityAllowed(count);
             RequestStorage.Set(AttributeWeakId, count);
             return count == 1 ? string.Empty : char.ConvertFromUtf32(95 + count); // single lowercase letter from latin alphabet or an empty string
@@ -195,7 +191,6 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         private void ResetSuffixAllocation()
         {
             RequestStorage.Remove(AttributeWeakId);
-            RequestStorage.Remove(AttributeFullId);
         }
 
         private void AssertNoNamingCollisionsAtCorrespondingSegments()

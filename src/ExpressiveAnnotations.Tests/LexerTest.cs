@@ -97,7 +97,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(TokenType.BIN, tokens[32].Type);
             Assert.Equal(255, tokens[33].Value);
             Assert.Equal(TokenType.HEX, tokens[33].Type);
-            Assert.Equal("'\r\na\r\n b\r\nc\r\n'", tokens[34].Value); // used alternatively to verbatim string (new line \n in expression has been replaced by windows \r\n)
+            Assert.Equal("'\r\na\r\n b\r\nc\r\n'", tokens[34].Value); // used alternatively to verbatim string (new line \n in expression string literal has been replaced by windows \r\n)
             Assert.Equal(TokenType.STRING, tokens[34].Type);
             Assert.Equal("メidメ", tokens[35].Value);
             Assert.Equal(TokenType.ID, tokens[35].Type);          

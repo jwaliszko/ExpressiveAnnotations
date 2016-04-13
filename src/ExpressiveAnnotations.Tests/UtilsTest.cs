@@ -158,13 +158,19 @@ namespace ExpressiveAnnotations.Tests
         }
 
         public static IEnumerable<object[]> ErrorData => new[]
-        {
+        {            
+            new object[] {new Location(1,1), "\r", @"
+" },
+            new object[] {new Location(1,1), "\r", "\r\n" },
             new object[] {new Location(1,1), "abcde", "abcde" },
             new object[] {new Location(1,3), "cde", "abcde" },
             new object[] {new Location(1,5), "e", "abcde" },
             new object[] {new Location(2,1), "abcde", "12345\r\nabcde" },
             new object[] {new Location(2,3), "cde", "12345\r\nabcde" },
             new object[] {new Location(2,5), "e", "12345\r\nabcde" },
+            new object[] {new Location(1,6), "  \r", "abcde  \r\nabcde" },
+            new object[] {new Location(1,7), " \r", "abcde  \r\nabcde" },
+            new object[] {new Location(1,8), "\r", "abcde  \r\nabcde" },
             new object[] {new Location(1,1), new string('a', 100), new string('a', 100) },
             new object[] {new Location(1,1), new string('a', 100), new string('a', 101) } // max 100 chars of expression is displayed
         };
@@ -181,9 +187,8 @@ namespace ExpressiveAnnotations.Tests
         }
 
         public static IEnumerable<object[]> BoundaryErrorData => new[]
-{
+        {
             new object[] {new Location(1,6), "abcde" },
-            new object[] {new Location(1,6), "12345    \r\nabcde" },
             new object[] {new Location(2,6), "12345\r\nabcde" }
         };
 

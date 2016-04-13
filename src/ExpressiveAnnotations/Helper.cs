@@ -353,7 +353,7 @@ namespace ExpressiveAnnotations
             var lines = input.Split('\n');
             Debug.Assert(lines.Length > index);
 
-            return lines.Skip(index).First().TrimEnd();
+            return lines.Skip(index).First();
         }
 
         public static string ToOrdinal(this int num)

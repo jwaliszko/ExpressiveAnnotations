@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace ExpressiveAnnotations.Analysis
@@ -22,45 +23,46 @@ namespace ExpressiveAnnotations.Analysis
 
         public void LOr(Expression arg1, Expression arg2, Token oper)
         {
-            AssertArgsNotNullLiterals(arg1, arg2, oper);
-            if (!(arg1.Type.IsBool() && arg2.Type.IsBool()))
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
+            LOrLAnd(arg1, arg2, oper);
         }
 
         public void LAnd(Expression arg1, Expression arg2, Token oper)
         {
+            LOrLAnd(arg1, arg2, oper);
+        }
+
+        private void LOrLAnd(Expression arg1, Expression arg2, Token oper)
+        {
             AssertArgsNotNullLiterals(arg1, arg2, oper);
             if (!(arg1.Type.IsBool() && arg2.Type.IsBool()))
                 throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
+                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.",
+                    Expr, oper.Location);
         }
 
         public void BOr(Expression arg1, Expression arg2, Token oper)
         {
-            AssertArgsNotNullLiterals(arg1, arg2, oper);
-            if (!(arg1.Type.IsBool() && arg2.Type.IsBool())
-                && !(arg1.Type.IsInteger() && arg2.Type.IsInteger()))
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
+            BOrBAndXor(arg1, arg2, oper);
         }
 
         public void Xor(Expression arg1, Expression arg2, Token oper)
         {
-            AssertArgsNotNullLiterals(arg1, arg2, oper);
-            if (!(arg1.Type.IsBool() && arg2.Type.IsBool())
-                && !(arg1.Type.IsInteger() && arg2.Type.IsInteger()))
-                throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
+            BOrBAndXor(arg1, arg2, oper);
         }
 
         public void BAnd(Expression arg1, Expression arg2, Token oper)
+        {
+            BOrBAndXor(arg1, arg2, oper);
+        }
+
+        private void BOrBAndXor(Expression arg1, Expression arg2, Token oper)
         {
             AssertArgsNotNullLiterals(arg1, arg2, oper);
             if (!(arg1.Type.IsBool() && arg2.Type.IsBool())
                 && !(arg1.Type.IsInteger() && arg2.Type.IsInteger()))
                 throw new ParseErrorException(
-                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.", Expr, oper.Location);
+                    $"Operator '{oper.Value}' cannot be applied to operands of type '{arg1.Type}' and '{arg2.Type}'.",
+                    Expr, oper.Location);
         }
 
         public void Eq(Expression arg1, Expression arg2, Type type1, Type type2, Token oper)
@@ -135,7 +137,7 @@ namespace ExpressiveAnnotations.Analysis
 
         public void Mul(Expression arg1, Expression arg2, Token oper)
         {
-            if (!arg1.Type.IsNumeric() || !arg2.Type.IsNumeric())
+            if (!(arg1.Type.IsNumeric() && arg2.Type.IsNumeric()))
             {
                 AssertArgsNotNullLiterals(arg1, arg2, oper);
                 throw new ParseErrorException(
@@ -152,6 +154,9 @@ namespace ExpressiveAnnotations.Analysis
                 throw new ParseErrorException(
                     $"Operator '{oper.Value}' cannot be applied to operand of type '{arg.Type}'.", Expr, oper.Location);
             if (oper.Type == TokenType.B_NOT && !arg.Type.IsBool() && !arg.Type.IsInteger())
+                throw new ParseErrorException(
+                    $"Operator '{oper.Value}' cannot be applied to operand of type '{arg.Type}'.", Expr, oper.Location);
+            if (new[] {TokenType.ADD, TokenType.SUB}.Contains(oper.Type) && !arg.Type.IsNumeric() && !arg.Type.IsTimeSpan())
                 throw new ParseErrorException(
                     $"Operator '{oper.Value}' cannot be applied to operand of type '{arg.Type}'.", Expr, oper.Location);
         }
