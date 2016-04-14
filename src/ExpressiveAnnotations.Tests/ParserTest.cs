@@ -878,6 +878,10 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal($"Operator '{oper}' cannot be applied to operands of type 'System.Boolean' and 'null'.", e.Error);
             Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
 
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"true {oper} 1").Invoke(null));
+            Assert.Equal($"Operator '{oper}' cannot be applied to operands of type 'System.Boolean' and 'System.Int32'.", e.Error);
+            Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
+
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"Now() {oper} Today()").Invoke(null));
             Assert.Equal($"Operator '{oper}' cannot be applied to operands of type 'System.DateTime' and 'System.DateTime'.", e.Error);
             Assert.Equal(new Location(1, 7), e.Location, new LocationComparer());
@@ -1245,7 +1249,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(new Location(1, 2), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("(1+1").Invoke(null));
-            Assert.Equal("Expected closing bracket. Unexpected end of expression.", e.Error);
+            Assert.Equal("Expected closing parenthesis. Unexpected end of expression.", e.Error);
             Assert.Equal(new Location(1, 5), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("()").Invoke(null));
@@ -1257,7 +1261,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(new Location(1, 5), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("Max(1 2").Invoke(null));
-            Assert.Equal("Function 'Max' expects comma or closing bracket. Unexpected token: '2'.", e.Error);
+            Assert.Equal("Function 'Max' expects comma or closing parenthesis. Unexpected token: '2'.", e.Error);
             Assert.Equal(new Location(1, 7), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("Max(1.1)").Invoke(null));
@@ -1279,7 +1283,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(new Location(1, 1), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>(@"Max(1").Invoke(new Model()));
-            Assert.Equal("Function 'Max' expects comma or closing bracket. Unexpected end of expression.", e.Error);
+            Assert.Equal("Function 'Max' expects comma or closing parenthesis. Unexpected end of expression.", e.Error);
             Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("1.1.1").Invoke(null));
