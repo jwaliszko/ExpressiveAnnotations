@@ -114,15 +114,18 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         protected IDictionary<string, object> ConstsMap { get; private set; }
 
         /// <summary>
-        ///     Attribute strong identifier - attribute type identifier concatenated with annotated field identifier.
+        ///     Gets attribute strong identifier - attribute type identifier concatenated with annotated field identifier.
         /// </summary>
         private string AttributeFullId { get; set; }
 
         /// <summary>
-        ///     Attribute partial identifier - attribute type name concatenated with annotated field identifier.
+        ///     Gets attribute partial identifier - attribute type name concatenated with annotated field identifier.
         /// </summary>
         private string AttributeWeakId { get; set; }
 
+        /// <summary>
+        ///     Gets name of the annotated field.
+        /// </summary>        
         private string FieldName { get; set; }
 
         /// <summary>

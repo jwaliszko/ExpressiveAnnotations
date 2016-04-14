@@ -51,7 +51,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             [AssertThat("!true", Priority = -1)]
             [AssertThat("!!true")] // no priority defind - will be moved at the and of its group
             [AssertThat("!!!true", Priority = 1)]
-            public int Value { get; set; }
+            public int? Value { get; set; }
         }
     }
 }

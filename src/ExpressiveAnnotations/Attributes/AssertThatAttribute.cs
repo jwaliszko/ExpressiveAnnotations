@@ -7,8 +7,8 @@ using System.ComponentModel.DataAnnotations;
 namespace ExpressiveAnnotations.Attributes
 {
     /// <summary>
-    ///     Validation attribute, executed for non-null annotated field, which indicates that assertion given in logical expression 
-    ///     has to be satisfied, for such field to be considered as valid.
+    ///     Validation attribute, executed for non-null annotated field, which indicates that assertion given 
+    ///     in logical expression has to be satisfied, for such a field to be considered as valid.
     /// </summary>
     public sealed class AssertThatAttribute : ExpressiveAttribute
     {

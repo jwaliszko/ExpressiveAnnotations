@@ -2,12 +2,14 @@
  * Copyright (c) 2014 Jarosław Waliszko
  * Licensed MIT: http://opensource.org/licenses/MIT */
 
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace ExpressiveAnnotations.Attributes
 {
     /// <summary>
-    ///     Validation attribute which indicates that annotated field is required when computed result of given logical expression is true.
+    ///     Validation attribute, executed for null-only annotated field, which indicates that such a field
+    ///     is required to be non-null, when computed result of given logical expression is true.
     /// </summary>
     public sealed class RequiredIfAttribute : ExpressiveAttribute
     {
@@ -40,8 +42,14 @@ namespace ExpressiveAnnotations.Attributes
         /// <returns>
         ///     An instance of the <see cref="T:System.ComponentModel.DataAnnotations.ValidationResult" /> class.
         /// </returns>
+        /// <exception cref="System.InvalidOperationException"></exception>
         protected override ValidationResult IsValidInternal(object value, ValidationContext validationContext)
         {
+            var propType = validationContext.ObjectType.GetProperty(validationContext.MemberName).PropertyType;
+            if (value != null && propType.IsNonNullableValueType())
+                throw new InvalidOperationException(
+                    $"{nameof(RequiredIfAttribute)} has no effect when applied to a field of non-nullable value type '{propType.FullName}'. Use nullable '{propType.FullName}?' version instead.");
+
             var isEmpty = value is string && string.IsNullOrWhiteSpace((string) value);
             if (value == null || (isEmpty && !AllowEmptyStrings))
             {

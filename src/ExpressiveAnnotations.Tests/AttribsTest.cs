@@ -151,8 +151,8 @@ namespace ExpressiveAnnotations.Tests
         {
             AssertErrorMessage(
                 null,
-                "Assertion for #{Value1}# field is not satisfied by the following logic: 1!=1",
-                "The #{Value1}# field is required by the following logic: 1==1");
+                "Assertion for _{Value1}_ field is not satisfied by the following logic: 1!=1",
+                "The _{Value1}_ field is required by the following logic: 1==1");
         }
 
         [Fact]
@@ -165,15 +165,15 @@ namespace ExpressiveAnnotations.Tests
 
             AssertErrorMessage(
                 "field: {0}, expr: {1} | Value1: {Value1}{Value1:n}, Internal.Internal.Value1: {Internal.Internal.Value1}, {Internal.Internal.Value2:N}",
-                "field: #{Value1}#, expr: 1!=1 | Value1: 0_{Value1}_, Internal.Internal.Value1: 2, _{Value2}_",
-                "field: #{Value1}#, expr: 1==1 | Value1: 0_{Value1}_, Internal.Internal.Value1: 2, _{Value2}_");
+                "field: _{Value1}_, expr: 1!=1 | Value1: 0_{Value1}_, Internal.Internal.Value1: 2, _{Value2}_",
+                "field: _{Value1}_, expr: 1==1 | Value1: 0_{Value1}_, Internal.Internal.Value1: 2, _{Value2}_");
             AssertErrorMessage( // all escaped
                 "field: {{0}}, expr: {{1}} | Value1: {{Value1}}{{Value1:n}}, Internal.Internal.Value1: {{Internal.Internal.Value1}}, {{Internal.Internal.Value2:N}}",
                 "field: {0}, expr: {1} | Value1: {Value1}{Value1:n}, Internal.Internal.Value1: {Internal.Internal.Value1}, {Internal.Internal.Value2:N}");
             AssertErrorMessage(
                 "field: {{{0}}}, expr: {{{1}}} | Value1: {{{Value1}}}{{{Value1:n}}}, Internal.Internal.Value1: {{{Internal.Internal.Value1}}}, {{{Internal.Internal.Value2:N}}}",
-                "field: {#{Value1}#}, expr: {1!=1} | Value1: {0}{_{Value1}_}, Internal.Internal.Value1: {2}, {_{Value2}_}",
-                "field: {#{Value1}#}, expr: {1==1} | Value1: {0}{_{Value1}_}, Internal.Internal.Value1: {2}, {_{Value2}_}");
+                "field: {_{Value1}_}, expr: {1!=1} | Value1: {0}{_{Value1}_}, Internal.Internal.Value1: {2}, {_{Value2}_}",
+                "field: {_{Value1}_}, expr: {1==1} | Value1: {0}{_{Value1}_}, Internal.Internal.Value1: {2}, {_{Value2}_}");
             AssertErrorMessage(  // all double-escaped
                 "field: {{{{0}}}}, expr: {{{{1}}}} | Value1: {{{{Value1}}}}{{{{Value1:n}}}}, Internal.Internal.Value1: {{{{Internal.Internal.Value1}}}}, {{{{Internal.Internal.Value2:N}}}}",
                 "field: {{0}}, expr: {{1}} | Value1: {{Value1}}{{Value1:n}}, Internal.Internal.Value1: {{Internal.Internal.Value1}}, {{Internal.Internal.Value2:N}}");
@@ -308,6 +308,19 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("assertthat only chosen", results.Single().ErrorMessage);
         }
 
+        [Fact]
+        public void throw_when_requirement_is_applied_to_field_of_non_nullable_value_type()
+        {
+            var model = new MisusedRequirementModel();
+            var context = new ValidationContext(model);
+            var e = Assert.Throws<ValidationException>(() => Validator.TryValidateObject(model, context, null, true));
+            Assert.Equal("RequiredIfAttribute: validation applied to Value field failed.", e.Message);
+            Assert.IsType<InvalidOperationException>(e.InnerException);
+            Assert.Equal(
+                "RequiredIfAttribute has no effect when applied to a field of non-nullable value type 'System.Int32'. Use nullable 'System.Int32?' version instead.",
+                e.InnerException.Message);
+        }
+
         private static void AssertErrorMessage(string input, string output)
         {
             AssertErrorMessage(input, output, output);
@@ -329,7 +342,7 @@ namespace ExpressiveAnnotations.Tests
                 }
             })
             {
-                MemberName = "#{Value1}#"
+                MemberName = "Value1"
             };
 
             if (input != null)
@@ -380,7 +393,7 @@ namespace ExpressiveAnnotations.Tests
         private class MsgModel
         {
             [Display(Name = "_{Value1}_")]
-            public int Value1 { get; set; }
+            public int? Value1 { get; set; }
 
             [Display(ResourceType = typeof (Resources), Name = "Value2")]
             public int Value2 { get; set; }            
@@ -410,6 +423,12 @@ namespace ExpressiveAnnotations.Tests
             [RequiredIf("Value > #")]
             [AssertThat("Value > #")]
             public int? Value { get; set; }
+        }
+
+        private class MisusedRequirementModel
+        {
+            [RequiredIf("true")]            
+            public int Value { get; set; }
         }
 
         private class WorkModel

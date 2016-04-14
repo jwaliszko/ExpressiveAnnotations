@@ -32,6 +32,7 @@ A small .NET and JavaScript library which provides annotation-based conditional 
    - [How to control frequency of dependent fields validation?](#how-to-control-frequency-of-dependent-fields-validation) <sup>(re client-side)</sup>
    - [Can I increase web console verbosity for debug purposes?](#can-i-increase-web-console-verbosity-for-debug-purposes) <sup>(re client-side)</sup>
    - [How to fetch field value or display name in error message?](#how-to-fetch-field-value-or-display-name-in-error-message) <sup>(re client and server-side)</sup>
+   - [`RequiredIf` attribute is not working, what is wrong?](#requiredif-attribute-is-not-working-what-is-wrong) <sup>(re client and server-side)</sup>
    - [Is there a possibility to perform asynchronous validation?](#is-there-a-possibility-to-perform-asynchronous-validation) <sup>(re client-side, experimental)</sup>
    - [What if my question is not covered by FAQ section?](#what-if-my-question-is-not-covered-by-faq-section)
  - [Installation instructions](#installation)
@@ -370,15 +371,16 @@ RequiredIfAttribute(
     string expression,
     [bool AllowEmptyStrings], 
     [int Priority]           
-    [string ErrorMessage]    ...) - Validation attribute which indicates that annotated 
-                                    field is required when computed result of given logical 
+    [string ErrorMessage]    ...) - Validation attribute, executed for null-only annotated
+                                    field, which indicates that such a field is required
+                                    to be non-null, when computed result of given logical 
                                     expression is true.
 AssertThatAttribute(
     string expression,
     [int Priority]           
     [string ErrorMessage]    ...) - Validation attribute, executed for non-null annotated 
                                     field, which indicates that assertion given in logical 
-                                    expression has to be satisfied, for such field to be 
+                                    expression has to be satisfied, for such a field to be 
                                     considered as valid.
 
 expression        - The logical expression based on which specified condition is computed.
@@ -636,6 +638,21 @@ If you need more insightful overview of what client-side script is doing (includ
 * to get display name, given in `DisplayAttribute`, use additional `n` (or `N`) suffix, e.g. `{field:n}`. 
 
 Notice that `{{` is treated as the escaped bracket character.
+
+#####<a id="#requiredif-attribute-is-not-working-what-is-wrong">`RequiredIf` attribute is not working, what is wrong?</a>
+
+Make sure `RequiredIf` is applied to a field which *accepts null values*.
+
+In the other words, it is redundant to apply this attribute to a field of non-nullable [value type](https://msdn.microsoft.com/en-us/library/s1ax56ch.aspx), like e.g. `int`, which is a struct representing integral numeric type, `DateTime`, etc. Because the value of such a type is always non-null, requirement demand is constantly fulfilled. Instead, for value types use their nullable forms, e.g. `int?`, `DateTime?`, etc.
+
+```
+[RequiredIf("true")] // no effect...
+public int Value { get; set; } // ...unless int? is used
+```
+```
+[RequiredIf("true")] // no effect...
+public DateTime Value { get; set; } // ...unless DateTime? is used
+```
 
 #####<a id="#is-there-a-possibility-to-perform-asynchronous-validation">Is there a possibility to perform asynchronous validation?</a>
 
