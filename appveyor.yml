@@ -15,4 +15,4 @@ test_script:
 - ps: build\test.ps1
 - "SET PATH=C:\\Python34;C:\\Python34\\Scripts;%PATH%"
 - pip install codecov
-- codecov -f "csharp-coverage.xml"
+- codecov -no-color -f "csharp-coverage.xml" -f "javascript-coverage.lcov"

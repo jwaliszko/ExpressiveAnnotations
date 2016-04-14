@@ -37,7 +37,7 @@ if($LastExitCode -ne 0) {
     throw "C# tests failed"
 }
     
-& $chutzpah /nologo /path $maintest /path $formtest /junit chutzpah-tests.xml /coverage /coverageIgnores "*test*, *jquery*" /coveragehtml javascript-coverage.htm
+& $chutzpah /nologo /path $maintest /path $formtest /junit chutzpah-tests.xml /coverage /coverageIgnores "*test*, *jquery*" /coveragehtml javascript-coverage.htm /lcov javascript-coverage.lcov
 
 if($LastExitCode -ne 0) {
     if($env:APPVEYOR -eq $true) {
