@@ -119,7 +119,7 @@ namespace ExpressiveAnnotations.Tests
         public void verify_logic_without_context()
         {
             var parser = new Parser();
-            parser.RegisterMethods();
+            parser.RegisterToolchain();
 
             Assert.True(parser.Parse<object>("YesNo.Yes == 0").Invoke(null));
             Assert.True(parser.Parse<object>("YesNo.Yes < YesNo.No").Invoke(null));
@@ -323,7 +323,7 @@ namespace ExpressiveAnnotations.Tests
             };
 
             var parser = new Parser();
-            parser.RegisterMethods();
+            parser.RegisterToolchain();
 
             Assert.True(parser.Parse(model.GetType(), "Number < 1").Invoke(model));
             Assert.True(parser.Parse(model.GetType(), "Number == 0").Invoke(model));
@@ -498,13 +498,16 @@ namespace ExpressiveAnnotations.Tests
         public void acceptable_methods_signatures_are_registered_correctly()
         {
             var parser = new Parser();
-            parser.AddFunction("M0", () => 0);
-            parser.AddFunction<int, int>("M1", i => i);
-            parser.AddFunction<int, int, int>("M2", (i, j) => i + j);
-            parser.AddFunction<int, int, int, int>("M3", (i, j, k) => i + j + k);
-            parser.AddFunction<int, int, int, int, int>("M4", (i, j, k, l) => i + j + k + l);
-            parser.AddFunction<int, int, int, int, int, int>("M5", (i, j, k, l, m) => i + j + k + l + m);
-            parser.AddFunction<int, int, int, int, int, int, int>("M6", (i, j, k, l, m, n) => i + j + k + l + m + n);
+            var funcManager = new FunctionsManager();
+            parser.RegisterFunctionsProvider(funcManager);
+
+            funcManager.AddFunction("M0", () => 0);
+            funcManager.AddFunction<int, int>("M1", i => i);
+            funcManager.AddFunction<int, int, int>("M2", (i, j) => i + j);
+            funcManager.AddFunction<int, int, int, int>("M3", (i, j, k) => i + j + k);
+            funcManager.AddFunction<int, int, int, int, int>("M4", (i, j, k, l) => i + j + k + l);
+            funcManager.AddFunction<int, int, int, int, int, int>("M5", (i, j, k, l, m) => i + j + k + l + m);
+            funcManager.AddFunction<int, int, int, int, int, int, int>("M6", (i, j, k, l, m, n) => i + j + k + l + m + n);
 
             Assert.True(parser.Parse<object>("M0() == 0").Invoke(null));
             Assert.True(parser.Parse<object>("M1(1) == 1").Invoke(null));
@@ -520,9 +523,12 @@ namespace ExpressiveAnnotations.Tests
         {
             // methods overloading is based on the number of arguments
             var parser = new Parser();
-            parser.AddFunction("Whoami", () => "utility method");
-            parser.AddFunction<int, string>("Whoami", i => $"utility method {i}");
-            parser.AddFunction<int, string, string>("Whoami", (i, s) => $"utility method {i} - {s}");
+            var funcManager = new FunctionsManager();
+            parser.RegisterFunctionsProvider(funcManager);
+
+            funcManager.AddFunction("Whoami", () => "utility method");
+            funcManager.AddFunction<int, string>("Whoami", i => $"utility method {i}");
+            funcManager.AddFunction<int, string, string>("Whoami", (i, s) => $"utility method {i} - {s}");            
 
             Assert.True(parser.Parse<object>("Whoami() == 'utility method'").Invoke(null));
             Assert.True(parser.Parse<object>("Whoami(1) == 'utility method 1'").Invoke(null));
@@ -533,10 +539,12 @@ namespace ExpressiveAnnotations.Tests
         public void verify_methods_overriding() // overriding concept exists, when there are two methods of the same name and signature, but different implementation
         {
             var parser = new Parser();
+            var funcManager = new FunctionsManager();
+            parser.RegisterFunctionsProvider(funcManager);
 
             // register utility methods
-            parser.AddFunction("Whoami", () => "utility method");
-            parser.AddFunction<int, string>("Whoami", i => $"utility method {i}");
+            funcManager.AddFunction("Whoami", () => "utility method");
+            funcManager.AddFunction<int, string>("Whoami", i => $"utility method {i}");
 
             var model = new ModelWithMethods();
 
@@ -550,12 +558,14 @@ namespace ExpressiveAnnotations.Tests
         {
             // since arguments types are not taken under consideration for methods overloading, following logic should fail
             var parser = new Parser();
+            var funcManager = new FunctionsManager();
+            parser.RegisterFunctionsProvider(funcManager);
 
-            parser.AddFunction<int, string>("Whoami", i => $"utility method {i}");
-            parser.AddFunction<string, string>("Whoami", s => $"utility method {s}");
+            funcManager.AddFunction<int, string>("Whoami", i => $"utility method {i}");
+            funcManager.AddFunction<string, string>("Whoami", s => $"utility method {s}");
 
-            parser.AddFunction<string, string, string>("Glue", (s1, s2) => string.Concat(s1, s2));
-            parser.AddFunction<int, int, string>("Glue", (i1, i2) => string.Concat(i1, i2));
+            funcManager.AddFunction<string, string, string>("Glue", (s1, s2) => string.Concat(s1, s2));
+            funcManager.AddFunction<int, int, string>("Glue", (i1, i2) => string.Concat(i1, i2));
 
             var e = Assert.Throws<ParseErrorException>(() => Assert.True(parser.Parse<object>("Whoami(0) == 'utility method 0'").Invoke(null)));
             Assert.Equal("Function 'Whoami' accepting 1 argument is ambiguous.", e.Error);
@@ -582,8 +592,11 @@ namespace ExpressiveAnnotations.Tests
         public void verify_implicit_type_conversion()
         {
             var parser = new Parser();
-            parser.AddFunction<object, string>("Whoami", o => $"utility method {o}");
-            parser.AddFunction<int, string, string>("Whoami", (i, s) => $"utility method {i} - {s}");
+            var funcManager = new FunctionsManager();
+            parser.RegisterFunctionsProvider(funcManager);
+
+            funcManager.AddFunction<object, string>("Whoami", o => $"utility method {o}");
+            funcManager.AddFunction<int, string, string>("Whoami", (i, s) => $"utility method {i} - {s}");
 
             Assert.True(parser.Parse<object>("Whoami('0') == 'utility method 0'").Invoke(null)); // successful conversion from String to Object
             Assert.True(parser.Parse<object>("Whoami(1, '2') == 'utility method 1 - 2'").Invoke(null)); // types matched, no conversion needed
@@ -623,7 +636,10 @@ namespace ExpressiveAnnotations.Tests
         public void verify_short_circuit_evaluation()
         {
             var parser = new Parser();
-            parser.AddFunction<object, bool>("CastToBool", obj => (bool) obj);
+            var funcManager = new FunctionsManager();
+            parser.RegisterFunctionsProvider(funcManager);
+
+            funcManager.AddFunction<object, bool>("CastToBool", obj => (bool) obj);
 
             Assert.Throws<NullReferenceException>(() => parser.Parse<object>("CastToBool(null)").Invoke(null));
 
@@ -703,7 +719,7 @@ namespace ExpressiveAnnotations.Tests
         public void verify_toolchain_methods_logic()
         {
             var parser = new Parser();
-            parser.RegisterMethods();
+            parser.RegisterToolchain();
 
             Assert.True(parser.Parse<object>("Now() > Today()").Invoke(null));
             Assert.True(parser.Parse<object>("Date(1985, 2, 20) < Date(1985, 2, 20, 0, 0, 1)").Invoke(null));
@@ -872,7 +888,7 @@ namespace ExpressiveAnnotations.Tests
         public void verify_type_mismatch_errors_for_bitwise_operators(string oper)
         {
             var parser = new Parser();
-            parser.RegisterMethods();
+            parser.RegisterToolchain();
 
             var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"true {oper} null").Invoke(null));
             Assert.Equal($"Operator '{oper}' cannot be applied to operands of type 'System.Boolean' and 'null'.", e.Error);
@@ -903,7 +919,7 @@ namespace ExpressiveAnnotations.Tests
         public void verify_remaining_type_mismatch_errors_for_shift_operators()
         {
             var parser = new Parser();
-            parser.RegisterMethods();
+            parser.RegisterToolchain();
 
             var e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("true >> false").Invoke(new Model()));
             Assert.Equal("Operator '>>' cannot be applied to operands of type 'System.Boolean' and 'System.Boolean'.", e.Error);
@@ -924,7 +940,7 @@ namespace ExpressiveAnnotations.Tests
         public void verify_type_mismatch_errors_for_logical_operators(string oper)
         {
             var parser = new Parser();
-            parser.RegisterMethods();
+            parser.RegisterToolchain();
 
             var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"true {oper} null").Invoke(null));
             Assert.Equal($"Operator '{oper}' cannot be applied to operands of type 'System.Boolean' and 'null'.", e.Error);
@@ -957,7 +973,7 @@ namespace ExpressiveAnnotations.Tests
         public void verify_type_mismatch_errors_for_equality_operators(string oper)
         {
             var parser = new Parser();
-            parser.RegisterMethods();
+            parser.RegisterToolchain();
 
             var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"0 {oper} '0'").Invoke(null));
             Assert.Equal($"Operator '{oper}' cannot be applied to operands of type 'System.Int32' and 'System.String'.", e.Error);
@@ -1006,7 +1022,7 @@ namespace ExpressiveAnnotations.Tests
         public void verify_type_mismatch_errors_for_inequality_operators(string oper)
         {
             var parser = new Parser();
-            parser.RegisterMethods();
+            parser.RegisterToolchain();
 
             var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"'a' {oper} 'b'").Invoke(null));
             Assert.Equal($"Operator '{oper}' cannot be applied to operands of type 'System.String' and 'System.String'.", e.Error);
@@ -1075,7 +1091,7 @@ namespace ExpressiveAnnotations.Tests
         public void verify_type_mismatch_errors_for_addition_and_subtraction_operators(string oper)
         {
             var parser = new Parser();
-            parser.RegisterMethods();
+            parser.RegisterToolchain();
 
             var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"0 {oper} null").Invoke(null));
             Assert.Equal($"Operator '{oper}' cannot be applied to operands of type 'System.Int32' and 'null'.", e.Error);
@@ -1128,7 +1144,7 @@ namespace ExpressiveAnnotations.Tests
         public void verify_type_mismatch_errors_for_multiplication_and_division_operators(string oper)
         {
             var parser = new Parser();
-            parser.RegisterMethods();
+            parser.RegisterToolchain();
 
             var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"0 {oper} null").Invoke(null));
             Assert.Equal($"Operator '{oper}' cannot be applied to operands of type 'System.Int32' and 'null'.", e.Error);
@@ -1154,7 +1170,7 @@ namespace ExpressiveAnnotations.Tests
         public void verify_remaining_type_mismatch_errors_for_addition_operator()
         {
             var parser = new Parser();
-            parser.RegisterMethods();
+            parser.RegisterToolchain();
 
             var e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Date + Date").Invoke(new Model()));
             Assert.Equal("Operator '+' cannot be applied to operands of type 'System.DateTime' and 'System.DateTime'.", e.Error);
@@ -1173,7 +1189,7 @@ namespace ExpressiveAnnotations.Tests
         public void verify_remaining_type_mismatch_errors_for_subtraction_operator()
         {
             var parser = new Parser();
-            parser.RegisterMethods();
+            parser.RegisterToolchain();
 
             var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("'abc' - 'abc'").Invoke(null));
             Assert.Equal("Operator '-' cannot be applied to operands of type 'System.String' and 'System.String'.", e.Error);
@@ -1198,7 +1214,7 @@ namespace ExpressiveAnnotations.Tests
         public void verify_type_mismatch_errors_for_unary_operators(string oper)
         {
             var parser = new Parser();
-            parser.RegisterMethods();
+            parser.RegisterToolchain();
 
             var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>($"{oper}null").Invoke(null));
             Assert.Equal($"Operator '{oper}' cannot be applied to operand of type 'null'.", e.Error);
@@ -1217,8 +1233,10 @@ namespace ExpressiveAnnotations.Tests
         public void verify_various_parsing_errors()
         {
             var parser = new Parser();
-            parser.RegisterMethods();
-            parser.AddFunction<int, int, int>("Max", (x, y) => Math.Max(x, y));
+            var funcManager = new FunctionsManager();
+            parser.RegisterFunctionsProvider(funcManager);
+
+            funcManager.AddFunction<int, int, int>("Max", (x, y) => Math.Max(x, y));
 
             var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("1++ +1==2").Invoke(null));
             Assert.Equal("Unexpected token: '++'.", e.Error);

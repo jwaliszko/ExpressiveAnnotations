@@ -187,15 +187,5 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         {
             return from.AddYears(years);
         }
-
-        public bool ArrayContains(int? value, int[] array)
-        {
-            return value != null && array.Contains((int)value);
-        }
-
-        public int ArrayLength(int[] array)
-        {
-            return array.Length;
-        }        
     }
 }

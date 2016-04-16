@@ -54,6 +54,8 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                 AppDomain.CurrentDomain.AssemblyResolve += LoadAssembly;
                 var assemblyPath = GetAssemblyLocation("ExpressiveAnnotations.MvcWebSample.dll");
                 var assembly = Assembly.LoadFrom(assemblyPath);
+
+                assembly.GetType("ExpressiveAnnotations.MvcWebSample.Misc.CustomToolchain").GetMethod("Register").Invoke(null, null); // register your custom methods if you defined any
                 var attribs = assembly.CompileExpressiveAttributes();
 
                 Assert.Equal(29, attribs.Count());

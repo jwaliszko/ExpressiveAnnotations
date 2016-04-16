@@ -54,7 +54,6 @@ namespace ExpressiveAnnotations.Analysis
         {
             Fields = new Dictionary<string, Type>();
             Consts = new Dictionary<string, object>();
-            Functions = new Dictionary<string, IList<LambdaExpression>>();
         }
 
         private Stack<Token> TokensToProcess { get; set; }
@@ -65,7 +64,9 @@ namespace ExpressiveAnnotations.Analysis
         private Expression ContextExpression { get; set; }
         private IDictionary<string, Type> Fields { get; set; }
         private IDictionary<string, object> Consts { get; set; }
-        private IDictionary<string, IList<LambdaExpression>> Functions { get; set; }
+        private IFunctionsProvider FuncProvider { get; set; }
+        private IDictionary<string, IList<LambdaExpression>> Functions
+            => FuncProvider == null ? new Dictionary<string, IList<LambdaExpression>>() : FuncProvider.GetFunctions();
 
         /// <summary>
         ///     Parses a specified logical expression into expression tree within given context.
@@ -147,102 +148,9 @@ namespace ExpressiveAnnotations.Analysis
             }
         }
 
-        /// <summary>
-        ///     Registers function signature for the parser.
-        /// </summary>
-        /// <typeparam name="TResult">Type identifier of returned result.</typeparam>
-        /// <param name="name">Function name.</param>
-        /// <param name="func">Function lambda.</param>
-        public void AddFunction<TResult>(string name, Expression<Func<TResult>> func)
+        public void RegisterFunctionsProvider(IFunctionsProvider provider)
         {
-            PersistFunction(name, func);
-        }
-
-        /// <summary>
-        ///     Registers function signature for the parser.
-        /// </summary>
-        /// <typeparam name="TArg1">First argument.</typeparam>
-        /// <typeparam name="TResult">Type identifier of returned result.</typeparam>
-        /// <param name="name">Function name.</param>
-        /// <param name="func">Function lambda.</param>
-        public void AddFunction<TArg1, TResult>(string name, Expression<Func<TArg1, TResult>> func)
-        {
-            PersistFunction(name, func);
-        }
-
-        /// <summary>
-        ///     Registers function signature for the parser.
-        /// </summary>
-        /// <typeparam name="TArg1">First argument.</typeparam>
-        /// <typeparam name="TArg2">Second argument.</typeparam>
-        /// <typeparam name="TResult">Type identifier of returned result.</typeparam>
-        /// <param name="name">Function name.</param>
-        /// <param name="func">Function lambda.</param>
-        public void AddFunction<TArg1, TArg2, TResult>(string name, Expression<Func<TArg1, TArg2, TResult>> func)
-        {
-            PersistFunction(name, func);
-        }
-
-        /// <summary>
-        ///     Registers function signature for the parser.
-        /// </summary>
-        /// <typeparam name="TArg1">First argument.</typeparam>
-        /// <typeparam name="TArg2">Second argument.</typeparam>
-        /// <typeparam name="TArg3">Third argument.</typeparam>
-        /// <typeparam name="TResult">Type identifier of returned result.</typeparam>
-        /// <param name="name">Function name.</param>
-        /// <param name="func">Function lambda.</param>
-        public void AddFunction<TArg1, TArg2, TArg3, TResult>(string name, Expression<Func<TArg1, TArg2, TArg3, TResult>> func)
-        {
-            PersistFunction(name, func);
-        }
-
-        /// <summary>
-        ///     Registers function signature for the parser.
-        /// </summary>
-        /// <typeparam name="TArg1">First argument.</typeparam>
-        /// <typeparam name="TArg2">Second argument.</typeparam>
-        /// <typeparam name="TArg3">Third argument.</typeparam>
-        /// <typeparam name="TArg4">Fourth argument.</typeparam>
-        /// <typeparam name="TResult">Type identifier of returned result.</typeparam>
-        /// <param name="name">Function name.</param>
-        /// <param name="func">Function lambda.</param>
-        public void AddFunction<TArg1, TArg2, TArg3, TArg4, TResult>(string name, Expression<Func<TArg1, TArg2, TArg3, TArg4, TResult>> func)
-        {
-            PersistFunction(name, func);
-        }
-
-        /// <summary>
-        ///     Registers function signature for the parser.
-        /// </summary>
-        /// <typeparam name="TArg1">First argument.</typeparam>
-        /// <typeparam name="TArg2">Second argument.</typeparam>
-        /// <typeparam name="TArg3">Third argument.</typeparam>
-        /// <typeparam name="TArg4">Fourth argument.</typeparam>
-        /// <typeparam name="TArg5">Fifth argument.</typeparam>
-        /// <typeparam name="TResult">Type identifier of returned result.</typeparam>
-        /// <param name="name">Function name.</param>
-        /// <param name="func">Function lambda.</param>
-        public void AddFunction<TArg1, TArg2, TArg3, TArg4, TArg5, TResult>(string name, Expression<Func<TArg1, TArg2, TArg3, TArg4, TArg5, TResult>> func)
-        {
-            PersistFunction(name, func);
-        }
-
-        /// <summary>
-        ///     Registers function signature for the parser.
-        /// </summary>
-        /// <typeparam name="TArg1">First argument.</typeparam>
-        /// <typeparam name="TArg2">Second argument.</typeparam>
-        /// <typeparam name="TArg3">Third argument.</typeparam>
-        /// <typeparam name="TArg4">Fourth argument.</typeparam>
-        /// <typeparam name="TArg5">Fifth argument.</typeparam>
-        /// <typeparam name="TArg6">Sixth argument.</typeparam>
-        /// <typeparam name="TResult">Type identifier of returned result.</typeparam>
-        /// <param name="name">Function name.</param>
-        /// <param name="func">Function lambda.</param>
-        public void AddFunction<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TResult>(string name, Expression<Func<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TResult>> func)
-        {
-            PersistFunction(name, func);
+            FuncProvider = provider;
         }
 
         /// <summary>
@@ -265,16 +173,6 @@ namespace ExpressiveAnnotations.Analysis
         public IDictionary<string, object> GetConsts()
         {
             return Consts.ToDictionary(x => x.Key, x => x.Value); // shallow clone is fair enough
-        }
-
-        private void PersistFunction(string name, LambdaExpression func)
-        {
-            lock (_locker)
-            {
-                if (!Functions.ContainsKey(name))
-                    Functions[name] = new List<LambdaExpression>();
-                Functions[name].Add(func);
-            }
         }
 
         private void Clear()

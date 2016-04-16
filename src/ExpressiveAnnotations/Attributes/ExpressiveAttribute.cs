@@ -49,7 +49,7 @@ namespace ExpressiveAnnotations.Attributes
                 throw new ArgumentNullException(nameof(expression), "Expression not provided.");
 
             Parser = new Parser();
-            Parser.RegisterMethods();
+            Parser.RegisterToolchain();
 
             Expression = expression;
             CachedValidationFuncs = new Dictionary<Type, Func<object, bool>>();

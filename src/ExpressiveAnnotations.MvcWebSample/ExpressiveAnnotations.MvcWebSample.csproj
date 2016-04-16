@@ -124,6 +124,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
+    <Compile Include="Misc\CustomToolchain.cs" />
     <Compile Include="Inheritance\CustomExpressiveAnnotationsModelValidatorProvider.cs" />
     <Compile Include="Inheritance\CustomAssertThatAttribute.cs" />
     <Compile Include="Inheritance\CustomAssertThatValidator.cs" />
