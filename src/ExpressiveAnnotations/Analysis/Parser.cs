@@ -148,6 +148,10 @@ namespace ExpressiveAnnotations.Analysis
             }
         }
 
+        /// <summary>
+        ///     Registers the functions provider.
+        /// </summary>
+        /// <param name="provider">The provider.</param>
         public void RegisterFunctionsProvider(IFunctionsProvider provider)
         {
             FuncProvider = provider;

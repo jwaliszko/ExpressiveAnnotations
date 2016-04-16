@@ -16,6 +16,9 @@ namespace ExpressiveAnnotations
     /// <seealso cref="ExpressiveAnnotations.IFunctionsProvider" />    
     public class FunctionsManager : IFunctionsManager, IFunctionsProvider
     {
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="FunctionsManager" /> class.
+        /// </summary>
         public FunctionsManager()
         {
             Functions = new Dictionary<string, IList<LambdaExpression>>();
