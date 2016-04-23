@@ -638,5 +638,20 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                     Home.GetErrorMessage("コメント"));
             });
         }
+
+        [Fact]
+        public void submit_correct_form_in_server_mode()
+        {
+            Watch(() =>
+            {
+                Home.ClickCheckbox("GoAbroad");
+                Home.Select("Age", "20");
+                Home.WriteInput("BloodType", "A+");
+                Home.WriteInput("ContactDetails_Phone", "123456789");
+                Home.ClickRadio("AgreeForContact", "True");
+                Home.Submit();
+                Assert.True(Home.SubmitSucceed());
+            });
+        }
     }
 }

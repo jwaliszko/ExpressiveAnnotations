@@ -262,12 +262,11 @@ namespace ExpressiveAnnotations.Attributes
         /// <exception cref="System.ComponentModel.DataAnnotations.ValidationException"></exception>
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
-            Debug.Assert(validationContext != null);
+            Debug.Assert(validationContext != null);            
 
-            validationContext.MemberName = validationContext.MemberName // in case member name is a null (e.g. like in older MVC versions) try workaround
-                                           ?? validationContext.ObjectType.GetMemberNameByDisplayName(validationContext.DisplayName);
             try
             {
+                AdjustMemberName(validationContext);
                 return IsValidInternal(value, validationContext);
             }
             catch (Exception e)
@@ -275,6 +274,18 @@ namespace ExpressiveAnnotations.Attributes
                 throw new ValidationException(
                     $"{GetType().Name}: validation applied to {validationContext.MemberName} field failed.", e);
             }
+        }
+
+        private void AdjustMemberName(ValidationContext validationContext)
+        {
+            if (validationContext.MemberName != null) // hack for WebAPI, where MemberName is set to display name
+                validationContext.MemberName = validationContext.ObjectType.GetMemberNameByDisplayName(validationContext.DisplayName);
+
+            validationContext.MemberName = validationContext.MemberName // hack for old MVC, where MemberName is not provided:
+                                           ?? validationContext.ObjectType.GetMemberNameByDisplayName(validationContext.DisplayName) // extract property using display name through Display or DisplayName annotation
+                                           ?? validationContext.DisplayName; // return DisplayName, which may contain the proper name if no Display nor DisplayName annotation exists
+
+            Debug.Assert(validationContext.MemberName != null);
         }
 
         private string PreformatMessage(string displayName, string expression, out IList<FormatItem> items)

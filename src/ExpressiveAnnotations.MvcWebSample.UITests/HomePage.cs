@@ -115,6 +115,12 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             return generated.Any() ? generated.Single().Text : elem.Text;
         }
 
+        public bool SubmitSucceed()
+        {
+            var elem = _driver.FindElementByXPath("//div[@class='message-success']");
+            return "Query successfully submitted.".Equals(elem.Text);
+        }
+
         public int GetPostbacksCount()
         {
             var elem = _driver.FindElementByXPath("//meta[@name='postbacks']");

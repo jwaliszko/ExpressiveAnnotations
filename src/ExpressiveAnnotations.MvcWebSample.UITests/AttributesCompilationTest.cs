@@ -58,7 +58,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                 assembly.GetType("ExpressiveAnnotations.MvcWebSample.Misc.CustomToolchain").GetMethod("Register").Invoke(null, null); // register your custom methods if you defined any
                 var attribs = assembly.CompileExpressiveAttributes();
 
-                Assert.Equal(29, attribs.Count());
+                Assert.Equal(30, attribs.Count());
             }
             catch (ReflectionTypeLoadException e)
             {

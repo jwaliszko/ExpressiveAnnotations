@@ -65,12 +65,15 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = "Age")]
         public int? Age { get; set; }
 
+        [RequiredIf("GoAbroad == true", ErrorMessage = "?")]
+        public string ID { get; set; }
+
         [RequiredIf("GoAbroad == true",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "FieldConditionallyRequired")]
         [AssertThat("IsDigitChain(PassportNumber)",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = "DigitsOnlyAccepted")]
         [Display(ResourceType = typeof (Resources), Name = "PassportNumber")]
-        public string PassportNumber { get; set; }
+        public string PassportNumber { get; set; }        
 
         [Display(ResourceType = typeof (Resources), Name = "Country")]
         public string Country { get; set; }

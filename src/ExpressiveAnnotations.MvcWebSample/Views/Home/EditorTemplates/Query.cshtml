@@ -16,13 +16,24 @@
     </li>
     <li>
         <pre class="code">
-[Required]
-</pre>
+    [Required]
+    </pre>
         <pre class="action">[show attribute]</pre>
         <div>
             @Html.LabelFor(model => model.Age, new { @class = "inline prefix" })
             @Html.DropDownListFor(model => model.Age, new SelectList(Model.Years, null), string.Empty)
             @Html.ValidationMessageFor(model => model.Age)
+        </div>
+    </li>
+    <li>
+        <pre class="code">
+[RequiredIf("GoAbroad == true")]
+</pre>
+        <pre class="action">[show attribute]</pre>
+        <div>
+            @Html.LabelFor(model => model.ID, new { @class = "inline prefix" })
+            @Html.TextBoxFor(model => model.ID)
+            @Html.ValidationMessageFor(model => model.ID)
         </div>
     </li>
     <li>

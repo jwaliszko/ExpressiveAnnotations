@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using ExpressiveAnnotations.MvcWebSample.Models;
 
@@ -18,23 +22,38 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
                 LatestSuggestedReturnDate = DateTime.Today.AddMonths(1)
             };
 
-            Session["Postbacks"] = 0;
+            Session["Postbacks"] = (int?) TempData["Postbacks"] ?? 0;
             ViewBag.Success = TempData["Success"];
             return View("Home", TempData["Query"] as Query ?? model);
         }
 
         [HttpPost]
-        public ActionResult Index(Query model)
+        public async Task<ActionResult> Index(Query model)
         {
-            Session["Postbacks"] = (int)Session["Postbacks"] + 1;
+            Session["Postbacks"] = (int) Session["Postbacks"] + 1;
             if (ModelState.IsValid)
             {
-                TempData["Success"] = "Query successfully submitted";
+                var result = await Save(model);
+                if (!result.IsSuccessStatusCode)
+                    throw new ApplicationException("Unexpected failure in WebAPI pipeline.");
+
+                TempData["Postbacks"] = Session["Postbacks"];
+                TempData["Success"] = "Query successfully submitted.";                
                 TempData["Query"] = model;
                 return RedirectToAction("Index"); // PRG to avoid subsequent form submission attempts on page refresh (http://en.wikipedia.org/wiki/Post/Redirect/Get)
             }
 
             return View("Home", model);
+        }
+
+        private async Task<HttpResponseMessage> Save(Query model) // simulate saving through WebAPI call
+        {
+            using (var client = new HttpClient())
+            {
+                Debug.Assert(Request.Url != null);
+                client.BaseAddress = new Uri($"{Request.Url.Scheme}://{Request.Url.Authority}/");
+                return await client.PostAsync("api/Default/Save", model, new JsonMediaTypeFormatter());                
+            }
         }
     }
 }
