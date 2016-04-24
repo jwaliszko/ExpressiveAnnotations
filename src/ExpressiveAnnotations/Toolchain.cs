@@ -185,8 +185,11 @@ namespace ExpressiveAnnotations
         }
 
         /// <summary>
-        ///     Gets registered functions.
+        ///     Gets functions for the <see cref="ExpressiveAnnotations.Analysis.Parser" />.
         /// </summary>
+        /// <returns>
+        ///     Registered functions.
+        /// </returns>
         public IDictionary<string, IList<LambdaExpression>> GetFunctions()
         {
             return FuncManager.GetFunctions();

@@ -26,6 +26,7 @@ A small .NET and JavaScript library which provides annotation-based conditional 
  - [Frequently asked questions](#frequently-asked-questions)
    - [Is it possible to compile all usages of annotations at once?](#is-it-possible-to-compile-all-usages-of-annotations-at-once) <sup>(re server-side)</sup>
    - [What if there is no built-in function I need?](#what-if-there-is-no-built-in-function-i-need) <sup>(re client and server-side)</sup>
+   - [Can I have custom utility-like functions outside of my models?](#can-I-have-custom-utility-like-functions-outside-of-my-models) <sup>(re server-side)</sup>
    - [How to cope with values of custom types?](#how-to-cope-with-values-of-custom-types) <sup>(re client-side)</sup>
    - [How to cope with dates given in non-standard formats?](#how-to-cope-with-dates-given-in-non-standard-formats) <sup>(re client-side)</sup>
    - [What if `ea` variable is already used by another library?](#what-if-ea-variable-is-already-used-by-another-library) <sup>(re client-side)</sup>
@@ -539,6 +540,36 @@ class Model
     });
 ```
 Many signatures can be defined for a single function name. Types are not taken under consideration as a differentiating factor though. Methods overloading is based on the number of arguments only. Functions with the same name and exact number of arguments are considered as ambiguous. The next issue important here is the fact that custom methods take precedence over built-in ones. If exact signatures are provided built-in methods are simply overridden by new definitions.
+
+#####<a id="can-I-have-custom-utility-like-functions-outside-of-my-models">Can I have custom utility-like functions outside of my models?
+
+Sure, provide your own methods provider, or extend existing global one, i.e.
+
+* extend existing provider:
+
+ ```
+    protected void Application_Start()
+    {
+        Toolchain.Instance.AddFunction<int[], int>("ArrayLength", array => array.Length);
+```
+* define new provider:
+
+ ```
+    public class CustomFunctionsProvider : IFunctionsProvider
+    {
+        public IDictionary<string, IList<LambdaExpression>> GetFunctions()
+        {
+            return new Dictionary<string, IList<LambdaExpression>>
+            {
+                {"ArrayLength", new LambdaExpression[] {(Expression<Func<int[], int>>) (array => array.Length)}}
+            };
+        }
+    }
+
+    protected void Application_Start()
+    {
+        Toolchain.Instance.Recharge(new CustomFunctionsProvider()); 
+```
 
 #####<a id="how-to-cope-with-values-of-custom-types">How to cope with values of custom types?</a>
 
