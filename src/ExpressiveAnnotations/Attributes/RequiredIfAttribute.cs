@@ -45,10 +45,7 @@ namespace ExpressiveAnnotations.Attributes
         /// <exception cref="System.InvalidOperationException"></exception>
         protected override ValidationResult IsValidInternal(object value, ValidationContext validationContext)
         {
-            var propType = validationContext.ObjectType.GetProperty(validationContext.MemberName).PropertyType;
-            if (value != null && propType.IsNonNullableValueType())
-                throw new InvalidOperationException(
-                    $"{nameof(RequiredIfAttribute)} has no effect when applied to a field of non-nullable value type '{propType.FullName}'. Use nullable '{propType.FullName}?' version instead.");
+            AssertNonValueType(value, validationContext);
 
             var isEmpty = value is string && string.IsNullOrWhiteSpace((string) value);
             if (value == null || (isEmpty && !AllowEmptyStrings))
@@ -61,6 +58,16 @@ namespace ExpressiveAnnotations.Attributes
             }
 
             return ValidationResult.Success;
+        }
+
+        private void AssertNonValueType(object value, ValidationContext validationContext)
+        {
+            if (PropertyType == null)
+                return;
+
+            if (value != null && PropertyType.IsNonNullableValueType())
+                throw new InvalidOperationException(
+                    $"{nameof(RequiredIfAttribute)} has no effect when applied to a field of non-nullable value type '{PropertyType.FullName}'. Use nullable '{PropertyType.FullName}?' version instead.");
         }
     }
 }

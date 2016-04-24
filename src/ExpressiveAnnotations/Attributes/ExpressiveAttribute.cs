@@ -66,6 +66,11 @@ namespace ExpressiveAnnotations.Attributes
         protected Parser Parser { get; private set; }
 
         /// <summary>
+        ///     Gets the annotated property type.
+        /// </summary>        
+        protected Type PropertyType { get; private set; }
+
+        /// <summary>
         ///     Gets the logical expression based on which specified condition is computed.
         /// </summary>
         public string Expression { get; private set; }
@@ -272,20 +277,30 @@ namespace ExpressiveAnnotations.Attributes
             catch (Exception e)
             {
                 throw new ValidationException(
-                    $"{GetType().Name}: validation applied to {validationContext.MemberName} field failed.", e);
+                    $"{GetType().Name}: validation applied to {validationContext.MemberName ?? "<member unknown>"} field failed.", e);
             }
         }
 
-        private void AdjustMemberName(ValidationContext validationContext)
+        private void AdjustMemberName(ValidationContext validationContext) // fixes for: MVC <= 4 (MemberName is not provided), WebAPI 2 (MemberName states for display name)
         {
-            if (validationContext.MemberName != null) // hack for WebAPI, where MemberName is set to display name
-                validationContext.MemberName = validationContext.ObjectType.GetMemberNameByDisplayName(validationContext.DisplayName);
+            PropertyType = null; // reset value
+            if (validationContext.MemberName == null && validationContext.DisplayName == null)
+                return;
 
-            validationContext.MemberName = validationContext.MemberName // hack for old MVC, where MemberName is not provided:
-                                           ?? validationContext.ObjectType.GetMemberNameByDisplayName(validationContext.DisplayName) // extract property using display name through Display or DisplayName annotation
-                                           ?? validationContext.DisplayName; // return DisplayName, which may contain the proper name if no Display nor DisplayName annotation exists
+            validationContext.MemberName = validationContext.MemberName ?? validationContext.DisplayName;
+            var prop = validationContext.ObjectType.GetProperty(validationContext.MemberName);
+            if (prop == null)
+            {
+                prop = validationContext.ObjectType.GetPropertyByDisplayName(validationContext.MemberName);
+                if (prop == null)
+                {
+                    validationContext.MemberName = null;
+                    return;
+                }
 
-            Debug.Assert(validationContext.MemberName != null);
+                validationContext.MemberName = prop.Name;
+            }
+            PropertyType = prop.PropertyType;
         }
 
         private string PreformatMessage(string displayName, string expression, out IList<FormatItem> items)

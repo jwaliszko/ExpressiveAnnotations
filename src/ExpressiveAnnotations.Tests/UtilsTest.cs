@@ -137,9 +137,9 @@ namespace ExpressiveAnnotations.Tests
         [Fact]
         public void verify_fields_names_extraction_based_on_their_display_names() // Display attribute or DisplayName attribute used as a workaround for field name extraction in older versions of MVC where MemberName was not provided in ValidationContext
         {
-            Assert.Equal("Value1", typeof (Model).GetMemberNameByDisplayName("Value_1"));
-            Assert.Equal("Value2", typeof (Model).GetMemberNameByDisplayName("_{Value2}_"));
-            Assert.Equal("Internal", typeof (Model).GetMemberNameByDisplayName("internal"));
+            Assert.Equal("Value1", typeof (Model).GetPropertyByDisplayName("Value_1").Name);
+            Assert.Equal("Value2", typeof (Model).GetPropertyByDisplayName("_{Value2}_").Name);
+            Assert.Equal("Internal", typeof (Model).GetPropertyByDisplayName("internal").Name);
         }
 
         [Fact]

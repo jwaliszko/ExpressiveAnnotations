@@ -250,41 +250,41 @@ namespace ExpressiveAnnotations
             }
         }
 
-        public static string GetMemberNameByDisplayName(this Type type, string displayName)
+        public static PropertyInfo GetPropertyByDisplayName(this Type type, string displayName)
         {
             Debug.Assert(type != null);
             Debug.Assert(displayName != null);
 
-            return type.GetMemberNameFromDisplayAttribute(displayName) ??
-                   type.GetMemberNameFromDisplayNameAttribute(displayName);
+            return type.GetPropertyByDisplayAttribute(displayName) ??
+                   type.GetPropertyByDisplayNameAttribute(displayName);
         }
 
-        public static string GetMemberNameFromDisplayAttribute(this Type type, string displayName)
+        public static PropertyInfo GetPropertyByDisplayAttribute(this Type type, string displayName)
         {
             Debug.Assert(type != null);
             Debug.Assert(displayName != null);
 
-            // get member name from Display attribute (if such an attribute exists) based on display name
+            // get member name through Display attribute (if such an attribute exists) based on display name
             var props = type.GetProperties()
                 .Where(p => p.GetAttributes<DisplayAttribute>().Any(a => a.GetName() == displayName))
-                .Select(p => p.Name).ToList();
+                .ToList();
 
             // if there is an ambiguity, return nothing
-            return props.Count == 1 ? props.SingleOrDefault() : null;
+            return props.Count == 1 ? props.Single() : null;
         }
 
-        public static string GetMemberNameFromDisplayNameAttribute(this Type type, string displayName)
+        public static PropertyInfo GetPropertyByDisplayNameAttribute(this Type type, string displayName)
         {
             Debug.Assert(type != null);
             Debug.Assert(displayName != null);
 
-            // get member name from DisplayName attribute (if such an attribute exists) based on display name
+            // get member name through DisplayName attribute (if such an attribute exists) based on display name
             var props = type.GetProperties()
                 .Where(p => p.GetAttributes<DisplayNameAttribute>().Any(a => a.DisplayName == displayName))
-                .Select(p => p.Name).ToList();
+                .ToList();
 
             // if there is an ambiguity, return nothing
-            return props.Count == 1 ? props.SingleOrDefault() : null;
+            return props.Count == 1 ? props.Single() : null;
         }
 
         public static IEnumerable<T> GetAttributes<T>(this MemberInfo element) where T : Attribute

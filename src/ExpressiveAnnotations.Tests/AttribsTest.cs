@@ -321,6 +321,45 @@ namespace ExpressiveAnnotations.Tests
                 e.InnerException.Message);
         }
 
+        [Fact]
+        public void verify_retrieval_of_correct_member_names_when_validation_context_is_broken()
+        {
+            var model = new HackTestModel();
+            var attrib = new AssertThatAttribute("false");
+
+            // correct path:
+            Assert.Equal("Value1", GetFinalMemberName(attrib, model, 0, "Value1", "Value1"));
+            Assert.Equal("Value2", GetFinalMemberName(attrib, model, 0, "Value2", "Value 2"));
+            Assert.Equal("Value3", GetFinalMemberName(attrib, model, 0, "Value3", "Value 3"));
+
+            // first issue: no member name provided (MVC <= 4)
+            Assert.Equal("Value1", GetFinalMemberName(attrib, model, 0, null, "Value1"));
+            Assert.Equal("Value2", GetFinalMemberName(attrib, model, 0, null, "Value 2"));
+            Assert.Equal("Value3", GetFinalMemberName(attrib, model, 0, null, "Value 3"));
+
+            // second issue: member name equals to display name (WebAPI 2)
+            Assert.Equal("Value2", GetFinalMemberName(attrib, model, 0, "Value 2", "Value 2"));
+            Assert.Equal("Value3", GetFinalMemberName(attrib, model, 0, "Value 3", "Value 3"));
+        }
+
+        [Fact]
+        public void return_null_in_place_of_member_name_when_it_cannot_be_unambiguously_retrieved()
+        {
+            var model = new DisplayDuplicateModel();
+            var attrib = new AssertThatAttribute("false");
+
+            Assert.Equal(null, GetFinalMemberName(attrib, model, 0, null, "duplicate"));
+        }
+
+        private static string GetFinalMemberName(ValidationAttribute attrib, object contextModel, object mamberValue, string givenMemberName, string givenDisplayName)
+        {
+            return attrib.GetValidationResult(mamberValue, new ValidationContext(contextModel)
+            {
+                MemberName = givenMemberName,
+                DisplayName = givenDisplayName
+            })?.MemberNames.Single();
+        }
+
         private static void AssertErrorMessage(string input, string output)
         {
             AssertErrorMessage(input, output, output);
@@ -439,6 +478,25 @@ namespace ExpressiveAnnotations.Tests
             [RequiredIf(HeavyExpression)]
             [AssertThat(HeavyExpression)]
             public int? Value { get; set; }
+        }
+
+        private class HackTestModel
+        {
+            public int? Value1 { get; set; }
+
+            [Display(Name = "Value 2")]
+            public int? Value2 { get; set; }
+
+            [DisplayName("Value 3")]
+            public int? Value3 { get; set; }
+        }
+
+        private class DisplayDuplicateModel
+        {
+            [Display(Name = "duplicate")]
+            public int? Value1 { get; set; }
+            [Display(Name = "duplicate")]
+            public int? Value2 { get; set; }
         }
     }
 
