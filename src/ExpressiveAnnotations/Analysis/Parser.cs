@@ -782,58 +782,172 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression FetchModelMethod(string name, IList<Tuple<Expression, Location>> args, Location funcPos)
         {
+            bool variable;
+            MethodInfo func;
             var signatures = ContextType.GetMethods()
                 .Where(mi => name.Equals(mi.Name) && mi.GetParameters().Length == args.Count).ToList();
             if (signatures.Count == 0)
-                return null;
+            {
+                func = ContextType.GetMethods().FirstOrDefault(mi => name.Equals(mi.Name));
+                if (func == null)
+                    return null;
+                variable = IsVariableNumOfArgsAccepted(func);
+                if (!variable)
+                    return null;
+
+                signatures = new List<MethodInfo> {func};
+            }
             AssertNonAmbiguity(signatures.Count, name, args.Count, funcPos);
 
-            return CreateMethodCallExpression(ContextExpression, args, signatures.Single());
+            func = signatures.Single();
+            variable = IsVariableNumOfArgsAccepted(func);
+            return CreateMethodCallExpression(ContextExpression, args, func, variable);
         }
 
         private Expression FetchToolchainMethod(string name, IList<Tuple<Expression, Location>> args, Location funcPos)
         {
+            bool variable;
+            LambdaExpression func;
             var signatures = Functions.ContainsKey(name)
                 ? Functions[name].Where(f => f.Parameters.Count == args.Count).ToList()
                 : new List<LambdaExpression>();
             if (signatures.Count == 0)
-                return null;
+            {
+                func = Functions.ContainsKey(name) ? Functions[name].FirstOrDefault() : null;
+                if (func == null)
+                    return null;
+                variable = IsVariableNumOfArgsAccepted(func);
+                if (!variable)
+                    return null;
+
+                signatures = new List<LambdaExpression> {func};
+            }
             AssertNonAmbiguity(signatures.Count, name, args.Count, funcPos);
 
-            return CreateInvocationExpression(signatures.Single(), args, name);
+            func = signatures.Single();
+            variable = IsVariableNumOfArgsAccepted(func);
+            return CreateInvocationExpression(func, args, name, variable);
         }
 
-        private InvocationExpression CreateInvocationExpression(LambdaExpression funcExpr, IList<Tuple<Expression, Location>> parsedArgs, string funcName)
+        private bool IsVariableNumOfArgsAccepted(LambdaExpression func)
         {
-            Debug.Assert(funcExpr.Parameters.Count == parsedArgs.Count);
+            Debug.Assert(func != null);
+
+            var arg = func.GetType().GetGenericArguments().FirstOrDefault();
+            var method = arg?.GetMethods().FirstOrDefault();
+            var parameter = method?.GetParameters().FirstOrDefault();
+            var indicator = parameter?.GetCustomAttributes(typeof(ParamArrayAttribute), false).Any();
+            return indicator != null && indicator.Value;
+        }
+
+        private bool IsVariableNumOfArgsAccepted(MethodInfo func)
+        {
+            Debug.Assert(func != null);
+
+            var parameter = func.GetParameters().FirstOrDefault();
+            var indicator = parameter?.GetCustomAttributes(typeof(ParamArrayAttribute), false).Any();
+            return indicator != null && indicator.Value;
+        }
+
+        private InvocationExpression CreateInvocationExpression(LambdaExpression funcExpr, IList<Tuple<Expression, Location>> parsedArgs, string funcName, bool variable)
+        {
             var convertedArgs = new List<Expression>();
+            ParameterExpression param;
+            if (!variable)
+            {
+                Debug.Assert(funcExpr.Parameters.Count == parsedArgs.Count);
+                for (var i = 0; i < parsedArgs.Count; i++)
+                {
+                    var arg = parsedArgs[i].Item1;
+                    var pos = parsedArgs[i].Item2;
+                    param = funcExpr.Parameters[i];
+                    convertedArgs.Add(arg.Type == param.Type
+                        ? arg
+                        : ConvertArgument(arg, param.Type, funcName, i + 1, pos));
+                }
+                return Expression.Invoke(funcExpr, convertedArgs);
+            }
+
+            if (parsedArgs.Count == 0)
+                return Expression.Invoke(funcExpr);
+
+            param = funcExpr.Parameters.Single();
+            if (parsedArgs.Count == 1)
+            {
+                var bag = parsedArgs.Single();
+                var arg = bag.Item1;
+                var pos = bag.Item2;
+                if (arg.Type.IsArray)
+                {
+                    convertedArgs.Add(arg.Type == param.Type
+                        ? arg
+                        : ConvertArgument(arg, param.Type, funcName, 1, pos));
+                    return Expression.Invoke(funcExpr, convertedArgs);
+                }
+            }
+
+            var paramElemType = param.Type.GetElementType();
             for (var i = 0; i < parsedArgs.Count; i++)
             {
                 var arg = parsedArgs[i].Item1;
                 var pos = parsedArgs[i].Item2;
-                var param = funcExpr.Parameters[i];
-                convertedArgs.Add(arg.Type == param.Type
+                convertedArgs.Add(arg.Type == paramElemType
                     ? arg
-                    : ConvertArgument(arg, param.Type, funcName, i + 1, pos));
+                    : ConvertArgument(arg, paramElemType, funcName, i + 1, pos));
             }
-            return Expression.Invoke(funcExpr, convertedArgs);
+            var argsArray = Expression.NewArrayInit(paramElemType, convertedArgs);
+            return Expression.Invoke(funcExpr, argsArray);
         }
 
-        private MethodCallExpression CreateMethodCallExpression(Expression contextExpression, IList<Tuple<Expression, Location>> parsedArgs, MethodInfo methodInfo)
+        private MethodCallExpression CreateMethodCallExpression(Expression ctxExpr, IList<Tuple<Expression, Location>> parsedArgs, MethodInfo methodInfo, bool variable)
         {
             var parameters = methodInfo.GetParameters();
-            Debug.Assert(parameters.Length == parsedArgs.Count);
             var convertedArgs = new List<Expression>();
+            ParameterInfo param;
+            if (!variable)
+            {
+                Debug.Assert(parameters.Length == parsedArgs.Count);                
+                for (var i = 0; i < parsedArgs.Count; i++)
+                {
+                    var arg = parsedArgs[i].Item1;
+                    var pos = parsedArgs[i].Item2;
+                    param = parameters[i];
+                    convertedArgs.Add(arg.Type == param.ParameterType
+                        ? arg
+                        : ConvertArgument(arg, param.ParameterType, methodInfo.Name, i + 1, pos));
+                }
+                return Expression.Call(ctxExpr, methodInfo, convertedArgs);
+            }
+
+            if (parsedArgs.Count == 0)
+                return Expression.Call(ctxExpr, methodInfo);
+
+            param = parameters.Single();            
+            if (parsedArgs.Count == 1)
+            {
+                var bag = parsedArgs.Single();
+                var arg = bag.Item1;
+                var pos = bag.Item2;
+                if (arg.Type.IsArray)
+                {
+                    convertedArgs.Add(arg.Type == param.ParameterType
+                        ? arg
+                        : ConvertArgument(arg, param.ParameterType, methodInfo.Name, 1, pos));
+                    return Expression.Call(ctxExpr, methodInfo, convertedArgs);
+                }
+            }
+
+            var paramElemType = param.ParameterType.GetElementType();
             for (var i = 0; i < parsedArgs.Count; i++)
             {
                 var arg = parsedArgs[i].Item1;
                 var pos = parsedArgs[i].Item2;
-                var param = parameters[i];
-                convertedArgs.Add(arg.Type == param.ParameterType
+                convertedArgs.Add(arg.Type == paramElemType
                     ? arg
-                    : ConvertArgument(arg, param.ParameterType, methodInfo.Name, i + 1, pos));
+                    : ConvertArgument(arg, paramElemType, methodInfo.Name, i + 1, pos));
             }
-            return Expression.Call(contextExpression, methodInfo, convertedArgs);
+            var argsArray = Expression.NewArrayInit(paramElemType, convertedArgs);
+            return Expression.Call(ctxExpr, methodInfo, argsArray);
         }        
 
         private Expression ConvertArgument(Expression arg, Type type, string funcName, int argIdx, Location argPos)
