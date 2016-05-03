@@ -318,6 +318,8 @@ Toolchain functions available out of the box at server- and client-side:
     * Initializes a new date to a specified year, month (months are 1-based), and day, with the time component set to 00:00:00 (client-side returns the number of milliseconds since January 1, 1970, 00:00:00 UTC).
 * `DateTime Date(int year, int month, int day, int hour, int minute, int second)`
     * Initializes a new date to a specified year, month (months are 1-based), day, hour, minute, and second (client-side returns the number of milliseconds since January 1, 1970, 00:00:00 UTC).
+* `DateTime ToDate(string dateString)`
+    * Converts the specified string representation of a date and time to its equivalents: `DateTime` at server-side - uses .NET [`DateTime.Parse(string dateString)`](https://msdn.microsoft.com/en-us/library/vstudio/1k1skd40(v=vs.100).aspx), and number of milliseconds since January 1, 1970, 00:00:00 UTC at client-side - uses JavaScript [`Date.parse(dateString)`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse).
 * `TimeSpan TimeSpan(int days, int hours, int minutes, int seconds)`
     * Initializes a new time period according to specified days, hours, minutes, and seconds (client-side period is expressed in milliseconds).
 * `int Length(str)`
@@ -362,6 +364,14 @@ Toolchain functions available out of the box at server- and client-side:
     * Indicates whether the regular expression finds a match in the input string (null-safe).
 * `Guid Guid(string str)`
     * Initializes a new instance of the Guid structure by using the value represented by a specified string.
+* `double Min(params double[] values)`
+    * Returns the minimum value in a sequence of numeric values.
+* `double Max(params double[] values)`
+    * Returns the maximum value in a sequence of numeric values.
+* `double Sum(params double[] values)`
+    * Computes the sum of the numeric values in a sequence.
+* `double Average(params double[] values)`
+    * Computes the average of the numeric values in a sequence.
 
 ###<a id="how-to-construct-conditional-validation-attributes">How to construct conditional validation attributes?</a>
 

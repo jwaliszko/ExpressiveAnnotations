@@ -896,8 +896,8 @@ namespace ExpressiveAnnotations.Tests
 
             var arrModel = new
             {
-                SingleElementArray = new[] {1},
-                MultipleElementsArray = new[] {1, 2, 3}
+                SingleElementArray = new[] {1.0},
+                MultipleElementsArray = new[] {1.0, 2, 3}
             };
 
             Assert.True(parser.Parse(arrModel.GetType(), "Min(SingleElementArray) == 1").Invoke(arrModel));
