@@ -275,6 +275,9 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.True(parser.Parse<object>("1 > 0 ? true : false ? 1 > 0 ? true : false : false ? false : false").Invoke(null));
             Assert.True(parser.Parse<object>("1 > 0 ? true : false ? false ? false : false : 1 > 0 ? true : false").Invoke(null));
+
+            Toolchain.Instance.AddFunction("Avg", (Expression<Toolchain.ParamsDelegate<double, double?>>)(items => items.Any() ? items.Average() : (double?)null));
+            Assert.True(parser.Parse<object>("Avg() == null").Invoke(null));
         }
 
         [Fact]
@@ -380,6 +383,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<Model>("DecNumber(SubModel.Number) == Number").Invoke(model));
             Assert.True(parser.Parse<Model>("DecNumber(Number) == 0").Invoke(model.SubModel));
 
+            Assert.True(parser.Parse<Model>("Average() == null").Invoke(model));
             Assert.True(parser.Parse<Model>("Average(1,2,3) == 2").Invoke(model));
             Assert.True(parser.Parse<Model>("Average(IntArray) == 2").Invoke(model));
 
@@ -1468,9 +1472,9 @@ namespace ExpressiveAnnotations.Tests
                 return --number;
             }
 
-            public double Average(params int[] numbers)
+            public double? Average(params int[] numbers)
             {
-                return numbers.Average();
+                return numbers.Any() ? numbers.Average() : (double?) null;
             }
 
             public void Long(int i, int j, int k, int l, int m, int n, int o, int p, int r, int s, int t, int u, int v) { }

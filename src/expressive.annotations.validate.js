@@ -216,6 +216,8 @@ var
 
                 if (arguments.length === 1) {
                     if (typeHelper.isArray(values)) {
+                        if (values.length === 0)
+                            throw "empty sequence";
                         return Math.min.apply(null, values);
                     }
                 }
@@ -227,6 +229,8 @@ var
 
                 if (arguments.length === 1) {
                     if (typeHelper.isArray(values)) {
+                        if (values.length === 0)
+                            throw "empty sequence";
                         return Math.max.apply(null, values);
                     }
                 }
@@ -239,6 +243,8 @@ var
                 var sum = 0, i, l;
                 if (arguments.length === 1) {
                     if (typeHelper.isArray(values)) {
+                        if (values.length === 0)
+                            throw "empty sequence";
                         for (i = 0, l = values.length; i < l; i++) {
                             sum += parseFloat(values[i]);
                         }
@@ -257,6 +263,8 @@ var
                 var sum, i, l, arr = new Array();
                 if (arguments.length === 1) {
                     if (typeHelper.isArray(values)) {
+                        if (values.length === 0)
+                            throw "empty sequence";
                         sum = this.Sum(values);
                         return sum / values.length;
                     }

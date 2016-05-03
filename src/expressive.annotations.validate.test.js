@@ -567,6 +567,13 @@
         assert.equal(m.Sum([1, 2, 3]), 6);
         assert.equal(m.Average([1, 2, 3]), 2);
 
+        var actions = [m.Min, m.Max, m.Sum, m.Average];
+        for (var i = 0; i < actions.length; i++) {
+            var action = actions[i];
+            assert.throws(function() { action(); }, 'no arguments');
+            assert.throws(function() { action([]); }, 'empty sequence');
+        }
+
         assert.equal(m.Guid('a1111111-1111-1111-1111-111111111111'), m.Guid('A1111111-1111-1111-1111-111111111111'));
     });
 

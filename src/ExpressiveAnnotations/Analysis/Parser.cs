@@ -753,7 +753,6 @@ namespace ExpressiveAnnotations.Analysis
                         Expr, pos);
 
                 constant = constants.SingleOrDefault();
-                
             }
             else
             {
@@ -761,7 +760,7 @@ namespace ExpressiveAnnotations.Analysis
                     .SingleOrDefault(fi => fi.IsLiteral && !fi.IsInitOnly && fi.Name.Equals(name));
             }
 
-            if (constant == null) 
+            if (constant == null)
                 return null;
 
             var value = constant.GetRawConstantValue();
@@ -868,10 +867,13 @@ namespace ExpressiveAnnotations.Analysis
                 return Expression.Invoke(funcExpr, convertedArgs);
             }
 
-            if (parsedArgs.Count == 0)
-                return Expression.Invoke(funcExpr);
-
             param = funcExpr.Parameters.Single();
+            var paramElemType = param.Type.GetElementType();
+            var argsArray = Expression.NewArrayInit(paramElemType, convertedArgs);
+
+            if (parsedArgs.Count == 0)
+                return Expression.Invoke(funcExpr, argsArray);
+            
             if (parsedArgs.Count == 1)
             {
                 var bag = parsedArgs.Single();
@@ -885,8 +887,7 @@ namespace ExpressiveAnnotations.Analysis
                     return Expression.Invoke(funcExpr, convertedArgs);
                 }
             }
-
-            var paramElemType = param.Type.GetElementType();
+            
             for (var i = 0; i < parsedArgs.Count; i++)
             {
                 var arg = parsedArgs[i].Item1;
@@ -895,7 +896,7 @@ namespace ExpressiveAnnotations.Analysis
                     ? arg
                     : ConvertArgument(arg, paramElemType, funcName, i + 1, pos));
             }
-            var argsArray = Expression.NewArrayInit(paramElemType, convertedArgs);
+            argsArray = Expression.NewArrayInit(paramElemType, convertedArgs);
             return Expression.Invoke(funcExpr, argsArray);
         }
 
@@ -919,10 +920,13 @@ namespace ExpressiveAnnotations.Analysis
                 return Expression.Call(ctxExpr, methodInfo, convertedArgs);
             }
 
-            if (parsedArgs.Count == 0)
-                return Expression.Call(ctxExpr, methodInfo);
+            param = parameters.Single();
+            var paramElemType = param.ParameterType.GetElementType();
+            var argsArray = Expression.NewArrayInit(paramElemType, convertedArgs);
 
-            param = parameters.Single();            
+            if (parsedArgs.Count == 0)
+                return Expression.Call(ctxExpr, methodInfo, argsArray);
+            
             if (parsedArgs.Count == 1)
             {
                 var bag = parsedArgs.Single();
@@ -936,8 +940,7 @@ namespace ExpressiveAnnotations.Analysis
                     return Expression.Call(ctxExpr, methodInfo, convertedArgs);
                 }
             }
-
-            var paramElemType = param.ParameterType.GetElementType();
+            
             for (var i = 0; i < parsedArgs.Count; i++)
             {
                 var arg = parsedArgs[i].Item1;
@@ -946,7 +949,7 @@ namespace ExpressiveAnnotations.Analysis
                     ? arg
                     : ConvertArgument(arg, paramElemType, methodInfo.Name, i + 1, pos));
             }
-            var argsArray = Expression.NewArrayInit(paramElemType, convertedArgs);
+            argsArray = Expression.NewArrayInit(paramElemType, convertedArgs);
             return Expression.Call(ctxExpr, methodInfo, argsArray);
         }        
 

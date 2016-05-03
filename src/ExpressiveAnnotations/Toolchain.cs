@@ -31,7 +31,14 @@ namespace ExpressiveAnnotations
     /// <seealso cref="IFunctionsProvider" />
     public class Toolchain : IFunctionsManager, IFunctionsProvider
     {
-        private delegate TResult ParamsDelegate<in TElement, out TResult>(params TElement[] args); // delegate taking variable number of arguments
+        /// <summary>
+        ///     Delegate taking variable number of arguments.
+        /// </summary>
+        /// <typeparam name="TElement">The type of the argument.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="args">The comma-separated list of arguments or an array of arguments.</param>
+        /// <returns>The result.</returns>
+        public delegate TResult ParamsDelegate<in TElement, out TResult>(params TElement[] args);
 
         private Toolchain()
         {
