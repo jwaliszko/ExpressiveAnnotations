@@ -98,6 +98,7 @@ var
                 if (typeof old === 'function') {
                     return old.apply(this, arguments);
                 }
+                return func.apply(this, arguments); // no exact signature match, most likely variable number of arguments is accepted
             };
         },
         registerMethods: function(model) {
@@ -116,6 +117,9 @@ var
             });
             this.addMethod('Today', function() { // return milliseconds
                 return new Date(new Date().setHours(0, 0, 0, 0)).getTime();
+            });
+            this.addMethod('ToDate', function(dateString) { // return milliseconds
+                return Date.parse(dateString);
             });
             this.addMethod('Date', function(year, month, day) { // months are 1-based, return milliseconds
                 return new Date(new Date(year, month - 1, day).setFullYear(year)).getTime();
@@ -205,6 +209,63 @@ var
                     throw guid.msg;
                 }
                 return guid;
+            });
+            this.addMethod('Min', function(values) { // accepts both, array and variable number of arguments
+                if (arguments.length === 0)
+                    throw "no arguments";
+
+                if (arguments.length === 1) {
+                    if (typeHelper.isArray(values)) {
+                        return Math.min.apply(null, values);
+                    }
+                }
+                return Math.min.apply(null, arguments);
+            });
+            this.addMethod('Max', function(values) { // accepts both, array and variable number of arguments
+                if (arguments.length === 0)
+                    throw "no arguments";
+
+                if (arguments.length === 1) {
+                    if (typeHelper.isArray(values)) {
+                        return Math.max.apply(null, values);
+                    }
+                }
+                return Math.max.apply(null, arguments);
+            });
+            this.addMethod('Sum', function(values) { // accepts both, array and variable number of arguments
+                if (arguments.length === 0)
+                    throw "no arguments";
+
+                var sum = 0, i, l;
+                if (arguments.length === 1) {
+                    if (typeHelper.isArray(values)) {
+                        for (i = 0, l = values.length; i < l; i++) {
+                            sum += parseFloat(values[i]);
+                        }
+                        return sum;
+                    }
+                }
+                for (i = 0, l = arguments.length; i < l; i++) {
+                    sum += parseFloat(arguments[i]);
+                }
+                return sum;
+            });
+            this.addMethod('Average', function(values) { // accepts both, array and variable number of arguments
+                if (arguments.length === 0)
+                    throw "no arguments";
+
+                var sum, i, l, arr = new Array();
+                if (arguments.length === 1) {
+                    if (typeHelper.isArray(values)) {
+                        sum = this.Sum(values);
+                        return sum / values.length;
+                    }
+                }
+                for (i = 0, l = arguments.length; i < l; i++) {
+                    arr.push(arguments[i]);
+                }
+                sum = this.Sum(arr);
+                return sum / arguments.length;
             });
         }
     },
@@ -371,6 +432,9 @@ var
         },
         isGuid: function(value) {
             return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value); // basic check
+        },
+        isArray: function(value) {
+            return Object.prototype.toString.call(value) === '[object Array]';
         },
         tryParse: function(value, type, field, parser) {
             var parseFunc;

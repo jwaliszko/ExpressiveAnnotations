@@ -393,11 +393,13 @@
         assert.ok(eapriv.typeHelper.isNumeric(m.Today()), "Today() returns number (of milliseconds)");
         assert.ok(eapriv.typeHelper.isNumeric(m.Date(1985, 2, 20)), "Date(y, M, d) returns number (of milliseconds)");
         assert.ok(eapriv.typeHelper.isNumeric(m.Date(1985, 2, 20, 0, 0, 1)), "Date(y, M, d, h, m, s) returns number (of milliseconds)");
+        assert.ok(eapriv.typeHelper.isNumeric(m.ToDate('2016-04-27')), "ToDate() returns number (of milliseconds)");
 
         assert.ok(m.Now() > m.Today());
         assert.ok(m.Date(1985, 2, 20) < m.Date(1985, 2, 20, 0, 0, 1));        
         assert.equal(m.Date(1, 1, 1), new Date(new Date(1, 0, 1).setFullYear(1)).getTime());
         assert.equal(m.Date(1, 1, 1), m.Date(1, 1, 1, 0, 0, 0));
+        assert.equal(m.ToDate('2016-04-27'), Date.parse('2016-04-27'));
 
         assert.ok(m.TimeSpan(1, 0, 0, 0) > m.TimeSpan(0, 1, 0, 0));
         assert.equal(m.TimeSpan(0, 0, 0, 0), 0);
@@ -544,6 +546,26 @@
         assert.ok(!m.IsRegexMatch(null, ''));
         assert.ok(!m.IsRegexMatch('', null));
         assert.ok(!m.IsRegexMatch(null, null));
+
+        assert.equal(m.Min(1), 1);
+        assert.equal(m.Max(1), 1);
+        assert.equal(m.Sum(1), 1);
+        assert.equal(m.Average(1), 1);
+
+        assert.equal(m.Min(1, 2, 3), 1);
+        assert.equal(m.Max(1, 2, 3), 3);
+        assert.equal(m.Sum(1, 2, 3), 6);
+        assert.equal(m.Average(1, 2, 3), 2);
+
+        assert.equal(m.Min([1]), 1);
+        assert.equal(m.Max([1]), 1);
+        assert.equal(m.Sum([1]), 1);
+        assert.equal(m.Average([1]), 1);
+
+        assert.equal(m.Min([1, 2, 3]), 1);
+        assert.equal(m.Max([1, 2, 3]), 3);
+        assert.equal(m.Sum([1, 2, 3]), 6);
+        assert.equal(m.Average([1, 2, 3]), 2);
 
         assert.equal(m.Guid('a1111111-1111-1111-1111-111111111111'), m.Guid('A1111111-1111-1111-1111-111111111111'));
     });

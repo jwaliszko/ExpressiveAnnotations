@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using ExpressiveAnnotations.Analysis;
 using Xunit;
@@ -304,6 +305,7 @@ namespace ExpressiveAnnotations.Tests
                 NGuid2 = Guid.Empty,
                 InsensString = new StringInsens("asd"),
                 NInsensString = new StringInsens("ASD"),
+                IntArray = new[] {1,2,3},
                 Array = new[]
                 {
                     new Model {Number = -1, Array = new[] {new Model {Number = -2}}},
@@ -377,6 +379,9 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.True(parser.Parse<Model>("DecNumber(SubModel.Number) == Number").Invoke(model));
             Assert.True(parser.Parse<Model>("DecNumber(Number) == 0").Invoke(model.SubModel));
+
+            Assert.True(parser.Parse<Model>("Average(1,2,3) == 2").Invoke(model));
+            Assert.True(parser.Parse<Model>("Average(IntArray) == 2").Invoke(model));
 
             Assert.True(parser.Parse<Model>("SubModel.Date > Today()").Invoke(model));
             Assert.True(parser.Parse<Model>("'hello world' == Trim(SubModel.Text)").Invoke(model));
@@ -508,6 +513,8 @@ namespace ExpressiveAnnotations.Tests
             funcManager.AddFunction<int, int, int, int, int>("M4", (i, j, k, l) => i + j + k + l);
             funcManager.AddFunction<int, int, int, int, int, int>("M5", (i, j, k, l, m) => i + j + k + l + m);
             funcManager.AddFunction<int, int, int, int, int, int, int>("M6", (i, j, k, l, m, n) => i + j + k + l + m + n);
+            // custom signature
+            funcManager.AddFunction("MN", (Expression<Func<int, int, int, int, int, int, int, int>>)((i, j, k, l, m, n, o) => i + j + k + l + m + n + o));
 
             Assert.True(parser.Parse<object>("M0() == 0").Invoke(null));
             Assert.True(parser.Parse<object>("M1(1) == 1").Invoke(null));
@@ -516,6 +523,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<object>("M4(1,1,1,1) == 4").Invoke(null));
             Assert.True(parser.Parse<object>("M5(1,1,1,1,1) == 5").Invoke(null));
             Assert.True(parser.Parse<object>("M6(1,1,1,1,1,1) == 6").Invoke(null));
+            Assert.True(parser.Parse<object>("MN(1,1,1,1,1,1,1) == 7").Invoke(null));
         }
 
         [Fact]
@@ -724,6 +732,10 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<object>("Now() > Today()").Invoke(null));
             Assert.True(parser.Parse<object>("Date(1985, 2, 20) < Date(1985, 2, 20, 0, 0, 1)").Invoke(null));
             Assert.True(parser.Parse<object>("Date(1, 1, 1) == Date(1, 1, 1, 0, 0, 0)").Invoke(null));
+            Assert.True(parser.Parse<object>("ToDate('2016-04-27') == Date(2016, 4, 27)").Invoke(null));
+
+            var dateModel = new {Date = new DateTime(2016, 4, 27)};
+            Assert.True(parser.Parse(dateModel.GetType(), "ToDate('2016-04-27') == Date").Invoke(dateModel));
 
             Assert.True(parser.Parse<object>("TimeSpan(1, 0, 0, 0) > TimeSpan(0, 1, 0, 0)").Invoke(null));
             //Assert.True(parser.Parse<object>("(TimeSpan(0, 0, 0, 0)).TotalMilliseconds == 0").Invoke(null)); // foo().Prop - to be supported?
@@ -871,6 +883,32 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<object>("IsRegexMatch(null, '') == false").Invoke(null));
             Assert.True(parser.Parse<object>("IsRegexMatch('', null) == false").Invoke(null));
             Assert.True(parser.Parse<object>("IsRegexMatch(null, null) == false").Invoke(null));
+
+            Assert.True(parser.Parse<object>("Min(1) == 1").Invoke(null));
+            Assert.True(parser.Parse<object>("Max(1) == 1").Invoke(null));
+            Assert.True(parser.Parse<object>("Sum(1) == 1").Invoke(null));
+            Assert.True(parser.Parse<object>("Average(1) == 1").Invoke(null));
+
+            Assert.True(parser.Parse<object>("Min(1, 2, 3) == 1").Invoke(null));
+            Assert.True(parser.Parse<object>("Max(1, 2, 3) == 3").Invoke(null));
+            Assert.True(parser.Parse<object>("Sum(1, 2, 3) == 6").Invoke(null));
+            Assert.True(parser.Parse<object>("Average(1, 2, 3) == 2").Invoke(null));
+
+            var arrModel = new
+            {
+                SingleElementArray = new[] {1},
+                MultipleElementsArray = new[] {1, 2, 3}
+            };
+
+            Assert.True(parser.Parse(arrModel.GetType(), "Min(SingleElementArray) == 1").Invoke(arrModel));
+            Assert.True(parser.Parse(arrModel.GetType(), "Max(SingleElementArray) == 1").Invoke(arrModel));
+            Assert.True(parser.Parse(arrModel.GetType(), "Sum(SingleElementArray) == 1").Invoke(arrModel));
+            Assert.True(parser.Parse(arrModel.GetType(), "Average(SingleElementArray) == 1").Invoke(arrModel));
+
+            Assert.True(parser.Parse(arrModel.GetType(), "Min(MultipleElementsArray) == 1").Invoke(arrModel));
+            Assert.True(parser.Parse(arrModel.GetType(), "Max(MultipleElementsArray) == 3").Invoke(arrModel));
+            Assert.True(parser.Parse(arrModel.GetType(), "Sum(MultipleElementsArray) == 6").Invoke(arrModel));
+            Assert.True(parser.Parse(arrModel.GetType(), "Average(MultipleElementsArray) == 2").Invoke(arrModel));
 
             Assert.True(parser.Parse<object>("Guid('a1111111-1111-1111-1111-111111111111') == Guid('A1111111-1111-1111-1111-111111111111')").Invoke(null));
 
@@ -1406,7 +1444,9 @@ namespace ExpressiveAnnotations.Tests
             public Guid? NGuid1 { get; set; }
             public Guid? NGuid2 { get; set; }
 
-            public Model[] Array { get; set; } // array
+            public int[] IntArray { get; set; }
+
+            public Model[] Array { get; set; } // array            
             public IEnumerable<Model> Items { get; set; } // collection without indexer
             public CustomCollection<Model> Collection { get; set; } // collection with indexer, like e.g List<>
 
@@ -1426,6 +1466,11 @@ namespace ExpressiveAnnotations.Tests
             public int DecNumber(int number)
             {
                 return --number;
+            }
+
+            public double Average(params int[] numbers)
+            {
+                return numbers.Average();
             }
 
             public void Long(int i, int j, int k, int l, int m, int n, int o, int p, int r, int s, int t, int u, int v) { }
