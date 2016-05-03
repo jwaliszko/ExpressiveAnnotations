@@ -718,9 +718,12 @@ namespace ExpressiveAnnotations.Analysis
                     .ToList();
 
                 if (enumTypes.Count > 1)
+                {
+                    var enumList = string.Join($",{Environment.NewLine}", enumTypes.Select(x => $"'{x.FullName}'"));
                     throw new ParseErrorException(
-                        $"Enum '{enumTypeName}' is ambiguous, found following:{Environment.NewLine}{string.Join("," + Environment.NewLine, enumTypes.Select(x => $"'{x.FullName}'"))}.",
+                        $"Enum '{enumTypeName}' is ambiguous, found following:{Environment.NewLine}{enumList}.",
                         Expr, pos);
+                }
 
                 var type = enumTypes.SingleOrDefault();
                 if (type != null)
@@ -748,9 +751,16 @@ namespace ExpressiveAnnotations.Analysis
                     .ToList();
 
                 if (constants.Count > 1)
+                {
+                    var constsList = string.Join(
+                        $",{Environment.NewLine}",
+                        constants.Select(x => x.ReflectedType != null
+                            ? $"'{x.ReflectedType.FullName}.{x.Name}'"
+                            : $"'{x.Name}'"));
                     throw new ParseErrorException(
-                        $"Constant '{name}' is ambiguous, found following:{Environment.NewLine}{string.Join("," + Environment.NewLine, constants.Select(x => x.ReflectedType != null ? $"'{x.ReflectedType.FullName}.{x.Name}'" : $"'{x.Name}'"))}.",
+                        $"Constant '{name}' is ambiguous, found following:{Environment.NewLine}{constsList}.",
                         Expr, pos);
+                }
 
                 constant = constants.SingleOrDefault();
             }
@@ -978,7 +988,8 @@ namespace ExpressiveAnnotations.Analysis
         {
             if (signatures > 1)
                 throw new ParseErrorException(
-                    $"Function '{funcName}' accepting {args} argument{(args == 1 ? string.Empty : "s")} is ambiguous.", Expr, funcPos);
+                    $"Function '{funcName}' accepting {args} argument{(args == 1 ? string.Empty : "s")} is ambiguous.", 
+                    Expr, funcPos);
         }
     }
 }
