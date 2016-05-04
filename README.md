@@ -479,7 +479,7 @@ For supplementary reading visit the [installation section](#installation).
 
 Yes, a complete list of types with annotations can be retrieved and compiled collectively. It can be useful, e.g. during unit tesing phase, when without the necessity of your main application startup, all the compile-time errors (syntax errors, typechecking errors) done to your expressions can be discovered. The following extension is helpful:
 
-```
+```C#
 public static IEnumerable<ExpressiveAttribute> CompileExpressiveAttributes(this Type type)
 {
     var properties = type.GetProperties()
@@ -496,7 +496,7 @@ public static IEnumerable<ExpressiveAttribute> CompileExpressiveAttributes(this 
 ```
 with the succeeding usage manner:
 
-```
+```C#
 // compile all expressions for specified model:
 var compiled = typeof (SomeModel).CompileExpressiveAttributes().ToList();
 
@@ -511,16 +511,16 @@ compiled = AppDomain.CurrentDomain.GetAssemblies()
 ```
 Notice that such compiled lambdas will be cached inside attributes instances stored in `compiled` list.
 That means that subsequent compilation requests:
-```
+```C#
 compiled.ForEach(x => x.Compile(typeof (SomeModel));
 ```
 do nothing (due to optimization purposes), unless invoked with enabled recompilation switch:
-```
+```C#
 compiled.ForEach(x => x.Compile(typeof (SomeModel), force: true); 
 ```
 Finally, this reveals compile-time errors only, you can still can get runtime errors though, e.g.:
 
-```
+```C#
 var parser = new Parser();
 parser.AddFunction<object, bool>("CastToBool", obj => (bool) obj);
 
@@ -557,14 +557,14 @@ Sure, provide your own methods provider, or extend existing global one, i.e.
 
 * extend existing provider:
 
- ```
+ ```C#
     protected void Application_Start()
     {
         Toolchain.Instance.AddFunction<int[], int>("ArrayLength", array => array.Length);
 ```
 * define new provider:
 
- ```
+ ```C#
     public class CustomFunctionsProvider : IFunctionsProvider
     {
         public IDictionary<string, IList<LambdaExpression>> GetFunctions()
@@ -686,11 +686,11 @@ Make sure `RequiredIf` is applied to a field which *accepts null values*.
 
 In the other words, it is redundant to apply this attribute to a field of non-nullable [value type](https://msdn.microsoft.com/en-us/library/s1ax56ch.aspx), like e.g. `int`, which is a struct representing integral numeric type, `DateTime`, etc. Because the value of such a type is always non-null, requirement demand is constantly fulfilled. Instead, for value types use their nullable forms, e.g. `int?`, `DateTime?`, etc.
 
-```
+```C#
 [RequiredIf("true")] // no effect...
 public int Value { get; set; } // ...unless int? is used
 ```
-```
+```C#
 [RequiredIf("true")] // no effect...
 public DateTime Value { get; set; } // ...unless DateTime? is used
 ```
