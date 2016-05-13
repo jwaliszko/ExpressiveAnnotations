@@ -724,7 +724,9 @@ var
         var method = typeHelper.string.format('assertthat{0}', $.trim(this));
         $.validator.addMethod(method, function(value, element, params) {
             try {
-                return computeAssertThat(value, element, params);
+                var valid = computeAssertThat(value, element, params);
+                $(element).trigger('eavalid', ['assertthat', valid, params.expression]);
+                return valid;
             } catch (ex) {
                 logger.fail(ex);
             }
@@ -735,7 +737,9 @@ var
         var method = typeHelper.string.format('requiredif{0}', $.trim(this));
         $.validator.addMethod(method, function(value, element, params) {
             try {
-                return computeRequiredIf(value, element, params);
+                var valid = computeRequiredIf(value, element, params);
+                $(element).trigger('eavalid', ['requiredif', valid, params.expression]);
+                return valid;
             } catch (ex) {
                 logger.fail(ex);
             }
