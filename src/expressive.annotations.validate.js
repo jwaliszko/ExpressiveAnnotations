@@ -607,13 +607,14 @@ var
             }
         },
         validateReferences: function(name, form) {
-            var i, field, referencedFields;
+            var i, field, referencedFields, validator;
+            validator = $(form).validate(); // get validator attached to the form
             referencedFields = this.referencesMap[name];
             if (referencedFields !== undefined && referencedFields !== null) {
                 logger.dump(typeHelper.string.format('Validation triggered for following {0} dependencies: {1}.', name, referencedFields.join(', ')));
                 i = referencedFields.length;
                 while (i--) {
-                    field = $(form).find(typeHelper.string.format(':input[data-val][name="{0}"]', referencedFields[i]));
+                    field = $(form).find(typeHelper.string.format(':input[data-val][name="{0}"]', referencedFields[i])).not(validator.settings.ignore);
                     if (field.length !== 0) {
                         field.valid();
                     }

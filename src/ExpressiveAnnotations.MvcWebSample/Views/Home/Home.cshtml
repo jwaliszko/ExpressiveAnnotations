@@ -105,10 +105,10 @@
                 return array.length;
             });
 
-            // ----- do some other stuff, not related to ea directly -----
+            // ----- do some other stuff, not necessarily related to ea directly -----
 
             $(document).ready(function() {
-                var validator = $("form").data("validator"); // get validator asociated with the form (association established by jquery.validate.unobtrusive.js)
+                var validator = $('form').data('validator'); // get validator associated with the form (association established by jquery.validate.unobtrusive.js)
                 validator.settings.onkeyup = function(element) { // execute validation of current field on keyup event
                     $(element).valid();
                 }
@@ -140,7 +140,25 @@
                         $(e.target).trigger(e.type);
                     }, 50);
                 });
+
+                //hideNonRequiredFields();
             });
+
+            //function hideNonRequiredFields() { // an example of how eavalid event can be used
+            //    var $form = $('form');
+            //    var current = undefined;
+            //    var selector = 'input, select, textarea';
+
+            //    $form.validate().settings.ignore = ''; // enable validation for ':hidden' fields
+            //    $form.find(selector).on(ea.settings.dependencyTriggers, function() {
+            //        current = this; // mark element being currently modified
+            //    });
+            //    $form.find(selector).on('eavalid', function(e, type, valid, expr) {
+            //        if (type === 'requiredif' && e.currentTarget !== current) {
+            //            $(e.currentTarget).closest('li').toggle(!valid); // for this to work ':hidden' fields validation has to be enabled
+            //        }
+            //    });
+            //}
         </script>
     }
 
