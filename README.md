@@ -33,6 +33,7 @@ A small .NET and JavaScript library which provides annotation-based conditional 
    - [How to control frequency of dependent fields validation?](#how-to-control-frequency-of-dependent-fields-validation) <sup>(re client-side)</sup>
    - [Can I increase web console verbosity for debug purposes?](#can-i-increase-web-console-verbosity-for-debug-purposes) <sup>(re client-side)</sup>
    - [How to fetch field value or display name in error message?](#how-to-fetch-field-value-or-display-name-in-error-message) <sup>(re client and server-side)</sup>
+   - [Is there any event raised when validation is done?](#is-there-any-event-raised-when-validation-is-done) <sup>(re client-side)</sup>
    - [`RequiredIf` attribute is not working, what is wrong?](#requiredif-attribute-is-not-working-what-is-wrong) <sup>(re client and server-side)</sup>
    - [Is there a possibility to perform asynchronous validation?](#is-there-a-possibility-to-perform-asynchronous-validation) <sup>(re client-side, experimental)</sup>
    - [What if my question is not covered by FAQ section?](#what-if-my-question-is-not-covered-by-faq-section)
@@ -679,6 +680,22 @@ If you need more insightful overview of what client-side script is doing (includ
 * to get display name, given in `DisplayAttribute`, use additional `n` (or `N`) suffix, e.g. `{field:n}`. 
 
 Notice that `{{` is treated as the escaped bracket character.
+
+#####<a id="#is-there-any-event-raised-when-validation-is-done">Is there any event raised when validation is done?</a>
+
+Each element validated by EA triggers an `eavalid` event, with the following extra parameters:
+
+* type of the attribute for which validation was executed: `'requiredif'` or `'assertthat'`,
+* state of the validation: `true` or `false`,
+* expression which was evaluated.
+
+Attach to it in the following manner:
+```JavaScript
+<script>
+    $('form').find('input, select, textarea').on('eavalid', function(e, type, valid, expr) {
+        console.log('event triggered by ' + e.currentTarget.name);
+    });
+```
 
 #####<a id="#requiredif-attribute-is-not-working-what-is-wrong">`RequiredIf` attribute is not working, what is wrong?</a>
 

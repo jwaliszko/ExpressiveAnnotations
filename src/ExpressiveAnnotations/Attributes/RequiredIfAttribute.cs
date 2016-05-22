@@ -13,14 +13,28 @@ namespace ExpressiveAnnotations.Attributes
     /// </summary>
     public sealed class RequiredIfAttribute : ExpressiveAttribute
     {
-        private const string _defaultErrorMessage = "The {0} field is required by the following logic: {1}";
+        private static string _defaultErrorMessage = "The {0} field is required by the following logic: {1}";
+
+        /// <summary>
+        ///     Gets or sets the default error message.
+        /// </summary>
+        public static string DefaultErrorMessage
+        {
+            get { return _defaultErrorMessage; }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException(nameof(value), "Default error message cannot be null.");
+                _defaultErrorMessage = value;
+            }
+        }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="RequiredIfAttribute" /> class.
         /// </summary>
         /// <param name="expression">The logical expression based on which requirement condition is computed.</param>
         public RequiredIfAttribute(string expression)
-            : base(expression, _defaultErrorMessage)
+            : base(expression, DefaultErrorMessage)
         {
             AllowEmptyStrings = false;
         }
@@ -45,7 +59,7 @@ namespace ExpressiveAnnotations.Attributes
         /// <exception cref="System.InvalidOperationException"></exception>
         protected override ValidationResult IsValidInternal(object value, ValidationContext validationContext)
         {
-            AssertNonValueType(value, validationContext);
+            AssertNonValueType(value);
 
             var isEmpty = value is string && string.IsNullOrWhiteSpace((string) value);
             if (value == null || (isEmpty && !AllowEmptyStrings))
@@ -60,7 +74,7 @@ namespace ExpressiveAnnotations.Attributes
             return ValidationResult.Success;
         }
 
-        private void AssertNonValueType(object value, ValidationContext validationContext)
+        private void AssertNonValueType(object value)
         {
             if (PropertyType == null)
                 return;

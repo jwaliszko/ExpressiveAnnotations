@@ -109,3 +109,4 @@ UpgradeLog*.XML
 
 # Linked content script files (copied automatically before each build)
 /src/ExpressiveAnnotations.MvcWebSample/Scripts/expressive.annotations.validate*.js
+/src/.vs/config/applicationhost.config
