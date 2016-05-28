@@ -21,7 +21,7 @@
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>
-            @Html.LabelFor(model => model.Phone, new {@class = "inline prefix"})
+            @Html.LabelFor(model => model.Phone, new { @class = "inline prefix" })
             @Html.TextBoxFor(model => model.Phone)
             @Html.ValidationMessageFor(model => model.Phone)
         </div>
