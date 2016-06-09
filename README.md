@@ -140,21 +140,24 @@ l-and-exp   => b-or-exp [ "&&" l-and-exp ]
 b-or-exp    => xor-exp [ "|" b-or-exp ]
 xor-exp     => b-and-exp [ "^" xor-exp ]
 b-and-exp   => eq-exp [ "&" b-and-exp ]
-eq-exp      => rel-exp [ "==" | "!=" eq-exp ]
-rel-exp     => shift-exp [ ">" | ">=" | "<" | "<=" rel-exp ]
-shift-exp   => add-exp [ "<<" | ">>" shift-exp ]
+eq-exp      => rel-exp [ ( "==" | "!=" ) eq-exp ]
+rel-exp     => shift-exp [ ( ">" | ">=" | "<" | "<=" ) rel-exp ]
+shift-exp   => add-exp [ ( "<<" | ">>" ) shift-exp ]
 add-exp     => mul-exp add-exp'
-add-exp'    => "+" | "-" add-exp
+add-exp'    => ( "+" | "-" ) add-exp
 mul-exp     => unary-exp mul-exp'
-mul-exp'    => "*" | "/" | "%" mul-exp
-unary-exp   => primary-exp [ "+" | "-" | "!" | "~" unary-exp ]
-primary-exp => "null" | "true" | "false" | int | float | bin | hex | string | 
-               func-call | subscrit | mem-access | "(" cond-exp ")"
+mul-exp'    => ( "*" | "/" | "%" ) mul-exp
+unary-exp   => primary-exp [ ( "+" | "-" | "!" | "~" ) unary-exp ]
+primary-exp => "null" | bool | int | float | bin | hex | string | arr-access | id-access | "(" cond-exp ")"
+
+bool        => "true" | "false"
+arr-access  => array [ "[" cond-exp "]" ]
+array       => "[" cond-exp [ "," cond-exp ] "]"
+id-access   => mem-access | func-call
+mem-access  => id [ "[" cond-exp "]" ] [ "." mem-access ]
 func-call   => id "(" cond-exp [ "," cond-exp ] ")"
-subscript   => id "[" int "]"
-mem-access  => id [ "." id ]
 ```
-Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar except for *int*, *float*, *bin*, *hex*, *string* and *id*, which are assumed to be implicitly defined (*id* identifier specifies names of arrays, functions, properties, constants and enums).
+Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar except for *int*, *float*, *bin*, *hex*, *string* and *id*, which are assumed to be implicitly defined (*id* specifies names of functions, properties, constants and enums).
 
 Expressions are built of unicode letters and numbers (i.e. `[L*]` and `[N*]` [categories](https://en.wikipedia.org/wiki/Unicode_character_property) respectively) with the usage of following components:
 
@@ -170,7 +173,8 @@ Expressions are built of unicode letters and numbers (i.e. `[L*]` and `[N*]` [ca
   * binary (with `0b` prefix), e.g. `0b1010`,
   * hexadecimal (with `0x` prefix), e.g. `0xFF`,
   * string, e.g. `'in single quotes'` (internal quote escape sequence is `\'`, character representing new line is `\n`),
-  * id, i.e. names of arrays, functions, properties, constants and enums.
+  * array, e.g. `[1,2,3]`,
+  * mem, i.e. names of functions, properties, constants and enums.
 
 #####<a id="operators-precedence">Operators precedence</a>
 

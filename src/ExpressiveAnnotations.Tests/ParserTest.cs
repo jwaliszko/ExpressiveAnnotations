@@ -120,7 +120,9 @@ namespace ExpressiveAnnotations.Tests
         public void verify_logic_without_context()
         {
             var parser = new Parser();
-            parser.RegisterToolchain();
+            Toolchain.Instance.AddFunction("IntArrayLength", (int[] arr) => arr.Length);
+            Toolchain.Instance.AddFunction("ObjArrayLength", (object[] arr) => arr.Length);
+            parser.RegisterToolchain();            
 
             Assert.True(parser.Parse<object>("YesNo.Yes == 0").Invoke(null));
             Assert.True(parser.Parse<object>("YesNo.Yes < YesNo.No").Invoke(null));
@@ -275,6 +277,13 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.True(parser.Parse<object>("1 > 0 ? true : false ? 1 > 0 ? true : false : false ? false : false").Invoke(null));
             Assert.True(parser.Parse<object>("1 > 0 ? true : false ? false ? false : false : 1 > 0 ? true : false").Invoke(null));
+
+            Assert.True(parser.Parse<object>("ObjArrayLength([]) == 0").Invoke(null));
+            Assert.True(parser.Parse<object>("IntArrayLength([1]) == 1").Invoke(null));
+            Assert.True(parser.Parse<object>("IntArrayLength([1,2,3]) == 3").Invoke(null));
+            Assert.True(parser.Parse<object>("[0+1,2,3][0] == 1").Invoke(null));
+            Assert.True(parser.Parse<object>("[0+1,2,3][true ? 0 : 1] == 1").Invoke(null));
+            Assert.True(parser.Parse<object>("[1,2,3][[1,2][[1,2][0]]] == 3").Invoke(null));
 
             Toolchain.Instance.AddFunction("Avg", (Expression<Toolchain.ParamsDelegate<double, double?>>)(items => items.Any() ? items.Average() : (double?)null));
             Assert.True(parser.Parse<object>("Avg() == null").Invoke(null));
@@ -463,6 +472,7 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.True(parser.Parse<Model>("Collection[0] != null && Collection[1] != null").Invoke(model));
             Assert.True(parser.Parse<Model>("Collection[0].Number + Collection[0].Collection[0].Number + Collection[1].Number + Collection[1].Collection[0].Number == 0").Invoke(model));
+            Assert.True(parser.Parse<Model>("Collection[true ? 0 : 1].Collection[true ? [0][0] : 1].Number == -2").Invoke(model));
         }
 
         [Fact]
@@ -1293,7 +1303,7 @@ namespace ExpressiveAnnotations.Tests
 
     - 6
     + 1/x[0]/1 == 3.50").Invoke(null));
-            Assert.Equal("Only public properties, constants and enums are accepted. Identifier 'x[0]' not known.", e.Error);
+            Assert.Equal("Only public properties, constants and enums are accepted. Identifier 'x' not known.", e.Error);
             Assert.Equal(new Location(4, 9), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("WriteLine('hello')").Invoke(null));
@@ -1387,7 +1397,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(new Location(1, 1), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Items[1.0]").Invoke(new Model()));
-            Assert.Equal("Array 'Items' expects integral index. Unexpected token: '1.0'.", e.Error);
+            Assert.Equal("Array 'Items' expects index of 'System.Int32' type. Type 'System.Double' cannot be implicitly converted.", e.Error);
             Assert.Equal(new Location(1, 7), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Items[0").Invoke(new Model()));
@@ -1395,8 +1405,8 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(new Location(1, 8), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Items[0+").Invoke(new Model()));
-            Assert.Equal("Array 'Items' expects closing bracket. Unexpected token: '+'.", e.Error);
-            Assert.Equal(new Location(1, 8), e.Location, new LocationComparer());
+            Assert.Equal("Expected \"null\", int, float, bool, bin, hex, string or id. Unexpected end of expression.", e.Error);
+            Assert.Equal(new Location(1, 9), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Prop.+").Invoke(new Model()));
             Assert.Equal("Member 'Prop' expects subproperty identifier. Unexpected token: '+'.", e.Error);
@@ -1405,6 +1415,14 @@ namespace ExpressiveAnnotations.Tests
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Prop.").Invoke(new Model()));
             Assert.Equal("Member 'Prop' expects subproperty identifier. Unexpected end of expression.", e.Error);
             Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("[0][1 > 0 ? 0*2 : 0^2] == 1").Invoke(null));
+            Assert.Equal("Argument types must match.", e.Error);
+            Assert.Equal(new Location(1, 11), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Collection[true ? 0 : 1].Collection[true ? [0][0] : 1].Unknown == -2").Invoke(new Model()));
+            Assert.Equal("Only public properties, constants and enums are accepted. Identifier 'Unknown' not known.", e.Error);
+            Assert.Equal(new Location(1, 56), e.Location, new LocationComparer());
         }
 
         [Fact]

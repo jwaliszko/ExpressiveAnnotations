@@ -13,7 +13,7 @@ using System.Text.RegularExpressions;
 
 namespace ExpressiveAnnotations.Analysis
 {
-    /* EBNF GRAMMAR:
+    /* EBNF grammar:
      * 
      * expression  => cond-exp
      * cond-exp    => l-or-exp [ "?" cond-exp ":" cond-exp ]
@@ -21,20 +21,23 @@ namespace ExpressiveAnnotations.Analysis
      * l-and-exp   => b-or-exp [ "&&" l-and-exp ]
      * b-or-exp    => xor-exp [ "|" b-or-exp ]
      * xor-exp     => b-and-exp [ "^" xor-exp ]
-     * b-and-exp   => eq-exp [ "&" b-and-exp ]     
-     * eq-exp      => rel-exp [ "==" | "!=" eq-exp ]
-     * rel-exp     => shift-exp [ ">" | ">=" | "<" | "<=" rel-exp ]
-     * shift-exp   => add-exp [ "<<" | ">>" shift-exp ]
+     * b-and-exp   => eq-exp [ "&" b-and-exp ]
+     * eq-exp      => rel-exp [ ( "==" | "!=" ) eq-exp ]
+     * rel-exp     => shift-exp [ ( ">" | ">=" | "<" | "<=" ) rel-exp ]
+     * shift-exp   => add-exp [ ( "<<" | ">>" ) shift-exp ]
      * add-exp     => mul-exp add-exp'
-     * add-exp'    => "+" | "-" add-exp
+     * add-exp'    => ( "+" | "-" ) add-exp
      * mul-exp     => unary-exp mul-exp'
-     * mul-exp'    => "*" | "/" | "%" mul-exp
-     * unary-exp   => primary-exp [ "+" | "-" | "!" | "~" unary-exp ]
-     * primary-exp => "null" | "true" | "false" | int | float | bin | hex | string | 
-     *                func-call | subscrit | mem-access | "(" cond-exp ")"
+     * mul-exp'    => ( "*" | "/" | "%" ) mul-exp
+     * unary-exp   => primary-exp [ ( "+" | "-" | "!" | "~" ) unary-exp ]
+     * primary-exp => "null" | bool | int | float | bin | hex | string | arr-access | id-access | "(" cond-exp ")"
+     * 
+     * bool        => "true" | "false"
+     * arr-access  => array [ "[" cond-exp "]" ]
+     * array       => "[" cond-exp [ "," cond-exp ] "]"
+     * id-access   => mem-access | func-call
+     * mem-access  => id [ "[" cond-exp "]" ] [ "." mem-access ]
      * func-call   => id "(" cond-exp [ "," cond-exp ] ")"
-     * subscript   => id "[" int "]"
-     * mem-access  => id [ "." id ]
      */
 
     /// <summary>
@@ -234,10 +237,15 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseConditionalExpression()
         {
+            var tok = PeekToken();
             var arg1 = ParseLogicalOrExp();
-            if (PeekType() != TokenType.QMARK)
+            var oper = PeekToken();
+            if (oper.Type != TokenType.QMARK)
                 return arg1;
+
+            Wall.OfType<bool>(arg1, tok.Location);
             ReadToken();
+
             var arg2 = ParseConditionalExpression();
             if (PeekType() != TokenType.COLON)
                 throw new ParseErrorException(
@@ -248,6 +256,7 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken();
             var arg3 = ParseConditionalExpression();
 
+            Wall.TypesMatch(arg2, arg3, oper.Location);
             return Expression.Condition(arg1, arg2, arg3);
         }
 
@@ -498,8 +507,10 @@ namespace ExpressiveAnnotations.Analysis
                     return ParseBool();
                 case TokenType.STRING:
                     return ParseString();
+                case TokenType.L_BRACKET:
+                    return ParseArrayAccess();
                 case TokenType.ID:
-                    return ParseId();
+                    return ParseIdAccess();
                 case TokenType.L_PAR:
                     ReadToken(); // read "("
                     var arg = ParseConditionalExpression();
@@ -554,18 +565,71 @@ namespace ExpressiveAnnotations.Analysis
             return Expression.Constant(value, typeof (string));
         }
 
-        private Expression ParseId()
+        private Expression ParseArrayAccess()
+        {
+            var arrExpr = ParseArray();
+            if (PeekType() != TokenType.L_BRACKET)
+                return arrExpr;
+
+            // parse subscrit
+            ReadToken(); // read "["
+            var idxExprLoc = PeekToken().Location;
+            var idxExpr = ParseConditionalExpression();
+            if (idxExpr.Type != typeof(int))
+                throw new ParseErrorException(
+                    PeekType() == TokenType.EOF
+                        ? $"Array literal expects index of '{typeof(int)}' type. Unexpected end of expression."
+                        : $"Array literal expects index of '{typeof(int)}' type. Type '{idxExpr.Type}' cannot be implicitly converted.",
+                    Expr, idxExprLoc);            
+            if (PeekType() != TokenType.R_BRACKET)
+                throw new ParseErrorException(
+                    PeekType() == TokenType.EOF
+                        ? "Array expects closing bracket. Unexpected end of expression."
+                        : $"Array expects closing bracket. Unexpected token: '{PeekRawValue()}'.",
+                    Expr, PeekToken().Location);
+            ReadToken(); // read "]"            
+
+            return Expression.ArrayIndex(arrExpr, idxExpr);
+        }
+
+        private Expression ParseArray()
+        {
+            ReadToken(); // read "["
+            var args = new List<Tuple<Expression, Location>>();
+            while (PeekType() != TokenType.R_BRACKET)
+            {
+                var tkn = PeekToken();
+                var arg = ParseConditionalExpression();
+                if (PeekType() == TokenType.COMMA)
+                    ReadToken();
+                else if (PeekType() != TokenType.R_BRACKET) // when no comma found, array literal end expected
+                    throw new ParseErrorException(
+                        PeekType() == TokenType.EOF
+                            ? "Array expects comma or closing bracket. Unexpected end of expression."
+                            : $"Array expects comma or closing bracket. Unexpected token: '{PeekRawValue()}'.",
+                        Expr, PeekToken().Location);
+                args.Add(new Tuple<Expression, Location>(
+                    args.Any()
+                        ? Expression.Convert(arg, args[0].Item1.Type)
+                        : arg,
+                    tkn.Location));
+            }
+            ReadToken(); // read "]"
+
+            var arrExpr = args.Any()
+                ? Expression.NewArrayInit(args[0].Item1.Type, args.Select(x => x.Item1))
+                : Expression.NewArrayInit(typeof(object));
+            return arrExpr;
+        }
+
+        private Expression ParseIdAccess()
         {
             var func = PeekToken();
             ReadToken(); // read name
 
-            switch (PeekType())
-            {
-                case TokenType.L_PAR:
-                    return ParseFuncCall(func);
-                default:
-                    return ParseMemberAccess(func);
-            }
+            return PeekType() == TokenType.L_PAR 
+                ? ParseFuncCall(func) 
+                : ParseMemberAccess(func);
         }
 
         private Expression ParseFuncCall(Token func)
@@ -596,6 +660,8 @@ namespace ExpressiveAnnotations.Analysis
         {
             var name = prop.RawValue;
             var builder = new StringBuilder(name);
+            var indices = new Queue<Expression>();
+            var identifiers = new Queue<Location>(new[] {prop.Location});
             while (new[] {TokenType.L_BRACKET, TokenType.PERIOD}.Contains(PeekType()))
             {
                 switch (PeekType())
@@ -609,6 +675,7 @@ namespace ExpressiveAnnotations.Analysis
                                     ? $"Member '{name}' expects subproperty identifier. Unexpected end of expression."
                                     : $"Member '{name}' expects subproperty identifier. Unexpected token: '{PeekRawValue()}'.",
                                 Expr, PeekToken().Location);
+                        identifiers.Enqueue(PeekToken().Location);
                         name = PeekRawValue();
                         builder.Append(name);
                         ReadToken(); // read identifier
@@ -617,14 +684,15 @@ namespace ExpressiveAnnotations.Analysis
                         Debug.Assert(PeekType() == TokenType.L_BRACKET);
                         builder.Append(PeekValue());
                         ReadToken(); // read "["
-                        if (PeekType() != TokenType.INT)
+                        var idxExprLoc = PeekToken().Location;
+                        var idxExpr = ParseConditionalExpression();
+                        if (idxExpr.Type != typeof(int))
                             throw new ParseErrorException(
                                 PeekType() == TokenType.EOF
-                                    ? $"Array '{name}' expects integral index. Unexpected end of expression."
-                                    : $"Array '{name}' expects integral index. Unexpected token: '{PeekRawValue()}'.",
-                                Expr, PeekToken().Location);
-                        builder.Append(PeekValue());
-                        ReadToken(); // read index
+                                    ? $"Array '{name}' expects index of '{typeof(int)}' type. Unexpected end of expression."
+                                    : $"Array '{name}' expects index of '{typeof(int)}' type. Type '{idxExpr.Type}' cannot be implicitly converted.",
+                                Expr, idxExprLoc);
+                        indices.Enqueue(idxExpr);
                         if (PeekType() != TokenType.R_BRACKET)
                             throw new ParseErrorException(
                                 PeekType() == TokenType.EOF
@@ -637,45 +705,56 @@ namespace ExpressiveAnnotations.Analysis
                 }
             }
 
-            return ExtractMemberExpression(builder.ToString(), prop.Location);
+            return ExtractMemberExpression(builder.ToString(), indices, identifiers);
         }
 
-        private Expression ExtractMemberExpression(string name, Location pos)
+        private Expression ExtractMemberExpression(string name, Queue<Expression> indices, Queue<Location> identifiers)
         {
-            var expression = FetchPropertyValue(name, pos) ?? FetchEnumValue(name, pos) ?? FetchConstValue(name, pos);
+            string what;
+            Location where;
+            var startLoc = identifiers.First();
+            var expression = FetchPropertyValue(name, indices, identifiers, out what, out where) ?? FetchEnumValue(name, startLoc) ?? FetchConstValue(name, startLoc);
             if (expression == null)
                 throw new ParseErrorException(
-                    $"Only public properties, constants and enums are accepted. Identifier '{name}' not known.", Expr, pos);
+                    $"Only public properties, constants and enums are accepted. Identifier '{what}' not known.", 
+                    Expr, where);
 
             return expression;
         }
 
-        private Expression FetchPropertyValue(string name, Location pos)
+        private Expression FetchPropertyValue(string name, Queue<Expression> indices, Queue<Location> identifiers, out string what, out Location where)
         {
+            what = null;
+            where = null;
             var type = ContextType;
             var expr = ContextExpression;
-            var parts = name.Split('.');
+            var parts = name.Split('.');            
 
-            var regex = new Regex(@"([a-zA-z_0-9]+)\[([0-9]+)\]"); // regex matching array element access
+            var regex = new Regex(@"([a-zA-z_0-9]+)\[.*\]"); // regex matching array element access
 
             foreach (var part in parts)
             {
                 PropertyInfo pi;
+                var pos = identifiers.Dequeue();
 
                 var match = regex.Match(part);                
                 if (match.Success)
                 {
-                    var partName = match.Groups[1].Value;                    
-                    var idx = int.Parse(match.Groups[2].Value);
+                    var partName = match.Groups[1].Value;
+                    var idxExpr = indices.Dequeue();
 
                     pi = type.GetProperty(partName);
                     if (pi == null)
+                    {
+                        what = partName;
+                        where = pos;
                         return null;
+                    }
 
                     var property = Expression.Property(expr, pi);
                     if (pi.PropertyType.IsArray) // check if we have an array type
                     {
-                        expr = Expression.ArrayIndex(property, Expression.Constant(idx));
+                        expr = Expression.ArrayIndex(property, idxExpr);
                         type = pi.PropertyType.GetElementType();
                         continue;
                     }
@@ -684,19 +763,23 @@ namespace ExpressiveAnnotations.Analysis
                     pi = pi.PropertyType.GetProperties().FirstOrDefault(p => p.GetIndexParameters().Any()); // look for indexer property (usually called Item...)
                     if (pi != null)
                     {
-                        expr = Expression.Property(property, pi.Name, Expression.Constant(idx));
+                        expr = Expression.Property(property, pi.Name, idxExpr);
                         type = pi.PropertyType;
                         continue;
                     }
 
                     throw new ParseErrorException(
-                        $"Identifier '{name.Substring(0, name.Length - 2 - idx.ToString().Length)}' either does not represent an array type or does not declare indexer.",
+                        $"Identifier '{partName}' either does not represent an array type or does not declare indexer.",
                         Expr, pos);
                 }
 
                 pi = type.GetProperty(part);
                 if (pi == null)
+                {
+                    what = part;
+                    where = pos;
                     return null;
+                }
 
                 expr = Expression.Property(expr, pi);
                 type = pi.PropertyType;

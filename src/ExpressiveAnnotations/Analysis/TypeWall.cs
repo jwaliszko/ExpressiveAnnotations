@@ -161,6 +161,20 @@ namespace ExpressiveAnnotations.Analysis
                     $"Operator '{oper.Value}' cannot be applied to operand of type '{arg.Type}'.", Expr, oper.Location);
         }
 
+        public void TypesMatch(Expression arg1, Expression arg2, Location loc)
+        {
+            if (arg1.Type != arg2.Type)
+                throw new ParseErrorException(
+                    "Argument types must match.", Expr, loc);
+        }
+
+        public void OfType<T>(Expression arg, Location loc)
+        {
+            if (arg.Type != typeof (T))
+                throw new ParseErrorException(
+                    $"Argument must be of type '{typeof (T)}'.", Expr, loc);
+        }
+
         private void AssertArgsNotNullLiterals(Expression arg1, Expression arg2, Token oper)
         {
             AssertArgsNotNullLiterals(arg1, arg1.Type, arg2, arg2.Type, oper);
