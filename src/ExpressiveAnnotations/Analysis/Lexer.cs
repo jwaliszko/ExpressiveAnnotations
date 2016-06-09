@@ -59,7 +59,7 @@ namespace ExpressiveAnnotations.Analysis
                 {TokenType.MUL, @"\*"},
                 {TokenType.DIV, @"/"},
                 {TokenType.MOD, @"%"},
-                {TokenType.BIN, @"0b[0-1]+"},
+                {TokenType.BIN, @"0b[01]+"},
                 {TokenType.HEX, @"0x[0-9a-fA-F]+"},
                 {TokenType.FLOAT, @"(?:(?:[0-9]+[eE][+-]?[0-9]+)|(?:[0-9]*\.[0-9]+(?:[eE][+-]?[0-9]+)?))"}, // 1e5, 1.0, 0.3e-2
                 {TokenType.PERIOD, @"\."},
