@@ -170,8 +170,8 @@ Expressions are built of unicode letters and numbers (i.e. `[L*]` and `[N*]` [ca
   * boolean, i.e. `true` and `false`,
   * integer, e.g. `123`,
   * float, e.g. `1.5` or `0.3e-2`,
-  * binary ([01]+ with `0b` prefix), e.g. `0b1010`,
-  * hexadecimal ([0-9a-fA-F]+ with `0x` prefix), e.g. `0xFF`,
+  * binary (with `0b` prefix), e.g. `0b1010`,
+  * hexadecimal (with `0x` prefix), e.g. `0xFF`,
   * string, e.g. `'in single quotes'` (internal quote escape sequence is `\'`, character representing new line is `\n`),
   * array (comma separated items within square brackets), e.g. `[1,2,3]`,
   * id, i.e. names of functions, properties, constants and enums.
