@@ -254,7 +254,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<object>("1*2>-1").Invoke(null));
             Assert.True(parser.Parse<object>("-1*-2>-1").Invoke(null));
             Assert.True(parser.Parse<object>("1/2==0.5").Invoke(null));
-            Assert.True(parser.Parse<object>("-1*-+- -+-1==-1").Invoke(null)); // weird construction, but since C# and JavaScript allows it, our language also doesn't mind
+            Assert.True(parser.Parse<object>("-1*-+- -+-1==-1").Invoke(null));
             Assert.True(parser.Parse<object>("- - -1+'a'+'b'+null+''+'c'+1+2=='-1abc12'").Invoke(null));
 
             Assert.True(parser.Parse<object>("1 - 2 -(6 / ((2*1.5 - 1) + 1)) * -2 + 1/2/1 == 3.50").Invoke(null));
@@ -284,6 +284,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<object>("[0+1,2,3][0] == 1").Invoke(null));
             Assert.True(parser.Parse<object>("[0+1,2,3][true ? 0 : 1] == 1").Invoke(null));
             Assert.True(parser.Parse<object>("[1,2,3][[1,2][[1,2][0]]] == 3").Invoke(null));
+            Assert.True(parser.Parse<object>("[[1,2],[3,4]][1][0] == 3").Invoke(null));
 
             Toolchain.Instance.AddFunction("Avg", (Expression<Toolchain.ParamsDelegate<double, double?>>)(items => items.Any() ? items.Average() : (double?)null));
             Assert.True(parser.Parse<object>("Avg() == null").Invoke(null));
@@ -318,6 +319,11 @@ namespace ExpressiveAnnotations.Tests
                 InsensString = new StringInsens("asd"),
                 NInsensString = new StringInsens("ASD"),
                 IntArray = new[] {1,2,3},
+                IntJaggedArray = new[]
+                {
+                  new[] {1,2,3},
+                  new[] {4,5,6},    
+                },
                 Array = new[]
                 {
                     new Model {Number = -1, Array = new[] {new Model {Number = -2}}},
@@ -335,6 +341,10 @@ namespace ExpressiveAnnotations.Tests
                     PoliticalStability = null,
                 }
             };
+            model.Collection[0] = new Model { Number = -1, Collection = new CustomCollection<Model>() };
+            model.Collection[0].Collection[0] = new Model { Number = -2 };
+            model.Collection[1] = new Model { Number = 1, Collection = new CustomCollection<Model>() };
+            model.Collection[1].Collection[0] = new Model { Number = 2 };
 
             var parser = new Parser();
             parser.RegisterToolchain();
@@ -424,7 +434,9 @@ namespace ExpressiveAnnotations.Tests
                       && (
                              (Text != 'hello world' && Date < SubModel.Date)
                              || (
-                                    (Number >= 0 && Number < 1) && PoliticalStability == Utility.Stability.High
+                                    (Number >= 0 && Number < 1)
+                                    && Collection[true ? 0 : 1].Number < 0
+                                    && PoliticalStability == Utility.Stability.High
                                 )
                          ) 
                       && Const + Tools.Utility.Const == 'insideoutside2'";
@@ -440,7 +452,8 @@ namespace ExpressiveAnnotations.Tests
                 {"Date", typeof (DateTime)},
                 {"SubModel.Date", typeof (DateTime)},
                 {"Number", typeof (int?)},
-                {"PoliticalStability", typeof (Utility.Stability?)}
+                {"Collection[true ? 0 : 1].Number", typeof (int?)},
+                {"PoliticalStability", typeof (Utility.Stability?)}                
             };
             Assert.Equal(expectedFields.Count, parsedFields.Count);
             Assert.True(
@@ -465,14 +478,12 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<Model>("Array[0] != null && Array[1] != null").Invoke(model));
             Assert.True(parser.Parse<Model>("Array[0].Number + Array[0].Array[0].Number + Array[1].Number + Array[1].Array[0].Number == 0").Invoke(model));
 
-            model.Collection[0] = new Model {Number = -1, Collection = new CustomCollection<Model>()};
-            model.Collection[0].Collection[0] = new Model {Number = -2};
-            model.Collection[1] = new Model {Number = 1, Collection = new CustomCollection<Model>()};
-            model.Collection[1].Collection[0] = new Model {Number = 2};
-
             Assert.True(parser.Parse<Model>("Collection[0] != null && Collection[1] != null").Invoke(model));
             Assert.True(parser.Parse<Model>("Collection[0].Number + Collection[0].Collection[0].Number + Collection[1].Number + Collection[1].Collection[0].Number == 0").Invoke(model));
             Assert.True(parser.Parse<Model>("Collection[true ? 0 : 1].Collection[true ? [0][0] : 1].Number == -2").Invoke(model));
+
+            Assert.True(parser.Parse<Model>("IntJaggedArray[1][2] == 6").Invoke(model));
+            Assert.True(parser.Parse<Model>("IntJaggedArray[1][1 + 1] == 6").Invoke(model));
         }
 
         [Fact]
@@ -1416,7 +1427,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("Member 'Prop' expects subproperty identifier. Unexpected end of expression.", e.Error);
             Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
 
-            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("[0][1 > 0 ? 0*2 : 0^2] == 1").Invoke(null));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("[0][1 > 0 ? 0*2.0 : 0^2] == 1").Invoke(null));
             Assert.Equal("Argument types must match.", e.Error);
             Assert.Equal(new Location(1, 11), e.Location, new LocationComparer());
 
@@ -1467,6 +1478,7 @@ namespace ExpressiveAnnotations.Tests
             public Guid? NGuid2 { get; set; }
 
             public int[] IntArray { get; set; }
+            public int[][] IntJaggedArray { get; set; }
 
             public Model[] Array { get; set; } // array            
             public IEnumerable<Model> Items { get; set; } // collection without indexer

@@ -32,7 +32,7 @@ namespace ExpressiveAnnotations
 
     internal static class Helper
     {
-        public static void MakeTypesCompatible(Expression e1, Expression e2, out Expression oute1, out Expression oute2)
+        public static void MakeTypesCompatible(Expression e1, Expression e2, out Expression oute1, out Expression oute2, TokenType operation)
         {
             Debug.Assert(e1 != null);
             Debug.Assert(e2 != null);
@@ -40,10 +40,17 @@ namespace ExpressiveAnnotations
             oute1 = e1;
             oute2 = e2;
 
-            if (oute1.Type.IsEnum && oute2.Type.IsEnum && oute1.Type.UnderlyingType() != oute2.Type.UnderlyingType())
+            if (oute1.Type.IsEnum && oute2.Type.IsEnum
+                && oute1.Type.UnderlyingType() != oute2.Type.UnderlyingType()) // various enum types
                 return;
 
-            // promote numeric values to double - do all computations with higher precision (to be compatible with JavaScript, e.g. notation 1/2, should give 0.5 double not 0 int)
+            if (operation != TokenType.DIV // do not promote integral numeric values to double - exception for division operation, e.g. 1/2 should evaluate to 0.5 double like in JS
+                && !oute1.Type.IsEnum && !oute2.Type.IsEnum
+                && oute1.Type.IsNumeric() && oute2.Type.IsNumeric()
+                && !oute1.Type.IsFloatingPointNumeric() && !oute2.Type.IsFloatingPointNumeric())
+                return;
+
+            // promote numeric values to double - do computations with higher precision (to be compatible with JavaScript, e.g. 1/2 should evaluate to 0.5 double not 0 int)
             if (oute1.Type != typeof (double) && oute1.Type != typeof (double?) && oute1.Type.IsNumeric())
                 oute1 = oute1.Type.IsNullable()
                     ? Expression.Convert(oute1, typeof (double?))
@@ -185,10 +192,22 @@ namespace ExpressiveAnnotations
                 TypeCode.Int32,     //int
                 TypeCode.UInt32,    //uint
                 TypeCode.Int64,     //long
-                TypeCode.UInt64,    //ulong
-                TypeCode.Single,    //float
-                TypeCode.Double,    //double
-                TypeCode.Decimal    //decimal
+                TypeCode.UInt64     //ulong
+            };
+            return type.IsFloatingPointNumeric() ||
+                   numericTypes.Contains(Type.GetTypeCode(type)) ||
+                   type.IsNullable() && Nullable.GetUnderlyingType(type).IsNumeric();
+        }
+
+        public static bool IsFloatingPointNumeric(this Type type)
+        {
+            Debug.Assert(type != null);
+
+            var numericTypes = new HashSet<TypeCode>
+            {
+                TypeCode.Single,    //float (floating binary point type, e.g. 1001.101)
+                TypeCode.Double,    //double (floating binary point type, e.g. 1001.101)
+                TypeCode.Decimal    //decimal (floating decimal point type, e.g. 1234.567)
             };
             return numericTypes.Contains(Type.GetTypeCode(type)) ||
                    type.IsNullable() && Nullable.GetUnderlyingType(type).IsNumeric();
@@ -400,6 +419,11 @@ namespace ExpressiveAnnotations
             return suffix.Length == 0
                 ? $"Parse error on line {location.Line}, last column: {message}"
                 : $"Parse error on line {location.Line}, column {location.Column}:{suffix.Indicator(100)}{message}";
+        }
+
+        public static int Position(this Location location, string expression)
+        {
+            return Enumerable.Range(0, location.Line - 1).Sum(i => expression.TakeLine(i).Length + 1) + location.Column - 1;
         }
 
         public static string Indicator(this string input, int max)
