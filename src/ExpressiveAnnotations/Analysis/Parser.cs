@@ -71,16 +71,17 @@ namespace ExpressiveAnnotations.Analysis
             => FuncProvider == null ? new Dictionary<string, IList<LambdaExpression>>() : FuncProvider.GetFunctions();
 
         /// <summary>
-        ///     Parses a specified logical expression into expression tree within given context.
+        ///     Parses a specified generic expression into expression tree within given context.
         /// </summary>
         /// <typeparam name="TContext">The type identifier of the context within which the expression is interpreted.</typeparam>
-        /// <param name="expression">The logical expression.</param>
+        /// <typeparam name="TResult">The type identifier of the expected evaluation result.</typeparam>
+        /// <param name="expression">The expression.</param>
         /// <returns>
         ///     A delegate containing the compiled version of the lambda expression described by created expression tree.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
         /// <exception cref="ParseErrorException"></exception>
-        public Func<TContext, bool> Parse<TContext>(string expression)
+        public Func<TContext, TResult> Parse<TContext, TResult>(string expression)
         {
             if (expression == null)
                 throw new ArgumentNullException(nameof(expression), "Expression not provided.");
@@ -96,7 +97,7 @@ namespace ExpressiveAnnotations.Analysis
                     Expr = expression;
                     Wall = new TypeWall(expression);
                     var expressionTree = ParseExpression();
-                    var lambda = Expression.Lambda<Func<TContext, bool>>(expressionTree, param);
+                    var lambda = Expression.Lambda<Func<TContext, TResult>>(expressionTree, param);
                     return lambda.Compile();
                 }
                 catch (ParseErrorException)
@@ -108,6 +109,21 @@ namespace ExpressiveAnnotations.Analysis
                     throw new ParseErrorException("Parse fatal error.", e);
                 }
             }
+        }
+
+        /// <summary>
+        ///     Parses a specified logical expression into expression tree within given context.
+        /// </summary>
+        /// <typeparam name="TContext">The type identifier of the context within which the expression is interpreted.</typeparam>
+        /// <param name="expression">The logical expression.</param>
+        /// <returns>
+        ///     A delegate containing the compiled version of the lambda expression described by created expression tree.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
+        /// <exception cref="ParseErrorException"></exception>
+        public Func<TContext, bool> Parse<TContext>(string expression)
+        {
+            return Parse<TContext, bool>(expression);
         }
 
         /// <summary>
@@ -596,10 +612,9 @@ namespace ExpressiveAnnotations.Analysis
         private Expression ParseArray()
         {
             ReadToken(); // read "["
-            var args = new List<Tuple<Expression, Location>>();
+            var args = new List<Expression>();
             while (PeekType() != TokenType.R_BRACKET)
             {
-                var tkn = PeekToken();
                 var arg = ParseConditionalExpression();
                 if (PeekType() == TokenType.COMMA)
                     ReadToken();
@@ -609,18 +624,17 @@ namespace ExpressiveAnnotations.Analysis
                             ? "Array expects comma or closing bracket. Unexpected end of expression."
                             : $"Array expects comma or closing bracket. Unexpected token: '{PeekRawValue()}'.",
                         Expr, PeekToken().Location);
-                args.Add(new Tuple<Expression, Location>(
-                    args.Any()
-                        ? Expression.Convert(arg, args[0].Item1.Type)
-                        : arg,
-                    tkn.Location));
+                args.Add(arg);
             }
             ReadToken(); // read "]"
 
-            var arrExpr = args.Any()
-                ? Expression.NewArrayInit(args[0].Item1.Type, args.Select(x => x.Item1))
-                : Expression.NewArrayInit(typeof(object));
-            return arrExpr;
+            if (!args.Any())
+                return Expression.NewArrayInit(typeof (object)); // empty array of objects
+
+            var typesMatch = args.Select(x => x.Type).Distinct().Count() == 1;
+            return typesMatch
+                ? Expression.NewArrayInit(args[0].Type, args) // items of the same type, array type can be determined
+                : Expression.NewArrayInit(typeof (object), args.Select(x => Expression.Convert(x, typeof (object)))); // items of various types, let it be an array of objects
         }
 
         private Expression ParseIdAccess()

@@ -120,8 +120,7 @@ namespace ExpressiveAnnotations.Tests
         public void verify_logic_without_context()
         {
             var parser = new Parser();
-            Toolchain.Instance.AddFunction("IntArrayLength", (int[] arr) => arr.Length);
-            Toolchain.Instance.AddFunction("ObjArrayLength", (object[] arr) => arr.Length);
+            Toolchain.Instance.AddFunction("ArrayLength", (object arr) => ((Array) arr).Length);
             parser.RegisterToolchain();            
 
             Assert.True(parser.Parse<object>("YesNo.Yes == 0").Invoke(null));
@@ -278,16 +277,21 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<object>("1 > 0 ? true : false ? 1 > 0 ? true : false : false ? false : false").Invoke(null));
             Assert.True(parser.Parse<object>("1 > 0 ? true : false ? false ? false : false : 1 > 0 ? true : false").Invoke(null));
 
-            Assert.True(parser.Parse<object>("ObjArrayLength([]) == 0").Invoke(null));
-            Assert.True(parser.Parse<object>("IntArrayLength([1]) == 1").Invoke(null));
-            Assert.True(parser.Parse<object>("IntArrayLength([1,2,3]) == 3").Invoke(null));
+            Assert.True(parser.Parse<object>("ArrayLength([]) == 0").Invoke(new Model()));
+            Assert.True(parser.Parse<object>("ArrayLength([1]) == 1").Invoke(new Model()));
+            Assert.True(parser.Parse<object>("ArrayLength([1,2,3]) == 3").Invoke(new Model()));
             Assert.True(parser.Parse<object>("[0+1,2,3][0] == 1").Invoke(null));
             Assert.True(parser.Parse<object>("[0+1,2,3][true ? 0 : 1] == 1").Invoke(null));
             Assert.True(parser.Parse<object>("[1,2,3][[1,2][[1,2][0]]] == 3").Invoke(null));
             Assert.True(parser.Parse<object>("[[1,2],[3,4]][1][0] == 3").Invoke(null));
+            Assert.True(parser.Parse<object>("[[1,2],'asd'][1] == 'asd'").Invoke(null));
+            //Assert.True(parser.Parse<object>("[[1,2],1][1] == 1").Invoke(null));
 
             Toolchain.Instance.AddFunction("Avg", (Expression<Toolchain.ParamsDelegate<double, double?>>)(items => items.Any() ? items.Average() : (double?)null));
             Assert.True(parser.Parse<object>("Avg() == null").Invoke(null));
+
+            var result = parser.Parse<object, object>("[[1,2],[3],4]").Invoke(null);
+            Assert.True(ArraysDeepEqual(result, new object[] {new[] {1, 2}, new[] {3}, 4}));
         }
 
         [Fact]
@@ -1442,6 +1446,33 @@ namespace ExpressiveAnnotations.Tests
             var parser = new Parser();
             var model = new LocalModel {ąęćłńśóźż = "ąęćłńśóźż"};
             Assert.True(parser.Parse<LocalModel>("ąęćłńśóźż == 'ąęćłńśóźż'").Invoke(model));
+        }
+
+        private static bool ArraysDeepEqual(object a1, object a2)
+        {
+            if (ReferenceEquals(a1, a2))
+                return true;
+            if (a1 == null || a2 == null)
+                return false;
+            if (a1.GetType() != a2.GetType())
+                return false;
+            if (!a1.GetType().IsArray)
+                return a1.Equals(a2);
+
+            var arr1 = (Array)a1;
+            var arr2 = (Array)a2;
+
+            if (arr1.Length != arr2.Length)
+                return false;
+
+            for (var i = 0; i < arr1.Length; i++)
+            {
+                var i1 = arr1.GetValue(i);
+                var i2 = arr2.GetValue(i);
+                if (!ArraysDeepEqual(i1, i2))
+                    return false;
+            }
+            return true;
         }
 
         private class Model
