@@ -87,7 +87,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
                              || (Age > 24 && Age <= 55)
                          )",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.ReasonForTravelRequired))]
-        [RequiredIf("ArrayContains(Age, EarlyYears)",
+        [RequiredIf("ArrayContains(Age, [15, 16, 17])", // alternative without array literal: ArrayContains(Age, EarlyYears)",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.ReasonForTravelRequiredForYouth))]
         [AssertThat(@"ReasonForTravel != 'John\'s cat named ""\\\'""\n (Backslash Quote)' && ReasonForTravel != SIMONS_CAT",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.SecretAnswerDetected))]
