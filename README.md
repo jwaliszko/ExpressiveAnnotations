@@ -20,7 +20,7 @@ A small .NET and JavaScript library which provides annotation-based conditional 
    - [Built-in functions (methods ready to be used by expressions)](#built-in-functions)
  - [How to construct conditional validation attributes?](#how-to-construct-conditional-validation-attributes)
    - [Signatures description](#signatures)
-   - [Implementation details outline](#implementation)   
+   - [Implementation details outline](#implementation)
    - [Traps (discrepancies between server- and client-side expressions evaluation)](#traps)   
  - [What about the support of ASP.NET MVC client-side validation?](#what-about-the-support-of-aspnet-mvc-client-side-validation)
  - [Frequently asked questions](#frequently-asked-questions)
@@ -133,38 +133,46 @@ Here instead, we're saying "If condition is met, return some view. Otherwise, ad
 Valid logical expressions handled by EA parser comply with syntax defined by the following grammar:
 
 ```
-expression  => cond-exp
-cond-exp    => l-or-exp [ "?" cond-exp ":" cond-exp ]
-l-or-exp    => l-and-exp [ "||" l-or-exp ]
-l-and-exp   => b-or-exp [ "&&" l-and-exp ]
-b-or-exp    => xor-exp [ "|" b-or-exp ]
-xor-exp     => b-and-exp [ "^" xor-exp ]
-b-and-exp   => eq-exp [ "&" b-and-exp ]
-eq-exp      => rel-exp [ ( "==" | "!=" ) eq-exp ]
-rel-exp     => shift-exp [ ( ">" | ">=" | "<" | "<=" ) rel-exp ]
-shift-exp   => add-exp [ ( "<<" | ">>" ) shift-exp ]
-add-exp     => mul-exp add-exp'
-add-exp'    => ( "+" | "-" ) add-exp
-mul-exp     => unary-exp mul-exp'
-mul-exp'    => ( "*" | "/" | "%" ) mul-exp
-unary-exp   => primary-exp [ ( "+" | "-" | "!" | "~" ) unary-exp ]
-primary-exp => "null" | bool | int | float | bin | hex | string | arr-access | id-access | "(" cond-exp ")"
+exp         => cond-exp
+cond-exp    => l-or-exp ['?' exp ':' exp]       // right associative (right recursive)
+l-or-exp    => l-and-exp  ('||' l-and-exp)*     // left associative (non-recursive alternative to left recursion)
+l-and-exp   => b-and-exp ('&&' b-and-exp)*
+b-or-exp    => xor-exp ('|' xor-exp)*
+xor-exp     => b-and-exp ('^' b-and-exp)*
+b-and-exp   => eq-exp ('&' eq-exp)*
+eq-exp      => rel-exp (('==' | '!=') rel-exp)*
+rel-exp     => shift-exp (('>' | '>=' | '<' | '<=') shift-exp)*
+shift-exp   => add-exp (('<<' | '>>') add-exp)*
+add-exp     => mul-exp (('+' | '-') mul-exp)*
+mul-exp     => unary-exp (('*' | '/' | '%')  unary-exp)*
+unary-exp   => ('+' | '-' | '!' | '~') unary-exp | primary-exp
+primary-exp => null-lit | bool-lit | num-lit | string-lit | arr-access | id-access | '(' exp ')'
 
-bool        => "true" | "false"
-arr-access  => array [ "[" cond-exp "]" ]
-array       => "[" cond-exp [ "," cond-exp ] "]"
-id-access   => mem-access | func-call
-mem-access  => id [ "[" cond-exp "]" ] [ "." mem-access ]
-func-call   => id "(" cond-exp [ "," cond-exp ] ")"
+arr-access  => arr-lit |
+               arr-lit '[' exp ']' ('[' exp ']' | '.' identifier)*
+
+id-access   => identifier |
+               identifier ('[' exp ']' | '.' exp)* |
+               func-call ('[' exp ']' | '.' exp)*
+               
+func-call   => identifier '(' [exp-list] ')'
+
+null-lit    => 'null'
+bool-lit    => 'true' | 'false'
+num-lit     => int-lit | float-lit
+int-lit     => dec-lit | bin-lit | hex-lit
+array-lit   => '[' [exp-list] ']'
+
+exp-list    => exp (',' exp)*
 ```
-Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar except for *int*, *float*, *bin*, *hex*, *string* and *id*, which are assumed to be implicitly defined (*id* specifies names of functions, properties, constants and enums).
+Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar except for *int-lit*, *float-lit*, *bin-lit*, *hex-lit*, *string-lit* and *identifier*, which are assumed to be implicitly defined (*identifier* specifies names of functions, properties, constants and enums).
 
 Expressions are built of unicode letters and numbers (i.e. `[L*]` and `[N*]` [categories](https://en.wikipedia.org/wiki/Unicode_character_property) respectively) with the usage of following components:
 
 * logical operators: `!a`, `a||b`, `a&&b`,
 * comparison operators: `a==b`, `a!=b`, `a<b`, `a<=b`, `a>b`, `a>=b`,
 * arithmetic operators: `+a`, `-a`, `a+b`, `a-b`, `a*b`, `a/b`, `a%b`, `~a`, `a&b`, `a^b`, `a|b`, `a<<b`, `a>>b`,
-* other operators: `a()`, `a[]`, `a.b`, `a?b:c`, `a,b`,
+* other operators: `a()`, `a[]`, `a.b`, `a?b:c`,
 * literals:
   * null, i.e. `null`,
   * boolean, i.e. `true` and `false`,
@@ -297,12 +305,6 @@ The following table lists the precedence and associativity of operators (listed 
             <td>Ternary conditional</td>
             <td>Right to left</td>
         </tr>
-        <tr>
-            <td>14</td>
-            <td><code>,</code></td>
-            <td>Comma</td>
-            <td>Left to right</td>
-        </tr>
     </tbody>
 </table>
 
@@ -419,7 +421,7 @@ Note above covers almost exhaustively what is actually needed to work with EA. N
 
 #####<a id="implementation">Implementation details outline</a>
 
-Implementation core is based on top-down recursive descent [logical expressions parser](src/ExpressiveAnnotations/Analysis/Parser.cs?raw=true), with a single token of lookahead ([LL(1)](http://en.wikipedia.org/wiki/LL_parser)), which runs on the [EBNF-like](http://en.wikipedia.org/wiki/Extended_Backus–Naur_Form) grammar [shown above](#grammar-definition).
+Implementation core is based on [expressions parser](src/ExpressiveAnnotations/Analysis/Parser.cs?raw=true), which runs on the grammar [shown above](#grammar-definition).
 
 Specified expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object. As a result of expression evaluation, boolean flag is returned, indicating that expression is true or false.
 

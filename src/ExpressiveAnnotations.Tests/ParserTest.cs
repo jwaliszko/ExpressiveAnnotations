@@ -175,8 +175,8 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<object>("~~5 == 5").Invoke(null));
             Assert.True(parser.Parse<object>("~-6 == 5").Invoke(null));
 
-            Assert.True(parser.Parse<object>("2 << 2 == 8").Invoke(null));
-            Assert.True(parser.Parse<object>("8 >> 2 == 2").Invoke(null));
+            Assert.True(parser.Parse<object>("3 >> 1 >> 1 == 0").Invoke(null));
+            Assert.True(parser.Parse<object>("1 << 1 << 2 == 8").Invoke(null));
             Assert.True(parser.Parse<object>("8 >> 2 >> 1 << 1 << 2 == 8").Invoke(null));
 
             Assert.True(parser.Parse<object>("0 == 0 && 1 < 2").Invoke(null));
@@ -345,12 +345,14 @@ namespace ExpressiveAnnotations.Tests
                     PoliticalStability = null,
                 }
             };
-            model.Collection[0] = new Model { Number = -1, Collection = new CustomCollection<Model>() };
-            model.Collection[0].Collection[0] = new Model { Number = -2 };
-            model.Collection[1] = new Model { Number = 1, Collection = new CustomCollection<Model>() };
-            model.Collection[1].Collection[0] = new Model { Number = 2 };
+            model.Collection[0] = new Model {Number = -1, Collection = new CustomCollection<Model>()};
+            model.Collection[0].Collection[0] = new Model {Number = -2};
+            model.Collection[1] = new Model {Number = 1, Collection = new CustomCollection<Model>()};
+            model.Collection[1].Collection[0] = new Model {Number = 2};
 
             var parser = new Parser();
+            Toolchain.Instance.AddFunction("GetModel", () => model);
+            Toolchain.Instance.AddFunction("GetModels", () => new[] {model});
             parser.RegisterToolchain();
 
             Assert.True(parser.Parse(model.GetType(), "Number < 1").Invoke(model));
@@ -488,6 +490,13 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.True(parser.Parse<Model>("IntJaggedArray[1][2] == 6").Invoke(model));
             Assert.True(parser.Parse<Model>("IntJaggedArray[1][1 + 1] == 6").Invoke(model));
+
+            Assert.True(parser.Parse<Model>("[SubModel][0].Number == 1").Invoke(model));
+
+            Assert.True(parser.Parse<Model>("GetModel().Number == 0").Invoke(model));
+            Assert.True(parser.Parse<Model>("GetModels()[0].Number == 0").Invoke(model));
+            Assert.True(parser.Parse<Model>("GetModel().SubModel.Number == 1").Invoke(model));
+            Assert.True(parser.Parse<Model>("GetModels()[0].SubModel.Number == 1").Invoke(model));
         }
 
         [Fact]
@@ -719,7 +728,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Fact]
-        public void verify_invalid_func_identifier()
+        public void verify_invalid_identifier()
         {
             var parser = new Parser();
             var model = new Model();
@@ -1330,7 +1339,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(new Location(1, 3), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("(").Invoke(null));
-            Assert.Equal("Expected \"null\", int, float, bool, bin, hex, string or id. Unexpected end of expression.", e.Error);
+            Assert.Equal("Expected \"null\", bool, int, float, bin, hex, string, array or id. Unexpected end of expression.", e.Error);
             Assert.Equal(new Location(1, 2), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("(1+1").Invoke(null));
@@ -1338,11 +1347,11 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(new Location(1, 5), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("()").Invoke(null));
-            Assert.Equal("Expected \"null\", int, float, bool, bin, hex, string or id. Unexpected token: ')'.", e.Error);
+            Assert.Equal("Expected \"null\", bool, int, float, bin, hex, string, array or id. Unexpected token: ')'.", e.Error);
             Assert.Equal(new Location(1, 2), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("Max(").Invoke(null));
-            Assert.Equal("Expected \"null\", int, float, bool, bin, hex, string or id. Unexpected end of expression.", e.Error);
+            Assert.Equal("Expected \"null\", bool, int, float, bin, hex, string, array or id. Unexpected end of expression.", e.Error);
             Assert.Equal(new Location(1, 5), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("Max(1 2").Invoke(null));
@@ -1412,23 +1421,23 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(new Location(1, 1), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Items[1.0]").Invoke(new Model()));
-            Assert.Equal("Array 'Items' expects index of 'System.Int32' type. Type 'System.Double' cannot be implicitly converted.", e.Error);
+            Assert.Equal("Index of 'System.Int32' type expected. Type 'System.Double' cannot be implicitly converted.", e.Error);
             Assert.Equal(new Location(1, 7), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Items[0").Invoke(new Model()));
-            Assert.Equal("Array 'Items' expects closing bracket. Unexpected end of expression.", e.Error);
+            Assert.Equal("Closing bracket expected. Unexpected end of expression.", e.Error);
             Assert.Equal(new Location(1, 8), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Items[0+").Invoke(new Model()));
-            Assert.Equal("Expected \"null\", int, float, bool, bin, hex, string or id. Unexpected end of expression.", e.Error);
+            Assert.Equal("Expected \"null\", bool, int, float, bin, hex, string, array or id. Unexpected end of expression.", e.Error);
             Assert.Equal(new Location(1, 9), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Prop.+").Invoke(new Model()));
-            Assert.Equal("Member 'Prop' expects subproperty identifier. Unexpected token: '+'.", e.Error);
+            Assert.Equal("Subproperty identifier expected. Unexpected token: '+'.", e.Error);
             Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model>("Prop.").Invoke(new Model()));
-            Assert.Equal("Member 'Prop' expects subproperty identifier. Unexpected end of expression.", e.Error);
+            Assert.Equal("Subproperty identifier expected. Unexpected end of expression.", e.Error);
             Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object>("[0][1 > 0 ? 0*2.0 : 0^2] == 1").Invoke(null));

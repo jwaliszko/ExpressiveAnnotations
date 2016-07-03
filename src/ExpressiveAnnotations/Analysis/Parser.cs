@@ -8,35 +8,42 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 
 namespace ExpressiveAnnotations.Analysis
 {
     /* EBNF grammar:
      * 
-     * expression  => cond-exp
-     * cond-exp    => l-or-exp [ "?" cond-exp ":" cond-exp ]
-     * l-or-exp    => l-and-exp [ "||" l-or-exp ]
-     * l-and-exp   => b-or-exp [ "&&" l-and-exp ]
-     * b-or-exp    => xor-exp [ "|" b-or-exp ]
-     * xor-exp     => b-and-exp [ "^" xor-exp ]
-     * b-and-exp   => eq-exp [ "&" b-and-exp ]
-     * eq-exp      => rel-exp [ ( "==" | "!=" ) eq-exp ]
-     * rel-exp     => shift-exp [ ( ">" | ">=" | "<" | "<=" ) rel-exp ]
-     * shift-exp   => add-exp [ ( "<<" | ">>" ) shift-exp ]
-     * add-exp     => mul-exp add-exp'
-     * add-exp'    => ( "+" | "-" ) add-exp
-     * mul-exp     => unary-exp mul-exp'
-     * mul-exp'    => ( "*" | "/" | "%" ) mul-exp
-     * unary-exp   => primary-exp [ ( "+" | "-" | "!" | "~" ) unary-exp ]
-     * primary-exp => "null" | bool | int | float | bin | hex | string | arr-access | id-access | "(" cond-exp ")"
+     * exp         => cond-exp
+     * cond-exp    => l-or-exp ["?" exp ":" exp]       // right associative (right recursive)
+     * l-or-exp    => l-and-exp  ("||" l-and-exp)*     // left associative (non-recursive alternative to left recursion: [l-or-exp  "||"] l-and-exp)
+     * l-and-exp   => b-and-exp ("&&" b-and-exp)*
+     * b-or-exp    => xor-exp ("|" xor-exp)*
+     * xor-exp     => b-and-exp ("^" b-and-exp)*
+     * b-and-exp   => eq-exp ("&" eq-exp)*
+     * eq-exp      => rel-exp (("==" | "!=") rel-exp)*
+     * rel-exp     => shift-exp ((">" | ">=" | "<" | "<=") shift-exp)*
+     * shift-exp   => add-exp (("<<" | ">>") add-exp)*
+     * add-exp     => mul-exp (("+" | "-") mul-exp)*
+     * mul-exp     => unary-exp (("*" | "/" | "%")  unary-exp)*
+     * unary-exp   => ("+" | "-" | "!" | "~") unary-exp | primary-exp
+     * primary-exp => null-lit | bool-lit | num-lit | string-lit | arr-access | id-access | "(" exp ")"
      * 
-     * bool        => "true" | "false"
-     * arr-access  => array [ "[" cond-exp "]" ]
-     * array       => "[" cond-exp [ "," cond-exp ] "]"
-     * id-access   => mem-access | func-call
-     * mem-access  => id [ "[" cond-exp "]" ] [ "." mem-access ]
-     * func-call   => id "(" cond-exp [ "," cond-exp ] ")"
+     * arr-access  => arr-lit |
+     *                arr-lit "[" exp "]" ("[" exp "]" | "." identifier)*
+     * 
+     * id-access   => identifier |
+     *                identifier ("[" exp "]" | "." identifier)* |
+     *                func-call ("[" exp "]" | "." identifier)*
+     *                
+     * func-call   => identifier "(" [exp-list] ")"
+     * 
+     * null-lit    => "null"
+     * bool-lit    => "true" | "false"
+     * num-lit     => int-lit | float-lit
+     * int-lit     => dec-lit | bin-lit | hex-lit
+     * array-lit   => "[" [exp-list] "]"
+     * 
+     * exp-list    => exp ("," exp)*
      */
 
     /// <summary>
@@ -96,7 +103,11 @@ namespace ExpressiveAnnotations.Analysis
                     ContextExpression = param;
                     Expr = expression;
                     Wall = new TypeWall(expression);
+                    Tokenize();
                     var expressionTree = ParseExpression();
+                    if (PeekType() != TokenType.EOF)
+                        throw new ParseErrorException(
+                            $"Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
                     var lambda = Expression.Lambda<Func<TContext, TResult>>(expressionTree, param);
                     return lambda.Compile();
                 }
@@ -151,7 +162,11 @@ namespace ExpressiveAnnotations.Analysis
                     ContextExpression = Expression.Convert(param, context);
                     Expr = expression;
                     Wall = new TypeWall(expression);
+                    Tokenize();
                     var expressionTree = ParseExpression();
+                    if (PeekType() != TokenType.EOF)
+                        throw new ParseErrorException(
+                            $"Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
                     var lambda = Expression.Lambda<Func<object, bool>>(expressionTree, param);
                     return lambda.Compile();
                 }
@@ -242,268 +257,289 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseExpression()
         {
-            Tokenize();
-            var expr = ParseConditionalExpression();
-            if (PeekType() != TokenType.EOF)
-                throw new ParseErrorException(
-                    $"Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
-            return expr;
+            return ParseConditionalExpression();
         }
 
         private Expression ParseConditionalExpression()
         {
             var tok = PeekToken();
-            var arg1 = ParseLogicalOrExp();
-            var oper = PeekToken();
-            if (oper.Type != TokenType.QMARK)
-                return arg1;
+            var arg1 = ParseLogicalOrExp();            
+            if (PeekType() == TokenType.QMARK)
+            {
+                var oper = PeekToken();
+                Wall.OfType<bool>(arg1, tok.Location);
+                ReadToken();
 
-            Wall.OfType<bool>(arg1, tok.Location);
-            ReadToken();
+                var arg2 = ParseExpression();
+                if (PeekType() != TokenType.COLON)
+                    throw new ParseErrorException(
+                        PeekType() == TokenType.EOF
+                            ? "Expected colon of ternary operator. Unexpected end of expression."
+                            : $"Expected colon of ternary operator. Unexpected token: '{PeekRawValue()}'.",
+                        Expr, PeekToken().Location);
+                ReadToken();
+                var arg3 = ParseExpression();
 
-            var arg2 = ParseConditionalExpression();
-            if (PeekType() != TokenType.COLON)
-                throw new ParseErrorException(
-                    PeekType() == TokenType.EOF
-                        ? "Expected colon of ternary operator. Unexpected end of expression."
-                        : $"Expected colon of ternary operator. Unexpected token: '{PeekRawValue()}'.",
-                    Expr, PeekToken().Location);
-            ReadToken();
-            var arg3 = ParseConditionalExpression();
-
-            Wall.TypesMatch(arg2, arg3, oper.Location);
-            return Expression.Condition(arg1, arg2, arg3);
+                Wall.TypesMatch(arg2, arg3, oper.Location);
+                arg1 = Expression.Condition(arg1, arg2, arg3);
+            }
+            return arg1;
         }
 
         private Expression ParseLogicalOrExp()
         {
             var arg1 = ParseLogicalAndExp();
-            if (PeekType() != TokenType.L_OR)
-                return arg1;
-            var oper = PeekToken();
-            ReadToken();
-            var arg2 = ParseLogicalOrExp();
+            while (PeekType() == TokenType.L_OR)
+            {
+                var oper = PeekToken();
+                ReadToken();
+                var arg2 = ParseLogicalAndExp();
 
-            Wall.LOr(arg1, arg2, oper);
+                Wall.LOr(arg1, arg2, oper);
 
-            return Expression.OrElse(arg1, arg2); // short-circuit evaluation
+                arg1 = Expression.OrElse(arg1, arg2); // short-circuit evaluation
+            }
+            return arg1;
         }
 
         private Expression ParseLogicalAndExp()
         {
             var arg1 = ParseBitwiseOrExp();
-            if (PeekType() != TokenType.L_AND)
-                return arg1;
-            var oper = PeekToken();
-            ReadToken();
-            var arg2 = ParseLogicalAndExp();
+            while (PeekType() == TokenType.L_AND)
+            {
+                var oper = PeekToken();
+                ReadToken();
+                var arg2 = ParseBitwiseOrExp();
 
-            Wall.LAnd(arg1, arg2, oper);
+                Wall.LAnd(arg1, arg2, oper);
 
-            return Expression.AndAlso(arg1, arg2); // short-circuit evaluation
+                arg1 = Expression.AndAlso(arg1, arg2); // short-circuit evaluation
+            }
+            return arg1;
         }
 
         private Expression ParseBitwiseOrExp()
         {
             var arg1 = ParseXorExp();
-            if (PeekType() != TokenType.B_OR)
-                return arg1;
-            var oper = PeekToken();
-            ReadToken();
-            var arg2 = ParseBitwiseOrExp();
+            while (PeekType() == TokenType.B_OR)
+            {
+                var oper = PeekToken();
+                ReadToken();
+                var arg2 = ParseXorExp();
 
-            Wall.BOr(arg1, arg2, oper);
+                Wall.BOr(arg1, arg2, oper);
 
-            return Expression.Or(arg1, arg2); // non-short-circuit evaluation
+                arg1 = Expression.Or(arg1, arg2); // non-short-circuit evaluation
+            }
+            return arg1;
         }
 
         private Expression ParseXorExp()
         {
             var arg1 = ParseBitwiseAndExp();
-            if (PeekType() != TokenType.XOR)
-                return arg1;
-            var oper = PeekToken();
-            ReadToken();
-            var arg2 = ParseXorExp();
+            while (PeekType() == TokenType.XOR)
+            {
+                var oper = PeekToken();
+                ReadToken();
+                var arg2 = ParseBitwiseAndExp();
 
-            Wall.Xor(arg1, arg2, oper);
+                Wall.Xor(arg1, arg2, oper);
 
-            return Expression.ExclusiveOr(arg1, arg2);
+                arg1 = Expression.ExclusiveOr(arg1, arg2);
+            }
+            return arg1;
         }
 
         private Expression ParseBitwiseAndExp()
         {
             var arg1 = ParseEqualityExp();
-            if (PeekType() != TokenType.B_AND)
-                return arg1;
-            var oper = PeekToken();
-            ReadToken();
-            var arg2 = ParseBitwiseAndExp();
+            while (PeekType() == TokenType.B_AND)
+            {
+                var oper = PeekToken();
+                ReadToken();
+                var arg2 = ParseEqualityExp();
 
-            Wall.BAnd(arg1, arg2, oper);
+                Wall.BAnd(arg1, arg2, oper);
 
-            return Expression.And(arg1, arg2); // non-short-circuit evaluation
+                arg1 = Expression.And(arg1, arg2); // non-short-circuit evaluation
+            }
+            return arg1;
         }
 
         private Expression ParseEqualityExp()
         {
             var arg1 = ParseRelationalExp();
-            if (!new[] {TokenType.EQ, TokenType.NEQ}.Contains(PeekType()))
-                return arg1;
-            var oper = PeekToken();
-            ReadToken();
-            var arg2 = ParseEqualityExp();
-
-            var type1 = arg1.Type;
-            var type2 = arg2.Type;
-            Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
-            Wall.Eq(arg1, arg2, type1, type2, oper);
-
-            switch (oper.Type)
+            while (new[] {TokenType.EQ, TokenType.NEQ}.Contains(PeekType()))
             {
-                case TokenType.EQ:
-                    return Expression.Equal(arg1, arg2);
-                default: // assures full branch coverage
-                    Debug.Assert(oper.Type == TokenType.NEQ); // http://stackoverflow.com/a/1468385/270315
-                    return Expression.NotEqual(arg1, arg2);
+                var oper = PeekToken();
+                ReadToken();
+                var arg2 = ParseRelationalExp();
+
+                var type1 = arg1.Type;
+                var type2 = arg2.Type;
+                Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
+                Wall.Eq(arg1, arg2, type1, type2, oper);
+
+                switch (oper.Type)
+                {
+                    case TokenType.EQ:
+                        arg1 = Expression.Equal(arg1, arg2);
+                        break;
+                    default: // assures full branch coverage
+                        Debug.Assert(oper.Type == TokenType.NEQ); // http://stackoverflow.com/a/1468385/270315
+                        arg1 = Expression.NotEqual(arg1, arg2);
+                        break;
+                }
             }
+            return arg1;
         }
 
         private Expression ParseRelationalExp()
         {
             var arg1 = ParseShiftExp();
-            if (!new[] {TokenType.LT, TokenType.LE, TokenType.GT, TokenType.GE}.Contains(PeekType()))
-                return arg1;
-            var oper = PeekToken();
-            ReadToken();
-            var arg2 = ParseRelationalExp();
-
-            var type1 = arg1.Type;
-            var type2 = arg2.Type;
-            Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
-            Wall.Rel(arg1, arg2, type1, type2, oper);
-
-            switch (oper.Type)
+            while (new[] {TokenType.LT, TokenType.LE, TokenType.GT, TokenType.GE}.Contains(PeekType()))
             {
-                case TokenType.LT:
-                    return Expression.LessThan(arg1, arg2);
-                case TokenType.LE:
-                    return Expression.LessThanOrEqual(arg1, arg2);
-                case TokenType.GT:
-                    return Expression.GreaterThan(arg1, arg2);
-                default:
-                    Debug.Assert(oper.Type == TokenType.GE);
-                    return Expression.GreaterThanOrEqual(arg1, arg2);
+                var oper = PeekToken();
+                ReadToken();
+                var arg2 = ParseShiftExp();
+
+                var type1 = arg1.Type;
+                var type2 = arg2.Type;
+                Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
+                Wall.Rel(arg1, arg2, type1, type2, oper);
+
+                switch (oper.Type)
+                {
+                    case TokenType.LT:
+                        arg1 = Expression.LessThan(arg1, arg2);
+                        break;
+                    case TokenType.LE:
+                        arg1 = Expression.LessThanOrEqual(arg1, arg2);
+                        break;
+                    case TokenType.GT:
+                        arg1 = Expression.GreaterThan(arg1, arg2);
+                        break;
+                    default:
+                        Debug.Assert(oper.Type == TokenType.GE);
+                        arg1 = Expression.GreaterThanOrEqual(arg1, arg2);
+                        break;
+                }
             }
+            return arg1;
         }
 
         private Expression ParseShiftExp()
         {
             var arg1 = ParseAdditiveExp();
-            if (!new[] {TokenType.L_SHIFT, TokenType.R_SHIFT}.Contains(PeekType()))
-                return arg1;
-            var oper = PeekToken();
-            ReadToken();
-            var arg2 = ParseShiftExp();
-
-            Wall.Shift(arg1, arg2, oper);
-
-            switch (oper.Type)
+            while (new[] {TokenType.L_SHIFT, TokenType.R_SHIFT}.Contains(PeekType()))
             {
-                case TokenType.L_SHIFT:
-                    return Expression.LeftShift(arg1, arg2);
-                default:
-                    Debug.Assert(oper.Type == TokenType.R_SHIFT);
-                    return Expression.RightShift(arg1, arg2);
+                var oper = PeekToken();
+                ReadToken();
+                var arg2 = ParseAdditiveExp();
+
+                Wall.Shift(arg1, arg2, oper);
+
+                switch (oper.Type)
+                {
+                    case TokenType.L_SHIFT:
+                        arg1 = Expression.LeftShift(arg1, arg2);
+                        break;
+                    default:
+                        Debug.Assert(oper.Type == TokenType.R_SHIFT);
+                        arg1 = Expression.RightShift(arg1, arg2);
+                        break;
+                }
             }
+            return arg1;
         }
 
         private Expression ParseAdditiveExp()
         {
-            var arg = ParseMultiplicativeExp();
-            return ParseAdditiveExpInternal(arg);
-        }
-
-        private Expression ParseAdditiveExpInternal(Expression arg1)
-        {
-            if (!new[] {TokenType.ADD, TokenType.SUB}.Contains(PeekType()))
-                return arg1;
-            var oper = PeekToken();
-            ReadToken();
-            var arg2 = ParseMultiplicativeExp();
-
-            var type1 = arg1.Type;
-            var type2 = arg2.Type;
-            Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
-            Wall.Add(arg1, arg2, type1, type2, oper);
-
-            switch (oper.Type)
+            var arg1 = ParseMultiplicativeExp();
+            while (new[] {TokenType.ADD, TokenType.SUB}.Contains(PeekType()))
             {
-                case TokenType.ADD:
-                    return ParseAdditiveExpInternal(
-                        (arg1.Type.IsString() || arg2.Type.IsString())
+                var oper = PeekToken();
+                ReadToken();
+
+                var arg2 = ParseMultiplicativeExp();
+
+                var type1 = arg1.Type;
+                var type2 = arg2.Type;
+                Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
+                Wall.Add(arg1, arg2, type1, type2, oper);
+
+                switch (oper.Type)
+                {
+                    case TokenType.ADD:
+                        arg1 = (arg1.Type.IsString() || arg2.Type.IsString())
                             ? Expression.Add(
                                 Expression.Convert(arg1, typeof (object)),
                                 Expression.Convert(arg2, typeof (object)),
                                 typeof (string).GetMethod("Concat", new[] {typeof (object), typeof (object)})) // convert string + string into a call to string.Concat
-                            : Expression.Add(arg1, arg2));
-                default:
-                    Debug.Assert(oper.Type == TokenType.SUB);
-                    return ParseAdditiveExpInternal(Expression.Subtract(arg1, arg2));
+                            : Expression.Add(arg1, arg2);
+                        break;
+                    default:
+                        Debug.Assert(oper.Type == TokenType.SUB);
+                        arg1 = Expression.Subtract(arg1, arg2);
+                        break;
+                }
             }
+            return arg1;
         }
 
         private Expression ParseMultiplicativeExp()
         {
-            var arg = ParseUnaryExp();
-            return ParseMultiplicativeExpInternal(arg);
-        }
-
-        private Expression ParseMultiplicativeExpInternal(Expression arg1)
-        {
-            if (!new[] {TokenType.MUL, TokenType.DIV, TokenType.MOD}.Contains(PeekType()))
-                return arg1;
-            var oper = PeekToken();
-            ReadToken();
-            var arg2 = ParseUnaryExp();
-
-            Wall.Mul(arg1, arg2, oper);
-            Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
-
-            switch (oper.Type)
+            var arg1 = ParseUnaryExp();
+            while (new[] {TokenType.MUL, TokenType.DIV, TokenType.MOD}.Contains(PeekType()))
             {
-                case TokenType.MUL:
-                    return ParseMultiplicativeExpInternal(Expression.Multiply(arg1, arg2));
-                case TokenType.DIV:
-                    return ParseMultiplicativeExpInternal(Expression.Divide(arg1, arg2));
-                default:
-                    Debug.Assert(oper.Type == TokenType.MOD);
-                    return ParseMultiplicativeExpInternal(Expression.Modulo(arg1, arg2));
+                var oper = PeekToken();
+                ReadToken();
+                var arg2 = ParseUnaryExp();
+
+                Wall.Mul(arg1, arg2, oper);
+                Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
+
+                switch (oper.Type)
+                {
+                    case TokenType.MUL:
+                        arg1 = Expression.Multiply(arg1, arg2);
+                        break;
+                    case TokenType.DIV:
+                        arg1 = Expression.Divide(arg1, arg2);
+                        break;
+                    default:
+                        Debug.Assert(oper.Type == TokenType.MOD);
+                        arg1 = Expression.Modulo(arg1, arg2);
+                        break;
+                }
             }
+            return arg1;
         }
 
         private Expression ParseUnaryExp()
         {
-            if (!new[] {TokenType.ADD, TokenType.SUB, TokenType.L_NOT, TokenType.B_NOT}.Contains(PeekType()))
-                return ParsePrimaryExp();
-            var oper = PeekToken();
-            ReadToken();
-            var arg = ParseUnaryExp(); // allow multiple negations
-
-            Wall.Unary(arg, oper);
-
-            switch (oper.Type)
+            if (new[] {TokenType.ADD, TokenType.SUB, TokenType.L_NOT, TokenType.B_NOT}.Contains(PeekType()))
             {
-                case TokenType.ADD:
-                    return arg;
-                case TokenType.SUB:
-                    return Expression.Negate(arg);
-                case TokenType.L_NOT:
-                    return Expression.Not(arg);
-                default:
-                    Debug.Assert(oper.Type == TokenType.B_NOT);
-                    return Expression.OnesComplement(arg);
+                var oper = PeekToken();
+                ReadToken();
+                var arg = ParseUnaryExp();
+
+                Wall.Unary(arg, oper);
+
+                switch (oper.Type)
+                {
+                    case TokenType.ADD:
+                        return arg;
+                    case TokenType.SUB:
+                        return Expression.Negate(arg);
+                    case TokenType.L_NOT:
+                        return Expression.Not(arg);
+                    default:
+                        Debug.Assert(oper.Type == TokenType.B_NOT);
+                        return Expression.OnesComplement(arg);
+                }
             }
+            return ParsePrimaryExp();
         }
 
         private Expression ParsePrimaryExp()
@@ -528,7 +564,7 @@ namespace ExpressiveAnnotations.Analysis
                     return ParseIdAccess();
                 case TokenType.L_PAR:
                     ReadToken(); // read "("
-                    var arg = ParseConditionalExpression();
+                    var arg = ParseExpression();
                     if (PeekType() != TokenType.R_PAR)
                         throw new ParseErrorException(
                             PeekType() == TokenType.EOF
@@ -539,10 +575,10 @@ namespace ExpressiveAnnotations.Analysis
                     return arg;
                 case TokenType.EOF:
                     throw new ParseErrorException(
-                        "Expected \"null\", int, float, bool, bin, hex, string or id. Unexpected end of expression.", Expr, PeekToken().Location);                
+                        "Expected \"null\", bool, int, float, bin, hex, string, array or id. Unexpected end of expression.", Expr, PeekToken().Location);                
                 default:
                     throw new ParseErrorException(
-                        $"Expected \"null\", int, float, bool, bin, hex, string or id. Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
+                        $"Expected \"null\", bool, int, float, bin, hex, string, array or id. Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
             }
         }
 
@@ -582,13 +618,13 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseArrayAccess()
         {
-            var arrExpr = ParseArray();
-            while (PeekType() == TokenType.L_BRACKET)
+            var expr = ParseArray();
+            if (PeekType() == TokenType.L_BRACKET)
             {
                 // parse subscrit
                 ReadToken(); // read "["
                 var idxExprLoc = PeekToken().Location;
-                var idxExpr = ParseConditionalExpression();
+                var idxExpr = ParseExpression();
                 if (idxExpr.Type != typeof(int))
                     throw new ParseErrorException(
                         PeekType() == TokenType.EOF
@@ -598,15 +634,53 @@ namespace ExpressiveAnnotations.Analysis
                 if (PeekType() != TokenType.R_BRACKET)
                     throw new ParseErrorException(
                         PeekType() == TokenType.EOF
-                            ? "Array expects closing bracket. Unexpected end of expression."
-                            : $"Array expects closing bracket. Unexpected token: '{PeekRawValue()}'.",
+                            ? "Array literal expects closing bracket. Unexpected end of expression."
+                            : $"Array literal expects closing bracket. Unexpected token: '{PeekRawValue()}'.",
                         Expr, PeekToken().Location);
                 ReadToken(); // read "]"            
 
-                arrExpr = Expression.ArrayIndex(arrExpr, idxExpr);
+                expr = Expression.ArrayIndex(expr, idxExpr);
+
+                Token unknown;
+                expr = ParseAccess(expr, null, out unknown);
+                AssertIdentifierExists(expr, unknown?.RawValue, unknown?.Location);
             }
 
-            return arrExpr;
+            return expr;
+        }
+
+        private Expression ParseIdAccess()
+        {
+            var origin = PeekToken();
+            ReadToken(); // read identifier
+
+            Token unknown;
+            if (PeekType() == TokenType.L_PAR)
+            {
+                var expr = ParseFuncCall(origin);
+                expr = ParseAccess(expr, null, out unknown);
+
+                AssertIdentifierExists(expr, unknown?.RawValue, unknown?.Location);
+                return expr;
+            }
+            else
+            {
+                var expr = ExtractMemberAccessExpression(origin.RawValue, ContextExpression);
+                expr = ParseAccess(expr, origin, out unknown);
+
+                var start = origin.Location.Position(Expr);
+                var length = PeekToken().Location.Position(Expr) - start;
+                var chain = Expr.Substring(start, length).TrimEnd();
+
+                if (expr != null)
+                    Fields[chain] = expr.Type;
+                else
+                {
+                    expr = ExtractConstantAccessExpression(chain, origin.Location);
+                    AssertIdentifierExists(expr, (unknown ?? origin).RawValue, (unknown ?? origin).Location);
+                }
+                return expr;
+            }
         }
 
         private Expression ParseArray()
@@ -615,7 +689,7 @@ namespace ExpressiveAnnotations.Analysis
             var args = new List<Expression>();
             while (PeekType() != TokenType.R_BRACKET)
             {
-                var arg = ParseConditionalExpression();
+                var arg = ParseExpression();
                 if (PeekType() == TokenType.COMMA)
                     ReadToken();
                 else if (PeekType() != TokenType.R_BRACKET) // when no comma found, array literal end expected
@@ -629,22 +703,12 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken(); // read "]"
 
             if (!args.Any())
-                return Expression.NewArrayInit(typeof (object)); // empty array of objects
+                return Expression.NewArrayInit(typeof(object)); // empty array of objects
 
             var typesMatch = args.Select(x => x.Type).Distinct().Count() == 1;
             return typesMatch
                 ? Expression.NewArrayInit(args[0].Type, args) // items of the same type, array type can be determined
-                : Expression.NewArrayInit(typeof (object), args.Select(x => Expression.Convert(x, typeof (object)))); // items of various types, let it be an array of objects
-        }
-
-        private Expression ParseIdAccess()
-        {
-            var func = PeekToken();
-            ReadToken(); // read name
-
-            return PeekType() == TokenType.L_PAR 
-                ? ParseFuncCall(func) 
-                : ParseMemberAccess(func);
+                : Expression.NewArrayInit(typeof(object), args.Select(x => Expression.Convert(x, typeof(object)))); // items of various types, let it be an array of objects
         }
 
         private Expression ParseFuncCall(Token func)
@@ -655,7 +719,7 @@ namespace ExpressiveAnnotations.Analysis
             while (PeekType() != TokenType.R_PAR) // read comma-separated arguments until we hit ")"
             {
                 var tkn = PeekToken();
-                var arg = ParseConditionalExpression();
+                var arg = ParseExpression();
                 if (PeekType() == TokenType.COMMA)
                     ReadToken();
                 else if (PeekType() != TokenType.R_PAR) // when no comma found, function exit expected
@@ -670,14 +734,10 @@ namespace ExpressiveAnnotations.Analysis
 
             return ExtractMethodExpression(name, args, func.Location); // get method call
         }
-
-        private Expression ParseMemberAccess(Token prop)
+        
+        private Expression ParseAccess(Expression expr, Token current, out Token unknown)
         {
-            var name = prop.RawValue;
-            var currProp = prop;
-
-            var expr = ExtractMemberAccessExpression(name, ContextExpression);
-            
+            unknown = null; // unknown token
             while (new[] {TokenType.L_BRACKET, TokenType.PERIOD}.Contains(PeekType()))
             {
                 switch (PeekType())
@@ -687,64 +747,52 @@ namespace ExpressiveAnnotations.Analysis
                         if (PeekType() != TokenType.ID)
                             throw new ParseErrorException(
                                 PeekType() == TokenType.EOF
-                                    ? $"Member '{name}' expects subproperty identifier. Unexpected end of expression."
-                                    : $"Member '{name}' expects subproperty identifier. Unexpected token: '{PeekRawValue()}'.",
+                                    ? "Subproperty identifier expected. Unexpected end of expression."
+                                    : $"Subproperty identifier expected. Unexpected token: '{PeekRawValue()}'.",
                                 Expr, PeekToken().Location);
-                        name = PeekRawValue();
+                        current = PeekToken();
 
                         if (expr != null)
-                            expr = ExtractMemberAccessExpression(name, expr);
+                        {
+                            expr = ExtractMemberAccessExpression(current.RawValue, expr);
+                            if (expr == null)
+                                unknown = current;
+                        }
 
-                        currProp = PeekToken();
                         ReadToken(); // read property name
                         break;
                     default: // parse subscrit
                         Debug.Assert(PeekType() == TokenType.L_BRACKET);
                         ReadToken(); // read "["
                         var idxExprLoc = PeekToken().Location;
-                        var idxExpr = ParseConditionalExpression();
+                        var idxExpr = ParseExpression();
                         if (idxExpr.Type != typeof(int))
                             throw new ParseErrorException(
                                 PeekType() == TokenType.EOF
-                                    ? $"Array '{name}' expects index of '{typeof(int)}' type. Unexpected end of expression."
-                                    : $"Array '{name}' expects index of '{typeof(int)}' type. Type '{idxExpr.Type}' cannot be implicitly converted.",
+                                    ? $"Index of '{typeof(int)}' type expected. Unexpected end of expression."
+                                    : $"Index of '{typeof(int)}' type expected. Type '{idxExpr.Type}' cannot be implicitly converted.",
                                 Expr, idxExprLoc);
                         if (PeekType() != TokenType.R_BRACKET)
                             throw new ParseErrorException(
                                 PeekType() == TokenType.EOF
-                                    ? $"Array '{name}' expects closing bracket. Unexpected end of expression."
-                                    : $"Array '{name}' expects closing bracket. Unexpected token: '{PeekRawValue()}'.",
+                                    ? "Closing bracket expected. Unexpected end of expression."
+                                    : $"Closing bracket expected. Unexpected token: '{PeekRawValue()}'.",
                                 Expr, PeekToken().Location);
 
                         if (expr == null)
                             throw new ParseErrorException(
-                                $"Only public properties, constants and enums are accepted. Identifier '{name}' not known.",
-                                Expr, currProp.Location);
+                                $"Only public properties, constants and enums are accepted. Identifier '{current.RawValue}' not known.",
+                                Expr, current.Location);
 
                         expr = ExtractMemberSubscritExpression(idxExpr, expr);
                         if (expr == null)
                             throw new ParseErrorException(
-                                $"Identifier '{name}' either does not represent an array type or does not declare indexer.",
-                                Expr, currProp.Location);
+                                $"Identifier '{current.RawValue}' either does not represent an array type or does not declare indexer.",
+                                Expr, current.Location);
 
                         ReadToken(); // read "]"
                         break;
                 }
-            }
-
-            var start = prop.Location.Position(Expr);
-            var length = PeekToken().Location.Position(Expr) - start;
-            var identifier = Expr.Substring(start, length).TrimEnd();
-
-            if (expr != null)
-                Fields[identifier] = expr.Type;
-            else
-            {
-                expr = ExtractConstantAccessExpression(identifier, prop.Location);
-                if (expr == null)
-                    throw new ParseErrorException(
-                        $"Only public properties, constants and enums are accepted. Identifier '{name}' not known.",
-                        Expr, currProp.Location);
             }
             return expr;
         }
@@ -854,7 +902,7 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ExtractMethodExpression(string name, IList<Tuple<Expression, Location>> args, Location funcPos)
         {
-            AssertMethodNameExistence(name, funcPos);
+            AssertMethodExists(name, funcPos);
             var expression = FetchModelMethod(name, args, funcPos) ?? FetchToolchainMethod(name, args, funcPos); // firstly, try to take method from model context - if not found, take one from toolchain
             if (expression == null)
                 throw new ParseErrorException(
@@ -880,7 +928,7 @@ namespace ExpressiveAnnotations.Analysis
 
                 signatures = new List<MethodInfo> {func};
             }
-            AssertNonAmbiguity(signatures.Count, name, args.Count, funcPos);
+            AssertMethodNotAmbiguous(signatures.Count, name, args.Count, funcPos);
 
             func = signatures.Single();
             variable = IsVariableNumOfArgsAccepted(func);
@@ -905,7 +953,7 @@ namespace ExpressiveAnnotations.Analysis
 
                 signatures = new List<LambdaExpression> {func};
             }
-            AssertNonAmbiguity(signatures.Count, name, args.Count, funcPos);
+            AssertMethodNotAmbiguous(signatures.Count, name, args.Count, funcPos);
 
             func = signatures.Single();
             variable = IsVariableNumOfArgsAccepted(func);
@@ -1051,19 +1099,27 @@ namespace ExpressiveAnnotations.Analysis
             }
         }
 
-        private void AssertMethodNameExistence(string name, Location funcPos)
+        private void AssertMethodExists(string name, Location pos)
         {
             if (!Functions.ContainsKey(name) && !ContextType.GetMethods().Any(mi => name.Equals(mi.Name)))
                 throw new ParseErrorException(
-                    $"Function '{name}' not known.", Expr, funcPos);
+                    $"Function '{name}' not known.", Expr, pos);
         }
 
-        private void AssertNonAmbiguity(int signatures, string funcName, int args, Location funcPos)
+        private void AssertMethodNotAmbiguous(int signatures, string name, int args, Location pos)
         {
             if (signatures > 1)
                 throw new ParseErrorException(
-                    $"Function '{funcName}' accepting {args} argument{(args == 1 ? string.Empty : "s")} is ambiguous.", 
-                    Expr, funcPos);
+                    $"Function '{name}' accepting {args} argument{(args == 1 ? string.Empty : "s")} is ambiguous.", 
+                    Expr, pos);
+        }
+
+        private void AssertIdentifierExists(Expression expr, string name, Location pos)
+        {
+            if (expr == null)
+                throw new ParseErrorException(
+                    $"Only public properties, constants and enums are accepted. Identifier '{name}' not known.",
+                    Expr, pos);
         }
     }
 }
