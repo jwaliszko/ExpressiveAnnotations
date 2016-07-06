@@ -16,7 +16,7 @@ A small .NET and JavaScript library which provides annotation-based conditional 
  - [Declarative vs. imperative programming - what is it about?](#declarative-vs-imperative-programming---what-is-it-about)
  - [EA expressions specification](#expressions-specification)
    - [Grammar definition](#grammar-definition)
-   - [Operators precedence](#operators-precedence)
+   - [Operators precedence and associativity](#operators-precedence)
    - [Built-in functions (methods ready to be used by expressions)](#built-in-functions)
  - [How to construct conditional validation attributes?](#how-to-construct-conditional-validation-attributes)
    - [Signatures description](#signatures)
@@ -165,7 +165,7 @@ array-lit   => '[' [exp-list] ']'
 
 exp-list    => exp (',' exp)*
 ```
-Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar except for *int-lit*, *float-lit*, *bin-lit*, *hex-lit*, *string-lit* and *identifier*, which are assumed to be implicitly defined (*identifier* specifies names of functions, properties, constants and enums).
+Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar except for *dec-lit*, *bin-lit*, *hex-lit*, *float-lit*, *string-lit* and *identifier*, which are assumed to be implicitly defined (*identifier* specifies names of functions, properties, constants and enums).
 
 Expressions are built of unicode letters and numbers (i.e. `[L*]` and `[N*]` [categories](https://en.wikipedia.org/wiki/Unicode_character_property) respectively) with the usage of following components:
 
@@ -176,15 +176,15 @@ Expressions are built of unicode letters and numbers (i.e. `[L*]` and `[N*]` [ca
 * literals:
   * null, i.e. `null`,
   * boolean, i.e. `true` and `false`,
-  * integer, e.g. `123`,
+  * decimal integer, e.g. `123`,
+  * binary integer (with `0b` prefix), e.g. `0b1010`,
+  * hexadecimal integer (with `0x` prefix), e.g. `0xFF`,
   * float, e.g. `1.5` or `0.3e-2`,
-  * binary (with `0b` prefix), e.g. `0b1010`,
-  * hexadecimal (with `0x` prefix), e.g. `0xFF`,
   * string, e.g. `'in single quotes'` (internal quote escape sequence is `\'`, character representing new line is `\n`),
   * array (comma separated items within square brackets), e.g. `[1,2,3]`,
-  * id, i.e. names of functions, properties, constants and enums.
+  * identifier, i.e. names of functions, properties, constants and enums.
 
-#####<a id="operators-precedence">Operators precedence</a>
+#####<a id="operators-precedence">Operators precedence and associativity</a>
 
 The following table lists the precedence and associativity of operators (listed top to bottom, in descending precedence):
 
@@ -287,7 +287,7 @@ The following table lists the precedence and associativity of operators (listed 
         <tr>
             <td>10</td>
             <td><code>|</code></td>
-            <td>Bitwise OR (incluseve OR)</td>
+            <td>Bitwise OR (inclusive OR)</td>
         </tr>
         <tr>
             <td>11</td>

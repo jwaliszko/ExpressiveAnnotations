@@ -42,7 +42,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 {                                                  // (by design, no reason to recompile once compiled expressions)
                     var parser = new Parser();
                     parser.RegisterToolchain();
-                    parser.Parse(metadata.ContainerType, attribute.Expression);
+                    parser.Parse<bool>(metadata.ContainerType, attribute.Expression);
 
                     FieldsMap = parser.GetFields().ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value));
                     ConstsMap = parser.GetConsts();

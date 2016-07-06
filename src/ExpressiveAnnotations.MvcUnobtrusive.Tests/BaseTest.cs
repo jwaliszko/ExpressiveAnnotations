@@ -22,8 +22,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
 
         protected ModelMetadata GetModelMetadata<TModel, TProp>(TModel model, Expression<Func<TModel, TProp>> expression)
         {
-            var property = ((MemberExpression)expression.Body).Member.Name;
-            return new ModelMetadata(ModelMetadataProviders.Current, typeof(TModel), () => model, typeof(TProp), property);
+            var property = ((MemberExpression) expression.Body).Member.Name;
+            return new ModelMetadata(ModelMetadataProviders.Current, typeof (TModel), () => model, typeof (TProp), property);
         }
 
         protected ControllerContext GetControllerContext()

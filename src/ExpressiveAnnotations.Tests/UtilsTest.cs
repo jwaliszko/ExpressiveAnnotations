@@ -117,14 +117,14 @@ namespace ExpressiveAnnotations.Tests
         public void verify_display_names_extraction_from_given_type()
         {
             // name provided explicitly
-            Assert.Equal("Value_1", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Value1"));
-            Assert.Equal("Value_1", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Internal.Value1"));
+            Assert.Equal("Value_1", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "Value1"));
+            Assert.Equal("Value_1", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "Internal.Value1"));
             
             // name provided in resources
-            Assert.Equal("_{Value2}_", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Value2"));
-            Assert.Equal("_{Value2}_", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Internal.Value2"));
+            Assert.Equal("_{Value2}_", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "Value2"));
+            Assert.Equal("_{Value2}_", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "Internal.Value2"));
 
-            var e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "internal"));
+            var e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "internal"));
             Assert.Equal("Display name extraction interrupted. Field internal not found.\r\nParameter name: internal", e.Message);
 
             e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "Internal.Value123"));
@@ -215,7 +215,7 @@ namespace ExpressiveAnnotations.Tests
             [Display(Name = "Value_1")]
             public int? Value1 { get; set; }
 
-            [Display(ResourceType = typeof(Resources), Name = "Value2")]
+            [Display(ResourceType = typeof (Resources), Name = "Value2")]
             public int? Value2 { get; set; }
 
             public string NoName { get; set; }

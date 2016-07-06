@@ -11,7 +11,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Inheritance
             : base(expression, "The {0} field is conditionally required.") // this default message will be overriden by resources
         {
             AllowEmptyStrings = false;
-            ErrorMessageResourceType = typeof(Resources);
+            ErrorMessageResourceType = typeof (Resources);
             ErrorMessageResourceName = "CustomizedRequiredIfDefaultError";
         }
 

@@ -73,6 +73,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="AttribsTest.cs" />
+    <Compile Include="Helper.cs" />
     <Compile Include="LexerTest.cs" />
     <Compile Include="LocationComparer.cs" />
     <Compile Include="ParserTest.cs" />

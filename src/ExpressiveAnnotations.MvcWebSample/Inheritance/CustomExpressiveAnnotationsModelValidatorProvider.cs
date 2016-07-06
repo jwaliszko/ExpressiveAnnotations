@@ -6,8 +6,8 @@ namespace ExpressiveAnnotations.MvcWebSample.Inheritance
     {
         public CustomExpressiveAnnotationsModelValidatorProvider()
         {
-            RegisterAdapter(typeof(CustomRequiredIfAttribute), typeof(CustomRequiredIfValidator));
-            RegisterAdapter(typeof(CustomAssertThatAttribute), typeof(CustomAssertThatValidator));
+            RegisterAdapter(typeof (CustomRequiredIfAttribute), typeof (CustomRequiredIfValidator));
+            RegisterAdapter(typeof (CustomAssertThatAttribute), typeof (CustomAssertThatValidator));
         }
     }
 }

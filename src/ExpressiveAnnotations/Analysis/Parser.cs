@@ -71,6 +71,7 @@ namespace ExpressiveAnnotations.Analysis
         private TypeWall Wall { get; set; }
         private Type ContextType { get; set; }
         private Expression ContextExpression { get; set; }
+        private Expression SyntaxTree { get; set; }
         private IDictionary<string, Type> Fields { get; set; }
         private IDictionary<string, object> Consts { get; set; }
         private IFunctionsProvider FuncProvider { get; set; }
@@ -78,7 +79,7 @@ namespace ExpressiveAnnotations.Analysis
             => FuncProvider == null ? new Dictionary<string, IList<LambdaExpression>>() : FuncProvider.GetFunctions();
 
         /// <summary>
-        ///     Parses a specified generic expression into expression tree within given context.
+        ///     Parses a specified expression into expression tree within given context.
         /// </summary>
         /// <typeparam name="TContext">The type identifier of the context within which the expression is interpreted.</typeparam>
         /// <typeparam name="TResult">The type identifier of the expected evaluation result.</typeparam>
@@ -104,11 +105,9 @@ namespace ExpressiveAnnotations.Analysis
                     Expr = expression;
                     Wall = new TypeWall(expression);
                     Tokenize();
-                    var expressionTree = ParseExpression();
-                    if (PeekType() != TokenType.EOF)
-                        throw new ParseErrorException(
-                            $"Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
-                    var lambda = Expression.Lambda<Func<TContext, TResult>>(expressionTree, param);
+                    SyntaxTree = ParseExpression();
+                    AssertEndOfExpression();
+                    var lambda = Expression.Lambda<Func<TContext, TResult>>(SyntaxTree, param);
                     return lambda.Compile();
                 }
                 catch (ParseErrorException)
@@ -123,22 +122,7 @@ namespace ExpressiveAnnotations.Analysis
         }
 
         /// <summary>
-        ///     Parses a specified logical expression into expression tree within given context.
-        /// </summary>
-        /// <typeparam name="TContext">The type identifier of the context within which the expression is interpreted.</typeparam>
-        /// <param name="expression">The logical expression.</param>
-        /// <returns>
-        ///     A delegate containing the compiled version of the lambda expression described by created expression tree.
-        /// </returns>
-        /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
-        /// <exception cref="ParseErrorException"></exception>
-        public Func<TContext, bool> Parse<TContext>(string expression)
-        {
-            return Parse<TContext, bool>(expression);
-        }
-
-        /// <summary>
-        ///     Parses a specified logical expression into expression tree within given context.
+        ///     Parses a specified expression into expression tree within given context.
         /// </summary>
         /// <param name="context">The type instance of the context within which the expression is interpreted.</param>
         /// <param name="expression">The logical expression.</param>
@@ -147,7 +131,7 @@ namespace ExpressiveAnnotations.Analysis
         /// </returns>
         /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
         /// <exception cref="ParseErrorException"></exception>
-        public Func<object, bool> Parse(Type context, string expression)
+        public Func<object, TResult> Parse<TResult>(Type context, string expression)
         {
             if (expression == null)
                 throw new ArgumentNullException(nameof(expression), "Expression not provided.");
@@ -163,11 +147,9 @@ namespace ExpressiveAnnotations.Analysis
                     Expr = expression;
                     Wall = new TypeWall(expression);
                     Tokenize();
-                    var expressionTree = ParseExpression();
-                    if (PeekType() != TokenType.EOF)
-                        throw new ParseErrorException(
-                            $"Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
-                    var lambda = Expression.Lambda<Func<object, bool>>(expressionTree, param);
+                    SyntaxTree = ParseExpression();
+                    AssertEndOfExpression();
+                    var lambda = Expression.Lambda<Func<object, TResult>>(SyntaxTree, param);
                     return lambda.Compile();
                 }
                 catch (ParseErrorException)
@@ -212,10 +194,22 @@ namespace ExpressiveAnnotations.Analysis
             return Consts.ToDictionary(x => x.Key, x => x.Value); // shallow clone is fair enough
         }
 
+        /// <summary>
+        ///     Gets the abstract syntax tree built during parsing.
+        /// </summary>
+        /// <returns>
+        ///     <see cref="Expression" /> that represents the tree.
+        /// </returns>
+        public Expression GetExpression()
+        {
+            return SyntaxTree;
+        }
+
         private void Clear()
         {
             Fields.Clear();
             Consts.Clear();
+            SyntaxTree = null;
         }
 
         private void Tokenize()
@@ -621,29 +615,13 @@ namespace ExpressiveAnnotations.Analysis
             var expr = ParseArray();
             if (PeekType() == TokenType.L_BRACKET)
             {
-                // parse subscrit
-                ReadToken(); // read "["
-                var idxExprLoc = PeekToken().Location;
-                var idxExpr = ParseExpression();
-                if (idxExpr.Type != typeof(int))
+                Token unknownProp;
+                expr = ParseAccess(expr, out unknownProp);
+                if (unknownProp != null)
                     throw new ParseErrorException(
-                        PeekType() == TokenType.EOF
-                            ? $"Array literal expects index of '{typeof(int)}' type. Unexpected end of expression."
-                            : $"Array literal expects index of '{typeof(int)}' type. Type '{idxExpr.Type}' cannot be implicitly converted.",
-                        Expr, idxExprLoc);
-                if (PeekType() != TokenType.R_BRACKET)
-                    throw new ParseErrorException(
-                        PeekType() == TokenType.EOF
-                            ? "Array literal expects closing bracket. Unexpected end of expression."
-                            : $"Array literal expects closing bracket. Unexpected token: '{PeekRawValue()}'.",
-                        Expr, PeekToken().Location);
-                ReadToken(); // read "]"            
-
-                expr = Expression.ArrayIndex(expr, idxExpr);
-
-                Token unknown;
-                expr = ParseAccess(expr, null, out unknown);
-                AssertIdentifierExists(expr, unknown?.RawValue, unknown?.Location);
+                        $"Only public properties, constants and enums are accepted. Identifier '{unknownProp.RawValue}' not known.",
+                        Expr, unknownProp.Location);
+                Debug.Assert(expr != null);
             }
 
             return expr;
@@ -651,24 +629,27 @@ namespace ExpressiveAnnotations.Analysis
 
         private Expression ParseIdAccess()
         {
-            var origin = PeekToken();
+            var originProp = PeekToken();
             ReadToken(); // read identifier
 
-            Token unknown;
+            Token unknownProp;
             if (PeekType() == TokenType.L_PAR)
             {
-                var expr = ParseFuncCall(origin);
-                expr = ParseAccess(expr, null, out unknown);
-
-                AssertIdentifierExists(expr, unknown?.RawValue, unknown?.Location);
+                var expr = ParseFuncCall(originProp);
+                expr = ParseAccess(expr, out unknownProp);
+                if (unknownProp != null)
+                    throw new ParseErrorException(
+                        $"Only public properties, constants and enums are accepted. Identifier '{unknownProp.RawValue}' not known.",
+                        Expr, unknownProp.Location);
+                Debug.Assert(expr != null);
                 return expr;
             }
             else
             {
-                var expr = ExtractMemberAccessExpression(origin.RawValue, ContextExpression);
-                expr = ParseAccess(expr, origin, out unknown);
+                var expr = ExtractMemberAccessExpression(originProp.RawValue, ContextExpression);
+                expr = ParseAccess(expr, out unknownProp);
 
-                var start = origin.Location.Position(Expr);
+                var start = originProp.Location.Position(Expr);
                 var length = PeekToken().Location.Position(Expr) - start;
                 var chain = Expr.Substring(start, length).TrimEnd();
 
@@ -676,8 +657,12 @@ namespace ExpressiveAnnotations.Analysis
                     Fields[chain] = expr.Type;
                 else
                 {
-                    expr = ExtractConstantAccessExpression(chain, origin.Location);
-                    AssertIdentifierExists(expr, (unknown ?? origin).RawValue, (unknown ?? origin).Location);
+                    expr = ExtractConstantAccessExpression(chain, originProp.Location);
+                    unknownProp = unknownProp ?? originProp;
+                    if (expr == null)
+                        throw new ParseErrorException(
+                            $"Only public properties, constants and enums are accepted. Identifier '{unknownProp.RawValue}' not known.",
+                            Expr, unknownProp.Location);
                 }
                 return expr;
             }
@@ -695,20 +680,20 @@ namespace ExpressiveAnnotations.Analysis
                 else if (PeekType() != TokenType.R_BRACKET) // when no comma found, array literal end expected
                     throw new ParseErrorException(
                         PeekType() == TokenType.EOF
-                            ? "Array expects comma or closing bracket. Unexpected end of expression."
-                            : $"Array expects comma or closing bracket. Unexpected token: '{PeekRawValue()}'.",
+                            ? "Expected comma or closing bracket. Unexpected end of expression."
+                            : $"Expected comma or closing bracket. Unexpected token: '{PeekRawValue()}'.",
                         Expr, PeekToken().Location);
                 args.Add(arg);
             }
             ReadToken(); // read "]"
 
             if (!args.Any())
-                return Expression.NewArrayInit(typeof(object)); // empty array of objects
+                return Expression.NewArrayInit(typeof (object)); // empty array of objects
 
             var typesMatch = args.Select(x => x.Type).Distinct().Count() == 1;
             return typesMatch
                 ? Expression.NewArrayInit(args[0].Type, args) // items of the same type, array type can be determined
-                : Expression.NewArrayInit(typeof(object), args.Select(x => Expression.Convert(x, typeof(object)))); // items of various types, let it be an array of objects
+                : Expression.NewArrayInit(typeof (object), args.Select(x => Expression.Convert(x, typeof (object)))); // items of various types, let it be an array of objects
         }
 
         private Expression ParseFuncCall(Token func)
@@ -725,8 +710,8 @@ namespace ExpressiveAnnotations.Analysis
                 else if (PeekType() != TokenType.R_PAR) // when no comma found, function exit expected
                     throw new ParseErrorException(
                         PeekType() == TokenType.EOF
-                            ? $"Function '{name}' expects comma or closing parenthesis. Unexpected end of expression."
-                            : $"Function '{name}' expects comma or closing parenthesis. Unexpected token: '{PeekRawValue()}'.",
+                            ? "Expected comma or closing parenthesis. Unexpected end of expression."
+                            : $"Expected comma or closing parenthesis. Unexpected token: '{PeekRawValue()}'.",
                         Expr, PeekToken().Location);
                 args.Add(new Tuple<Expression, Location>(arg, tkn.Location));
             }
@@ -735,60 +720,59 @@ namespace ExpressiveAnnotations.Analysis
             return ExtractMethodExpression(name, args, func.Location); // get method call
         }
         
-        private Expression ParseAccess(Expression expr, Token current, out Token unknown)
+        private Expression ParseAccess(Expression expr, out Token unknownProp)
         {
-            unknown = null; // unknown token
+            unknownProp = null; // unknown token
             while (new[] {TokenType.L_BRACKET, TokenType.PERIOD}.Contains(PeekType()))
             {
-                switch (PeekType())
+                var oper = PeekToken();
+                switch (oper.Type)
                 {
                     case TokenType.PERIOD: // parse member access
                         ReadToken(); // read "."
                         if (PeekType() != TokenType.ID)
                             throw new ParseErrorException(
                                 PeekType() == TokenType.EOF
-                                    ? "Subproperty identifier expected. Unexpected end of expression."
-                                    : $"Subproperty identifier expected. Unexpected token: '{PeekRawValue()}'.",
+                                    ? "Expected subproperty identifier. Unexpected end of expression."
+                                    : $"Expected subproperty identifier. Unexpected token: '{PeekRawValue()}'.",
                                 Expr, PeekToken().Location);
-                        current = PeekToken();
+                        var currentProp = PeekToken();
 
                         if (expr != null)
                         {
-                            expr = ExtractMemberAccessExpression(current.RawValue, expr);
+                            expr = ExtractMemberAccessExpression(currentProp.RawValue, expr);
                             if (expr == null)
-                                unknown = current;
+                                unknownProp = currentProp;
                         }
 
                         ReadToken(); // read property name
                         break;
                     default: // parse subscrit
-                        Debug.Assert(PeekType() == TokenType.L_BRACKET);
+                        Debug.Assert(PeekType() == TokenType.L_BRACKET);                        
                         ReadToken(); // read "["
                         var idxExprLoc = PeekToken().Location;
                         var idxExpr = ParseExpression();
-                        if (idxExpr.Type != typeof(int))
+                        if (idxExpr.Type != typeof (int))
                             throw new ParseErrorException(
                                 PeekType() == TokenType.EOF
-                                    ? $"Index of '{typeof(int)}' type expected. Unexpected end of expression."
-                                    : $"Index of '{typeof(int)}' type expected. Type '{idxExpr.Type}' cannot be implicitly converted.",
+                                    ? $"Expected index of '{typeof (int)}' type. Unexpected end of expression."
+                                    : $"Expected index of '{typeof (int)}' type. Type '{idxExpr.Type}' cannot be implicitly converted.",
                                 Expr, idxExprLoc);
                         if (PeekType() != TokenType.R_BRACKET)
                             throw new ParseErrorException(
                                 PeekType() == TokenType.EOF
-                                    ? "Closing bracket expected. Unexpected end of expression."
-                                    : $"Closing bracket expected. Unexpected token: '{PeekRawValue()}'.",
+                                    ? "Expected closing bracket. Unexpected end of expression."
+                                    : $"Expected closing bracket. Unexpected token: '{PeekRawValue()}'.",
                                 Expr, PeekToken().Location);
 
-                        if (expr == null)
-                            throw new ParseErrorException(
-                                $"Only public properties, constants and enums are accepted. Identifier '{current.RawValue}' not known.",
-                                Expr, current.Location);
-
-                        expr = ExtractMemberSubscritExpression(idxExpr, expr);
-                        if (expr == null)
-                            throw new ParseErrorException(
-                                $"Identifier '{current.RawValue}' either does not represent an array type or does not declare indexer.",
-                                Expr, current.Location);
+                        if (expr != null)
+                        {
+                            expr = ExtractMemberSubscritExpression(idxExpr, expr);
+                            if (expr == null)
+                                throw new ParseErrorException(
+                                    "Indexing operation not supported. Subscript operator can be applied to either an array or a type declaring indexer.",
+                                    Expr, oper.Location);
+                        }
 
                         ReadToken(); // read "]"
                         break;
@@ -967,7 +951,7 @@ namespace ExpressiveAnnotations.Analysis
             var arg = func.GetType().GetGenericArguments().FirstOrDefault();
             var method = arg?.GetMethods().FirstOrDefault();
             var parameter = method?.GetParameters().FirstOrDefault();
-            var indicator = parameter?.GetCustomAttributes(typeof(ParamArrayAttribute), false).Any();
+            var indicator = parameter?.GetCustomAttributes(typeof (ParamArrayAttribute), false).Any();
             return indicator != null && indicator.Value;
         }
 
@@ -976,7 +960,7 @@ namespace ExpressiveAnnotations.Analysis
             Debug.Assert(func != null);
 
             var parameter = func.GetParameters().FirstOrDefault();
-            var indicator = parameter?.GetCustomAttributes(typeof(ParamArrayAttribute), false).Any();
+            var indicator = parameter?.GetCustomAttributes(typeof (ParamArrayAttribute), false).Any();
             return indicator != null && indicator.Value;
         }
 
@@ -1114,12 +1098,11 @@ namespace ExpressiveAnnotations.Analysis
                     Expr, pos);
         }
 
-        private void AssertIdentifierExists(Expression expr, string name, Location pos)
+        private void AssertEndOfExpression()
         {
-            if (expr == null)
+            if (PeekType() != TokenType.EOF)
                 throw new ParseErrorException(
-                    $"Only public properties, constants and enums are accepted. Identifier '{name}' not known.",
-                    Expr, pos);
+                    $"Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
         }
     }
 }

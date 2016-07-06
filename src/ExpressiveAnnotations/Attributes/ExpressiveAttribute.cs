@@ -157,11 +157,11 @@ namespace ExpressiveAnnotations.Attributes
         {
             if (force)
             {
-                CachedValidationFuncs[validationContextType] = Parser.Parse(validationContextType, Expression);
+                CachedValidationFuncs[validationContextType] = Parser.Parse<bool>(validationContextType, Expression);
                 return;
             }
             if (!CachedValidationFuncs.ContainsKey(validationContextType))
-                CachedValidationFuncs[validationContextType] = Parser.Parse(validationContextType, Expression);
+                CachedValidationFuncs[validationContextType] = Parser.Parse<bool>(validationContextType, Expression);
         }
 
         /// <summary>

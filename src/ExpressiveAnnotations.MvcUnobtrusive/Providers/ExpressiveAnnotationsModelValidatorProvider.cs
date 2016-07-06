@@ -26,8 +26,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Providers
         /// </summary>
         public ExpressiveAnnotationsModelValidatorProvider()
         {
-            RegisterAdapter(typeof(RequiredIfAttribute), typeof(RequiredIfValidator));
-            RegisterAdapter(typeof(AssertThatAttribute), typeof(AssertThatValidator));
+            RegisterAdapter(typeof (RequiredIfAttribute), typeof (RequiredIfValidator));
+            RegisterAdapter(typeof (AssertThatAttribute), typeof (AssertThatValidator));
         }
 
         /// <summary>

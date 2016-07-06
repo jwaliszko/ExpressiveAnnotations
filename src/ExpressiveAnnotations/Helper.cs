@@ -155,7 +155,7 @@ namespace ExpressiveAnnotations
         {
             Debug.Assert(type != null);
 
-            return type == typeof(TimeSpan) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsTimeSpan());
+            return type == typeof (TimeSpan) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsTimeSpan());
         }
 
         public static bool IsBool(this Type type)

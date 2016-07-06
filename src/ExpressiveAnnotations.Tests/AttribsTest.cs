@@ -208,7 +208,7 @@ namespace ExpressiveAnnotations.Tests
                 Assert.Equal("Input string was not in a correct format.", e.InnerException.Message);
 
                 IDictionary<string, Guid> errFieldsMap;
-                e = Assert.Throws<FormatException>(() => attrib.FormatErrorMessage("asd", "true", typeof(object), out errFieldsMap));
+                e = Assert.Throws<FormatException>(() => attrib.FormatErrorMessage("asd", "true", typeof (object), out errFieldsMap));
                 Assert.Equal($"Problem with error message processing. The message is following: {msg}", e.Message);
                 Assert.IsType<FormatException>(e.InnerException);
                 Assert.Equal("Input string was not in a correct format.", e.InnerException.Message);
@@ -497,36 +497,6 @@ namespace ExpressiveAnnotations.Tests
             public int? Value1 { get; set; }
             [Display(Name = "duplicate")]
             public int? Value2 { get; set; }
-        }
-    }
-
-    public static class Helper
-    {
-        public static IEnumerable<TSource> DistinctBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
-        {
-            var seenKeys = new HashSet<TKey>();
-            foreach (var element in source)
-            {
-                if (seenKeys.Add(keySelector(element)))
-                {
-                    yield return element;
-                }
-            }
-        }
-
-        public static IEnumerable<ExpressiveAttribute> CompileExpressiveAttributes(this Type type)
-        {
-            var properties = type.GetProperties()
-                .Where(p => Attribute.IsDefined(p, typeof (ExpressiveAttribute)));
-            var attributes = new List<ExpressiveAttribute>();
-
-            foreach (var prop in properties)
-            {
-                var attribs = prop.GetCustomAttributes<ExpressiveAttribute>().ToList();
-                attribs.ForEach(x => x.Compile(prop.DeclaringType));
-                attributes.AddRange(attribs);
-            }
-            return attributes;
         }
     }
 }

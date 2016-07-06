@@ -78,6 +78,7 @@
     <Compile Include="ClientModeTest.cs" />
     <Compile Include="AttributesCompilationTest.cs" />
     <Compile Include="DriverFixture.cs" />
+    <Compile Include="Helper.cs" />
     <Compile Include="HomePage.cs" />
     <Compile Include="ServerModeTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
