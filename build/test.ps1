@@ -24,8 +24,9 @@ $testdlls  = "`"`"$eatestdll`"`" `"`"$vatestdll`"`" `"`"$uitestdll`"`""
 $webmvcbin = "$rootdir\src\ExpressiveAnnotations.MvcWebSample\bin"
 
 # collect JS tests
-$maintest = "$rootdir\src\expressive.annotations.validate.test.js"
-$formtest = "$rootdir\src\tests.html"
+$maintest    = "$rootdir\src\expressive.annotations.validate.test.js"
+$formtest    = "$rootdir\src\form.tests.harness.html"
+$formtestnew = "$rootdir\src\form.tests.harness.latestdeps.html"
 
 # run tests and analyze code coverage
 & $opencover -register:user "-target:$xunit" "-targetargs:$testdlls -nologo -noshadow -appveyor" "-targetdir:$webmvcbin" "-filter:+[ExpressiveAnnotations(.MvcUnobtrusive)?]*" -output:csharp-coverage.xml -hideskipped:All -mergebyhash -returntargetcode
@@ -37,7 +38,7 @@ if($LastExitCode -ne 0) {
     throw "C# tests failed"
 }
     
-& $chutzpah /nologo /path $maintest /path $formtest /junit chutzpah-tests.xml /coverage /coverageIgnores "*test*, *jquery*" /coveragehtml javascript-coverage.htm /lcov javascript-coverage.lcov
+& $chutzpah /nologo /path $maintest /path $formtest /path $formtestnew /junit chutzpah-tests.xml /coverage /coverageIgnores "*test*, *jquery*" /coveragehtml javascript-coverage.htm /lcov javascript-coverage.lcov
 
 if($LastExitCode -ne 0) {
     if($env:APPVEYOR -eq $true) {

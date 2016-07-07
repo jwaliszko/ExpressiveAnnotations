@@ -1522,6 +1522,26 @@ namespace ExpressiveAnnotations.Tests
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model, bool>("GetObject()[0]").Invoke(null));
             Assert.Equal("Indexing operation not supported. Subscript operator can be applied to either an array or a type declaring indexer.", e.Error);
             Assert.Equal(new Location(1, 12), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model, bool>("SubModel.Unknown1.Unknown2 == 1").Invoke(new Model()));
+            Assert.Equal("Only public properties, constants and enums are accepted. Identifier 'Unknown1' not known.", e.Error);
+            Assert.Equal(new Location(1, 10), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model, bool>("GetObject().Unknown1.Unknown2 == 1").Invoke(new Model()));
+            Assert.Equal("Only public properties, constants and enums are accepted. Identifier 'Unknown1' not known.", e.Error);
+            Assert.Equal(new Location(1, 13), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model, bool>("[SubModel][0].Unknown1.Unknown2 == 1").Invoke(new Model()));
+            Assert.Equal("Only public properties, constants and enums are accepted. Identifier 'Unknown1' not known.", e.Error);
+            Assert.Equal(new Location(1, 15), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model, bool>("[1").Invoke(new Model()));
+            Assert.Equal("Expected comma or closing bracket. Unexpected end of expression.", e.Error);
+            Assert.Equal(new Location(1, 3), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model, bool>("[1)").Invoke(new Model()));
+            Assert.Equal("Expected comma or closing bracket. Unexpected token: ')'.", e.Error);
+            Assert.Equal(new Location(1, 3), e.Location, new LocationComparer());
         }
 
         [Fact]

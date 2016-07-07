@@ -130,7 +130,7 @@ Here instead, we're saying "If condition is met, return some view. Otherwise, ad
 
 #####<a id="grammar">Grammar definition</a>
 
-Valid logical expressions handled by EA parser comply with syntax defined by the following grammar:
+Valid expressions handled by EA parser comply with syntax defined by the following grammar:
 
 ```
 exp         => cond-exp

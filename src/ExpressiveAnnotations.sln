@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressiveAnnotations", "ExpressiveAnnotations\ExpressiveAnnotations.csproj", "{70DD327B-F37C-4291-9388-212AA541E970}"
 EndProject
@@ -18,7 +18,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{5908
 		expressive.annotations.validate.js = expressive.annotations.validate.js
 		expressive.annotations.validate.min.js = expressive.annotations.validate.min.js
 		expressive.annotations.validate.test.js = expressive.annotations.validate.test.js
-		tests.html = tests.html
+		form.tests.harness.html = form.tests.harness.html
+		form.tests.harness.latestdeps.html = form.tests.harness.latestdeps.html
+		form.tests.js = form.tests.js
 	EndProjectSection
 	ProjectSection(FolderStartupServices) = postProject
 		{82A7F48D-3B50-4B1E-B82E-3ADA8210C358} = {82A7F48D-3B50-4B1E-B82E-3ADA8210C358}

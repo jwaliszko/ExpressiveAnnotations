@@ -210,6 +210,13 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("Column number should be positive.\r\nParameter name: column", e.Message);
         }
 
+        [Fact]
+        public void print_token_for_debug_purposes()
+        {
+            var token = new Token(TokenType.FLOAT, 1.0, "1.0", new Location(1, 2));
+            Assert.Equal(@"""1.0"" FLOAT (1, 2)", token.ToString());
+        }
+
         private class Model
         {
             [Display(Name = "Value_1")]

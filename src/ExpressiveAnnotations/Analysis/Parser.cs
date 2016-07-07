@@ -371,7 +371,7 @@ namespace ExpressiveAnnotations.Analysis
 
                 var type1 = arg1.Type;
                 var type2 = arg2.Type;
-                Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
+                TypeAdapter.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
                 Wall.Eq(arg1, arg2, type1, type2, oper);
 
                 switch (oper.Type)
@@ -399,7 +399,7 @@ namespace ExpressiveAnnotations.Analysis
 
                 var type1 = arg1.Type;
                 var type2 = arg2.Type;
-                Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
+                TypeAdapter.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
                 Wall.Rel(arg1, arg2, type1, type2, oper);
 
                 switch (oper.Type)
@@ -459,7 +459,7 @@ namespace ExpressiveAnnotations.Analysis
 
                 var type1 = arg1.Type;
                 var type2 = arg2.Type;
-                Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
+                TypeAdapter.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
                 Wall.Add(arg1, arg2, type1, type2, oper);
 
                 switch (oper.Type)
@@ -491,7 +491,7 @@ namespace ExpressiveAnnotations.Analysis
                 var arg2 = ParseUnaryExp();
 
                 Wall.Mul(arg1, arg2, oper);
-                Helper.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
+                TypeAdapter.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
 
                 switch (oper.Type)
                 {
