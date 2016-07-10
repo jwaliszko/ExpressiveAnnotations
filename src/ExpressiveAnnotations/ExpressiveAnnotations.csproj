@@ -61,6 +61,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analysis\Expr.cs" />
     <Compile Include="Analysis\TypeAdapter.cs" />
     <Compile Include="FunctionsManager.cs" />
     <Compile Include="IFunctionsManager.cs" />

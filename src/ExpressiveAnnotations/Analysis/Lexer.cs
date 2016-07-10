@@ -76,8 +76,8 @@ namespace ExpressiveAnnotations.Analysis
 
         private Token Token { get; set; }
         private Location Location { get; set; }
-        private string Expr { get; set; }
-        private string RemainingExpression { get; set; }        
+        private string ExprString { get; set; }
+        private string RemainingExprString { get; set; }        
         private IDictionary<TokenType, Regex> RegexMap { get; set; }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace ExpressiveAnnotations.Analysis
             lock (_locker)
             {
                 Location = new Location(1, 1);
-                Expr = RemainingExpression = expression;
+                ExprString = RemainingExprString = expression;
 
                 var tokens = new List<Token>();
                 while (Next())
@@ -114,29 +114,29 @@ namespace ExpressiveAnnotations.Analysis
         private bool Next()
         {
             int line, column;
-            RemainingExpression = RemainingExpression.TrimStart(out line, out column);
+            RemainingExprString = RemainingExprString.TrimStart(out line, out column);
             Location.Line += line;
             Location.Column = line > 0 ? column : Location.Column + column;
 
-            if (RemainingExpression.Length == 0)
+            if (RemainingExprString.Length == 0)
                 return false;
 
             foreach (var kvp in RegexMap)
             {
                 var regex = kvp.Value;
-                var match = regex.Match(RemainingExpression);
+                var match = regex.Match(RemainingExprString);
                 if (!match.Success) 
                     continue;
                 
                 var value = match.Value;
                 Token = new Token(kvp.Key, ConvertTokenValue(kvp.Key, value), value, Location.Clone());
 
-                RemainingExpression = RemainingExpression.Substring(value.Length, out line, out column);
+                RemainingExprString = RemainingExprString.Substring(value.Length, out line, out column);
                 Location.Line += line;
                 Location.Column = line > 0 ? column : Location.Column + column;
                 return true;
             }
-            throw new ParseErrorException("Invalid token.", Expr, Location);
+            throw new ParseErrorException("Invalid token.", ExprString, Location);
         }
 
         private object ConvertTokenValue(TokenType type, string value)
@@ -165,7 +165,7 @@ namespace ExpressiveAnnotations.Analysis
             }
             catch (OverflowException e)
             {
-                throw new ParseErrorException("Integral constant is too large.", Expr, Location, e);
+                throw new ParseErrorException("Integral constant is too large.", ExprString, Location, e);
             }
         }
 

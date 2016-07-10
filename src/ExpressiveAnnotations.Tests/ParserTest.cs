@@ -140,7 +140,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("(Prop[(Prop[(<Model>),SubModel]),Number])", parser.GetExpression().PrefixPrint());
 
             parser.Parse<object, int>("+1");
-            Assert.Equal("(1)", parser.GetExpression().PrefixPrint());
+            Assert.Equal("(+(1))", parser.GetExpression().PrefixPrint());
             parser.Parse<object, int>("-1");
             Assert.Equal("(-(1))", parser.GetExpression().PrefixPrint());
             parser.Parse<object, bool>("!true");
@@ -1543,6 +1543,33 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Fact]
+        public void overloaded_operators_are_accepted()
+        {
+            var parser = new Parser();
+
+            parser.Parse<Overloaded, bool>("!Instance");
+            parser.Parse<Overloaded, bool>("Instance == Instance");
+            parser.Parse<Overloaded, bool>("Instance != Instance");
+            parser.Parse<Overloaded, bool>("Instance < Instance");
+            parser.Parse<Overloaded, bool>("Instance <= Instance");
+            parser.Parse<Overloaded, bool>("Instance > Instance");
+            parser.Parse<Overloaded, bool>("Instance >= Instance");
+            parser.Parse<Overloaded, int>("+Instance");
+            parser.Parse<Overloaded, int>("-Instance");
+            parser.Parse<Overloaded, int>("Instance + Instance");
+            parser.Parse<Overloaded, int>("Instance - Instance");
+            parser.Parse<Overloaded, int>("Instance * Instance");
+            parser.Parse<Overloaded, int>("Instance / Instance");
+            parser.Parse<Overloaded, int>("Instance % Instance");
+            parser.Parse<Overloaded, int>("~Instance");
+            parser.Parse<Overloaded, int>("Instance & Instance");
+            parser.Parse<Overloaded, int>("Instance ^ Instance");
+            parser.Parse<Overloaded, int>("Instance | Instance");
+            parser.Parse<Overloaded, int>("Instance << 0");
+            parser.Parse<Overloaded, int>("Instance >> 0");
+        }
+
+        [Fact]
         public void unicode_characters_are_supported()
         {
             var parser = new Parser();
@@ -1751,6 +1778,35 @@ namespace ExpressiveAnnotations.Tests
             {
                 return !(a == b);
             }
+        }
+
+        public class Overloaded
+        {
+            public Overloaded Instance { get; set; }
+
+            public override bool Equals(object obj) { return true; }
+            public override int GetHashCode() { return 0; }
+
+            public static bool operator !(Overloaded a) { return true; }
+            public static bool operator ==(Overloaded a, Overloaded b) { return true; }
+            public static bool operator !=(Overloaded a, Overloaded b) { return true; }
+            public static bool operator <(Overloaded a, Overloaded b) { return true; }
+            public static bool operator <=(Overloaded a, Overloaded b) { return true; }
+            public static bool operator >(Overloaded a, Overloaded b) { return true; }
+            public static bool operator >=(Overloaded a, Overloaded b) { return true; }
+            public static int operator +(Overloaded a) { return 0; }
+            public static int operator -(Overloaded a) { return 0; }
+            public static int operator +(Overloaded a, Overloaded b) { return 0; }
+            public static int operator -(Overloaded a, Overloaded b) { return 0; }
+            public static int operator *(Overloaded a, Overloaded b) { return 0; }
+            public static int operator /(Overloaded a, Overloaded b) { return 0; }
+            public static int operator %(Overloaded a, Overloaded b) { return 0; }
+            public static int operator ~(Overloaded a) { return 0; }
+            public static int operator &(Overloaded a, Overloaded b) { return 0; }
+            public static int operator ^(Overloaded a, Overloaded b) { return 0; }
+            public static int operator |(Overloaded a, Overloaded b) { return 0; }            
+            public static int operator <<(Overloaded a, int b) { return 0; }
+            public static int operator >>(Overloaded a, int b) { return 0; }
         }
     }
 }

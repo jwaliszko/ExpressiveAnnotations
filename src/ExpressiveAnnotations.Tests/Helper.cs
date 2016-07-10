@@ -172,6 +172,7 @@ namespace ExpressiveAnnotations.Tests
                 case ExpressionType.GreaterThanOrEqual:
                     return ">=";
                 case ExpressionType.Add:
+                case ExpressionType.UnaryPlus:
                     return "+";
                 case ExpressionType.Subtract:
                 case ExpressionType.Negate:

@@ -67,8 +67,8 @@ namespace ExpressiveAnnotations.Analysis
 
         private Stack<Token> TokensToProcess { get; set; }
         private Stack<Token> TokensProcessed { get; set; }
-        private string Expr { get; set; }
-        private TypeWall Wall { get; set; }
+        private string ExprString { get; set; }
+        private Expr Expr { get; set; }
         private Type ContextType { get; set; }
         private Expression ContextExpression { get; set; }
         private Expression SyntaxTree { get; set; }
@@ -102,8 +102,8 @@ namespace ExpressiveAnnotations.Analysis
                     ContextType = typeof (TContext);
                     var param = Expression.Parameter(typeof (TContext));
                     ContextExpression = param;
-                    Expr = expression;
-                    Wall = new TypeWall(expression);
+                    ExprString = expression;
+                    Expr = new Expr(expression);
                     Tokenize();
                     SyntaxTree = ParseExpression();
                     AssertEndOfExpression();
@@ -144,8 +144,8 @@ namespace ExpressiveAnnotations.Analysis
                     ContextType = context;
                     var param = Expression.Parameter(typeof (object));
                     ContextExpression = Expression.Convert(param, context);
-                    Expr = expression;
-                    Wall = new TypeWall(expression);
+                    ExprString = expression;
+                    Expr = new Expr(expression);
                     Tokenize();
                     SyntaxTree = ParseExpression();
                     AssertEndOfExpression();
@@ -215,7 +215,7 @@ namespace ExpressiveAnnotations.Analysis
         private void Tokenize()
         {
             var lexer = new Lexer();
-            var tokens = lexer.Analyze(Expr);
+            var tokens = lexer.Analyze(ExprString);
             TokensToProcess = new Stack<Token>(tokens.Reverse());
             TokensProcessed = new Stack<Token>();
         }
@@ -261,21 +261,18 @@ namespace ExpressiveAnnotations.Analysis
             if (PeekType() == TokenType.QMARK)
             {
                 var oper = PeekToken();
-                Wall.OfType<bool>(arg1, tok.Location);
                 ReadToken();
-
                 var arg2 = ParseExpression();
                 if (PeekType() != TokenType.COLON)
                     throw new ParseErrorException(
                         PeekType() == TokenType.EOF
                             ? "Expected colon of ternary operator. Unexpected end of expression."
                             : $"Expected colon of ternary operator. Unexpected token: '{PeekRawValue()}'.",
-                        Expr, PeekToken().Location);
+                        ExprString, PeekToken().Location);
                 ReadToken();
                 var arg3 = ParseExpression();
 
-                Wall.TypesMatch(arg2, arg3, oper.Location);
-                arg1 = Expression.Condition(arg1, arg2, arg3);
+                arg1 = Expr.Condition(arg1, arg2, arg3, tok, oper);
             }
             return arg1;
         }
@@ -289,9 +286,7 @@ namespace ExpressiveAnnotations.Analysis
                 ReadToken();
                 var arg2 = ParseLogicalAndExp();
 
-                Wall.LOr(arg1, arg2, oper);
-
-                arg1 = Expression.OrElse(arg1, arg2); // short-circuit evaluation
+                arg1 = Expr.OrElse(arg1, arg2, oper); // short-circuit evaluation
             }
             return arg1;
         }
@@ -305,9 +300,7 @@ namespace ExpressiveAnnotations.Analysis
                 ReadToken();
                 var arg2 = ParseBitwiseOrExp();
 
-                Wall.LAnd(arg1, arg2, oper);
-
-                arg1 = Expression.AndAlso(arg1, arg2); // short-circuit evaluation
+                arg1 = Expr.AndAlso(arg1, arg2, oper); // short-circuit evaluation
             }
             return arg1;
         }
@@ -321,9 +314,7 @@ namespace ExpressiveAnnotations.Analysis
                 ReadToken();
                 var arg2 = ParseXorExp();
 
-                Wall.BOr(arg1, arg2, oper);
-
-                arg1 = Expression.Or(arg1, arg2); // non-short-circuit evaluation
+                arg1 = Expr.Or(arg1, arg2, oper); // non-short-circuit evaluation
             }
             return arg1;
         }
@@ -337,9 +328,7 @@ namespace ExpressiveAnnotations.Analysis
                 ReadToken();
                 var arg2 = ParseBitwiseAndExp();
 
-                Wall.Xor(arg1, arg2, oper);
-
-                arg1 = Expression.ExclusiveOr(arg1, arg2);
+                arg1 = Expr.ExclusiveOr(arg1, arg2, oper);
             }
             return arg1;
         }
@@ -353,9 +342,7 @@ namespace ExpressiveAnnotations.Analysis
                 ReadToken();
                 var arg2 = ParseEqualityExp();
 
-                Wall.BAnd(arg1, arg2, oper);
-
-                arg1 = Expression.And(arg1, arg2); // non-short-circuit evaluation
+                arg1 = Expr.And(arg1, arg2, oper); // non-short-circuit evaluation
             }
             return arg1;
         }
@@ -369,19 +356,14 @@ namespace ExpressiveAnnotations.Analysis
                 ReadToken();
                 var arg2 = ParseRelationalExp();
 
-                var type1 = arg1.Type;
-                var type2 = arg2.Type;
-                TypeAdapter.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
-                Wall.Eq(arg1, arg2, type1, type2, oper);
-
                 switch (oper.Type)
                 {
                     case TokenType.EQ:
-                        arg1 = Expression.Equal(arg1, arg2);
+                        arg1 = Expr.Equal(arg1, arg2, oper);
                         break;
                     default: // assures full branch coverage
                         Debug.Assert(oper.Type == TokenType.NEQ); // http://stackoverflow.com/a/1468385/270315
-                        arg1 = Expression.NotEqual(arg1, arg2);
+                        arg1 = Expr.NotEqual(arg1, arg2, oper);
                         break;
                 }
             }
@@ -397,25 +379,20 @@ namespace ExpressiveAnnotations.Analysis
                 ReadToken();
                 var arg2 = ParseShiftExp();
 
-                var type1 = arg1.Type;
-                var type2 = arg2.Type;
-                TypeAdapter.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
-                Wall.Rel(arg1, arg2, type1, type2, oper);
-
                 switch (oper.Type)
                 {
                     case TokenType.LT:
-                        arg1 = Expression.LessThan(arg1, arg2);
+                        arg1 = Expr.LessThan(arg1, arg2, oper);
                         break;
                     case TokenType.LE:
-                        arg1 = Expression.LessThanOrEqual(arg1, arg2);
+                        arg1 = Expr.LessThanOrEqual(arg1, arg2, oper);
                         break;
                     case TokenType.GT:
-                        arg1 = Expression.GreaterThan(arg1, arg2);
+                        arg1 = Expr.GreaterThan(arg1, arg2, oper);
                         break;
                     default:
                         Debug.Assert(oper.Type == TokenType.GE);
-                        arg1 = Expression.GreaterThanOrEqual(arg1, arg2);
+                        arg1 = Expr.GreaterThanOrEqual(arg1, arg2, oper);
                         break;
                 }
             }
@@ -431,16 +408,14 @@ namespace ExpressiveAnnotations.Analysis
                 ReadToken();
                 var arg2 = ParseAdditiveExp();
 
-                Wall.Shift(arg1, arg2, oper);
-
                 switch (oper.Type)
                 {
                     case TokenType.L_SHIFT:
-                        arg1 = Expression.LeftShift(arg1, arg2);
+                        arg1 = Expr.LeftShift(arg1, arg2, oper);
                         break;
                     default:
                         Debug.Assert(oper.Type == TokenType.R_SHIFT);
-                        arg1 = Expression.RightShift(arg1, arg2);
+                        arg1 = Expr.RightShift(arg1, arg2, oper);
                         break;
                 }
             }
@@ -454,13 +429,7 @@ namespace ExpressiveAnnotations.Analysis
             {
                 var oper = PeekToken();
                 ReadToken();
-
                 var arg2 = ParseMultiplicativeExp();
-
-                var type1 = arg1.Type;
-                var type2 = arg2.Type;
-                TypeAdapter.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
-                Wall.Add(arg1, arg2, type1, type2, oper);
 
                 switch (oper.Type)
                 {
@@ -470,11 +439,11 @@ namespace ExpressiveAnnotations.Analysis
                                 Expression.Convert(arg1, typeof (object)),
                                 Expression.Convert(arg2, typeof (object)),
                                 typeof (string).GetMethod("Concat", new[] {typeof (object), typeof (object)})) // convert string + string into a call to string.Concat
-                            : Expression.Add(arg1, arg2);
+                            : Expr.Add(arg1, arg2, oper);
                         break;
                     default:
                         Debug.Assert(oper.Type == TokenType.SUB);
-                        arg1 = Expression.Subtract(arg1, arg2);
+                        arg1 = Expr.Subtract(arg1, arg2, oper);
                         break;
                 }
             }
@@ -490,20 +459,17 @@ namespace ExpressiveAnnotations.Analysis
                 ReadToken();
                 var arg2 = ParseUnaryExp();
 
-                Wall.Mul(arg1, arg2, oper);
-                TypeAdapter.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
-
                 switch (oper.Type)
                 {
                     case TokenType.MUL:
-                        arg1 = Expression.Multiply(arg1, arg2);
+                        arg1 = Expr.Multiply(arg1, arg2, oper);
                         break;
                     case TokenType.DIV:
-                        arg1 = Expression.Divide(arg1, arg2);
+                        arg1 = Expr.Divide(arg1, arg2, oper);
                         break;
                     default:
                         Debug.Assert(oper.Type == TokenType.MOD);
-                        arg1 = Expression.Modulo(arg1, arg2);
+                        arg1 = Expr.Modulo(arg1, arg2, oper);
                         break;
                 }
             }
@@ -518,19 +484,17 @@ namespace ExpressiveAnnotations.Analysis
                 ReadToken();
                 var arg = ParseUnaryExp();
 
-                Wall.Unary(arg, oper);
-
                 switch (oper.Type)
                 {
                     case TokenType.ADD:
-                        return arg;
+                        return Expr.UnaryPlus(arg, oper);
                     case TokenType.SUB:
-                        return Expression.Negate(arg);
+                        return Expr.Negate(arg, oper);
                     case TokenType.L_NOT:
-                        return Expression.Not(arg);
+                        return Expr.Not(arg, oper);
                     default:
                         Debug.Assert(oper.Type == TokenType.B_NOT);
-                        return Expression.OnesComplement(arg);
+                        return Expr.OnesComplement(arg, oper);
                 }
             }
             return ParsePrimaryExp();
@@ -564,15 +528,15 @@ namespace ExpressiveAnnotations.Analysis
                             PeekType() == TokenType.EOF
                                 ? "Expected closing parenthesis. Unexpected end of expression."
                                 : $"Expected closing parenthesis. Unexpected token: '{PeekRawValue()}'.",
-                            Expr, PeekToken().Location);
+                            ExprString, PeekToken().Location);
                     ReadToken(); // read ")"
                     return arg;
                 case TokenType.EOF:
                     throw new ParseErrorException(
-                        "Expected \"null\", bool, int, float, bin, hex, string, array or id. Unexpected end of expression.", Expr, PeekToken().Location);                
+                        "Expected \"null\", bool, int, float, bin, hex, string, array or id. Unexpected end of expression.", ExprString, PeekToken().Location);                
                 default:
                     throw new ParseErrorException(
-                        $"Expected \"null\", bool, int, float, bin, hex, string, array or id. Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
+                        $"Expected \"null\", bool, int, float, bin, hex, string, array or id. Unexpected token: '{PeekRawValue()}'.", ExprString, PeekToken().Location);
             }
         }
 
@@ -620,7 +584,7 @@ namespace ExpressiveAnnotations.Analysis
                 if (unknownProp != null)
                     throw new ParseErrorException(
                         $"Only public properties, constants and enums are accepted. Identifier '{unknownProp.RawValue}' not known.",
-                        Expr, unknownProp.Location);
+                        ExprString, unknownProp.Location);
                 Debug.Assert(expr != null);
             }
 
@@ -640,7 +604,7 @@ namespace ExpressiveAnnotations.Analysis
                 if (unknownProp != null)
                     throw new ParseErrorException(
                         $"Only public properties, constants and enums are accepted. Identifier '{unknownProp.RawValue}' not known.",
-                        Expr, unknownProp.Location);
+                        ExprString, unknownProp.Location);
                 Debug.Assert(expr != null);
                 return expr;
             }
@@ -649,9 +613,9 @@ namespace ExpressiveAnnotations.Analysis
                 var expr = ExtractMemberAccessExpression(originProp.RawValue, ContextExpression);
                 expr = ParseAccess(expr, out unknownProp);
 
-                var start = originProp.Location.Position(Expr);
-                var length = PeekToken().Location.Position(Expr) - start;
-                var chain = Expr.Substring(start, length).TrimEnd();
+                var start = originProp.Location.Position(ExprString);
+                var length = PeekToken().Location.Position(ExprString) - start;
+                var chain = ExprString.Substring(start, length).TrimEnd();
 
                 if (expr != null)
                     Fields[chain] = expr.Type;
@@ -662,7 +626,7 @@ namespace ExpressiveAnnotations.Analysis
                     if (expr == null)
                         throw new ParseErrorException(
                             $"Only public properties, constants and enums are accepted. Identifier '{unknownProp.RawValue}' not known.",
-                            Expr, unknownProp.Location);
+                            ExprString, unknownProp.Location);
                 }
                 return expr;
             }
@@ -682,7 +646,7 @@ namespace ExpressiveAnnotations.Analysis
                         PeekType() == TokenType.EOF
                             ? "Expected comma or closing bracket. Unexpected end of expression."
                             : $"Expected comma or closing bracket. Unexpected token: '{PeekRawValue()}'.",
-                        Expr, PeekToken().Location);
+                        ExprString, PeekToken().Location);
                 args.Add(arg);
             }
             ReadToken(); // read "]"
@@ -712,7 +676,7 @@ namespace ExpressiveAnnotations.Analysis
                         PeekType() == TokenType.EOF
                             ? "Expected comma or closing parenthesis. Unexpected end of expression."
                             : $"Expected comma or closing parenthesis. Unexpected token: '{PeekRawValue()}'.",
-                        Expr, PeekToken().Location);
+                        ExprString, PeekToken().Location);
                 args.Add(new Tuple<Expression, Location>(arg, tkn.Location));
             }
             ReadToken(); // read ")"
@@ -735,7 +699,7 @@ namespace ExpressiveAnnotations.Analysis
                                 PeekType() == TokenType.EOF
                                     ? "Expected subproperty identifier. Unexpected end of expression."
                                     : $"Expected subproperty identifier. Unexpected token: '{PeekRawValue()}'.",
-                                Expr, PeekToken().Location);
+                                ExprString, PeekToken().Location);
                         var currentProp = PeekToken();
 
                         if (expr != null)
@@ -757,13 +721,13 @@ namespace ExpressiveAnnotations.Analysis
                                 PeekType() == TokenType.EOF
                                     ? $"Expected index of '{typeof (int)}' type. Unexpected end of expression."
                                     : $"Expected index of '{typeof (int)}' type. Type '{idxExpr.Type}' cannot be implicitly converted.",
-                                Expr, idxExprLoc);
+                                ExprString, idxExprLoc);
                         if (PeekType() != TokenType.R_BRACKET)
                             throw new ParseErrorException(
                                 PeekType() == TokenType.EOF
                                     ? "Expected closing bracket. Unexpected end of expression."
                                     : $"Expected closing bracket. Unexpected token: '{PeekRawValue()}'.",
-                                Expr, PeekToken().Location);
+                                ExprString, PeekToken().Location);
 
                         if (expr != null)
                         {
@@ -771,7 +735,7 @@ namespace ExpressiveAnnotations.Analysis
                             if (expr == null)
                                 throw new ParseErrorException(
                                     "Indexing operation not supported. Subscript operator can be applied to either an array or a type declaring indexer.",
-                                    Expr, oper.Location);
+                                    ExprString, oper.Location);
                         }
 
                         ReadToken(); // read "]"
@@ -828,7 +792,7 @@ namespace ExpressiveAnnotations.Analysis
                     var enumList = string.Join($",{Environment.NewLine}", enumTypes.Select(x => $"'{x.FullName}'"));
                     throw new ParseErrorException(
                         $"Enum '{enumTypeName}' is ambiguous, found following:{Environment.NewLine}{enumList}.",
-                        Expr, pos);
+                        ExprString, pos);
                 }
 
                 var type = enumTypes.SingleOrDefault();
@@ -865,7 +829,7 @@ namespace ExpressiveAnnotations.Analysis
                             : $"'{x.Name}'"));
                     throw new ParseErrorException(
                         $"Constant '{name}' is ambiguous, found following:{Environment.NewLine}{constsList}.",
-                        Expr, pos);
+                        ExprString, pos);
                 }
 
                 constant = constants.SingleOrDefault();
@@ -890,7 +854,7 @@ namespace ExpressiveAnnotations.Analysis
             var expression = FetchModelMethod(name, args, funcPos) ?? FetchToolchainMethod(name, args, funcPos); // firstly, try to take method from model context - if not found, take one from toolchain
             if (expression == null)
                 throw new ParseErrorException(
-                    $"Function '{name}' accepting {args.Count} argument{(args.Count == 1 ? string.Empty : "s")} not found.", Expr, funcPos);
+                    $"Function '{name}' accepting {args.Count} argument{(args.Count == 1 ? string.Empty : "s")} not found.", ExprString, funcPos);
 
             return expression;
         }
@@ -1079,7 +1043,7 @@ namespace ExpressiveAnnotations.Analysis
             {
                 throw new ParseErrorException(
                     $"Function '{funcName}' {argIdx.ToOrdinal()} argument implicit conversion from '{arg.Type}' to expected '{type}' failed.",
-                    Expr, argPos);
+                    ExprString, argPos);
             }
         }
 
@@ -1087,7 +1051,7 @@ namespace ExpressiveAnnotations.Analysis
         {
             if (!Functions.ContainsKey(name) && !ContextType.GetMethods().Any(mi => name.Equals(mi.Name)))
                 throw new ParseErrorException(
-                    $"Function '{name}' not known.", Expr, pos);
+                    $"Function '{name}' not known.", ExprString, pos);
         }
 
         private void AssertMethodNotAmbiguous(int signatures, string name, int args, Location pos)
@@ -1095,14 +1059,14 @@ namespace ExpressiveAnnotations.Analysis
             if (signatures > 1)
                 throw new ParseErrorException(
                     $"Function '{name}' accepting {args} argument{(args == 1 ? string.Empty : "s")} is ambiguous.", 
-                    Expr, pos);
+                    ExprString, pos);
         }
 
         private void AssertEndOfExpression()
         {
             if (PeekType() != TokenType.EOF)
                 throw new ParseErrorException(
-                    $"Unexpected token: '{PeekRawValue()}'.", Expr, PeekToken().Location);
+                    $"Unexpected token: '{PeekRawValue()}'.", ExprString, PeekToken().Location);
         }
     }
 }
