@@ -7,6 +7,9 @@ if($env:APPVEYOR -eq $true) {
     $buildcfg = $env:CONFIGURATION
 }
 
+Write-Host "Configuration: $buildcfg"
+Write-Host "Root directory: $rootdir"
+
 # collect tools
 $xunitdir     = Get-ChildItem $rootdir xunit.console.exe -Recurse | Select-Object -First 1 | Select -Expand Directory
 $opencoverdir = Get-ChildItem $rootdir opencover.console.exe -Recurse | Select-Object -First 1 | Select -Expand Directory
@@ -38,7 +41,7 @@ if($LastExitCode -ne 0) {
     throw "C# tests failed"
 }
     
-& $chutzpah /nologo /path $maintest /path $formtest /path $formtestnew /junit chutzpah-tests.xml /coverage /coverageIgnores "*test*, *jquery*" /coveragehtml javascript-coverage.htm /lcov javascript-coverage.lcov
+& $chutzpah /nologo /path $formtest /path $formtestnew /path $maintest /junit chutzpah-tests.xml /coverage /coverageIgnores "*test*, *jquery*" /coveragehtml javascript-coverage.htm /lcov javascript-coverage.lcov
 
 if($LastExitCode -ne 0) {
     if($env:APPVEYOR -eq $true) {

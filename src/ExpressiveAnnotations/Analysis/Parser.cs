@@ -61,7 +61,7 @@ namespace ExpressiveAnnotations.Analysis
         /// </summary>
         public Parser()
         {
-            Fields = new Dictionary<string, Type>();
+            Fields = new Dictionary<string, Expression>();
             Consts = new Dictionary<string, object>();
         }
 
@@ -72,7 +72,7 @@ namespace ExpressiveAnnotations.Analysis
         private Type ContextType { get; set; }
         private Expression ContextExpression { get; set; }
         private Expression SyntaxTree { get; set; }
-        private IDictionary<string, Type> Fields { get; set; }
+        private IDictionary<string, Expression> Fields { get; set; }
         private IDictionary<string, object> Consts { get; set; }
         private IFunctionsProvider FuncProvider { get; set; }
         private IDictionary<string, IList<LambdaExpression>> Functions
@@ -178,7 +178,7 @@ namespace ExpressiveAnnotations.Analysis
         /// <returns>
         ///     Dictionary containing names and types.
         /// </returns>
-        public IDictionary<string, Type> GetFields()
+        public IDictionary<string, Expression> GetFields()
         {
             return Fields.ToDictionary(x => x.Key, x => x.Value);
         }
@@ -618,7 +618,7 @@ namespace ExpressiveAnnotations.Analysis
                 var chain = ExprString.Substring(start, length).TrimEnd();
 
                 if (expr != null)
-                    Fields[chain] = expr.Type;
+                    Fields[chain] = expr;
                 else
                 {
                     expr = ExtractConstantAccessExpression(chain, originProp.Location);

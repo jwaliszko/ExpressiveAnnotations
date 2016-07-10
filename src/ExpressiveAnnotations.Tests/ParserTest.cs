@@ -535,7 +535,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(
                 expectedFields.Keys.All(
                     key => parsedFields.ContainsKey(key) &&
-                           EqualityComparer<Type>.Default.Equals(expectedFields[key], parsedFields[key])));
+                           EqualityComparer<Type>.Default.Equals(expectedFields[key], parsedFields[key].Type)));
 
             parser.GetConsts()["Const"] = null; // try to mess up with internal fields - original data should not be affected
             var parsedConsts = parser.GetConsts();            

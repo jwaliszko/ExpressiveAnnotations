@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
@@ -44,16 +45,25 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                     parser.RegisterToolchain();
                     parser.Parse<bool>(metadata.ContainerType, attribute.Expression);
 
-                    FieldsMap = parser.GetFields().ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value));
+                    var fields = parser.GetFields();
+                    FieldsMap = fields.ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value.Type));
                     ConstsMap = parser.GetConsts();
-                    ParsersMap = metadata.ContainerType.GetProperties()
-                        .Where(p => FieldsMap.Keys.Contains(p.Name) || metadata.PropertyName == p.Name) // narrow down number of parsers sent to client
-                        .Select(p => new
+                    ParsersMap = fields
+                        .Select(kvp => new
                         {
-                            PropertyName = p.Name,
-                            ParserAttribute = p.GetAttributes<ValueParserAttribute>().SingleOrDefault()
+                            FullName = kvp.Key,
+                            ParserAttribute = ((MemberExpression) kvp.Value).Member.GetAttributes<ValueParserAttribute>().SingleOrDefault()
                         }).Where(x => x.ParserAttribute != null)
-                        .ToDictionary(x => x.PropertyName, x => x.ParserAttribute.ParserName);
+                        .ToDictionary(x => x.FullName, x => x.ParserAttribute.ParserName);
+
+                    if (!ParsersMap.ContainsKey(metadata.PropertyName))
+                    {
+                        var currentField = metadata.ContainerType
+                            .GetProperties().Single(p => metadata.PropertyName == p.Name);
+                        var valueParser = currentField.GetAttributes<ValueParserAttribute>().SingleOrDefault();
+                        if (valueParser != null)
+                            ParsersMap.Add(new KeyValuePair<string, string>(metadata.PropertyName, valueParser.ParserName));
+                    }
 
                     AssertNoNamingCollisionsAtCorrespondingSegments();
                     attribute.Compile(metadata.ContainerType); // compile expressions in attributes (to be cached for subsequent invocations)
