@@ -375,6 +375,7 @@ namespace ExpressiveAnnotations.Tests
                 NSpan = now - new DateTime(1999, 1, 1),
                 Span = new TimeSpan(0),
                 Number = 0,
+                Chaaar = 'a',
                 Flag = true,
                 NFlag = true,
                 Text = "hello world",
@@ -424,6 +425,8 @@ namespace ExpressiveAnnotations.Tests
             Toolchain.Instance.AddFunction("GetModel", () => model);
             Toolchain.Instance.AddFunction("GetModels", () => new[] {model});
             parser.RegisterToolchain();
+
+            Assert.True(parser.Parse<Model, bool>("Chaaar == 'a'").Invoke(model));
 
             Assert.True(parser.Parse<bool>(model.GetType(), "Number < 1").Invoke(model));
             Assert.True(parser.Parse<bool>(model.GetType(), "Number == 0").Invoke(model));
@@ -1591,6 +1594,7 @@ namespace ExpressiveAnnotations.Tests
             public TimeSpan? NSpan { get; set; }
             public TimeSpan Span { get; set; }
             public int? Number { get; set; }
+            public char Chaaar { get; set; }
             public bool Flag { get; set; }
             public bool? NFlag { get; set; }
             public string Text { get; set; }

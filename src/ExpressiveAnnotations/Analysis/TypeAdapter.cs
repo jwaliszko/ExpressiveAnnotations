@@ -4,6 +4,9 @@ using System.Linq.Expressions;
 
 namespace ExpressiveAnnotations.Analysis
 {
+    /// <summary>
+    ///     Adjusts types compatibility for operations.
+    /// </summary>
     internal static class TypeAdapter
     {
         public static void MakeTypesCompatible(Expression e1, Expression e2, out Expression oute1, out Expression oute2, TokenType operation)
@@ -17,6 +20,11 @@ namespace ExpressiveAnnotations.Analysis
             if (oute1.Type.IsEnum && oute2.Type.IsEnum
                 && oute1.Type.UnderlyingType() != oute2.Type.UnderlyingType()) // various enum types
                 return;
+
+            if (oute1.Type == typeof (string) && oute2.Type == typeof (char)) // convert char to string
+                oute2 = Expression.Call(oute2, typeof (object).GetMethod("ToString"));
+            else if (oute1.Type == typeof (char) && oute2.Type == typeof (string))
+                oute1 = Expression.Call(oute1, typeof (object).GetMethod("ToString"));
 
             if (operation != TokenType.DIV // do not promote integral numeric values to double - exception for division operation, e.g. 1/2 should evaluate to 0.5 double like in JS
                 && !oute1.Type.IsEnum && !oute2.Type.IsEnum
