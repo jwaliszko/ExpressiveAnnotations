@@ -28,12 +28,12 @@ namespace ExpressiveAnnotations.Analysis
      * unary-exp   => ("+" | "-" | "!" | "~") unary-exp | primary-exp
      * primary-exp => null-lit | bool-lit | num-lit | string-lit | arr-access | id-access | "(" exp ")"
      * 
-     * arr-access  => arr-lit |
-     *                arr-lit "[" exp "]" ("[" exp "]" | "." identifier)*
+     * arr-access  => arr-lit |                                                                         // [a,b,c]
+     *                arr-lit "[" exp "]" ("[" exp "]" | "." identifier)*                               // [a,b,c][d][e].f.g
      * 
-     * id-access   => identifier |
-     *                identifier ("[" exp "]" | "." identifier)* |
-     *                func-call ("[" exp "]" | "." identifier)*
+     * id-access   => identifier |                                                                      // a
+     *                identifier ("[" exp "]" | "." identifier)* |                                      // a[b].c
+     *                func-call ("[" exp "]" | "." identifier)*                                         // a(b,c,d)[e].f.g
      *                
      * func-call   => identifier "(" [exp-list] ")"
      * 
@@ -107,7 +107,8 @@ namespace ExpressiveAnnotations.Analysis
                     Tokenize();
                     SyntaxTree = ParseExpression();
                     AssertEndOfExpression();
-                    var lambda = Expression.Lambda<Func<TContext, TResult>>(SyntaxTree, param);
+                    var convTree = Expression.Convert(SyntaxTree, typeof (TResult));
+                    var lambda = Expression.Lambda<Func<TContext, TResult>>(convTree, param);
                     return lambda.Compile();
                 }
                 catch (ParseErrorException)
@@ -149,7 +150,8 @@ namespace ExpressiveAnnotations.Analysis
                     Tokenize();
                     SyntaxTree = ParseExpression();
                     AssertEndOfExpression();
-                    var lambda = Expression.Lambda<Func<object, TResult>>(SyntaxTree, param);
+                    var convTree = Expression.Convert(SyntaxTree, typeof (TResult));
+                    var lambda = Expression.Lambda<Func<object, TResult>>(convTree, param);
                     return lambda.Compile();
                 }
                 catch (ParseErrorException)

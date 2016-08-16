@@ -136,6 +136,13 @@ namespace ExpressiveAnnotations
         {
             Debug.Assert(type != null);
 
+            return type.IsIntegralNumeric() || type.IsFloatingPointNumeric();
+        }
+
+        public static bool IsIntegralNumeric(this Type type)
+        {
+            Debug.Assert(type != null);
+
             var numericTypes = new HashSet<TypeCode>
             {
                 TypeCode.SByte,     //sbyte
@@ -147,8 +154,7 @@ namespace ExpressiveAnnotations
                 TypeCode.Int64,     //long
                 TypeCode.UInt64     //ulong
             };
-            return type.IsFloatingPointNumeric() ||
-                   numericTypes.Contains(Type.GetTypeCode(type)) ||
+            return numericTypes.Contains(Type.GetTypeCode(type)) ||
                    type.IsNullable() && Nullable.GetUnderlyingType(type).IsNumeric();
         }
 
@@ -164,6 +170,27 @@ namespace ExpressiveAnnotations
             };
             return numericTypes.Contains(Type.GetTypeCode(type)) ||
                    type.IsNullable() && Nullable.GetUnderlyingType(type).IsNumeric();
+        }
+
+        public static int HasHigherPrecisionThan(this Type type, Type other) // < 0 - lower precision, 0 - the same, > 0 - higher
+        {
+            Debug.Assert(type != null);
+            Debug.Assert(other != null);
+            Debug.Assert(type.IsIntegralNumeric());
+            Debug.Assert(other.IsIntegralNumeric());
+
+            var orderedTypes = new List<Type>
+            {
+                typeof (sbyte),
+                typeof (byte),
+                typeof (short),
+                typeof (ushort),
+                typeof (int),
+                typeof (uint),
+                typeof (long),
+                typeof (ulong)
+            };
+            return orderedTypes.IndexOf(type) - orderedTypes.IndexOf(other);
         }
 
         public static bool IsNullable(this Type type)

@@ -152,8 +152,8 @@ arr-access  => arr-lit |
                arr-lit '[' exp ']' ('[' exp ']' | '.' identifier)*
 
 id-access   => identifier |
-               identifier ('[' exp ']' | '.' exp)* |
-               func-call ('[' exp ']' | '.' exp)*
+               identifier ('[' exp ']' | '.' identifier)* |
+               func-call ('[' exp ']' | '.' identifier)*
                
 func-call   => identifier '(' [exp-list] ')'
 
