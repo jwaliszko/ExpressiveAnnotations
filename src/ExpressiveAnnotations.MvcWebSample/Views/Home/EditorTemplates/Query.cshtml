@@ -68,7 +68,7 @@
 [RequiredIf(@@"GoAbroad == true
               && (
                      (NextCountry != 'Other' && NextCountry == Country)
-                     || (Age > 24 && Age &le; 55)
+                     || (Age > 24 && 55 &ge; Age)
                  )")]
 [RequiredIf("ArrayContains(Age, [15, 16, 17])")] @*alternative: [RequiredIf("ArrayContains(Age, EarlyYears)")]*@
 [AssertThat(@@"ReasonForTravel != 'John\'s cat named ""\\\'""\n (Backslash Quote)' && ReasonForTravel != SIMONS_CAT")]

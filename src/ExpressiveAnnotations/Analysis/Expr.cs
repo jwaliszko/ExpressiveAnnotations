@@ -361,21 +361,6 @@ namespace ExpressiveAnnotations.Analysis
             }
         }
 
-        public Expression Convert(Expression arg, Type type, Location pos)
-        {
-            if (arg.Type == typeof (bool))
-                return arg;
-
-            try
-            {
-                return Expression.Convert(arg, type);
-            }
-            catch
-            {
-                throw new ParseErrorException($"Cannot implicitly convert type '{arg.Type}' to '{type}'.", ExprString, pos);
-            }
-        }
-
         public Expression Condition(Expression arg1, Expression arg2, Expression arg3, Token start, Token oper)
         {
             Wall.OfType<bool>(arg1, start.Location);

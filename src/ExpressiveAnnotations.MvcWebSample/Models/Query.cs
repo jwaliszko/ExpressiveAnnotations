@@ -84,7 +84,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [RequiredIf(@"GoAbroad == true
                       && (
                              (NextCountry != 'Other' && NextCountry == Country)
-                             || (Age > 24 && Age <= 55)
+                             || (Age > 24 && 55 >= Age)
                          )",
             ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.ReasonForTravelRequired))]
         [RequiredIf("ArrayContains(Age, [15, 16, 17])", // alternative without array literal: ArrayContains(Age, EarlyYears)",
