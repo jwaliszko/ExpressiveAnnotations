@@ -190,7 +190,26 @@ namespace ExpressiveAnnotations
                 typeof (long),
                 typeof (ulong)
             };
-            return orderedTypes.IndexOf(type) - orderedTypes.IndexOf(other);
+            return orderedTypes.IndexOf(type.UnderlyingType()) - orderedTypes.IndexOf(other.UnderlyingType());
+        }
+
+        public static Type GetNullableEquivalent(this Type type)
+        {
+            Debug.Assert(type != null);
+            Debug.Assert(type.IsIntegralNumeric());
+
+            var map = new Dictionary<Type, Type>
+            {
+                {typeof (sbyte), typeof (sbyte?)},
+                {typeof (byte), typeof (byte?)},
+                {typeof (short), typeof (short?)},
+                {typeof (ushort), typeof (ushort?)},
+                {typeof (int), typeof (int?)},
+                {typeof (uint), typeof (uint?)},
+                {typeof (long), typeof (long?)},
+                {typeof (ulong), typeof (ulong?)}
+            };
+            return map[type];
         }
 
         public static bool IsNullable(this Type type)

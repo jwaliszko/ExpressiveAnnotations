@@ -63,7 +63,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         
         [Required(ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.FieldRequired))]
         [Display(ResourceType = typeof (Resources), Name = nameof(Resources.Age))]
-        public int? Age { get; set; }
+        public ushort? Age { get; set; }
 
         [RequiredIf("GoAbroad == true", ErrorMessage = "?")]
         public string ID { get; set; }
