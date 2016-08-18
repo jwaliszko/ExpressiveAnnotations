@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using ExpressiveAnnotations.Functions;
 
 namespace ExpressiveAnnotations.Analysis
 {

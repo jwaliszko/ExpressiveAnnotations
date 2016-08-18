@@ -63,10 +63,10 @@
   <ItemGroup>
     <Compile Include="Analysis\Expr.cs" />
     <Compile Include="Analysis\TypeAdapter.cs" />
-    <Compile Include="FunctionsManager.cs" />
-    <Compile Include="IFunctionsManager.cs" />
-    <Compile Include="Toolchain.cs" />
-    <Compile Include="IFunctionsProvider.cs" />
+    <Compile Include="Functions\FunctionsManager.cs" />
+    <Compile Include="Functions\IFunctionsManager.cs" />
+    <Compile Include="Functions\Toolchain.cs" />
+    <Compile Include="Functions\IFunctionsProvider.cs" />
     <Compile Include="Analysis\ParseErrorException.cs" />
     <Compile Include="Analysis\Location.cs" />
     <Compile Include="Analysis\TokenType.cs" />

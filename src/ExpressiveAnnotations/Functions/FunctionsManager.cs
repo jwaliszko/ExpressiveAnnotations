@@ -7,13 +7,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace ExpressiveAnnotations
+namespace ExpressiveAnnotations.Functions
 {
     /// <summary>
     ///     Registers new functions of predefined signatures.
     /// </summary>
-    /// <seealso cref="ExpressiveAnnotations.IFunctionsManager" />
-    /// <seealso cref="ExpressiveAnnotations.IFunctionsProvider" />    
+    /// <seealso cref="IFunctionsManager" />
+    /// <seealso cref="IFunctionsProvider" />    
     public class FunctionsManager : IFunctionsManager, IFunctionsProvider
     {
         /// <summary>

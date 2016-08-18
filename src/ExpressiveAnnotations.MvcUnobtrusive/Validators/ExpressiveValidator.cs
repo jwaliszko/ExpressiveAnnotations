@@ -11,6 +11,7 @@ using System.Linq.Expressions;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
+using ExpressiveAnnotations.Functions;
 
 namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
 {

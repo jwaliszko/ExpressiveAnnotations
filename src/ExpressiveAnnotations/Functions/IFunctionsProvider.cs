@@ -1,11 +1,11 @@
 ﻿/* https://github.com/jwaliszko/ExpressiveAnnotations
  * Copyright (c) 2014 Jarosław Waliszko
  * Licensed MIT: http://opensource.org/licenses/MIT */
- 
+
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
-namespace ExpressiveAnnotations
+namespace ExpressiveAnnotations.Functions
 {
     /// <summary>
     ///     Functions source.

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using ExpressiveAnnotations.Analysis;
+using ExpressiveAnnotations.Functions;
 using Xunit;
 
 namespace ExpressiveAnnotations.Tests

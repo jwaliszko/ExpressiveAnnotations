@@ -41,12 +41,13 @@
     <HelpTitle>ExpressiveAnnotations API</HelpTitle>
     <ContentPlacement>AboveNamespaces</ContentPlacement>
     <NamespaceSummaries>
-      <NamespaceSummaryItem name="(global)" isDocumented="False" />
-      <NamespaceSummaryItem name="ExpressiveAnnotations.Analysis" isDocumented="True">Namespace provides logic related to lexical and syntactic analysis of specified expressions.</NamespaceSummaryItem>
-      <NamespaceSummaryItem name="ExpressiveAnnotations.Attributes" isDocumented="True">Namespace provides expressive attributes that are used to define metadata for properties.</NamespaceSummaryItem>
-      <NamespaceSummaryItem name="ExpressiveAnnotations.MvcUnobtrusive.Providers" isDocumented="True">Namespace provides validator providers.</NamespaceSummaryItem>
-      <NamespaceSummaryItem name="ExpressiveAnnotations.MvcUnobtrusive.Validators" isDocumented="True">Namespace provides expressive validators for a specified validation types.</NamespaceSummaryItem>
-    </NamespaceSummaries>
+      <NamespaceSummaryItem name="(global)" isDocumented="True" />
+<NamespaceSummaryItem name="ExpressiveAnnotations.Analysis" isDocumented="True">Namespace provides logic related to lexical and syntactic analysis of specified expressions.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="ExpressiveAnnotations.Attributes" isDocumented="True">Namespace provides expressive attributes that are used to define metadata for properties.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="ExpressiveAnnotations.MvcUnobtrusive.Providers" isDocumented="True">Namespace provides validator providers.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="ExpressiveAnnotations.MvcUnobtrusive.Validators" isDocumented="True">Namespace provides expressive validators for a specified validation types.</NamespaceSummaryItem>
+<NamespaceSummaryItem name="ExpressiveAnnotations" isDocumented="True" />
+<NamespaceSummaryItem name="ExpressiveAnnotations.Functions" isDocumented="True">Namespace provides access to function management for expressions.</NamespaceSummaryItem></NamespaceSummaries>
     <VisibleItems>InheritedMembers, Protected, ProtectedInternalAsProtected</VisibleItems>
     <ProjectSummary>A small .NET and JavaScript library which provides annotation-based conditional validation mechanisms. Given attributes allow to forget about imperative way of step-by-step verification of validation conditions in many cases. Since fields validation requirements are applied as metadata, domain-related code is more condensed.</ProjectSummary>
     <RootNamespaceTitle>

@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using ExpressiveAnnotations.Analysis;
+using ExpressiveAnnotations.Functions;
 
 namespace ExpressiveAnnotations.Attributes
 {

@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using ExpressiveAnnotations.Analysis;
 
-namespace ExpressiveAnnotations
+namespace ExpressiveAnnotations.Functions
 {
     internal static class ParserHelper
     {
@@ -26,8 +26,8 @@ namespace ExpressiveAnnotations
     /// <summary>
     ///     Contains a set of predefined methods.
     /// </summary>
-    /// <seealso cref="ExpressiveAnnotations.IFunctionsManager" />
-    /// <seealso cref="ExpressiveAnnotations.IFunctionsProvider" />    
+    /// <seealso cref="IFunctionsProvider" />
+    /// <seealso cref="IFunctionsManager" />    
     /// <seealso cref="IFunctionsProvider" />
     public class Toolchain : IFunctionsManager, IFunctionsProvider
     {
