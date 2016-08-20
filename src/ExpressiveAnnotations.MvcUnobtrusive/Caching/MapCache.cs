@@ -14,7 +14,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Caching
     /// </summary>
     internal static class MapCache<TKey, TValue> // http://stackoverflow.com/q/3037203/270315
     {
-        private static readonly ConcurrentDictionary<TKey, Lazy<TValue>> _cache = new ConcurrentDictionary<TKey, Lazy<TValue>>(); // why lazy? -> http://stackoverflow.com/q/12611167/270315, https://blogs.endjin.com/2015/10/using-lazy-and-concurrentdictionary-to-ensure-a-thread-safe-run-once-lazy-loaded-collection/
+        private static readonly ConcurrentDictionary<TKey, Lazy<TValue>> _cache = new ConcurrentDictionary<TKey, Lazy<TValue>>(); // why lazy? -> http://stackoverflow.com/q/12611167/270315
 
         public static TValue GetOrAdd(TKey key, Func<TKey, TValue> valueFactory) // delegate value factory invocation guaranteed to be atomic
         {
@@ -23,7 +23,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Caching
                 k => new Lazy<TValue>(
                     () => valueFactory(k),
                     LazyThreadSafetyMode.ExecutionAndPublication));
-            return lazyResult.Value;
+            return lazyResult.Value; /* From http://bit.ly/2b8E1AS: If multiple concurrent threads try to call GetOrAdd with the same key at once, multiple Lazy objects may be 
+                                      * created but these are cheap, and all but one will be thrown away. The return Lazy object will be the same across all threads, and the 
+                                      * first one to call the Value property will run the expensive delegate method, whilst the other threads are locked, waiting for the result. */
         }
 
         public static void Clear()
