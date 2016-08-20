@@ -8,10 +8,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Web.Mvc;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
 using ExpressiveAnnotations.Functions;
+using ExpressiveAnnotations.MvcUnobtrusive.Caching;
 
 namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
 {
@@ -33,6 +35,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         {
             try
             {
+                Debug.WriteLine($"[ctor entry] process: {Process.GetCurrentProcess().Id}, thread: {Thread.CurrentThread.ManagedThreadId}");
+
                 var fieldId = $"{metadata.ContainerType.FullName}.{metadata.PropertyName}".ToLowerInvariant();
                 AttributeFullId = $"{attribute.TypeId}.{fieldId}".ToLowerInvariant();
                 AttributeWeakId = $"{typeof (T).FullName}.{fieldId}".ToLowerInvariant();
@@ -40,8 +44,10 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
 
                 ResetSuffixAllocation();
 
-                var item = MapCache.GetOrAdd(AttributeFullId, _ => // map cache is based on static dictionary, set-up once for entire application instance
+                var item = MapCache<string, CacheItem>.GetOrAdd(AttributeFullId, _ => // map cache is based on static dictionary, set-up once for entire application instance
                 {                                                  // (by design, no reason to recompile once compiled expressions)
+                    Debug.WriteLine($"[cache add] process: {Process.GetCurrentProcess().Id}, thread: {Thread.CurrentThread.ManagedThreadId}");
+
                     var parser = new Parser();
                     parser.RegisterToolchain();
                     parser.Parse<bool>(metadata.ContainerType, attribute.Expression);

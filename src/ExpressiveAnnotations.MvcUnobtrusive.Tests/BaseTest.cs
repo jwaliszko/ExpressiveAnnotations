@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
+using ExpressiveAnnotations.MvcUnobtrusive.Caching;
 using Moq;
 
 namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
@@ -17,7 +18,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
                 new HttpResponse(new StringWriter())
                 );
 
-            MapCache.Clear();
+            MapCache<string, CacheItem>.Clear();
         }
 
         protected ModelMetadata GetModelMetadata<TModel, TProp>(TModel model, Expression<Func<TModel, TProp>> expression)
