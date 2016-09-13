@@ -17,8 +17,8 @@
   ],
   "dependencies": {
     "jquery": ">=1.8.2",
-    "jquery-validation-unobtrusive": ">=3.1.1"
-    "jquery-validation": ">=1.10.0",
+    "jquery-validation-unobtrusive": ">=3.1.1",
+    "jquery-validation": ">=1.10.0"
   },
   "main": [
     "src/expressive.annotations.validate.js"
