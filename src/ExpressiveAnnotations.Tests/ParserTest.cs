@@ -195,173 +195,175 @@ namespace ExpressiveAnnotations.Tests
             Toolchain.Instance.AddFunction("ArrayLength", (object arr) => ((Array) arr).Length);
             parser.RegisterToolchain();            
 
-            Assert.True(parser.Parse<object, bool>("YesNo.Yes == 0").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("YesNo.Yes < YesNo.No").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("YesNo.Yes - YesNo.No == -1").Invoke(null));
+            Assert.True(parser.Parse<bool>("YesNo.Yes == 0").Invoke());
+            Assert.True(parser.Parse<bool>("YesNo.Yes < YesNo.No").Invoke());
+            Assert.True(parser.Parse<bool>("YesNo.Yes - YesNo.No == -1").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("true").Invoke(null));
-            Assert.False(parser.Parse<object, bool>("false").Invoke(null));
-            Assert.False(parser.Parse<object, bool>("!true").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("!false").Invoke(null));
+            Assert.True(parser.Parse<bool>("true").Invoke());
+            Assert.False(parser.Parse<bool>("false").Invoke());
+            Assert.False(parser.Parse<bool>("!true").Invoke());
+            Assert.True(parser.Parse<bool>("!false").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("true == true").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("false == false").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("true != false").Invoke(null));
+            Assert.True(parser.Parse<bool>("true == true").Invoke());
+            Assert.True(parser.Parse<bool>("false == false").Invoke());
+            Assert.True(parser.Parse<bool>("true != false").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("!true == false").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("!!true == true").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("!!!true == false").Invoke(null));
+            Assert.True(parser.Parse<bool>("!true == false").Invoke());
+            Assert.True(parser.Parse<bool>("!!true == true").Invoke());
+            Assert.True(parser.Parse<bool>("!!!true == false").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("true != !true").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("!!true != !!!true").Invoke(null));
+            Assert.True(parser.Parse<bool>("true != !true").Invoke());
+            Assert.True(parser.Parse<bool>("!!true != !!!true").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("true && true").Invoke(null));
-            Assert.False(parser.Parse<object, bool>("false && false").Invoke(null));
-            Assert.False(parser.Parse<object, bool>("true && false").Invoke(null));
-            Assert.False(parser.Parse<object, bool>("false && true").Invoke(null));
+            Assert.True(parser.Parse<bool>("true && true").Invoke());
+            Assert.False(parser.Parse<bool>("false && false").Invoke());
+            Assert.False(parser.Parse<bool>("true && false").Invoke());
+            Assert.False(parser.Parse<bool>("false && true").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("true || true").Invoke(null));
-            Assert.False(parser.Parse<object, bool>("false || false").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("true || false").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("false || true").Invoke(null));
+            Assert.True(parser.Parse<bool>("true || true").Invoke());
+            Assert.False(parser.Parse<bool>("false || false").Invoke());
+            Assert.True(parser.Parse<bool>("true || false").Invoke());
+            Assert.True(parser.Parse<bool>("false || true").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))").Invoke(null));
+            Assert.True(parser.Parse<bool>("(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false").Invoke());
+            Assert.True(parser.Parse<bool>("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))").Invoke());
             
-            Assert.True(parser.Parse<object, bool>("(0b0101 & 0b1100) == 0b0100").Invoke(null));            
-            Assert.True(parser.Parse<object, bool>("(0b0101 | 0b1100) == 0b1101").Invoke(null));            
-            Assert.True(parser.Parse<object, bool>("(0b0101 ^ 0b1100) == 0b1001").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("(5 & 12) == 4").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("(5 | 12) == 13").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("(5 ^ 12) == 9").Invoke(null));
+            Assert.True(parser.Parse<bool>("(0b0101 & 0b1100) == 0b0100").Invoke());            
+            Assert.True(parser.Parse<bool>("(0b0101 | 0b1100) == 0b1101").Invoke());            
+            Assert.True(parser.Parse<bool>("(0b0101 ^ 0b1100) == 0b1001").Invoke());
+            Assert.True(parser.Parse<bool>("(5 & 12) == 4").Invoke());
+            Assert.True(parser.Parse<bool>("(5 | 12) == 13").Invoke());
+            Assert.True(parser.Parse<bool>("(5 ^ 12) == 9").Invoke());
 
-            Assert.False(parser.Parse<object, bool>("true && true && false").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("false || false || true").Invoke(null));
+            Assert.False(parser.Parse<bool>("true && true && false").Invoke());
+            Assert.True(parser.Parse<bool>("false || false || true").Invoke());
 
-            Assert.False(parser.Parse<object, bool>("true & true & false").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("false | false | true").Invoke(null));
+            Assert.False(parser.Parse<bool>("true & true & false").Invoke());
+            Assert.True(parser.Parse<bool>("false | false | true").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("true ^ true ^ true").Invoke(null));
+            Assert.True(parser.Parse<bool>("true ^ true ^ true").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("~+5 == -6").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("~~5 == 5").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("~-6 == 5").Invoke(null));
+            Assert.True(parser.Parse<bool>("~+5 == -6").Invoke());
+            Assert.True(parser.Parse<bool>("~~5 == 5").Invoke());
+            Assert.True(parser.Parse<bool>("~-6 == 5").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("3 >> 1 >> 1 == 0").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("1 << 1 << 2 == 8").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("8 >> 2 >> 1 << 1 << 2 == 8").Invoke(null));
+            Assert.True(parser.Parse<bool>("3 >> 1 >> 1 == 0").Invoke());
+            Assert.True(parser.Parse<bool>("1 << 1 << 2 == 8").Invoke());
+            Assert.True(parser.Parse<bool>("8 >> 2 >> 1 << 1 << 2 == 8").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("0 == 0 && 1 < 2").Invoke(null));
+            Assert.True(parser.Parse<bool>("0 == 0 && 1 < 2").Invoke());
+                                             
+            Assert.False(parser.Parse<bool>("0 != 0").Invoke());
+            Assert.True(parser.Parse<bool>("0 >= 0").Invoke());
+            Assert.True(parser.Parse<bool>("0 <= 0").Invoke());
+            Assert.True(parser.Parse<bool>("0 == 0").Invoke());
+            Assert.False(parser.Parse<bool>("0 == 1").Invoke());
+            Assert.True(parser.Parse<bool>("-1 == -1").Invoke());
+            Assert.True(parser.Parse<bool>("0 != 1").Invoke());
+            Assert.False(parser.Parse<bool>("0 >= 1").Invoke());
+            Assert.False(parser.Parse<bool>("0 > 1").Invoke());
+            Assert.True(parser.Parse<bool>("0 <= 1").Invoke());
+            Assert.True(parser.Parse<bool>("0 < 1").Invoke());
 
-            Assert.False(parser.Parse<object, bool>("0 != 0").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("0 >= 0").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("0 <= 0").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("0 == 0").Invoke(null));
-            Assert.False(parser.Parse<object, bool>("0 == 1").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("-1 == -1").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("0 != 1").Invoke(null));
-            Assert.False(parser.Parse<object, bool>("0 >= 1").Invoke(null));
-            Assert.False(parser.Parse<object, bool>("0 > 1").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("0 <= 1").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("0 < 1").Invoke(null));
+            Assert.True(parser.Parse<bool>("1 + 2 == 3").Invoke());
+            Assert.True(parser.Parse<bool>("1 - 2 == -1").Invoke());
+            Assert.True(parser.Parse<bool>("2 - 1 > 0").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("1 + 2 == 3").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("1 - 2 == -1").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("2 - 1 > 0").Invoke(null));
+            Assert.True(parser.Parse<bool>("null == null").Invoke());
+            Assert.False(parser.Parse<bool>("null != null").Invoke());
+            Assert.True(parser.Parse<bool>("'' == ''").Invoke());
+            Assert.True(parser.Parse<bool>("' ' == ' '").Invoke());
+            Assert.True(parser.Parse<bool>("' ' != '  '").Invoke());
+            Assert.True(parser.Parse<bool>("'asd' == 'asd'").Invoke());
+            Assert.True(parser.Parse<bool>("'asd' != 'ASD'").Invoke());
+            Assert.True(parser.Parse<bool>("'' != null").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("null == null").Invoke(null));
-            Assert.False(parser.Parse<object, bool>("null != null").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("'' == ''").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("' ' == ' '").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("' ' != '  '").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("'asd' == 'asd'").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("'asd' != 'ASD'").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("'' != null").Invoke(null));
+            Assert.True(parser.Parse<bool>("'a' + 'b' == 'ab'").Invoke());
+            Assert.True(parser.Parse<bool>("'' + '' == ''").Invoke());
+            Assert.True(parser.Parse<bool>("' ' + null == ' '").Invoke());
+            Assert.True(parser.Parse<bool>("'a' + 0 + 'ab' + null + 'abc' == 'a0ababc'").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("'a' + 'b' == 'ab'").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("'' + '' == ''").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("' ' + null == ' '").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("'a' + 0 + 'ab' + null + 'abc' == 'a0ababc'").Invoke(null));
+            Assert.True(parser.Parse<bool>("1 + 2 + 3 + 4 == 10").Invoke());
+            Assert.True(parser.Parse<bool>("1 - 2 + 3 - 4 == -2").Invoke());
+            Assert.True(parser.Parse<bool>("-1 - 2 - 3 - 4 == -10").Invoke());
+            Assert.True(parser.Parse<bool>("3 - (4 - 5) == 4").Invoke());
+            Assert.True(parser.Parse<bool>("1 - -1 == 2").Invoke());
+            Assert.True(parser.Parse<bool>("(1 - 2) + ((3 - 4) - 5) == -7").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("1 + 2 + 3 + 4 == 10").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("1 - 2 + 3 - 4 == -2").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("-1 - 2 - 3 - 4 == -10").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("3 - (4 - 5) == 4").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("1 - -1 == 2").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("(1 - 2) + ((3 - 4) - 5) == -7").Invoke(null));
+            Assert.True(parser.Parse<bool>("1 * 2 == 2").Invoke());
+            Assert.True(parser.Parse<bool>("1 * 2 * 3 == 6").Invoke());
+            Assert.True(parser.Parse<bool>("2 / 2 == 1").Invoke());
+            Assert.True(parser.Parse<bool>("4 / 2 / 2 == 1").Invoke());
+            Assert.True(parser.Parse<bool>("2 * 2 / 2 == 2").Invoke());
+            Assert.True(parser.Parse<bool>("4 / 2 * 2 == 4").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("1 * 2 == 2").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("1 * 2 * 3 == 6").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("2 / 2 == 1").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("4 / 2 / 2 == 1").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("2 * 2 / 2 == 2").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("4 / 2 * 2 == 4").Invoke(null));
+            Assert.True(parser.Parse<bool>("5 % 2 == 1").Invoke());
+            Assert.True(parser.Parse<bool>("5 % 2 % 1 == 0").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("5 % 2 == 1").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("5 % 2 % 1 == 0").Invoke(null));
+            Assert.True(parser.Parse<bool>("1.2 * 2 == 2.4").Invoke());
+            Assert.True(parser.Parse<bool>("1.2 / 2 == 0.6").Invoke());
+            Assert.True(parser.Parse<bool>("1.2 + 2 == 3.2").Invoke());
+            Assert.True(parser.Parse<bool>("1.2 - 2 == -0.8").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("1.2 * 2 == 2.4").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("1.2 / 2 == 0.6").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("1.2 + 2 == 3.2").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("1.2 - 2 == -0.8").Invoke(null));
+            Assert.True(parser.Parse<bool>("0e0 == 0").Invoke());
+            Assert.True(parser.Parse<bool>(".2 == 0.2").Invoke());
+            Assert.True(parser.Parse<bool>("3.14 == 3.14").Invoke());
+            Assert.True(parser.Parse<bool>("5e6 == 5000000").Invoke());
+            Assert.True(parser.Parse<bool>("5e-6 == 5E-06").Invoke());
+            Assert.True(parser.Parse<bool>("5e+6 == 5000000").Invoke());
+            Assert.True(parser.Parse<bool>("9.0E-10 == 9E-10").Invoke());
+            Assert.True(parser.Parse<bool>(".11e10 == 1100000000").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("0e0 == 0").Invoke(null));
-            Assert.True(parser.Parse<object, bool>(".2 == 0.2").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("3.14 == 3.14").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("5e6 == 5000000").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("5e-6 == 5E-06").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("5e+6 == 5000000").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("9.0E-10 == 9E-10").Invoke(null));
-            Assert.True(parser.Parse<object, bool>(".11e10 == 1100000000").Invoke(null));
+            Assert.True(parser.Parse<bool>("0b0 == 0").Invoke());
+            Assert.True(parser.Parse<bool>("0b11111111 == 255").Invoke());
+            Assert.True(parser.Parse<bool>("0x0 == 0").Invoke());
+            Assert.True(parser.Parse<bool>("0xFF == 255").Invoke());
+            Assert.True(parser.Parse<bool>("0xff == 255").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("0b0 == 0").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("0b11111111 == 255").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("0x0 == 0").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("0xFF == 255").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("0xff == 255").Invoke(null));
+            Assert.True(parser.Parse<bool>("1+2==3").Invoke());
+            Assert.True(parser.Parse<bool>("1-2==-1").Invoke());
+            Assert.True(parser.Parse<bool>("1*2>-1").Invoke());
+            Assert.True(parser.Parse<bool>("-1*-2>-1").Invoke());
+            Assert.True(parser.Parse<bool>("1/2==0.5").Invoke());
+            Assert.True(parser.Parse<bool>("-1*-+- -+-1==-1").Invoke());
+            Assert.True(parser.Parse<bool>("- - -1+'a'+'b'+null+''+'c'+1+2=='-1abc12'").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("1+2==3").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("1-2==-1").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("1*2>-1").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("-1*-2>-1").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("1/2==0.5").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("-1*-+- -+-1==-1").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("- - -1+'a'+'b'+null+''+'c'+1+2=='-1abc12'").Invoke(null));
+            Assert.True(parser.Parse<bool>("1 - 2 -(6 / ((2*1.5 - 1) + 1)) * -2 + 1/2/1 == 3.50").Invoke());
+            Assert.True(parser.Parse<bool>("-.11e-10+.11e-10==.0-.0").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("1 - 2 -(6 / ((2*1.5 - 1) + 1)) * -2 + 1/2/1 == 3.50").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("-.11e-10+.11e-10==.0-.0").Invoke(null));
+            Assert.True(parser.Parse<bool>("'abc' == Trim(' abc ')").Invoke());
+            Assert.True(parser.Parse<bool>("Length(null) + Length('abc' + 'cde') >= Length(Trim(' abc def ')) - 2 - -1").Invoke());
+            Assert.True(parser.Parse<bool>("0 == YesNo.Yes").Invoke());
+            Assert.True(parser.Parse<bool>("YesNo.Yes == 0").Invoke());
+            Assert.True(parser.Parse<bool>("YesNo.Yes != YesNo.No").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("'abc' == Trim(' abc ')").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("Length(null) + Length('abc' + 'cde') >= Length(Trim(' abc def ')) - 2 - -1").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("0 == YesNo.Yes").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("YesNo.Yes == 0").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("YesNo.Yes != YesNo.No").Invoke(null));
+            Assert.True(parser.Parse<bool>("true ? true : false").Invoke());
+            Assert.True(parser.Parse<bool>("false ? false : true").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("true ? true : false").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("false ? false : true").Invoke(null));
+            Assert.True(parser.Parse<bool>("(true ? 1 : 2) == 1").Invoke());
+            Assert.True(parser.Parse<bool>("(false ? 1 : 2) == 2").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("(true ? 1 : 2) == 1").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("(false ? 1 : 2) == 2").Invoke(null));
+            Assert.True(parser.Parse<bool>("(1 > 0 ? true : false) ? (1 > 0 ? true : false) : (false ? false : false)").Invoke());
+            Assert.True(parser.Parse<bool>("(1 > 0 ? false : true) ? (false ? false : false) : (1 > 0 ? true : false)").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("(1 > 0 ? true : false) ? (1 > 0 ? true : false) : (false ? false : false)").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("(1 > 0 ? false : true) ? (false ? false : false) : (1 > 0 ? true : false)").Invoke(null));
+            Assert.True(parser.Parse<bool>("1 > 0 ? true : false ? 1 > 0 ? true : false : false ? false : false").Invoke());
+            Assert.True(parser.Parse<bool>("1 > 0 ? true : false ? false ? false : false : 1 > 0 ? true : false").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("1 > 0 ? true : false ? 1 > 0 ? true : false : false ? false : false").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("1 > 0 ? true : false ? false ? false : false : 1 > 0 ? true : false").Invoke(null));
+            Assert.True(parser.Parse<bool>("ArrayLength([]) == 0").Invoke());
+            Assert.True(parser.Parse<bool>("ArrayLength([1]) == 1").Invoke());
+            Assert.True(parser.Parse<bool>("ArrayLength([1,2,3]) == 3").Invoke());
+            Assert.True(parser.Parse<bool>("[0+1,2,3][0] == 1").Invoke());
+            Assert.True(parser.Parse<bool>("[0+1,2,3][true ? 0 : 1] == 1").Invoke());
+            Assert.True(parser.Parse<bool>("[1,2,3][[1,2][[1,2][0]]] == 3").Invoke());
+            Assert.True(parser.Parse<bool>("[[1,2],[3,4]][1][0] == 3").Invoke());
+            Assert.True(parser.Parse<bool>("[[1,2],'asd'][1] == 'asd'").Invoke());
 
-            Assert.True(parser.Parse<object, bool>("ArrayLength([]) == 0").Invoke(new Model()));
-            Assert.True(parser.Parse<object, bool>("ArrayLength([1]) == 1").Invoke(new Model()));
-            Assert.True(parser.Parse<object, bool>("ArrayLength([1,2,3]) == 3").Invoke(new Model()));
-            Assert.True(parser.Parse<object, bool>("[0+1,2,3][0] == 1").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("[0+1,2,3][true ? 0 : 1] == 1").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("[1,2,3][[1,2][[1,2][0]]] == 3").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("[[1,2],[3,4]][1][0] == 3").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("[[1,2],'asd'][1] == 'asd'").Invoke(null));
+            Assert.True(parser.Parse<bool>("Average([1.0,1.5,2.0]) == 1.5").Invoke());
 
             Toolchain.Instance.AddFunction("Avg", (Expression<Toolchain.ParamsDelegate<double, double?>>)(items => items.Any() ? items.Average() : (double?)null));
-            Assert.True(parser.Parse<object, bool>("Avg() == null").Invoke(null));
+            Assert.True(parser.Parse<bool>("Avg() == null").Invoke());
 
-            var result = parser.Parse<object, object>("[[1,2],[3],4]").Invoke(null);
+            var result = parser.Parse<object>("[[1,2],[3],4]").Invoke();
             Assert.True(result.ArrayDeepEqual(new object[] {new[] {1, 2}, new[] {3}, 4}));
         }
 
@@ -484,6 +486,7 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.True(parser.Parse<Model, bool>("Average() == null").Invoke(model));
             Assert.True(parser.Parse<Model, bool>("Average(1,2,3) == 2").Invoke(model));
+            Assert.True(parser.Parse<Model, bool>("Average([1,2,3]) == 2").Invoke(model));
             Assert.True(parser.Parse<Model, bool>("Average(IntArray) == 2").Invoke(model));
 
             Assert.True(parser.Parse<Model, bool>("SubModel.Date > Today()").Invoke(model));
@@ -628,14 +631,14 @@ namespace ExpressiveAnnotations.Tests
             // custom signature
             funcManager.AddFunction("MN", (Expression<Func<int, int, int, int, int, int, int, int>>)((i, j, k, l, m, n, o) => i + j + k + l + m + n + o));
 
-            Assert.True(parser.Parse<object, bool>("M0() == 0").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("M1(1) == 1").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("M2(1,1) == 2").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("M3(1,1,1) == 3").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("M4(1,1,1,1) == 4").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("M5(1,1,1,1,1) == 5").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("M6(1,1,1,1,1,1) == 6").Invoke(null));
-            Assert.True(parser.Parse<object, bool>("MN(1,1,1,1,1,1,1) == 7").Invoke(null));
+            Assert.True(parser.Parse<bool>("M0() == 0").Invoke());
+            Assert.True(parser.Parse<bool>("M1(1) == 1").Invoke());
+            Assert.True(parser.Parse<bool>("M2(1,1) == 2").Invoke());
+            Assert.True(parser.Parse<bool>("M3(1,1,1) == 3").Invoke());
+            Assert.True(parser.Parse<bool>("M4(1,1,1,1) == 4").Invoke());
+            Assert.True(parser.Parse<bool>("M5(1,1,1,1,1) == 5").Invoke());
+            Assert.True(parser.Parse<bool>("M6(1,1,1,1,1,1) == 6").Invoke());
+            Assert.True(parser.Parse<bool>("MN(1,1,1,1,1,1,1) == 7").Invoke());
         }
 
         [Fact]
@@ -803,7 +806,6 @@ namespace ExpressiveAnnotations.Tests
         public void verify_invalid_identifier()
         {
             var parser = new Parser();
-            var model = new Model();
 
             var e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model, bool>("NotMe == 0"));
             Assert.Equal("Only public properties, constants and enums are accepted. Identifier 'NotMe' not known.", e.Error);

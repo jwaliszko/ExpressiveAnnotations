@@ -135,6 +135,8 @@ namespace ExpressiveAnnotations.Analysis
         /// <exception cref="ParseErrorException"></exception>
         public Func<object, TResult> Parse<TResult>(Type context, string expression)
         {
+            if (context == null)
+                throw new ArgumentNullException(nameof(context), "Context not provided.");
             if (expression == null)
                 throw new ArgumentNullException(nameof(expression), "Expression not provided.");
 
@@ -153,6 +155,48 @@ namespace ExpressiveAnnotations.Analysis
                     AssertEndOfExpression();
                     var convTree = Expression.Convert(SyntaxTree, typeof (TResult));
                     var lambda = Expression.Lambda<Func<object, TResult>>(convTree, param);
+                    return lambda.Compile();
+                }
+                catch (ParseErrorException)
+                {
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    throw new ParseErrorException("Parse fatal error.", e);
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Parses a specified expression into expression tree within default object context.
+        /// </summary>
+        /// <typeparam name="TResult">The type identifier of the expected evaluation result.</typeparam>
+        /// <param name="expression">The expression.</param>
+        /// <returns>
+        ///     A delegate containing the compiled version of the lambda expression described by created expression tree.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
+        /// <exception cref="ParseErrorException"></exception>
+        public Func<TResult> Parse<TResult>(string expression)
+        {
+            if (expression == null)
+                throw new ArgumentNullException(nameof(expression), "Expression not provided.");
+
+            lock (_locker)
+            {
+                try
+                {
+                    Clear();
+                    ContextType = typeof (object);
+                    ContextExpression = Expression.Parameter(typeof (object));
+                    ExprString = expression;
+                    Expr = new Expr(expression);
+                    Tokenize();
+                    SyntaxTree = ParseExpression();
+                    AssertEndOfExpression();
+                    var convTree = Expression.Convert(SyntaxTree, typeof (TResult));
+                    var lambda = Expression.Lambda<Func<TResult>>(convTree);
                     return lambda.Compile();
                 }
                 catch (ParseErrorException)
