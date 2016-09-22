@@ -1,0 +1,26 @@
+{
+  "name": "expresive-annotations",
+  "version": "2.9.1",
+  "homepage": "https://github.com/jwaliszko/ExpressiveAnnotations",
+  "authors": [
+    "Jaroslaw Waliszko"
+  ],
+  "description": "A small .NET and JavaScript library which provides annotation-based conditional validation mechanisms.",
+  "keywords": [
+    "conditional",
+    "validation",
+    "mvc",
+	"dataannotations"
+  ],
+  "license": "MIT",
+  "ignore": [
+  ],
+  "dependencies": {
+    "jquery": ">=1.8.2",
+    "jquery-validation-unobtrusive": ">=3.1.1",
+    "jquery-validation": ">=1.10.0"
+  },
+  "main": [
+    "src/expressive.annotations.validate.js"
+  ]
+}
