@@ -96,7 +96,7 @@
   <ItemGroup>
     <Compile Include="Providers\ExpressiveAnnotationsModelValidatorProvider.cs" />
     <Compile Include="Caching\RequestStorage.cs" />
-    <Compile Include="Caching\MapCache.cs" />
+    <Compile Include="Caching\ProcessStorage.cs" />
     <Compile Include="Validators\AssertThatValidator.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Validators\ExpressiveValidator.cs" />

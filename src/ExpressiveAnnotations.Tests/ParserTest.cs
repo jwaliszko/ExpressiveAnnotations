@@ -595,7 +595,10 @@ namespace ExpressiveAnnotations.Tests
         {
             var parser = new Parser();
 
-            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object, bool>("1"));
+            var e = Assert.Throws<ParseErrorException>(() => parser.Parse<bool>("1"));
+            Assert.Equal("Parse fatal error.", e.Message);
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object, bool>("1"));
             Assert.Equal("Parse fatal error.", e.Message);
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<bool>(typeof (object), "1"));
@@ -607,9 +610,14 @@ namespace ExpressiveAnnotations.Tests
         {
             var parser = new Parser();
 
-            var e = Assert.Throws<ArgumentNullException>(() => parser.Parse<object, bool>(null));
+            var e = Assert.Throws<ArgumentNullException>(() => parser.Parse<bool>(null));
             Assert.Equal("Expression not provided.\r\nParameter name: expression", e.Message);
 
+            e = Assert.Throws<ArgumentNullException>(() => parser.Parse<object, bool>(null));
+            Assert.Equal("Expression not provided.\r\nParameter name: expression", e.Message);
+
+            e = Assert.Throws<ArgumentNullException>(() => parser.Parse<bool>(null, null));
+            Assert.Equal("Context not provided.\r\nParameter name: context", e.Message);
             e = Assert.Throws<ArgumentNullException>(() => parser.Parse<bool>(typeof (object), null));
             Assert.Equal("Expression not provided.\r\nParameter name: expression", e.Message);
         }

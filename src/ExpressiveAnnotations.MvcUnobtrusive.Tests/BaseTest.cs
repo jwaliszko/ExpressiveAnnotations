@@ -18,7 +18,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
                 new HttpResponse(new StringWriter())
                 );
 
-            MapCache<string, CacheItem>.Clear();
+            ProcessStorage<string, CacheItem>.Clear();
         }
 
         protected ModelMetadata GetModelMetadata<TModel, TProp>(TModel model, Expression<Func<TModel, TProp>> expression)

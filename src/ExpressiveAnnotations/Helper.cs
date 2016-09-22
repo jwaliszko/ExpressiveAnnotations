@@ -216,7 +216,8 @@ namespace ExpressiveAnnotations
         {
             Debug.Assert(type != null);
 
-            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Nullable<>);
+            return type.IsGenericType
+                   && type.GetGenericTypeDefinition() == typeof (Nullable<>);
         }
 
         public static bool IsObject(this Type type)
@@ -273,8 +274,8 @@ namespace ExpressiveAnnotations
             Debug.Assert(type != null);
             Debug.Assert(displayName != null);
 
-            return type.GetPropertyByDisplayAttribute(displayName) ??
-                   type.GetPropertyByDisplayNameAttribute(displayName);
+            return type.GetPropertyByDisplayAttribute(displayName)
+                   ?? type.GetPropertyByDisplayNameAttribute(displayName);
         }
 
         public static PropertyInfo GetPropertyByDisplayAttribute(this Type type, string displayName)

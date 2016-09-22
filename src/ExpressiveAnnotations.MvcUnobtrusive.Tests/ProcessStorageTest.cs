@@ -8,11 +8,11 @@ using Xunit;
 
 namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
 {
-    public class MapCacheTest
+    public class ProcessStorageTest
     {
-        public MapCacheTest()
+        public ProcessStorageTest()
         {
-            MapCache<string, TestItem>.Clear();
+            ProcessStorage<string, TestItem>.Clear();
         }
 
         [Fact]
@@ -90,7 +90,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
                     var storage = (ConcurrentStack<TestItem>) ((object[]) load)[0];
                     var counter = (ConcurrentStack<int>) ((object[]) load)[1];
 
-                    var item = MapCache<string, TestItem>.GetOrAdd(key.ToString(), _ =>
+                    var item = ProcessStorage<string, TestItem>.GetOrAdd(key.ToString(), _ =>
                     {
                         Debug.WriteLine($"{key} :: {Thread.CurrentThread.ManagedThreadId}");
                         counter.Push(Thread.CurrentThread.ManagedThreadId); // we want to test that this value factory delegate is invoked only once, even if map is accessed concurrently for the same key

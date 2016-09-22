@@ -10,9 +10,12 @@ using System.Threading;
 namespace ExpressiveAnnotations.MvcUnobtrusive.Caching
 {
     /// <summary>
-    ///     Persists decomposed expressions parts for entire application instance. Implementation is concurrent and lazy.
+    ///     Stores arbitrary key-value pairs for the entire lifespan of the application (until the pool recycles).
     /// </summary>
-    internal static class MapCache<TKey, TValue> // http://stackoverflow.com/q/3037203/270315
+    /// <remarks>
+    ///     Type is thread safe (atomic invocation of the value factory func guaranteed, implementation uses concurrent dictionary with lazy value access).
+    /// </remarks>
+    internal static class ProcessStorage<TKey, TValue> // note about static generics: http://stackoverflow.com/q/3037203/270315
     {
         private static readonly ConcurrentDictionary<TKey, Lazy<TValue>> _cache = new ConcurrentDictionary<TKey, Lazy<TValue>>(); // why lazy? -> http://stackoverflow.com/q/12611167/270315
 
