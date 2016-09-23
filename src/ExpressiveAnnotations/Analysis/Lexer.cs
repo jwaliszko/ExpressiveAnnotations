@@ -87,7 +87,7 @@ namespace ExpressiveAnnotations.Analysis
         /// <returns>
         ///     A sequence of extracted tokens.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
+        /// <exception cref="System.ArgumentNullException"><c>expression</c> is null</exception>
         /// <exception cref="ParseErrorException"></exception>
         public IEnumerable<Token> Analyze(string expression)
         {

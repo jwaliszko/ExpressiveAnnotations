@@ -26,7 +26,7 @@ namespace ExpressiveAnnotations.Attributes
         /// </summary>
         /// <param name="expression">The logical expression based on which specified condition is computed.</param>
         /// <param name="errorMessage">The error message to associate with a validation control.</param>
-        /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
+        /// <exception cref="System.ArgumentNullException"><c>expression</c> is null</exception>
         protected ExpressiveAttribute(string expression, string errorMessage)
             : this(expression, () => errorMessage)
         {
@@ -37,7 +37,7 @@ namespace ExpressiveAnnotations.Attributes
         /// </summary>
         /// <param name="expression">The logical expression based on which specified condition is computed.</param>
         /// <param name="errorMessageAccessor">The error message accessor, allowing the error message to be provided dynamically.</param>
-        /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
+        /// <exception cref="System.ArgumentNullException"><c>expression</c> is null</exception>
         /// <remarks>
         ///     Allows for providing a resource accessor function that will be used to retrieve the error message.
         ///     An example would be to have something like, e.g.

@@ -20,11 +20,7 @@ namespace ExpressiveAnnotations.Analysis
         /// </summary>
         /// <param name="line">The line number.</param>
         /// <param name="column">The column number.</param>
-        /// <exception cref="System.ArgumentOutOfRangeException">
-        /// Line number should be positive.
-        /// or
-        /// Column number should be positive.
-        /// </exception>
+        /// <exception cref="System.ArgumentOutOfRangeException"><c>line &lt;= 0</c> or <c>column &lt;= 0</c>.</exception>
         public Location(int line, int column)
         {
             if (line < 1)

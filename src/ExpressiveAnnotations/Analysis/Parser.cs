@@ -88,7 +88,7 @@ namespace ExpressiveAnnotations.Analysis
         /// <returns>
         ///     A delegate containing the compiled version of the lambda expression described by created expression tree.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
+        /// <exception cref="System.ArgumentNullException"><c>expression</c> is null</exception>
         /// <exception cref="ParseErrorException"></exception>
         public Func<TContext, TResult> Parse<TContext, TResult>(string expression)
         {
@@ -126,12 +126,13 @@ namespace ExpressiveAnnotations.Analysis
         /// <summary>
         ///     Parses a specified expression into expression tree within given context.
         /// </summary>
+        /// <typeparam name="TResult">The type identifier of the expected evaluation result.</typeparam>
         /// <param name="context">The type instance of the context within which the expression is interpreted.</param>
         /// <param name="expression">The logical expression.</param>
         /// <returns>
         ///     A delegate containing the compiled version of the lambda expression described by created expression tree.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
+        /// <exception cref="System.ArgumentNullException"><c>expression</c> or <c>context</c> is <c>null</c></exception>
         /// <exception cref="ParseErrorException"></exception>
         public Func<object, TResult> Parse<TResult>(Type context, string expression)
         {
@@ -176,7 +177,7 @@ namespace ExpressiveAnnotations.Analysis
         /// <returns>
         ///     A delegate containing the compiled version of the lambda expression described by created expression tree.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">expression;Expression not provided.</exception>
+        /// <exception cref="System.ArgumentNullException"><c>expression</c> is null</exception>
         /// <exception cref="ParseErrorException"></exception>
         public Func<TResult> Parse<TResult>(string expression)
         {
