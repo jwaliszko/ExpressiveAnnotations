@@ -4,7 +4,7 @@
     "license": "MIT",
     "homepage": "https://github.com/jwaliszko/ExpressiveAnnotations",
     "description": "Client-side component of ExpresiveAnnotations - annotation-based conditional validation library.",
-    "author": "Jaros≥aw Waliszko <jaroslaw.waliszko@gmail.com>",
+    "author": "Jaros≈Çaw Waliszko <jaroslaw.waliszko@gmail.com>",
     "main": "src/expressive.annotations.validate.js",
     "repository": {
         "type": "git",
