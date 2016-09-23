@@ -1,14 +1,14 @@
 {
-    "name": "expresive-annotations",
-    "version": "2.6.8",
+    "name": "expressive-annotations",
+    "version": "2.6.9-pre",
     "license": "MIT",
     "homepage": "https://github.com/jwaliszko/ExpressiveAnnotations",
-    "description": "Client-side component of ExpresiveAnnotations - annotation-based conditional validation library.",
+    "description": "Client-side component of ExpressiveAnnotations - annotation-based conditional validation library.",
     "author": "Jarosław Waliszko <jaroslaw.waliszko@gmail.com>",
     "main": "src/expressive.annotations.validate.js",
     "repository": {
         "type": "git",
-        "url": "https://github.com/jwaliszko/ExpressiveAnnotations.git"
+        "url": "git://github.com/jwaliszko/ExpressiveAnnotations.git"
     },
     "dependencies": {
         "jquery": ">=1.8.2",

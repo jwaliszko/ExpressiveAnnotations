@@ -17,7 +17,7 @@ msbuildVersion=14.0
 visualStudioVersion=14.0
 targets=( v4.0 v4.5 )
 
-rm -fr $productVersion net* *.js
+rm -fr $productVersion
 
 echo -e "\n------ package restoration..."
 ./nuget.exe restore ../src/ExpressiveAnnotations.sln -MSBuildVersion $msbuildVersion -verbosity quiet
@@ -59,13 +59,28 @@ coreVersion=`strings ../src/ExpressiveAnnotations/bin/Release/ExpressiveAnnotati
 ./nuget.exe pack ExpressiveAnnotations.nuspec -version $productVersion -symbols -MSBuildVersion $msbuildVersion
 ./nuget.exe pack ExpressiveAnnotations.dll.nuspec -version $coreVersion -symbols -MSBuildVersion $msbuildVersion
 
+scriptVersion=`strings ../src/expressive.annotations.validate.js | egrep -o -m1 '[0-9]+\.[0-9]+\.[0-9]+'`
+sed -E 's/[0-9]+\.[0-9]+\.[0-9]+-pre/'$scriptVersion'/' ../bower.json > bower.json
+sed -E 's/[0-9]+\.[0-9]+\.[0-9]+-pre/'$scriptVersion'/' ../package.json > package.json
+
+unobVersion=`strings ../src/ExpressiveAnnotations.MvcUnobtrusive/bin/Release/ExpressiveAnnotations.MvcUnobtrusive.dll | egrep '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | cut -f1,2,3 -d"."`
+
+echo "This product version contains following components:
+ExpressiveAnnotations.dll v"$coreVersion", ExpressiveAnnotations.MvcUnobtrusive.dll v"$unobVersion", expressive.annotations.validate.js v"$scriptVersion"" > readme.txt
+unix2dos readme.txt
+
 echo -e "\n------ archive creation..."
-mkdir -p $productVersion/ExpressiveAnnotations
-mv net* $productVersion/ExpressiveAnnotations
-mv expressive.annotations.validate* $productVersion/ExpressiveAnnotations
+mkdir -p $productVersion/dist
+mv net* $productVersion/dist
+mv expressive.annotations.validate* $productVersion/dist
+mv *.txt $productVersion/dist
+cp ../doc/api/api.chm $productVersion/dist
 mv *.nupkg $productVersion
-cp ../doc/api/api.chm $productVersion/ExpressiveAnnotations
-cd $productVersion && zip -r ExpressiveAnnotations.zip ExpressiveAnnotations
+mv *.json $productVersion
+cd $productVersion
+mv dist ExpressiveAnnotations
+zip -r ExpressiveAnnotations.zip ExpressiveAnnotations
+mv ExpressiveAnnotations dist
 cd ..
 
 # nuget setapikey ...

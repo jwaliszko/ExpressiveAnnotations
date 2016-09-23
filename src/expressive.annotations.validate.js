@@ -1,5 +1,5 @@
 /* expressive.annotations.validate.js - v2.6.8
- * Client-side component of ExpresiveAnnotations - annotation-based conditional validation library.
+ * Client-side component of ExpressiveAnnotations - annotation-based conditional validation library.
  * https://github.com/jwaliszko/ExpressiveAnnotations
  *
  * Copyright (c) 2014 Jarosław Waliszko
