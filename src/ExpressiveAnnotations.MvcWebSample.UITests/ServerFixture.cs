@@ -12,13 +12,12 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         {
             Port = 51622;
             var applicationPath = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\ExpressiveAnnotations.MvcWebSample"));
-            var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
 
             _iisProcess = new Process
             {
                 StartInfo =
                 {
-                    FileName = programFiles + @"\IIS Express\iisexpress.exe",
+                    FileName = @"C:\Program Files\IIS Express\iisexpress.exe",
                     Arguments = $@"/path:""{applicationPath}"" /port:{Port}"
                 }
             };
@@ -37,7 +36,14 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             {
                 if (_iisProcess != null)
                 {
-                    _iisProcess.Kill();
+                    try
+                    {
+                        _iisProcess.Kill();
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
                     _iisProcess.Dispose(); // MSDN: the Dispose() method calls Close()
                     _iisProcess = null;
                 }

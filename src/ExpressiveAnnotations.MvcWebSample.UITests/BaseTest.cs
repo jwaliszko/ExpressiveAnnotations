@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -16,6 +17,8 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             _driver = classContext.Driver;
             Home = new HomePage(classContext.Driver);
             Home.Load($"http://localhost:{assemblyContext.Port}/");
+
+            Debug.WriteLine($"{System.Threading.Thread.CurrentThread.ManagedThreadId}: http://localhost:{assemblyContext.Port}/");
         }
 
         public HomePage Home { get; private set; }
@@ -36,7 +39,14 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         protected void TakeScreenshot(string name)
         {
             var directory = Directory.CreateDirectory("Screenshots");
-            _driver.GetScreenshot().SaveAsFile($"{directory.Name}/{name}.png", ImageFormat.Png);
+
+            var stamp = DateTime.Now.ToString("HH-mm-ss_fffffff");
+            var fullImgPath = $"{directory.Name}/{stamp}.png";
+            _driver.GetScreenshot().SaveAsFile(fullImgPath, ImageFormat.Png);
+
+            var fullTxtPath = $"{directory.Name}/toc.txt";
+            var entry = $"{stamp} :: {name}\r\n";
+            File.AppendAllText(fullTxtPath, entry);
         }
 
         protected virtual void Dispose(bool disposing)

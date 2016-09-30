@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Remote;
+using OpenQA.Selenium.Support.Extensions;
 using OpenQA.Selenium.Support.UI;
 
 namespace ExpressiveAnnotations.MvcWebSample.UITests
@@ -129,13 +129,20 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
 
         private void WaitForAjax() // wait for all ajax requests initiated by jQuery to complete
         {
-            while (true)
-            {
-                var ajaxIsComplete = _driver.ExecuteScript("return jQuery.active == 0"); // $.active returns the number of active Ajax requests                    
-                if ((bool) ajaxIsComplete)
-                    break;
-                Thread.Sleep(100);
-            }
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
+            wait.Until(d => d.ExecuteJavaScript<bool>("return jQuery.active === 0")); // $.active returns the number of active Ajax requests
         }
+
+        //private void WaitForLoad() // wait for the DOM to be in a complete state - the document and all sub-resources have finished loading (load event has been fired, page is fully loaded)
+        //{
+        //    var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
+        //    wait.Until(d => d.ExecuteJavaScript<bool>("return document.readyState === 'complete'")); // document.readyState describes the loading state of the document
+        //}
+
+        //private void SafeClick(IWebElement elem)
+        //{
+        //    var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
+        //    wait.Until(ExpectedConditions.ElementToBeClickable(elem)).Click();
+        //}
     }
 }

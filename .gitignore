@@ -114,3 +114,6 @@ UpgradeLog*.XML
 /node_modules
 /build/[0-9]*
 /build/nuget.exe
+/build/*.html
+/build/*.lcov
+/build/*.xml

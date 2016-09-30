@@ -1,5 +1,5 @@
 (function($, qunit, ea) {
-    qunit.module("html based full computation flow");
+    qunit.module("html_based_full_computation_flow");
 
     qunit.test("verify_sample_form_validation", function(assert) { // relies on form defined in test harness file
 

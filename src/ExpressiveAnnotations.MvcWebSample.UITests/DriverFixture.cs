@@ -12,8 +12,13 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             //var service = PhantomJSDriverService.CreateDefaultService();
             //service.IgnoreSslErrors = true;
             //service.WebSecurity = false;
-            //var options = new PhantomJSOptions();            
-            //Driver = new PhantomJSDriver(service, options, TimeSpan.FromSeconds(15)); // headless browser testing
+            //Driver = new PhantomJSDriver(service, new PhantomJSOptions(), TimeSpan.FromSeconds(15)); // headless browser testing
+
+            //var service = FirefoxDriverService.CreateDefaultService();
+            //service.FirefoxBinaryPath = @"C:\Program Files (x86)\Mozilla Firefox\firefox.exe";
+            //service.HideCommandPromptWindow = true;
+            //service.SuppressInitialDiagnosticInformation = true;
+            //Driver = new FirefoxDriver(service, new FirefoxOptions(), TimeSpan.FromSeconds(15));
 
             Driver = new FirefoxDriver();
         }

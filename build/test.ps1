@@ -41,7 +41,7 @@ if($LastExitCode -ne 0) {
     throw "C# tests failed"
 }
     
-& $chutzpah /nologo /path $formtest /path $formtestnew /path $maintest /junit chutzpah-tests.xml /coverage /coverageIgnores "*test*, *jquery*" /coveragehtml javascript-coverage.htm /lcov javascript-coverage.lcov
+& $chutzpah /nologo /silent /path $formtest /path $formtestnew /path $maintest /junit chutzpah-tests.xml /coverage /coverageIgnores "*test*, *jquery*" /coveragehtml javascript-coverage.html /lcov javascript-coverage.lcov
 
 if($LastExitCode -ne 0) {
     if($env:APPVEYOR -eq $true) {
@@ -56,11 +56,13 @@ if($env:APPVEYOR -eq $true) {
 
     foreach ($testsuite in $results.testsuites.testsuite) {
         foreach ($testcase in $testsuite.testcase) {
+            $module,$test = $testcase.name.split(':')
+
             if ($testcase.failure) {
-                Add-AppveyorTest $testcase.name -Outcome Failed -FileName $testsuite.name -ErrorMessage $testcase.failure.message -Duration $testcase.time
+                Add-AppveyorTest $test -Outcome Failed -FileName $testsuite.name -ErrorMessage $testcase.failure.message -Duration $testcase.time
             }
             else {
-                Add-AppveyorTest $testcase.name -Outcome Passed -FileName $testsuite.name -Duration $testcase.time
+                Add-AppveyorTest $test -Outcome Passed -FileName $testsuite.name -Duration $testcase.time
             }
         }
     }

@@ -15,7 +15,7 @@
         });
     });
 
-    qunit.module("type helper");
+    qunit.module("type_helper");
 
     qunit.test("verify_array_storage", function(assert) {
         // debugger; // enable firebug (preferably, check 'on for all web pages' option) for the debugger to launch
@@ -308,7 +308,7 @@
         assert.ok(!eapriv.typeHelper.isGuid(""), "empty string not recognized as guid");
     });
 
-    qunit.module("model helper");
+    qunit.module("model_helper");
 
     qunit.test("verify_expression_evaluation", function(assert) {
         var model = {
@@ -619,7 +619,7 @@
         );
     });
 
-    qunit.module("full computation flow");
+    qunit.module("full_computation_flow");
 
     qunit.test("verify_assertthat_not_computed_for_null_value", function(assert) {
 
