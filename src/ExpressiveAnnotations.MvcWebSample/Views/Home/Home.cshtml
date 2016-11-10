@@ -23,7 +23,11 @@
     @Html.AntiForgeryToken()
     @Html.ValidationSummary(true) @*show/hide validation summary block*@
 
-    <div class="message-success">@(ViewBag.Success ?? Html.Raw("&nbsp;"))</div>
+    <div class="box-narrow">
+        <div class="right-corner">
+            <div class="message-success">@(ViewBag.Success ?? Html.Raw("&nbsp;"))</div>
+        </div>
+    </div>
 
     <fieldset>
         <legend>Usage sample for model validation in ASP.NET MVC</legend>
@@ -53,6 +57,7 @@
 
             ea.settings.apply({
                 debug: '@debug' === 'true',
+                //optimize: false,
                 dependencyTriggers: '@triggers' // if not explicitly provided, default setup is: 'change keyup'
             });
 
@@ -141,24 +146,64 @@
                     }, 50);
                 });
 
+                annotateRequiredFields();
                 //hideNonRequiredFields();
             });
 
-            //function hideNonRequiredFields() { // an example of how eavalid event can be used
-            //    var $form = $('form');
-            //    var current = undefined;
-            //    var selector = 'input, select, textarea';
+            function annotateRequiredFields() { // an example of how eavalid event can be used (annotate required fields, hide non-required fields, etc.)
+                var $form = $('form');
+                var selector = 'input, select, textarea';
 
-            //    $form.validate().settings.ignore = ''; // enable validation for ':hidden' fields
-            //    $form.find(selector).on(ea.settings.dependencyTriggers, function() {
-            //        current = this; // mark element being currently modified
-            //    });
-            //    $form.find(selector).on('eavalid', function(e, type, valid, expr) {
-            //        if (type === 'requiredif' && e.currentTarget !== current) {
-            //            $(e.currentTarget).closest('li').toggle(!valid); // for this to work ':hidden' fields validation has to be enabled
-            //        }
-            //    });
-            //}
+                $form.find(selector).each(function () {
+                    if (undefined !== $(this).attr('data-val-required')
+                        || undefined !== $(this).attr('data-val-requiredif')) {
+                        var label = $('label[for="' + $(this).attr('id') + '"]');
+                        var text = label.text();
+                        var asterisk = '<span class="asterisk">* </span>';
+                        if (text.length > 0) {
+                            label.prepend(asterisk);
+                            // ToDo: for requiredif asterisk may be not needed (based on condition), workaround: execute $(this).valid() here for eavalid event to be triggered, and asterisk visibility initialized
+                        }
+                    }
+                });
+
+                $form.find(selector).on('eavalid', function(e, type, valid, expr, cond) {
+                    if (type === 'requiredif') { // be aware of the fact that multiple requiredif attributes can be applied to a single field
+                        var asterisk = $(e.currentTarget).closest('div').find('.asterisk');
+                        if(cond) {
+                            asterisk.show(); // show asterisk for required fields (no matter if valid or not)
+                        }
+                        else {
+                            asterisk.hide();
+                        }
+                    }
+                });
+            }
+
+            function hideNonRequiredFields() {
+                var $form = $('form');
+                var selector = 'input, select, textarea';
+                
+                $form.validate().settings.ignore = ''; // enable validation for ':hidden' fields
+                
+                var current = undefined;
+                $form.find(selector).on(ea.settings.dependencyTriggers, function() {
+                    current = this; // mark element being currently modified
+                });
+                $form.find(selector).on('eavalid', function(e, type, valid, expr, cond) { // in this case ':hidden' fields validation has to be enabled
+                    if (type === 'requiredif') { // be aware of the fact that multiple requiredif attributes can be applied to a single field
+                        if (e.currentTarget !== current) {
+                            var container = $(e.currentTarget).closest('li');
+                            if (cond) {
+                                container.show();
+                            }
+                            else {
+                                container.hide(); // hide non-required fields
+                            }
+                        }
+                    }
+                });
+            }
         </script>
     }
 
@@ -186,8 +231,11 @@
                 }
             }); // (downside of this hack - validation triggered 2 times for these fields after first form submission attempt is done)
 
-
             $('#triggers input[type="checkbox"]').attr('disabled', @Json.Encode(!client));
+
+            $('form').on('submit', function() {
+                $(".message-success").hide();
+            });
         });
 
         $.datepicker.regional['pl'] = { // https://github.com/jquery/jquery-ui/tree/master/ui/i18n

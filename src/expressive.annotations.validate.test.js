@@ -640,12 +640,12 @@
         var elementMock = { name: 'name' };
         var paramsMock = { expression: 'true', fieldsMap: {}, constsMap: {}, parsersMap: {} };
         var result = eapriv.computeRequiredIf({}, elementMock, paramsMock);
-        assert.ok(result); // ok - not required despite requirement obligation (not invoked due to non-null value)
+        assert.ok(result.valid); // ok - not required despite requirement obligation (not invoked due to non-null value)
 
         // the same behavior for whitespace string if allowed
         paramsMock.allowEmpty = true;
         result = eapriv.computeRequiredIf(' ', elementMock, paramsMock);
-        assert.ok(result);
+        assert.ok(result.valid);
     });
 
     qunit.test("verify_assertthat_computed_for_non_null_value", function(assert) {
@@ -661,18 +661,18 @@
         var elementMock = { name: 'name' };
         var paramsMock = { expression: 'true', fieldsMap: {}, constsMap: {}, parsersMap: {} };
         var result = eapriv.computeRequiredIf(null, elementMock, paramsMock);
-        assert.ok(!result); // not ok - required because of requirement obligation
+        assert.ok(!result.valid); // not ok - required because of requirement obligation
 
         // the same behavior for empty or undefined
         result = eapriv.computeRequiredIf('', elementMock, paramsMock);
-        assert.ok(!result);
+        assert.ok(!result.valid);
         result = eapriv.computeRequiredIf(undefined, elementMock, paramsMock);
-        assert.ok(!result);
+        assert.ok(!result.valid);
 
         // the same behavior for whitespace string if not allowed
         paramsMock.allowEmpty = false;
         result = eapriv.computeRequiredIf(' ', elementMock, paramsMock);
-        assert.ok(!result);
+        assert.ok(!result.valid);
     });
 
     qunit.test("verify_assertthat_complex_expression_computation", function(assert) {
@@ -722,7 +722,7 @@
             parsersMap: {}
         }
         var result = eapriv.computeRequiredIf(null, elementMock, paramsMock);
-        assert.ok(!result);
+        assert.ok(!result.valid);
     });
 
 }($, QUnit, window.ea, window.ea._private));

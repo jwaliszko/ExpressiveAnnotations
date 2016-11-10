@@ -13,12 +13,16 @@ var
     api = { // to be accesssed from outer scope
         settings: {
             debug: false, // output debug messages to the web console (should be disabled for release code)
-            dependencyTriggers: 'change keyup', // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names) for which fields directly dependent on referenced DOM field are validated
+            optimize: true, // if flag is on, requirement expression is not evaluated for empty fields (otherwise, it is evaluated and such an evaluation result is provided to eavalid event)
+            dependencyTriggers: 'change keyup', // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names) for which fields directly dependent on referenced DOM field are validated            
 
             apply: function(options) { // alternative way of settings setup (recommended), crucial to invoke e.g. for new set of dependency triggers to be re-bound
                 function verifySetup() {
                     if (!typeHelper.isBool(api.settings.debug)) {
                         throw 'debug value must be a boolean (true or false)';
+                    }
+                    if (!typeHelper.isBool(api.settings.optimize)) {
+                        throw 'optimize value must be a boolean (true or false)';
                     }
                     if (!typeHelper.isString(api.settings.dependencyTriggers)
                         && api.settings.dependencyTriggers !== null && api.settings.dependencyTriggers !== undefined) {
@@ -693,16 +697,41 @@ var
 
     computeRequiredIf = function(value, element, params) {
         value = modelHelper.adjustGivenValue(value, element, params);
-        if(value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
+
+        var exprVal, model;
+        if (!api.settings.optimize) { // no optimization - compute requirement condition despite the fact field value may be provided
+            model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
+            toolchain.registerMethods(model);
+            exprVal = modelHelper.ctxEval(params.expression, model);
+        }
+
+        if (value === undefined || value === null || value === '' // check if the field value is not set (undefined, null or empty string treated at client as null at server)
             || (!/\S/.test(value) && !params.allowEmpty)) {
-            var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
+
+            if (exprVal !== undefined) {
+                if (exprVal) { // check if the requirement condition is satisfied
+                    return {
+                        valid: false, // requirement confirmed => notify
+                        condition: exprVal
+                    }
+                }
+            }
+
+            model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model);
             logger.dump(typeHelper.string.format('RequiredIf expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
-            if (modelHelper.ctxEval(params.expression, model)) { // check if the requirement condition is satisfied
-                return false; // requirement confirmed => notify
+            exprVal = modelHelper.ctxEval(params.expression, model);
+            if (exprVal) { // check if the requirement condition is satisfied
+                return {
+                    valid: false, // requirement confirmed => notify
+                    condition: exprVal
+                }
             }
         }
-        return true;
+        return {
+            valid: true,
+            condition: exprVal || undefined
+        }
     },
 
     annotations = ' abcdefghijklmnopqrstuvwxyz'; // suffixes for attributes annotating single field multiple times
@@ -738,9 +767,9 @@ var
         var method = typeHelper.string.format('requiredif{0}', $.trim(this));
         $.validator.addMethod(method, function(value, element, params) {
             try {
-                var valid = computeRequiredIf(value, element, params);
-                $(element).trigger('eavalid', ['requiredif', valid, params.expression]);
-                return valid;
+                var result = computeRequiredIf(value, element, params);
+                $(element).trigger('eavalid', ['requiredif', result.valid, params.expression, result.condition]);
+                return result.valid;
             } catch (ex) {
                 logger.fail(ex);
             }
