@@ -7,7 +7,7 @@ using Xunit;
 
 namespace ExpressiveAnnotations.MvcWebSample.UITests
 {
-    public class AttributesCompilationTest
+    public class AttribsCompileTest
     {
         private static string GetAssemblyLocation(string assemblyName) // looks inside bin folder of sample project
         {

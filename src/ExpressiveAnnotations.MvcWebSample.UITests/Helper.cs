@@ -17,8 +17,8 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         {
             var properties = type.GetProperties()
                 .Where(p => Attribute.IsDefined(p, typeof (ExpressiveAttribute)));
-
             var attributes = new List<ExpressiveAttribute>();
+
             foreach (var prop in properties)
             {
                 var attribs = prop.GetCustomAttributes<ExpressiveAttribute>().ToList();

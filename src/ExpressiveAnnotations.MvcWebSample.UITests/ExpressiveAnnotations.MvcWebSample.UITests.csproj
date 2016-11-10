@@ -76,7 +76,7 @@
   <ItemGroup>
     <Compile Include="BaseTest.cs" />
     <Compile Include="ClientModeTest.cs" />
-    <Compile Include="AttributesCompilationTest.cs" />
+    <Compile Include="AttribsCompileTest.cs" />
     <Compile Include="DriverFixture.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="HomePage.cs" />

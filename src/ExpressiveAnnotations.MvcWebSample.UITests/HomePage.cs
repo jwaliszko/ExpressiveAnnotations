@@ -7,6 +7,16 @@ using OpenQA.Selenium.Support.UI;
 
 namespace ExpressiveAnnotations.MvcWebSample.UITests
 {
+    //public static class DriverHelper
+    //{
+    //    public static IWebElement FindElementByXPathUntil(this RemoteWebDriver driver, string query)
+    //    {
+    //        var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+    //        var elem = wait.Until(d => d.FindElement(By.XPath(query)));
+    //        return elem;
+    //    }
+    //}
+
     public class HomePage
     {
         private readonly RemoteWebDriver _driver;
@@ -118,7 +128,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         public bool SubmitSucceed()
         {
             var elem = _driver.FindElementByXPath("//div[@class='message-success']");
-            return "Query successfully submitted.".Equals(elem.Text);
+            return "[query successfully submitted]".Equals(elem.Text);
         }
 
         public int GetPostbacksCount()

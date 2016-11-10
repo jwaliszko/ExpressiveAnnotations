@@ -38,7 +38,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
                     throw new ApplicationException("Unexpected failure in WebAPI pipeline.");
 
                 TempData["Postbacks"] = Session["Postbacks"];
-                TempData["Success"] = "Query successfully submitted.";                
+                TempData["Success"] = "[query successfully submitted]";                
                 TempData["Query"] = model;
                 return RedirectToAction("Index"); // PRG to avoid subsequent form submission attempts on page refresh (http://en.wikipedia.org/wiki/Post/Redirect/Get)
             }

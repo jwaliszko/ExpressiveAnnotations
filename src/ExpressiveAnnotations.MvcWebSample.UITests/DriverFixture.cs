@@ -19,6 +19,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             //service.HideCommandPromptWindow = true;
             //service.SuppressInitialDiagnosticInformation = true;
             //Driver = new FirefoxDriver(service, new FirefoxOptions(), TimeSpan.FromSeconds(15));
+            //Driver.Manage().Timeouts().ImplicitlyWait(new TimeSpan(0, 0, 0, 5));
 
             Driver = new FirefoxDriver();
         }

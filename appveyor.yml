@@ -1,18 +1,20 @@
 version: '{build}'
 init:
-- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 branches:
   only:
-  - master
+    - master
 configuration: Release
 before_build:
-- ps: nuget restore src\ExpressiveAnnotations.sln
+  - ps: nuget restore src\ExpressiveAnnotations.sln
 build:
   project: src\ExpressiveAnnotations.sln
   parallel: true
   verbosity: minimal
 test_script:
-- ps: build\test.ps1
-- "SET PATH=C:\\Python34;C:\\Python34\\Scripts;%PATH%"
-- pip install codecov
-- codecov --no-color -f "csharp-coverage.xml" "javascript-coverage.lcov"
+  - ps: build\test.ps1
+  - "SET PATH=C:\\Python34;C:\\Python34\\Scripts;%PATH%"
+  - pip install codecov
+  - codecov --no-color -f "csharp-coverage.xml" "javascript-coverage.lcov"
+install:
+  - choco install firefox -version 46.0.1

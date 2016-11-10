@@ -545,6 +545,12 @@ namespace ExpressiveAnnotations.Analysis
                         return Expr.OnesComplement(arg, oper);
                 }
             }
+            return ParsePostfixExp();
+        }
+
+        private Expression ParsePostfixExp()
+        {
+            // e.g. suffix/postfix increment and decrement a++, a--
             return ParsePrimaryExp();
         }
 

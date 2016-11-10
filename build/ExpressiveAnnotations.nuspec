@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
     <metadata>
         <id>ExpressiveAnnotations</id>
@@ -26,7 +26,7 @@ This package contains 3 components: ExpressiveAnnotations.dll - core annotations
     </metadata>
     <files>
         <file src="expressive.annotations.validate.js" target="content\Scripts\expressive.annotations.validate.js" />
-		<file src="expressive.annotations.validate.min.js" target="content\Scripts\expressive.annotations.validate.min.js" />
+        <file src="expressive.annotations.validate.min.js" target="content\Scripts\expressive.annotations.validate.min.js" />
 
         <file src="net40\ExpressiveAnnotations.dll" target="lib\net40\ExpressiveAnnotations.dll" />
         <file src="net40\ExpressiveAnnotations.pdb" target="lib\net40\ExpressiveAnnotations.pdb" />
