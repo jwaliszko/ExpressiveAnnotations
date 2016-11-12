@@ -57,7 +57,7 @@
 
             ea.settings.apply({
                 debug: '@debug' === 'true',
-                //optimize: false,
+                optimize: false,
                 dependencyTriggers: '@triggers' // if not explicitly provided, default setup is: 'change keyup'
             });
 
@@ -146,61 +146,57 @@
                     }, 50);
                 });
 
-                //annotateRequiredFields();
-                //hideNonRequiredFields();
+                annotateRequiredFields(false);                
             });
 
-            function annotateRequiredFields() { // an example of how eavalid event can be used (annotate required fields, hide non-required fields, etc.)
+            function annotateRequiredFields(hideNonRequired) { // an example of how eavalid event can be used (annotate required fields, hide non-required fields, etc.)
                 var $form = $('form');
                 var selector = 'input, select, textarea';
 
-                $form.find(selector).each(function () {
-                    if (undefined !== $(this).attr('data-val-required')
-                        || undefined !== $(this).attr('data-val-requiredif')) {
-                        var label = $('label[for="' + $(this).attr('id') + '"]');
-                        var text = label.text();
-                        var asterisk = '<span class="asterisk">* </span>';
-                        if (text.length > 0) {
-                            label.prepend(asterisk);
-                            // ToDo: for requiredif asterisk may be not needed (based on condition), workaround: execute $(this).valid() here for eavalid event to be triggered, and asterisk visibility initialized
+                $form.validate().settings.ignore = ''; // enable validation for ':hidden' fields (to have hidden fields visibility re-computed)
+
+                $(selector).on(ea.settings.dependencyTriggers, function() { // reset remembered conditions for every field when user activity is detected
+                    $form.find(selector).each(function() {
+                        if ($(this).attr('data-val-requiredif') !== undefined) {
+                            this.eacond = undefined; // forget previous condition result which may now have changed
                         }
+                    });
+                }); 
+
+                $form.find(selector).each(function() { // apply asterisks for required or conditionally required fields
+                    if ($(this).attr('data-val-required') !== undefined
+                        || $(this).attr('data-val-requiredif') !== undefined) {
+                        var div = $(this).closest('div');
+                        div.prepend('<span class="asterisk">*</span>');
                     }
                 });
 
-                $form.find(selector).on('eavalid', function(e, type, valid, expr, cond) {
-                    if (type === 'requiredif') { // be aware of the fact that multiple requiredif attributes can be applied to a single field
-                        var asterisk = $(e.currentTarget).closest('div').find('.asterisk');
-                        if(cond) {
+                $form.find(selector).on('eavalid', function(e, type, valid, expr, cond) { // verify asterisk visibility based on computed condition
+                    if (type === 'requiredif' && cond !== undefined) {
+                        e.currentTarget.eacond |= cond; // multiple requiredif attributes can be applied to a single field - remember if any condition is true
+                        var li = $(e.currentTarget).closest('li');
+                        var asterisk = li.find('.asterisk');
+
+                        if (e.currentTarget.eacond) {
                             asterisk.show(); // show asterisk for required fields (no matter if valid or not)
+                            if (hideNonRequired) {
+                                li.show();
+                            }
                         }
                         else {
                             asterisk.hide();
+                            if (hideNonRequired) {
+                                li.hide(); // hide non-required fields
+                            }
                         }
                     }
                 });
-            }
 
-            function hideNonRequiredFields() {
-                var $form = $('form');
-                var selector = 'input, select, textarea';
-                
-                $form.validate().settings.ignore = ''; // enable validation for ':hidden' fields
-                
-                var current = undefined;
-                $form.find(selector).on(ea.settings.dependencyTriggers, function() {
-                    current = this; // mark element being currently modified
-                });
-                $form.find(selector).on('eavalid', function(e, type, valid, expr, cond) { // in this case ':hidden' fields validation has to be enabled
-                    if (type === 'requiredif') { // be aware of the fact that multiple requiredif attributes can be applied to a single field
-                        if (e.currentTarget !== current) {
-                            var container = $(e.currentTarget).closest('li');
-                            if (cond) {
-                                container.show();
-                            }
-                            else {
-                                container.hide(); // hide non-required fields
-                            }
-                        }
+                $form.find(selector).each(function() { // run validation for every field to initialize asterisks
+                    if ($(this).attr('data-val-requiredif') !== undefined) {
+                        $(this).valid();
+                        $(this).removeClass('input-validation-error');
+                        $(this).parent().find('.field-validation-error').empty();
                     }
                 });
             }

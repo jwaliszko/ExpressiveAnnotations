@@ -730,7 +730,7 @@ var
         }
         return {
             valid: true,
-            condition: exprVal || undefined
+            condition: exprVal
         }
     },
 

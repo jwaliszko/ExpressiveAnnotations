@@ -105,6 +105,8 @@ a {
                         
 fieldset {
     margin: 0;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
     fieldset legend {
@@ -184,6 +186,9 @@ button {
 
 .asterisk {
     color: #ff0000;
+    vertical-align: top;
+    margin-right: -5px;
+    margin-left: -10px;
 }
 
 .message-info {

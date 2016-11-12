@@ -121,12 +121,14 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof (Resources), Name = nameof(Resources.PoliticalStability))]
         public Stability? PoliticalStability { get; set; }
 
-        [AssertThat(@"(
-                          AwareOfTheRisks == true
-                          && (PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain)
-                      ) 
-                      || PoliticalStability == null || PoliticalStability == Stability.High",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.AwareOfTheRisksRequired))]
+        //[AssertThat(@"(
+        //                  AwareOfTheRisks == true
+        //                  && (PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain)
+        //              ) 
+        //              || PoliticalStability == null || PoliticalStability == Stability.High",
+        //    ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.AwareOfTheRisksRequired))]
+        [AssertThat("(PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain) ? AwareOfTheRisks == true : true", // expresses the same as the assertion above
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.AwareOfTheRisksRequired))]
         [Display(ResourceType = typeof (Resources), Name = nameof(Resources.AwareOfTheRisks))]
         public bool AwareOfTheRisks { get; set; }
 

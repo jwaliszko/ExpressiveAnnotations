@@ -121,11 +121,7 @@
     </li>
     <li>
         <pre class="code">
-[AssertThat(@@"(
-                  AwareOfTheRisks == true
-                  && (PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain)
-              )
-              || PoliticalStability == null || PoliticalStability == Stability.High")]
+[AssertThat("(PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain) ? AwareOfTheRisks == true : true")]
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>

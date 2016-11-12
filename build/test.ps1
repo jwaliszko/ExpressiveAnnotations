@@ -7,8 +7,8 @@ if($env:APPVEYOR -eq $true) {
     $buildcfg = $env:CONFIGURATION
 }
 
-Write-Host "Configuration: $buildcfg"
-Write-Host "Root directory: $rootdir"
+Write-Host "Configuration: $buildcfg" -foregroundcolor "green"
+Write-Host "Root directory: $rootdir" -foregroundcolor "green"
 
 # collect tools
 $xunitdir     = Get-ChildItem $rootdir xunit.console.exe -Recurse | Select-Object -First 1 | Select -Expand Directory
