@@ -6,7 +6,7 @@ branches:
     - master
 configuration: Release
 before_build:
-  - ps: nuget restore src\ExpressiveAnnotations.sln
+  - ps: nuget restore src\ExpressiveAnnotations.sln -verbosity quiet
 build:
   project: src\ExpressiveAnnotations.sln
   parallel: true

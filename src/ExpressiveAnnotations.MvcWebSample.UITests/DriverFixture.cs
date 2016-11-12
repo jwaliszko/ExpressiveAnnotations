@@ -21,7 +21,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             //Driver = new FirefoxDriver(service, new FirefoxOptions(), TimeSpan.FromSeconds(15));
             //Driver.Manage().Timeouts().ImplicitlyWait(new TimeSpan(0, 0, 0, 5));
 
-            Driver = new FirefoxDriver();
+            Driver = new FirefoxDriver(new FirefoxProfile());
         }
 
         public RemoteWebDriver Driver { get; private set; }
