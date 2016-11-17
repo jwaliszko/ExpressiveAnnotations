@@ -118,3 +118,4 @@ UpgradeLog*.XML
 /build/*.lcov
 /build/*.xml
 /build/*.js
+/src/_Chutzpah.*

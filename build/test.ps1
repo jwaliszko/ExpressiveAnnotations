@@ -11,8 +11,7 @@ Write-Host "Root directory: $rootdir" -foregroundcolor "yellow"
 Write-Host "Configuration: $buildcfg" -foregroundcolor "yellow"
 
 # minify the script file, which is required in release configuration of UI testing
-& uglifyjs --compress --mangle --comments /Copyright/ --output expressive.annotations.validate.min.js -- ..\src\expressive.annotations.validate.js
-Copy-Item expressive.annotations.validate.min.js ..\src\ExpressiveAnnotations.MvcWebSample\Scripts\expressive.annotations.validate.min.js
+& uglifyjs --compress --mangle --comments /Copyright/ --output $rootdir\src\ExpressiveAnnotations.MvcWebSample\Scripts\expressive.annotations.validate.min.js -- $rootdir\src\expressive.annotations.validate.js
 
 # collect tools
 $xunitdir     = Get-ChildItem $rootdir xunit.console.exe -Recurse | Select-Object -First 1 | Select -Expand Directory
