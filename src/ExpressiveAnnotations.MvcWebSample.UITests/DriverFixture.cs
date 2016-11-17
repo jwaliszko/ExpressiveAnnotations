@@ -21,7 +21,11 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             //Driver = new FirefoxDriver(service, new FirefoxOptions(), TimeSpan.FromSeconds(15));
             //Driver.Manage().Timeouts().ImplicitlyWait(new TimeSpan(0, 0, 0, 5));
 
-            Driver = new FirefoxDriver(new FirefoxProfile());
+            var profile = new FirefoxProfile();
+            profile.SetPreference("webdriver.log.browser.ignore", true);
+            profile.SetPreference("webdriver.log.driver.ignore", true);
+            profile.SetPreference("webdriver.log.profiler.ignore", true);
+            Driver = new FirefoxDriver(profile);
         }
 
         public RemoteWebDriver Driver { get; private set; }
