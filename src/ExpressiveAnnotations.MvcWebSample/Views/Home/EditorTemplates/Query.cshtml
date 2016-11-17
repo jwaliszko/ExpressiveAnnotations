@@ -115,7 +115,7 @@
         <pre class="action">[show attribute]</pre>
         <div>
             @Html.LabelFor(model => model.PoliticalStability, new { @class = "inline prefix" })
-            @Html.EnumDropDownListFor(model => model.PoliticalStability)
+            @Html.EnumDropDownListFor(model => model.PoliticalStability, true)
             @Html.ValidationMessageFor(model => model.PoliticalStability)
         </div>
     </li>

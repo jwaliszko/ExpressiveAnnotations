@@ -41,6 +41,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Caching
     {
         public IDictionary<string, string> FieldsMap { get; set; }
         public IDictionary<string, object> ConstsMap { get; set; }
+        public IDictionary<string, object> EnumsMap { get; set; }
         public IDictionary<string, string> ParsersMap { get; set; }
     }
 }

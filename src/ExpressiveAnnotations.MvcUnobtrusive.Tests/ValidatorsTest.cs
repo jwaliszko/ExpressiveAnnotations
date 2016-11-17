@@ -288,24 +288,26 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             var metadata = GetModelMetadata(model, m => m.Array);
             var controllerContext = GetControllerContext();
 
-            const string expression = "Value > 0 && Status == ValidatorsTest.State.High && SubModel.InsensString == NInsensString";
+            const string expression = "Value > 0 && MathModel.PI == 3.142 && Status == ValidatorsTest.State.High && SubModel.InsensString == NInsensString";
 
             var assert = new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute(expression));
             var assertRule = assert.GetClientValidationRules().Single();
 
-            Assert.Equal("{\"Value\":\"numeric\",\"Status\":\"numeric\",\"SubModel.InsensString\":\"stringinsens\",\"NInsensString\":\"stringinsens\"}", (string) assertRule.ValidationParameters["fieldsmap"], false);
-            Assert.Equal("{\"ValidatorsTest.State.High\":0}", (string) assertRule.ValidationParameters["constsmap"], false);
+            Assert.Equal("{\"Value\":\"number\",\"Status\":\"enumeration\",\"SubModel.InsensString\":\"stringinsens\",\"NInsensString\":\"stringinsens\"}", (string) assertRule.ValidationParameters["fieldsmap"], false);
+            Assert.Equal("{\"MathModel.PI\":3.142}", (string) assertRule.ValidationParameters["constsmap"], false);
+            Assert.Equal("{\"ValidatorsTest.State.High\":0}", (string) assertRule.ValidationParameters["enumsmap"], false);
             Assert.Equal("{\"SubModel.InsensString\":\"stringparser\",\"Array\":\"arrayparser\"}", (string) assertRule.ValidationParameters["parsersmap"], false);
-            Assert.Equal("\"Value > 0 && Status == ValidatorsTest.State.High && SubModel.InsensString == NInsensString\"", (string) assertRule.ValidationParameters["expression"], false);
+            Assert.Equal("\"Value > 0 && MathModel.PI == 3.142 && Status == ValidatorsTest.State.High && SubModel.InsensString == NInsensString\"", (string) assertRule.ValidationParameters["expression"], false);
 
             var requir = new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute(expression));
             var requirRule = requir.GetClientValidationRules().Single();
 
-            Assert.Equal("{\"Value\":\"numeric\",\"Status\":\"numeric\",\"SubModel.InsensString\":\"stringinsens\",\"NInsensString\":\"stringinsens\"}", (string) requirRule.ValidationParameters["fieldsmap"], false);
-            Assert.Equal("{\"ValidatorsTest.State.High\":0}", (string) requirRule.ValidationParameters["constsmap"], false);
+            Assert.Equal("{\"Value\":\"number\",\"Status\":\"enumeration\",\"SubModel.InsensString\":\"stringinsens\",\"NInsensString\":\"stringinsens\"}", (string) requirRule.ValidationParameters["fieldsmap"], false);
+            Assert.Equal("{\"MathModel.PI\":3.142}", (string) requirRule.ValidationParameters["constsmap"], false);
+            Assert.Equal("{\"ValidatorsTest.State.High\":0}", (string) requirRule.ValidationParameters["enumsmap"], false);
             Assert.Equal("{\"SubModel.InsensString\":\"stringparser\",\"Array\":\"arrayparser\"}", (string) assertRule.ValidationParameters["parsersmap"], false);
             Assert.Equal("false", (string) requirRule.ValidationParameters["allowempty"], false);
-            Assert.Equal("\"Value > 0 && Status == ValidatorsTest.State.High && SubModel.InsensString == NInsensString\"", (string) requirRule.ValidationParameters["expression"], false);
+            Assert.Equal("\"Value > 0 && MathModel.PI == 3.142 && Status == ValidatorsTest.State.High && SubModel.InsensString == NInsensString\"", (string) requirRule.ValidationParameters["expression"], false);
 
             JsonConvert.DefaultSettings = settings; // reset settings to original state
         }
@@ -499,6 +501,11 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             [ValueParser("stringparser")]
             public StringInsens InsensString { get; set; }
             public StringInsens? NInsensString { get; set; }
+
+            public class MathModel
+            {
+                public const double PI = 3.142;
+            }
         }
 
         public class MsgModel

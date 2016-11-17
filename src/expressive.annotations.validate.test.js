@@ -67,9 +67,9 @@
         assert.ok(result.error, "broken bool parsing error thrown");
         assert.equal(result.msg, "Given value was not recognized as a valid boolean.", "broken bool parsing error message thrown");
 
-        result = eapriv.typeHelper.tryParse("", "numeric");
+        result = eapriv.typeHelper.tryParse("", "number");
         assert.ok(result.error, "broken number parsing error thrown");
-        assert.equal(result.msg, "Given value was not recognized as a valid float.", "broken number parsing error message thrown");
+        assert.equal(result.msg, "Given value was not recognized as a valid number.", "broken number parsing error message thrown");
 
         result = eapriv.typeHelper.tryParse("", "datetime");
         assert.ok(result.error, "broken datetime parsing error thrown");
@@ -169,7 +169,7 @@
         // non-numeric values
         var result = eapriv.typeHelper.number.tryParse(""); // empty string
         assert.ok(result.error, "empty string to float parse error thrown");
-        assert.equal(result.msg, "Given value was not recognized as a valid float.", "empty string to float parse error message thrown");
+        assert.equal(result.msg, "Given value was not recognized as a valid number.", "empty string to float parse error message thrown");
 
         assert.ok(eapriv.typeHelper.number.tryParse(" ").error, "whitespace character to float parse error thrown");
         assert.ok(eapriv.typeHelper.number.tryParse("\t").error, "tab character to float parse error thrown");
@@ -190,20 +190,20 @@
 
     qunit.test("verify_date_parsing", function(assert) {
         var now = Date.now();
-        assert.equal(eapriv.typeHelper.date.tryParse(new Date(now)), now, "date object to date parse succeed");
-        assert.equal(eapriv.typeHelper.date.tryParse("Aug 9, 1995"), new Date("Aug 9, 1995").getTime(), "casual date string to date parse succeed");
-        assert.equal(eapriv.typeHelper.date.tryParse("Wed, 09 Aug 1995 00:00:00 GMT"), 807926400000, "ISO date string to date parse succeed");
-        assert.equal(eapriv.typeHelper.date.tryParse("Thu, 01 Jan 1970 00:00:00 GMT"), 0, "Jan 1st, 1970 ISO date string to date parse succeed");
-        assert.equal(eapriv.typeHelper.date.tryParse("Thu, 01 Jan 1970 00:00:00 GMT-0400"), 14400000, "4h shift to Jan 1st, 1970 ISO date string to date parse succeed");
+        assert.equal(eapriv.typeHelper.datetime.tryParse(new Date(now)), now, "date object to date parse succeed");
+        assert.equal(eapriv.typeHelper.datetime.tryParse("Aug 9, 1995"), new Date("Aug 9, 1995").getTime(), "casual date string to date parse succeed");
+        assert.equal(eapriv.typeHelper.datetime.tryParse("Wed, 09 Aug 1995 00:00:00 GMT"), 807926400000, "ISO date string to date parse succeed");
+        assert.equal(eapriv.typeHelper.datetime.tryParse("Thu, 01 Jan 1970 00:00:00 GMT"), 0, "Jan 1st, 1970 ISO date string to date parse succeed");
+        assert.equal(eapriv.typeHelper.datetime.tryParse("Thu, 01 Jan 1970 00:00:00 GMT-0400"), 14400000, "4h shift to Jan 1st, 1970 ISO date string to date parse succeed");
 
-        assert.ok(eapriv.typeHelper.isNumeric(eapriv.typeHelper.date.tryParse(new Date())), "datetime parsing returns number (of milliseconds)");
-        assert.ok(eapriv.typeHelper.isNumeric(eapriv.typeHelper.date.tryParse("Aug 9, 1995")), "datetime parsing returns number (of milliseconds)");
+        assert.ok(eapriv.typeHelper.isNumeric(eapriv.typeHelper.datetime.tryParse(new Date())), "datetime parsing returns number (of milliseconds)");
+        assert.ok(eapriv.typeHelper.isNumeric(eapriv.typeHelper.datetime.tryParse("Aug 9, 1995")), "datetime parsing returns number (of milliseconds)");
 
-        var result = eapriv.typeHelper.date.tryParse("");
+        var result = eapriv.typeHelper.datetime.tryParse("");
         assert.ok(result.error, "empty string to date parse error thrown");
         assert.equal(result.msg, "Given value was not recognized as a valid RFC 2822 or ISO 8601 date.", "empty string to date parse error message thrown");
 
-        result = eapriv.typeHelper.date.tryParse(1997);
+        result = eapriv.typeHelper.datetime.tryParse(1997);
         assert.ok(result.error, "integer to date parse error thrown");
         assert.equal(result.msg, "Given value was not recognized as a valid RFC 2822 or ISO 8601 date.", "integer to date parse error message thrown");
     });

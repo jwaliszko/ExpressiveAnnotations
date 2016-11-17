@@ -23,8 +23,10 @@ namespace ExpressiveAnnotations.MvcUnobtrusive
                 return "timespan";
             if (type.IsDateTime())
                 return "datetime";
+            if (type.IsEnum())
+                return "enumeration";
             if (type.IsNumeric())
-                return "numeric";
+                return "number";
             if (type.IsString())
                 return "string";
             if (type.IsBool())

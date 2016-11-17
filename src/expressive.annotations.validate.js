@@ -12,8 +12,9 @@ var
 
     api = { // to be accesssed from outer scope
         settings: {
-            debug: false, // output debug messages to the web console (should be disabled for release code)
+            debug: false, // output debug info messages to the web console (should be disabled for release code)
             optimize: true, // if flag is on, requirement expression is not evaluated for empty fields (otherwise, it is evaluated and such an evaluation result is provided to eavalid event)
+            enumsAsNumbers: true, // specifies whether values of enum types are internally treated as integral numerics or string identifiers (should be consistent with the way of how input fields values are stored in HTML)
             dependencyTriggers: 'change keyup', // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names) for which fields directly dependent on referenced DOM field are validated            
 
             apply: function(options) { // alternative way of settings setup (recommended), crucial to invoke e.g. for new set of dependency triggers to be re-bound
@@ -23,6 +24,9 @@ var
                     }
                     if (!typeHelper.isBool(api.settings.optimize)) {
                         throw 'optimize value must be a boolean (true or false)';
+                    }
+                    if (!typeHelper.isBool(api.settings.enumsAsNumbers)) {
+                        throw 'enumsAsNumbers value must be a boolean (true or false)';
                     }
                     if (!typeHelper.isString(api.settings.dependencyTriggers)
                         && api.settings.dependencyTriggers !== null && api.settings.dependencyTriggers !== undefined) {
@@ -376,7 +380,7 @@ var
                 if (isNumber(value)) {
                     return parseFloat(value);
                 }
-                return { error: true, msg: 'Given value was not recognized as a valid float.' };
+                return { error: true, msg: 'Given value was not recognized as a valid number.' };
             }
         },
         timespan: {
@@ -402,7 +406,7 @@ var
                 return { error: true, msg: 'Given value was not recognized as a valid .NET style timespan string.' };
             }
         },
-        date: {
+        datetime: {
             tryParse: function(value) {
                 if (typeHelper.isDate(value)) {
                     return value.getTime(); // return the time value in milliseconds
@@ -422,6 +426,11 @@ var
                     return value.toUpperCase();
                 }
                 return { error: true, msg: 'Given value was not recognized as a valid guid - guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).' };
+            }
+        },
+        enumeration: {
+            tryParse: function(value) {
+                return api.settings.enumsAsNumbers ? typeHelper.number.tryParse(value) : typeHelper.string.tryParse(value);
             }
         },
         isTimeSpan: function(value) {
@@ -464,23 +473,8 @@ var
             }
             return typeHelper.tryAutoParse(value, type); // built-in parser lookup - lowest parsing priority
         },
-        tryAutoParse: function(value, type) {
-            switch (type) {
-                case 'timespan':
-                    return typeHelper.timespan.tryParse(value);
-                case 'datetime':
-                    return typeHelper.date.tryParse(value);
-                case 'numeric':
-                    return typeHelper.number.tryParse(value);
-                case 'string':
-                    return typeHelper.string.tryParse(value);
-                case 'bool':
-                    return typeHelper.bool.tryParse(value);
-                case 'guid':
-                    return typeHelper.guid.tryParse(value);
-                default:
-                    return typeHelper.object.tryParse(value);
-            }
+        tryAutoParse: function(value, type) {            
+            return typeHelper[type].tryParse(value);
         },
         findValueParser: function(field, parser) {
             var parseFunc = typeHelper.parsers[parser]; // custom parsing lookup
@@ -530,7 +524,7 @@ var
             }
             return parsedValue;
         },
-        deserializeObject: function(form, fieldsMap, constsMap, parsersMap, prefix) {
+        deserializeObject: function(form, fieldsMap, constsMap, enumsMap, parsersMap, prefix) {
             function buildField(fieldName, fieldValue, object) {
                 var props, parent, i, match, arridx;                
                 props = fieldName.split('.');
@@ -571,6 +565,12 @@ var
             for (name in constsMap) {
                 if (constsMap.hasOwnProperty(name)) {
                     value = constsMap[name];
+                    buildField(name, value, model);
+                }
+            }
+            for (name in enumsMap) {
+                if (enumsMap.hasOwnProperty(name)) {
+                    value = api.settings.enumsAsNumbers ? enumsMap[name] : name.split('.').pop();
                     buildField(name, value, model);
                 }
             }
@@ -685,7 +685,7 @@ var
                                                                       // logic should be invoked or not - full type-detection parsing is not required at this stage, but we may have to extract such a value using
                                                                       // value parser, e.g. for an array which values are distracted among multiple fields)
         if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
-            var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
+            var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model);
             logger.dump(typeHelper.string.format('AssertThat expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
             if (!modelHelper.ctxEval(params.expression, model)) { // check if the assertion condition is not satisfied
@@ -697,11 +697,13 @@ var
 
     computeRequiredIf = function(value, element, params) {
         value = modelHelper.adjustGivenValue(value, element, params);
-
+        
         var exprVal, model;
+        var message = 'RequiredIf expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}';
         if (!api.settings.optimize) { // no optimization - compute requirement condition despite the fact field value may be provided
-            model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
+            model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model);
+            logger.dump(typeHelper.string.format(message, element.name, params.expression, model));
             exprVal = modelHelper.ctxEval(params.expression, model);
         }
 
@@ -717,9 +719,9 @@ var
                 }
             }
 
-            model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.parsersMap, params.prefix);
+            model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model);
-            logger.dump(typeHelper.string.format('RequiredIf expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
+            logger.dump(typeHelper.string.format(message, element.name, params.expression, model));
             exprVal = modelHelper.ctxEval(params.expression, model);
             if (exprVal) { // check if the requirement condition is satisfied
                 return {
@@ -738,14 +740,14 @@ var
 
     $.each(annotations.split(''), function() { // it would be ideal to have exactly as many handlers as there are unique annotations, but the number of annotations isn't known untill DOM is ready
         var adapter = typeHelper.string.format('assertthat{0}', $.trim(this));
-        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'parsersMap', 'errFieldsMap'], function(options) {
+        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'enumsMap', 'parsersMap', 'errFieldsMap'], function(options) {
             buildAdapter(adapter, options);
         });
     });
 
     $.each(annotations.split(''), function() {
         var adapter = typeHelper.string.format('requiredif{0}', $.trim(this));
-        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'parsersMap', 'errFieldsMap', 'allowEmpty'], function(options) {
+        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'enumsMap', 'parsersMap', 'errFieldsMap', 'allowEmpty'], function(options) {
             buildAdapter(adapter, options);
         });
     });

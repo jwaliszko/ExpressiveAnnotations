@@ -25,6 +25,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             profile.SetPreference("webdriver.log.browser.ignore", true);
             profile.SetPreference("webdriver.log.driver.ignore", true);
             profile.SetPreference("webdriver.log.profiler.ignore", true);
+            profile.SetPreference("webdriver.log.init", false);
             Driver = new FirefoxDriver(profile);
         }
 

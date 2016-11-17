@@ -64,6 +64,7 @@ namespace ExpressiveAnnotations.Analysis
         {
             Fields = new Dictionary<string, Expression>();
             Consts = new Dictionary<string, object>();
+            Enums = new Dictionary<string, object>();
         }
 
         private Stack<Token> TokensToProcess { get; set; }
@@ -75,6 +76,7 @@ namespace ExpressiveAnnotations.Analysis
         private Expression SyntaxTree { get; set; }
         private IDictionary<string, Expression> Fields { get; set; }
         private IDictionary<string, object> Consts { get; set; }
+        private IDictionary<string, object> Enums { get; set; }
         private IFunctionsProvider FuncProvider { get; set; }
         private IDictionary<string, IList<LambdaExpression>> Functions
             => FuncProvider == null ? new Dictionary<string, IList<LambdaExpression>>() : FuncProvider.GetFunctions();
@@ -243,6 +245,17 @@ namespace ExpressiveAnnotations.Analysis
         }
 
         /// <summary>
+        ///     Gets names and values of enums extracted from specified expression within given context.
+        /// </summary>
+        /// <returns>
+        ///     Dictionary containing names and values.
+        /// </returns>
+        public IDictionary<string, object> GetEnums()
+        {
+            return Enums.ToDictionary(x => x.Key, x => x.Value);
+        }
+
+        /// <summary>
         ///     Gets the abstract syntax tree built during parsing.
         /// </summary>
         /// <returns>
@@ -257,6 +270,7 @@ namespace ExpressiveAnnotations.Analysis
         {
             Fields.Clear();
             Consts.Clear();
+            Enums.Clear();
             SyntaxTree = null;
         }
 
@@ -853,7 +867,7 @@ namespace ExpressiveAnnotations.Analysis
                 if (type != null)
                 {
                     var value = Enum.Parse(type, parts.Last());
-                    Consts[name] = value;
+                    Enums[name] = value;
                     return Expression.Constant(value);
                 }
             }

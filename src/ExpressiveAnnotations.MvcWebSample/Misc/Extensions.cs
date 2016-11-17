@@ -11,25 +11,26 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
 {
     public static class Extensions
     {
-        public static MvcHtmlString EnumDropDownListFor<TModel, TEnum>(this HtmlHelper<TModel> htmlHelper, Expression<Func<TModel, TEnum>> expression)
+        public static MvcHtmlString EnumDropDownListFor<TModel, TEnum>(this HtmlHelper<TModel> htmlHelper, Expression<Func<TModel, TEnum>> expression, bool numericValues = true)
         {
-            return EnumDropDownListFor(htmlHelper, expression, null);
+            return EnumDropDownListFor(htmlHelper, expression, numericValues, null);
         }
 
-        public static MvcHtmlString EnumDropDownListFor<TModel, TEnum>(this HtmlHelper<TModel> htmlHelper, Expression<Func<TModel, TEnum>> expression, object htmlAttributes)
+        public static MvcHtmlString EnumDropDownListFor<TModel, TEnum>(this HtmlHelper<TModel> htmlHelper, Expression<Func<TModel, TEnum>> expression, bool numericValues, object htmlAttributes)
         {
             var metadata = ModelMetadata.FromLambdaExpression(expression, htmlHelper.ViewData);
             var type = Nullable.GetUnderlyingType(metadata.ModelType) ?? metadata.ModelType;
             if (!type.IsEnum)
                 throw new ArgumentException
-                    ("Given parameter expression has to indicate enum type.", 
-                    nameof(expression));
+                    ("Given parameter expression has to indicate enum type.", nameof(expression));
             var values = Enum.GetValues(type).Cast<TEnum>();
 
             var items = values.Select(value => new SelectListItem
             {
                 Text = GetEnumDisplayText(value),
-                Value = Convert.ToInt32(value).ToString(CultureInfo.InvariantCulture),
+                Value = numericValues
+                    ? string.Format(CultureInfo.InvariantCulture, $"{Convert.ChangeType(value, value.GetType().GetEnumUnderlyingType())}")
+                    : string.Format(CultureInfo.InvariantCulture, $"{value}"),
                 Selected = value.Equals(metadata.Model)
             });
 

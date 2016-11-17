@@ -132,6 +132,13 @@ namespace ExpressiveAnnotations
             return type == typeof (string);
         }
 
+        public static bool IsEnum(this Type type)
+        {
+            Debug.Assert(type != null);
+
+            return type.IsEnum || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsEnum());
+        }
+
         public static bool IsNumeric(this Type type)
         {
             Debug.Assert(type != null);

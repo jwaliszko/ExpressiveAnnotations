@@ -58,6 +58,7 @@
             ea.settings.apply({
                 debug: '@debug' === 'true',
                 optimize: false,
+                enumsAsNumbers: true,
                 dependencyTriggers: '@triggers' // if not explicitly provided, default setup is: 'change keyup'
             });
 

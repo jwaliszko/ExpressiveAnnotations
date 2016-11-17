@@ -55,6 +55,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                     var fields = parser.GetFields();
                     FieldsMap = fields.ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value.Type));
                     ConstsMap = parser.GetConsts();
+                    EnumsMap = parser.GetEnums();
                     ParsersMap = fields
                         .Select(kvp => new
                         {
@@ -79,12 +80,14 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                     {
                         FieldsMap = FieldsMap,
                         ConstsMap = ConstsMap,
+                        EnumsMap = EnumsMap,
                         ParsersMap = ParsersMap
                     };
                 });
 
                 FieldsMap = item.FieldsMap;
                 ConstsMap = item.ConstsMap;
+                EnumsMap = item.EnumsMap;
                 ParsersMap = item.ParsersMap;
 
                 Expression = attribute.Expression;
@@ -131,6 +134,11 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         protected IDictionary<string, object> ConstsMap { get; private set; }
 
         /// <summary>
+        ///     Gets names and values of enums extracted from specified expression within given context.
+        /// </summary>
+        protected IDictionary<string, object> EnumsMap { get; private set; }
+
+        /// <summary>
         ///     Gets attribute strong identifier - attribute type identifier concatenated with annotated field identifier.
         /// </summary>
         private string AttributeFullId { get; set; }
@@ -171,6 +179,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 Debug.Assert(ConstsMap != null);
                 if (ConstsMap.Any())
                     rule.ValidationParameters.Add("constsmap", ConstsMap.ToJson());
+                Debug.Assert(EnumsMap != null);
+                if (EnumsMap.Any())
+                    rule.ValidationParameters.Add("enumsmap", EnumsMap.ToJson());
                 Debug.Assert(ParsersMap != null);
                 if (ParsersMap.Any())
                     rule.ValidationParameters.Add("parsersmap", ParsersMap.ToJson());
@@ -217,7 +228,10 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         {
             string name;
             int level;
-            if (Helper.SegmentsCollide(FieldsMap.Keys, ConstsMap.Keys, out name, out level))
+            var collision = Helper.SegmentsCollide(FieldsMap.Keys, ConstsMap.Keys, out name, out level)
+                            || Helper.SegmentsCollide(FieldsMap.Keys, EnumsMap.Keys, out name, out level)
+                            || Helper.SegmentsCollide(ConstsMap.Keys, EnumsMap.Keys, out name, out level);
+            if (collision)
                 throw new InvalidOperationException(
                     $"Naming collisions cannot be accepted by client-side - {name} part at level {level} is ambiguous.");
         }

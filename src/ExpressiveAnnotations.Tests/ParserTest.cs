@@ -548,7 +548,6 @@ namespace ExpressiveAnnotations.Tests
             var parsedConsts = parser.GetConsts();            
             var expectedConsts = new Dictionary<string, object>
             {
-                {"Utility.Stability.High", Utility.Stability.High},
                 {"Const", Model.Const},
                 {"Tools.Utility.Const", Tools.Utility.Const}
             };
@@ -557,6 +556,18 @@ namespace ExpressiveAnnotations.Tests
                 expectedConsts.Keys.All(
                     key => parsedConsts.ContainsKey(key) &&
                            EqualityComparer<object>.Default.Equals(expectedConsts[key], parsedConsts[key])));
+
+            parser.GetEnums()["Enum"] = null; // try to mess up with internal fields - original data should not be affected
+            var parsedEnums = parser.GetEnums();
+            var expectedEnums = new Dictionary<string, object>
+            {
+                {"Utility.Stability.High", Utility.Stability.High}
+            };
+            Assert.Equal(expectedEnums.Count, parsedEnums.Count);
+            Assert.True(
+                expectedEnums.Keys.All(
+                    key => parsedEnums.ContainsKey(key) &&
+                           EqualityComparer<object>.Default.Equals(expectedEnums[key], parsedEnums[key])));
 
             Assert.True(parser.Parse<Model, bool>("Array[0] != null && Array[1] != null").Invoke(model));
             Assert.True(parser.Parse<Model, bool>("Array[0].Number + Array[0].Array[0].Number + Array[1].Number + Array[1].Array[0].Number == 0").Invoke(model));
@@ -830,17 +841,20 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.True(parser.Parse<SampleOne, bool>("0 == Vehicle.Car").Invoke(one));
             Assert.Equal(0, parser.GetFields().Count);
-            Assert.Equal(1, parser.GetConsts().Count);
+            Assert.Equal(0, parser.GetConsts().Count);
+            Assert.Equal(1, parser.GetEnums().Count);
             Assert.True(parser.Parse<SampleOne, bool>("Vehicle == Vehicle.Car").Invoke(one));
             Assert.Equal(1, parser.GetFields().Count);
-            Assert.Equal(1, parser.GetConsts().Count);
+            Assert.Equal(0, parser.GetConsts().Count);
+            Assert.Equal(1, parser.GetEnums().Count);
 
             Assert.True(parser.Parse<SampleTwo, bool>("-1 == Vehicle.Car").Invoke(two));
             Assert.Equal(1, parser.GetFields().Count);
             Assert.Equal(0, parser.GetConsts().Count);
             Assert.True(parser.Parse<SampleTwo, bool>("Vehicle.Car != ParserTest.Vehicle.Car").Invoke(two));
             Assert.Equal(1, parser.GetFields().Count);
-            Assert.Equal(1, parser.GetConsts().Count);
+            Assert.Equal(0, parser.GetConsts().Count);
+            Assert.Equal(1, parser.GetEnums().Count);
         }
 
         [Fact]
