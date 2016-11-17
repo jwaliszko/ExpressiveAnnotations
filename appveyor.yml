@@ -18,3 +18,4 @@ test_script:
   - codecov --no-color -f "csharp-coverage.xml" "javascript-coverage.lcov"
 install:
   - choco install firefox -version 46.0.1
+  - npm install uglify-js -g
