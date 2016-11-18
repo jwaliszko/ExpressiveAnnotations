@@ -477,8 +477,10 @@ var
             }
             return typeHelper.tryAutoParse(value, type); // built-in parser lookup - lowest parsing priority
         },
-        tryAutoParse: function(value, type) {            
-            return typeHelper[type].tryParse(value);
+        tryAutoParse: function(value, type) {
+            return typeHelper.hasOwnProperty(type)
+                ? typeHelper[type].tryParse(value)
+                : typeHelper.object.tryParse(value);
         },
         findValueParser: function(field, parser) {
             var parseFunc = typeHelper.parsers[parser]; // custom parsing lookup

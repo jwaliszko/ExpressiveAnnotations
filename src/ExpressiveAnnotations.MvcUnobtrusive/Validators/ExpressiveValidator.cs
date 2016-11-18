@@ -60,7 +60,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                         .Select(kvp => new
                         {
                             FullName = kvp.Key,
-                            ParserAttribute = ((MemberExpression) kvp.Value).Member.GetAttributes<ValueParserAttribute>().SingleOrDefault()
+                            ParserAttribute = (kvp.Value as MemberExpression)?.Member.GetAttributes<ValueParserAttribute>().SingleOrDefault()
                         }).Where(x => x.ParserAttribute != null)
                         .ToDictionary(x => x.FullName, x => x.ParserAttribute.ParserName);
 
