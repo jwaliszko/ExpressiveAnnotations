@@ -381,7 +381,7 @@ namespace ExpressiveAnnotations.Tests
                 Chaaar = 'a',
                 Flag = true,
                 NFlag = true,
-                Text = "hello world",
+                Text = "hello world",                
                 PoliticalStability = Utility.Stability.High,
                 SbyteNumber = SbyteEnum.First,
                 ByteNumber = ByteEnum.First,
@@ -429,7 +429,7 @@ namespace ExpressiveAnnotations.Tests
             Toolchain.Instance.AddFunction("GetModels", () => new[] {model});
             parser.RegisterToolchain();
 
-            Assert.True(parser.Parse<Model, bool>("Chaaar == 'a'").Invoke(model));
+            Assert.True(parser.Parse<Model, bool>("Chaaar == 'a'").Invoke(model));            
 
             Assert.True(parser.Parse<bool>(model.GetType(), "Number < 1").Invoke(model));
             Assert.True(parser.Parse<bool>(model.GetType(), "Number == 0").Invoke(model));
@@ -480,6 +480,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<Model, bool>("Now() - Span > NDate - Span").Invoke(model));
             Assert.True(parser.Parse<Model, bool>("-NSpan == -NSpan").Invoke(model));
             Assert.True(parser.Parse<Model, bool>("+NSpan == +NSpan").Invoke(model));
+            Assert.True(parser.Parse<Model, bool>("SByte + Byte == 0").Invoke(model));
 
             Assert.True(parser.Parse<Model, bool>("DecNumber(SubModel.Number) == Number").Invoke(model));
             Assert.True(parser.Parse<Model, bool>("DecNumber(Number) == 0").Invoke(model.SubModel));
@@ -1056,7 +1057,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Theory]
-        [MemberData("BitwiseOperators")]
+        [MemberData(nameof(BitwiseOperators))]
         public void verify_type_mismatch_errors_for_bitwise_operators(string oper)
         {
             var parser = new Parser();
@@ -1108,7 +1109,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Theory]
-        [MemberData("LogicalOperators")]
+        [MemberData(nameof(LogicalOperators))]
         public void verify_type_mismatch_errors_for_logical_operators(string oper)
         {
             var parser = new Parser();
@@ -1141,7 +1142,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Theory]
-        [MemberData("EqualityOperators")]
+        [MemberData(nameof(EqualityOperators))]
         public void verify_type_mismatch_errors_for_equality_operators(string oper)
         {
             var parser = new Parser();
@@ -1190,7 +1191,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Theory]
-        [MemberData("RelationalOperators")]
+        [MemberData(nameof(RelationalOperators))]
         public void verify_type_mismatch_errors_for_inequality_operators(string oper)
         {
             var parser = new Parser();
@@ -1259,7 +1260,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Theory]
-        [MemberData("AdditiveOperators")]
+        [MemberData(nameof(AdditiveOperators))]
         public void verify_type_mismatch_errors_for_addition_and_subtraction_operators(string oper)
         {
             var parser = new Parser();
@@ -1312,7 +1313,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Theory]
-        [MemberData("MultiplicativeOperators")]
+        [MemberData(nameof(MultiplicativeOperators))]
         public void verify_type_mismatch_errors_for_multiplication_and_division_operators(string oper)
         {
             var parser = new Parser();
@@ -1382,7 +1383,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Theory]
-        [MemberData("UnaryOperators")]
+        [MemberData(nameof(UnaryOperators))]
         public void verify_type_mismatch_errors_for_unary_operators(string oper)
         {
             var parser = new Parser();
@@ -1619,11 +1620,13 @@ namespace ExpressiveAnnotations.Tests
             public TimeSpan? NSpan { get; set; }
             public TimeSpan Span { get; set; }
             public int? Number { get; set; }
-            public char Chaaar { get; set; }
+            public char? Chaaar { get; set; }
             public bool Flag { get; set; }
             public bool? NFlag { get; set; }
             public string Text { get; set; }
             public decimal Cash { get; set; }
+            public byte Byte { get; set; }
+            public sbyte SByte { get; set; }
             public Utility.Stability? PoliticalStability { get; set; }
 
             public SbyteEnum? SbyteNumber { get; set; }

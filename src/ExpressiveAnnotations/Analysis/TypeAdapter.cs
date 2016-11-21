@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace ExpressiveAnnotations.Analysis
@@ -21,10 +22,21 @@ namespace ExpressiveAnnotations.Analysis
                 && oute1.Type.UnderlyingType() != oute2.Type.UnderlyingType()) // various enum types
                 return;
 
-            if (oute1.Type == typeof (string) && oute2.Type == typeof (char)) // convert char to string
+            if (oute1.Type == typeof (string) && oute2.Type.UnderlyingType() == typeof (char)) // convert char to string
                 oute2 = Expression.Call(oute2, typeof (object).GetMethod("ToString"));
-            else if (oute1.Type == typeof (char) && oute2.Type == typeof (string))
+            else if (oute1.Type.UnderlyingType() == typeof (char) && oute2.Type == typeof (string))
                 oute1 = Expression.Call(oute1, typeof (object).GetMethod("ToString"));
+
+            var small = new[] {typeof (sbyte), typeof (byte), typeof (char), typeof(short), typeof(ushort)}; // convart all <32bit integral types to signed int
+
+            if (small.Contains(oute1.Type.UnderlyingType()))
+                oute1 = oute1.Type.IsNullable()
+                    ? Expression.Convert(oute1, typeof (int?))
+                    : Expression.Convert(oute1, typeof (int));
+            if (small.Contains(oute2.Type.UnderlyingType()))
+                oute2 = oute2.Type.IsNullable()
+                    ? Expression.Convert(oute2, typeof (int?))
+                    : Expression.Convert(oute2, typeof (int));
 
             if (operation != TokenType.DIV // do not promote integral numeric values to double - exception for division operation, e.g. 1/2 should evaluate to 0.5 double like in JS
                 && !oute1.Type.IsEnum && !oute2.Type.IsEnum

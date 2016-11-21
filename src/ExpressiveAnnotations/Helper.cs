@@ -154,6 +154,7 @@ namespace ExpressiveAnnotations
             {
                 TypeCode.SByte,     //sbyte
                 TypeCode.Byte,      //byte
+                TypeCode.Char,      //char
                 TypeCode.Int16,     //short
                 TypeCode.UInt16,    //ushort
                 TypeCode.Int32,     //int
@@ -190,6 +191,7 @@ namespace ExpressiveAnnotations
             {
                 typeof (sbyte),
                 typeof (byte),
+                typeof (char),
                 typeof (short),
                 typeof (ushort),
                 typeof (int),

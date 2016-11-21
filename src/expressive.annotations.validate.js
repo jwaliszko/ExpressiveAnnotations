@@ -492,8 +492,8 @@ var
     },
 
     modelHelper = {
-        getPrefix: function(value) {
-            return value.substr(0, value.lastIndexOf('.') + 1);
+        getPrefix: function(str) {
+            return (str !== undefined && str !== null) ? str.substr(0, str.lastIndexOf('.') + 1) : '';
         },
         extractValue: function(form, name, prefix, type, parser) {
             function getValue(element) {
@@ -532,7 +532,7 @@ var
         },
         deserializeObject: function(form, fieldsMap, constsMap, enumsMap, parsersMap, prefix) {
             function buildField(fieldName, fieldValue, object) {
-                var props, parent, i, match, arridx;                
+                var props, parent, i, match, arridx;
                 props = fieldName.split('.');
                 parent = object;
                 for (i = 0; i < props.length - 1; i++) {
