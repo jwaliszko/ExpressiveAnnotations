@@ -38,7 +38,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
                     throw new ApplicationException("Unexpected failure in WebAPI pipeline.");
 
                 TempData["Postbacks"] = Session["Postbacks"];
-                TempData["Success"] = "[query successfully submitted]";                
+                TempData["Success"] = "[query successfully submitted]";
                 TempData["Query"] = model;
                 return RedirectToAction("Index"); // PRG to avoid subsequent form submission attempts on page refresh (http://en.wikipedia.org/wiki/Post/Redirect/Get)
             }
@@ -52,7 +52,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
             {
                 Debug.Assert(Request.Url != null);
                 client.BaseAddress = new Uri($"{Request.Url.Scheme}://{Request.Url.Authority}/");
-                return await client.PostAsync("api/Default/Save", model, new JsonMediaTypeFormatter());                
+                return await client.PostAsync("api/Default/Save", model, new JsonMediaTypeFormatter());
             }
         }
     }

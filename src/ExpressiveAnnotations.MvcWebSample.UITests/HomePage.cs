@@ -118,6 +118,14 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             elem.Clear();
         }
 
+        public bool AsteriskVisible(string id)
+        {
+            var elem = _driver.FindElementByXPath($"//input[@id='{id}'] | //select[@id='{id}'] | //textarea[@id='{id}']");
+            var parent = elem.FindElement(By.XPath(".."));
+            var asterisk = parent.FindElements(By.XPath("span[@class='asterisk']"));
+            return asterisk.Single().Displayed;
+        }
+
         public string GetErrorMessage(string id)
         {
             var elem = _driver.FindElementByXPath($"//span[@data-valmsg-for='{id}']");

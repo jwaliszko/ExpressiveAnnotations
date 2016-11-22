@@ -13,7 +13,7 @@ using ExpressiveAnnotations.Functions;
 namespace ExpressiveAnnotations.Analysis
 {
     /* EBNF grammar:
-     * 
+     *
      * exp         => cond-exp
      * cond-exp    => l-or-exp ["?" exp ":" exp]       // right associative (right recursive)
      * l-or-exp    => l-and-exp  ("||" l-and-exp)*     // left associative (non-recursive alternative to left recursion: [l-or-exp  "||"] l-and-exp)
@@ -28,22 +28,22 @@ namespace ExpressiveAnnotations.Analysis
      * mul-exp     => unary-exp (("*" | "/" | "%")  unary-exp)*
      * unary-exp   => ("+" | "-" | "!" | "~") unary-exp | primary-exp
      * primary-exp => null-lit | bool-lit | num-lit | string-lit | arr-access | id-access | "(" exp ")"
-     * 
+     *
      * arr-access  => arr-lit |                                                                         // [a,b,c]
      *                arr-lit "[" exp "]" ("[" exp "]" | "." identifier)*                               // [a,b,c][d][e].f.g
-     * 
+     *
      * id-access   => identifier |                                                                      // a
      *                identifier ("[" exp "]" | "." identifier)* |                                      // a[b].c
      *                func-call ("[" exp "]" | "." identifier)*                                         // a(b,c,d)[e].f.g
-     *                
+     *
      * func-call   => identifier "(" [exp-list] ")"
-     * 
+     *
      * null-lit    => "null"
      * bool-lit    => "true" | "false"
      * num-lit     => int-lit | float-lit
      * int-lit     => dec-lit | bin-lit | hex-lit
      * array-lit   => "[" [exp-list] "]"
-     * 
+     *
      * exp-list    => exp ("," exp)*
      */
 
@@ -102,15 +102,15 @@ namespace ExpressiveAnnotations.Analysis
                 try
                 {
                     Clear();
-                    ContextType = typeof (TContext);
-                    var param = Expression.Parameter(typeof (TContext));
+                    ContextType = typeof(TContext);
+                    var param = Expression.Parameter(typeof(TContext));
                     ContextExpression = param;
                     ExprString = expression;
                     Expr = new Expr(expression);
                     Tokenize();
                     SyntaxTree = ParseExpression();
                     AssertEndOfExpression();
-                    var convTree = Expression.Convert(SyntaxTree, typeof (TResult));
+                    var convTree = Expression.Convert(SyntaxTree, typeof(TResult));
                     var lambda = Expression.Lambda<Func<TContext, TResult>>(convTree, param);
                     return lambda.Compile();
                 }
@@ -149,14 +149,14 @@ namespace ExpressiveAnnotations.Analysis
                 {
                     Clear();
                     ContextType = context;
-                    var param = Expression.Parameter(typeof (object));
+                    var param = Expression.Parameter(typeof(object));
                     ContextExpression = Expression.Convert(param, context);
                     ExprString = expression;
                     Expr = new Expr(expression);
                     Tokenize();
                     SyntaxTree = ParseExpression();
                     AssertEndOfExpression();
-                    var convTree = Expression.Convert(SyntaxTree, typeof (TResult));
+                    var convTree = Expression.Convert(SyntaxTree, typeof(TResult));
                     var lambda = Expression.Lambda<Func<object, TResult>>(convTree, param);
                     return lambda.Compile();
                 }
@@ -191,14 +191,14 @@ namespace ExpressiveAnnotations.Analysis
                 try
                 {
                     Clear();
-                    ContextType = typeof (object);
-                    ContextExpression = Expression.Parameter(typeof (object));
+                    ContextType = typeof(object);
+                    ContextExpression = Expression.Parameter(typeof(object));
                     ExprString = expression;
                     Expr = new Expr(expression);
                     Tokenize();
                     SyntaxTree = ParseExpression();
                     AssertEndOfExpression();
-                    var convTree = Expression.Convert(SyntaxTree, typeof (TResult));
+                    var convTree = Expression.Convert(SyntaxTree, typeof(TResult));
                     var lambda = Expression.Lambda<Func<TResult>>(convTree);
                     return lambda.Compile();
                 }
@@ -319,7 +319,7 @@ namespace ExpressiveAnnotations.Analysis
         private Expression ParseConditionalExpression()
         {
             var tok = PeekToken();
-            var arg1 = ParseLogicalOrExp();            
+            var arg1 = ParseLogicalOrExp();
             if (PeekType() == TokenType.QMARK)
             {
                 var oper = PeekToken();
@@ -498,9 +498,9 @@ namespace ExpressiveAnnotations.Analysis
                     case TokenType.ADD:
                         arg1 = (arg1.Type.IsString() || arg2.Type.IsString())
                             ? Expression.Add(
-                                Expression.Convert(arg1, typeof (object)),
-                                Expression.Convert(arg2, typeof (object)),
-                                typeof (string).GetMethod("Concat", new[] {typeof (object), typeof (object)})) // convert string + string into a call to string.Concat
+                                Expression.Convert(arg1, typeof(object)),
+                                Expression.Convert(arg2, typeof(object)),
+                                typeof(string).GetMethod("Concat", new[] {typeof(object), typeof(object)})) // convert string + string into a call to string.Concat
                             : Expr.Add(arg1, arg2, oper);
                         break;
                     default:
@@ -601,7 +601,7 @@ namespace ExpressiveAnnotations.Analysis
                     return arg;
                 case TokenType.EOF:
                     throw new ParseErrorException(
-                        "Expected \"null\", bool, int, float, bin, hex, string, array or id. Unexpected end of expression.", ExprString, PeekToken().Location);                
+                        "Expected \"null\", bool, int, float, bin, hex, string, array or id. Unexpected end of expression.", ExprString, PeekToken().Location);
                 default:
                     throw new ParseErrorException(
                         $"Expected \"null\", bool, int, float, bin, hex, string, array or id. Unexpected token: '{PeekRawValue()}'.", ExprString, PeekToken().Location);
@@ -618,28 +618,28 @@ namespace ExpressiveAnnotations.Analysis
         {
             var value = PeekValue();
             ReadToken();
-            return Expression.Constant(value, typeof (int));
+            return Expression.Constant(value, typeof(int));
         }
 
         private Expression ParseFloat()
         {
             var value = PeekValue();
             ReadToken();
-            return Expression.Constant(value, typeof (double));
+            return Expression.Constant(value, typeof(double));
         }
 
         private Expression ParseBool()
         {
             var value = PeekValue();
             ReadToken();
-            return Expression.Constant(value, typeof (bool));
+            return Expression.Constant(value, typeof(bool));
         }
 
         private Expression ParseString()
         {
             var value = PeekValue();
             ReadToken();
-            return Expression.Constant(value, typeof (string));
+            return Expression.Constant(value, typeof(string));
         }
 
         private Expression ParseArrayAccess()
@@ -720,12 +720,12 @@ namespace ExpressiveAnnotations.Analysis
             ReadToken(); // read "]"
 
             if (!args.Any())
-                return Expression.NewArrayInit(typeof (object)); // empty array of objects
+                return Expression.NewArrayInit(typeof(object)); // empty array of objects
 
             var typesMatch = args.Select(x => x.Type).Distinct().Count() == 1;
             return typesMatch
                 ? Expression.NewArrayInit(args[0].Type, args) // items of the same type, array type can be determined
-                : Expression.NewArrayInit(typeof (object), args.Select(x => Expression.Convert(x, typeof (object)))); // items of various types, let it be an array of objects
+                : Expression.NewArrayInit(typeof(object), args.Select(x => Expression.Convert(x, typeof(object)))); // items of various types, let it be an array of objects
         }
 
         private Expression ParseFuncCall(Token func)
@@ -751,7 +751,7 @@ namespace ExpressiveAnnotations.Analysis
 
             return ExtractMethodExpression(name, args, func.Location); // get method call
         }
-        
+
         private Expression ParseAccess(Expression expr, out Token unknownProp)
         {
             unknownProp = null; // unknown token
@@ -780,15 +780,15 @@ namespace ExpressiveAnnotations.Analysis
                         ReadToken(); // read property name
                         break;
                     default: // parse subscrit
-                        Debug.Assert(PeekType() == TokenType.L_BRACKET);                        
+                        Debug.Assert(PeekType() == TokenType.L_BRACKET);
                         ReadToken(); // read "["
                         var idxExprLoc = PeekToken().Location;
                         var idxExpr = ParseExpression();
-                        if (idxExpr.Type != typeof (int))
+                        if (idxExpr.Type != typeof(int))
                             throw new ParseErrorException(
                                 PeekType() == TokenType.EOF
-                                    ? $"Expected index of '{typeof (int)}' type. Unexpected end of expression."
-                                    : $"Expected index of '{typeof (int)}' type. Type '{idxExpr.Type}' cannot be implicitly converted.",
+                                    ? $"Expected index of '{typeof(int)}' type. Unexpected end of expression."
+                                    : $"Expected index of '{typeof(int)}' type. Type '{idxExpr.Type}' cannot be implicitly converted.",
                                 ExprString, idxExprLoc);
                         if (PeekType() != TokenType.R_BRACKET)
                             throw new ParseErrorException(
@@ -983,7 +983,7 @@ namespace ExpressiveAnnotations.Analysis
             var arg = func.GetType().GetGenericArguments().FirstOrDefault();
             var method = arg?.GetMethods().FirstOrDefault();
             var parameter = method?.GetParameters().FirstOrDefault();
-            var indicator = parameter?.GetCustomAttributes(typeof (ParamArrayAttribute), false).Any();
+            var indicator = parameter?.GetCustomAttributes(typeof(ParamArrayAttribute), false).Any();
             return indicator != null && indicator.Value;
         }
 
@@ -992,7 +992,7 @@ namespace ExpressiveAnnotations.Analysis
             Debug.Assert(func != null);
 
             var parameter = func.GetParameters().FirstOrDefault();
-            var indicator = parameter?.GetCustomAttributes(typeof (ParamArrayAttribute), false).Any();
+            var indicator = parameter?.GetCustomAttributes(typeof(ParamArrayAttribute), false).Any();
             return indicator != null && indicator.Value;
         }
 
@@ -1021,7 +1021,7 @@ namespace ExpressiveAnnotations.Analysis
 
             if (parsedArgs.Count == 0)
                 return Expression.Invoke(funcExpr, argsArray);
-            
+
             if (parsedArgs.Count == 1)
             {
                 var bag = parsedArgs.Single();
@@ -1035,7 +1035,7 @@ namespace ExpressiveAnnotations.Analysis
                     return Expression.Invoke(funcExpr, convertedArgs);
                 }
             }
-            
+
             for (var i = 0; i < parsedArgs.Count; i++)
             {
                 var arg = parsedArgs[i].Item1;
@@ -1055,7 +1055,7 @@ namespace ExpressiveAnnotations.Analysis
             ParameterInfo param;
             if (!variable)
             {
-                Debug.Assert(parameters.Length == parsedArgs.Count);                
+                Debug.Assert(parameters.Length == parsedArgs.Count);
                 for (var i = 0; i < parsedArgs.Count; i++)
                 {
                     var arg = parsedArgs[i].Item1;
@@ -1074,7 +1074,7 @@ namespace ExpressiveAnnotations.Analysis
 
             if (parsedArgs.Count == 0)
                 return Expression.Call(ctxExpr, methodInfo, argsArray);
-            
+
             if (parsedArgs.Count == 1)
             {
                 var bag = parsedArgs.Single();
@@ -1088,7 +1088,7 @@ namespace ExpressiveAnnotations.Analysis
                     return Expression.Call(ctxExpr, methodInfo, convertedArgs);
                 }
             }
-            
+
             for (var i = 0; i < parsedArgs.Count; i++)
             {
                 var arg = parsedArgs[i].Item1;
@@ -1099,7 +1099,7 @@ namespace ExpressiveAnnotations.Analysis
             }
             argsArray = Expression.NewArrayInit(paramElemType, convertedArgs);
             return Expression.Call(ctxExpr, methodInfo, argsArray);
-        }        
+        }
 
         private Expression ConvertArgument(Expression arg, Type type, string funcName, int argIdx, Location argPos)
         {
@@ -1126,7 +1126,7 @@ namespace ExpressiveAnnotations.Analysis
         {
             if (signatures > 1)
                 throw new ParseErrorException(
-                    $"Function '{name}' accepting {args} argument{(args == 1 ? string.Empty : "s")} is ambiguous.", 
+                    $"Function '{name}' accepting {args} argument{(args == 1 ? string.Empty : "s")} is ambiguous.",
                     ExprString, pos);
         }
 

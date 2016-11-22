@@ -664,5 +664,53 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                     Home.GetErrorMessage("コメント"));
             });
         }
+
+        [Fact]
+        public void verify_password_is_denoted_as_required()
+        {
+            Watch(() =>
+            {
+                Assert.True(Home.AsteriskVisible("PassportNumber"));
+            });
+        }
+
+        [Fact]
+        public void verify_password_is_denoted_as_required_even_when_valid()
+        {
+            Watch(() =>
+            {
+                Home.WriteInput("PassportNumber", "0123456789");
+                Assert.True(Home.AsteriskVisible("PassportNumber"));
+            });
+        }
+
+        [Fact]
+        public void unselect_goabroad_and_verify_password_is_not_denoted_as_required()
+        {
+            Watch(() =>
+            {
+                Home.ClickCheckbox("GoAbroad");
+                Assert.False(Home.AsteriskVisible("PassportNumber"));
+            });
+        }
+
+        [Fact]
+        public void verify_reason_for_travel_field_is_denoted_as_required_when_any_attribute_demands_it()
+        {
+            Watch(() =>
+            {
+                Assert.False(Home.AsteriskVisible("ReasonForTravel"));
+
+                Home.Select("NextCountry", "Poland");
+                Assert.True(Home.AsteriskVisible("ReasonForTravel"));
+                Home.Select("Age", "15");
+                Assert.True(Home.AsteriskVisible("ReasonForTravel"));
+                Home.Select("NextCountry", "Other");
+                Assert.True(Home.AsteriskVisible("ReasonForTravel"));
+                Home.Select("Age", "");
+
+                Assert.False(Home.AsteriskVisible("ReasonForTravel"));
+            });
+        }
     }
 }

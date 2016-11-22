@@ -27,7 +27,7 @@ namespace ExpressiveAnnotations.Tests
         public static IEnumerable<ExpressiveAttribute> CompileExpressiveAttributes(this Type type)
         {
             var properties = type.GetProperties()
-                .Where(p => Attribute.IsDefined(p, typeof (ExpressiveAttribute)));
+                .Where(p => Attribute.IsDefined(p, typeof(ExpressiveAttribute)));
             var attributes = new List<ExpressiveAttribute>();
 
             foreach (var prop in properties)
@@ -106,7 +106,7 @@ namespace ExpressiveAnnotations.Tests
                     sb.Append(be.NodeType.Symbol());
                     sb.Append(be.Left.PrefixPrint());
                     sb.Append(be.Right.PrefixPrint());
-                }                
+                }
             }
             else if ((ce = exp as ConditionalExpression) != null)
             {
@@ -124,7 +124,7 @@ namespace ExpressiveAnnotations.Tests
                 sb.Append(me.Member.Name);
                 sb.Append("]");
             }
-            else if((mce = exp as MethodCallExpression) != null)
+            else if ((mce = exp as MethodCallExpression) != null)
             {
                 sb.Append(mce.Method.Name);
                 sb.Append($"({string.Join(",", mce.Arguments.Select(arg => arg.PrefixPrint()))})");
@@ -183,7 +183,7 @@ namespace ExpressiveAnnotations.Tests
                     return "/";
                 case ExpressionType.Modulo:
                     return "%";
-                case ExpressionType.OnesComplement:                
+                case ExpressionType.OnesComplement:
                     return "~";
                 case ExpressionType.And:
                     return "&";

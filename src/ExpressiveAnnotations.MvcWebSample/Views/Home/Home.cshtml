@@ -66,12 +66,12 @@
 
             ea.addValueParser('NonStandardDateParser', function(value) { // override default datetime parsing mechanism to deal with yyyy-mm-dd format
                 if (value === '') {
-                    return;        
+                    return;
                 }
 
                 var millisec;
                 if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) { // in case the value does not have non-standard format (here, when language set to english)...
-                    millisec = Date.parse(value); // ...try to go with standard way (default date parser used)                    
+                    millisec = Date.parse(value); // ...try to go with standard way (default date parser used)
                 } else {
                     var arr = value.split('-');
                     var date = new Date(arr[0], arr[1] - 1, arr[2]); // months are 0-based
@@ -147,7 +147,7 @@
                     }, 50);
                 });
 
-                annotateRequiredFields(false);                
+                annotateRequiredFields(false);
             });
 
             function annotateRequiredFields(hideNonRequired) { // an example of how eavalid event can be used (annotate required fields, hide non-required fields, etc.)
@@ -162,12 +162,12 @@
                             this.eacond = undefined; // forget previous condition result which may now have changed
                         }
                     });
-                }); 
+                });
 
                 $form.find(selector).each(function() { // apply asterisks for required or conditionally required fields
                     if ($(this).attr('data-val-required') !== undefined
                         || $(this).attr('data-val-requiredif') !== undefined) {
-                        var div = $(this).closest('div');
+                        var div = $(this).parent('div');
                         div.prepend('<span class="asterisk">*</span>');
                     }
                 });
@@ -200,6 +200,12 @@
                         $(this).parent().find('.field-validation-error').empty();
                     }
                 });
+
+                $form.find(selector).each(function() {
+                    if ($(this).attr('data-val-requiredif') !== undefined) {
+                        this.eacond = undefined; // forget previous condition result which may now have changed
+                    }
+                });
             }
         </script>
     }
@@ -224,7 +230,7 @@
 
             $('input[type="checkbox"], input[type="radio"]').on('change', function() {
                 if (typeof $('form').valid == 'function') {
-                    $(this).valid(); // triggers the validation test on change (jquery.validate.js does not trigger checkbox and radio validation on click, if such a click occurs prior to first submission attempt of entire form - later, validation is triggered 
+                    $(this).valid(); // triggers the validation test on change (jquery.validate.js does not trigger checkbox and radio validation on click, if such a click occurs prior to first submission attempt of entire form - later, validation is triggered
                 }
             }); // (downside of this hack - validation triggered 2 times for these fields after first form submission attempt is done)
 

@@ -12,11 +12,11 @@ using ExpressiveAnnotations.MvcUnobtrusive.Validators;
 namespace ExpressiveAnnotations.MvcUnobtrusive.Providers
 {
     /// <summary>
-    ///     Data annotations validator provider which automatically registers adapters for expressive validation attributes, i.e. <see cref="ExpressiveAttribute" />, 
+    ///     Data annotations validator provider which automatically registers adapters for expressive validation attributes, i.e. <see cref="ExpressiveAttribute" />,
     ///     and additionally respects their processing priorities (if <see cref="ExpressiveAttribute.Priority" /> is specified) when validation is executed.
     /// </summary>
     /// <remarks>
-    ///     Attributes with highest priority (lowest value) will be processed in first place. Attributes without explicitly proivided priorities will be processed later, 
+    ///     Attributes with highest priority (lowest value) will be processed in first place. Attributes without explicitly proivided priorities will be processed later,
     ///     without any specific order.
     /// </remarks>
     public class ExpressiveAnnotationsModelValidatorProvider : DataAnnotationsModelValidatorProvider
@@ -26,8 +26,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Providers
         /// </summary>
         public ExpressiveAnnotationsModelValidatorProvider()
         {
-            RegisterAdapter(typeof (RequiredIfAttribute), typeof (RequiredIfValidator));
-            RegisterAdapter(typeof (AssertThatAttribute), typeof (AssertThatValidator));
+            RegisterAdapter(typeof(RequiredIfAttribute), typeof(RequiredIfValidator));
+            RegisterAdapter(typeof(AssertThatAttribute), typeof(AssertThatValidator));
         }
 
         /// <summary>
@@ -49,11 +49,11 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Providers
                 .OrderBy(x => x.Priority)
                 .Cast<Attribute>()
                 .ToList();
-            
+
             var setToRemove = new HashSet<Attribute>(orderedAttribs);
             allAttribs.RemoveAll(setToRemove.Contains); // allAttribs variable contains only chaotic attribs now
             orderedAttribs.AddRange(allAttribs); // chaotic attribs are added after ordered ones
-            
+
             return base.GetValidators(metadata, context, orderedAttribs);
         }
     }

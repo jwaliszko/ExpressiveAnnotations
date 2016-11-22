@@ -102,7 +102,7 @@ a {
     max-width: 1100px;
     min-height: 750px; /* hack that prevents site from collapsing on reload (probably the reason is some floated elements do not add to the height in the container element) */
 }
-                        
+
 fieldset {
     margin: 0;
     padding-left: 15px;
@@ -187,8 +187,8 @@ button {
 .asterisk {
     color: #ff0000;
     vertical-align: top;
-    margin-right: -5px;
     margin-left: -10px;
+    float: left;
 }
 
 .message-info {

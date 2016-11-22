@@ -22,21 +22,21 @@ namespace ExpressiveAnnotations.Analysis
                 && oute1.Type.UnderlyingType() != oute2.Type.UnderlyingType()) // various enum types
                 return;
 
-            if (oute1.Type == typeof (string) && oute2.Type.UnderlyingType() == typeof (char)) // convert char to string
-                oute2 = Expression.Call(oute2, typeof (object).GetMethod("ToString"));
-            else if (oute1.Type.UnderlyingType() == typeof (char) && oute2.Type == typeof (string))
-                oute1 = Expression.Call(oute1, typeof (object).GetMethod("ToString"));
+            if (oute1.Type == typeof(string) && oute2.Type.UnderlyingType() == typeof(char)) // convert char to string
+                oute2 = Expression.Call(oute2, typeof(object).GetMethod("ToString"));
+            else if (oute1.Type.UnderlyingType() == typeof(char) && oute2.Type == typeof(string))
+                oute1 = Expression.Call(oute1, typeof(object).GetMethod("ToString"));
 
-            var small = new[] {typeof (sbyte), typeof (byte), typeof (char), typeof(short), typeof(ushort)}; // convart all <32bit integral types to signed int
+            var small = new[] {typeof(sbyte), typeof(byte), typeof(char), typeof(short), typeof(ushort)}; // convart all <32bit integral types to signed int
 
             if (small.Contains(oute1.Type.UnderlyingType()))
                 oute1 = oute1.Type.IsNullable()
-                    ? Expression.Convert(oute1, typeof (int?))
-                    : Expression.Convert(oute1, typeof (int));
+                    ? Expression.Convert(oute1, typeof(int?))
+                    : Expression.Convert(oute1, typeof(int));
             if (small.Contains(oute2.Type.UnderlyingType()))
                 oute2 = oute2.Type.IsNullable()
-                    ? Expression.Convert(oute2, typeof (int?))
-                    : Expression.Convert(oute2, typeof (int));
+                    ? Expression.Convert(oute2, typeof(int?))
+                    : Expression.Convert(oute2, typeof(int));
 
             if (operation != TokenType.DIV // do not promote integral numeric values to double - exception for division operation, e.g. 1/2 should evaluate to 0.5 double like in JS
                 && !oute1.Type.IsEnum && !oute2.Type.IsEnum
@@ -52,7 +52,7 @@ namespace ExpressiveAnnotations.Analysis
 
                     return;
                 }
-                
+
                 if (oute1.Type.IsNullable() || oute2.Type.IsNullable())
                 {
                     if (!oute1.Type.IsNullable())
@@ -70,14 +70,14 @@ namespace ExpressiveAnnotations.Analysis
             }
 
             // promote numeric values to double - do computations with higher precision (to be compatible with JavaScript, e.g. 1/2 should evaluate to 0.5 double not 0 int)
-            if (oute1.Type != typeof (double) && oute1.Type != typeof (double?) && oute1.Type.IsNumeric())
+            if (oute1.Type != typeof(double) && oute1.Type != typeof(double?) && oute1.Type.IsNumeric())
                 oute1 = oute1.Type.IsNullable()
-                    ? Expression.Convert(oute1, typeof (double?))
-                    : Expression.Convert(oute1, typeof (double));
-            if (oute2.Type != typeof (double) && oute2.Type != typeof (double?) && oute2.Type.IsNumeric())
+                    ? Expression.Convert(oute1, typeof(double?))
+                    : Expression.Convert(oute1, typeof(double));
+            if (oute2.Type != typeof(double) && oute2.Type != typeof(double?) && oute2.Type.IsNumeric())
                 oute2 = oute2.Type.IsNullable()
-                    ? Expression.Convert(oute2, typeof (double?))
-                    : Expression.Convert(oute2, typeof (double));
+                    ? Expression.Convert(oute2, typeof(double?))
+                    : Expression.Convert(oute2, typeof(double));
 
             if (oute1.Type.UnderlyingType() == oute2.Type.UnderlyingType())
             {
@@ -92,9 +92,9 @@ namespace ExpressiveAnnotations.Analysis
             if (oute1.Type.IsDateTime() && oute2.Type.IsTimeSpan())
             {
                 if (oute1.Type.IsNullable() && !oute2.Type.IsNullable())
-                    oute2 = Expression.Convert(oute2, typeof (TimeSpan?));
+                    oute2 = Expression.Convert(oute2, typeof(TimeSpan?));
                 else if (!oute1.Type.IsNullable() && oute2.Type.IsNullable())
-                    oute1 = Expression.Convert(oute1, typeof (DateTime?));
+                    oute1 = Expression.Convert(oute1, typeof(DateTime?));
             }
         }
     }

@@ -117,29 +117,29 @@ namespace ExpressiveAnnotations.Tests
         public void verify_display_names_extraction_from_given_type()
         {
             // name provided explicitly
-            Assert.Equal("Value_1", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "Value1"));
-            Assert.Equal("Value_1", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "Internal.Value1"));
-            
-            // name provided in resources
-            Assert.Equal("_{Value2}_", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "Value2"));
-            Assert.Equal("_{Value2}_", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "Internal.Value2"));
+            Assert.Equal("Value_1", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Value1"));
+            Assert.Equal("Value_1", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Internal.Value1"));
 
-            var e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "internal"));
+            // name provided in resources
+            Assert.Equal("_{Value2}_", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Value2"));
+            Assert.Equal("_{Value2}_", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Internal.Value2"));
+
+            var e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "internal"));
             Assert.Equal("Display name extraction interrupted. Field internal not found.\r\nParameter name: internal", e.Message);
 
-            e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "Internal.Value123"));
+            e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Internal.Value123"));
             Assert.Equal("Display name extraction interrupted. Field Value123 not found.\r\nParameter name: Internal.Value123", e.Message);
 
-            e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof (Model), "NoName"));
+            e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "NoName"));
             Assert.Equal("No display name provided for NoName field. Use either Display attribute or DisplayName attribute.\r\nParameter name: NoName", e.Message);
         }
 
         [Fact]
         public void verify_fields_names_extraction_based_on_their_display_names() // Display attribute or DisplayName attribute used as a workaround for field name extraction in older versions of MVC where MemberName was not provided in ValidationContext
         {
-            Assert.Equal("Value1", typeof (Model).GetPropertyByDisplayName("Value_1").Name);
-            Assert.Equal("Value2", typeof (Model).GetPropertyByDisplayName("_{Value2}_").Name);
-            Assert.Equal("Internal", typeof (Model).GetPropertyByDisplayName("internal").Name);
+            Assert.Equal("Value1", typeof(Model).GetPropertyByDisplayName("Value_1").Name);
+            Assert.Equal("Value2", typeof(Model).GetPropertyByDisplayName("_{Value2}_").Name);
+            Assert.Equal("Internal", typeof(Model).GetPropertyByDisplayName("internal").Name);
         }
 
         [Fact]
@@ -153,12 +153,12 @@ namespace ExpressiveAnnotations.Tests
             typeProviderMock.Setup(p => p.GetTypes()).Throws(new ReflectionTypeLoadException(new Type[] {null}, null));
             Assert.Empty(typeProviderMock.Object.GetLoadableTypes());
 
-            typeProviderMock.Setup(p => p.GetTypes()).Throws(new ReflectionTypeLoadException(new[] {typeof (object), null}, null));
+            typeProviderMock.Setup(p => p.GetTypes()).Throws(new ReflectionTypeLoadException(new[] {typeof(object), null}, null));
             Assert.Equal(1, typeProviderMock.Object.GetLoadableTypes().Count());
         }
 
         public static IEnumerable<object[]> ErrorData => new[]
-        {            
+        {
             new object[] {new Location(1,1), "\r", @"
 " },
             new object[] {new Location(1,1), "\r", "\r\n" },
@@ -176,7 +176,7 @@ namespace ExpressiveAnnotations.Tests
         };
 
         [Theory]
-        [MemberData("ErrorData")]
+        [MemberData(nameof(ErrorData))]
         public void verify_error_message_construction(Location location, string indication, string expression)
         {
             Assert.Equal(
@@ -193,7 +193,7 @@ namespace ExpressiveAnnotations.Tests
         };
 
         [Theory]
-        [MemberData("BoundaryErrorData")]
+        [MemberData(nameof(BoundaryErrorData))]
         public void verify_error_message_construction_for_boundary_conditions(Location location, string expression)
         {
             Assert.Equal(
@@ -222,7 +222,7 @@ namespace ExpressiveAnnotations.Tests
             [Display(Name = "Value_1")]
             public int? Value1 { get; set; }
 
-            [Display(ResourceType = typeof (Resources), Name = "Value2")]
+            [Display(ResourceType = typeof(Resources), Name = "Value2")]
             public int? Value2 { get; set; }
 
             public string NoName { get; set; }

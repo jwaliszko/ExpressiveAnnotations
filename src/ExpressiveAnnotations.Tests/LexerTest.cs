@@ -100,7 +100,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("'\r\na\r\n b\r\nc\r\n'", tokens[34].Value); // used alternatively to verbatim string (new line \n in expression string literal has been replaced by windows \r\n)
             Assert.Equal(TokenType.STRING, tokens[34].Type);
             Assert.Equal("メidメ", tokens[35].Value);
-            Assert.Equal(TokenType.ID, tokens[35].Type);          
+            Assert.Equal(TokenType.ID, tokens[35].Type);
             Assert.Equal(string.Empty, tokens[36].Value);
             Assert.Equal(TokenType.EOF, tokens[36].Type);
         }
@@ -138,7 +138,7 @@ namespace ExpressiveAnnotations.Tests
 
             var lexer = new Lexer();
             foreach (var temp in CultureInfo.GetCultures(CultureTypes.AllCultures))
-            {                
+            {
                 Thread.CurrentThread.CurrentCulture = temp;
 
                 // literals parsing should not vary across diverse cultures

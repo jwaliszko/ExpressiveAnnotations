@@ -38,7 +38,7 @@ namespace ExpressiveAnnotations.MvcWebSample
 #if !DEBUG
             BundleTable.EnableOptimizations = true; // forces bundling in development phase, where it's disabled by default (here, enabled for non-debug configuration only)
                                                     // (web.[mode].config transformations are normally executed for deploying/publishing, not just for changing the active configuration in VS)
-#endif            
+#endif
         }
     }
 }

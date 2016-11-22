@@ -66,7 +66,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             Assert.Equal(2, storage.Count);
             var a = storage.First();
             Assert.Same(storage.First(), storage.Last());
-            
+
             // cleanups and second run
             storage.Clear();
             counter.Clear();

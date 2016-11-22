@@ -101,35 +101,35 @@ namespace ExpressiveAnnotations
         {
             Debug.Assert(type != null);
 
-            return type == typeof (DateTime) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsDateTime());
+            return type == typeof(DateTime) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsDateTime());
         }
 
         public static bool IsTimeSpan(this Type type)
         {
             Debug.Assert(type != null);
 
-            return type == typeof (TimeSpan) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsTimeSpan());
+            return type == typeof(TimeSpan) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsTimeSpan());
         }
 
         public static bool IsBool(this Type type)
         {
             Debug.Assert(type != null);
 
-            return type == typeof (bool) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsBool());
+            return type == typeof(bool) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsBool());
         }
 
         public static bool IsGuid(this Type type)
         {
             Debug.Assert(type != null);
 
-            return type == typeof (Guid) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsGuid());
+            return type == typeof(Guid) || (type.IsNullable() && Nullable.GetUnderlyingType(type).IsGuid());
         }
 
         public static bool IsString(this Type type)
         {
             Debug.Assert(type != null);
 
-            return type == typeof (string);
+            return type == typeof(string);
         }
 
         public static bool IsEnum(this Type type)
@@ -189,15 +189,15 @@ namespace ExpressiveAnnotations
 
             var orderedTypes = new List<Type>
             {
-                typeof (sbyte),
-                typeof (byte),
-                typeof (char),
-                typeof (short),
-                typeof (ushort),
-                typeof (int),
-                typeof (uint),
-                typeof (long),
-                typeof (ulong)
+                typeof(sbyte),
+                typeof(byte),
+                typeof(char),
+                typeof(short),
+                typeof(ushort),
+                typeof(int),
+                typeof(uint),
+                typeof(long),
+                typeof(ulong)
             };
             return orderedTypes.IndexOf(type.UnderlyingType()) - orderedTypes.IndexOf(other.UnderlyingType());
         }
@@ -209,14 +209,14 @@ namespace ExpressiveAnnotations
 
             var map = new Dictionary<Type, Type>
             {
-                {typeof (sbyte), typeof (sbyte?)},
-                {typeof (byte), typeof (byte?)},
-                {typeof (short), typeof (short?)},
-                {typeof (ushort), typeof (ushort?)},
-                {typeof (int), typeof (int?)},
-                {typeof (uint), typeof (uint?)},
-                {typeof (long), typeof (long?)},
-                {typeof (ulong), typeof (ulong?)}
+                {typeof(sbyte), typeof(sbyte?)},
+                {typeof(byte), typeof(byte?)},
+                {typeof(short), typeof(short?)},
+                {typeof(ushort), typeof(ushort?)},
+                {typeof(int), typeof(int?)},
+                {typeof(uint), typeof(uint?)},
+                {typeof(long), typeof(long?)},
+                {typeof(ulong), typeof(ulong?)}
             };
             return map[type];
         }
@@ -226,21 +226,21 @@ namespace ExpressiveAnnotations
             Debug.Assert(type != null);
 
             return type.IsGenericType
-                   && type.GetGenericTypeDefinition() == typeof (Nullable<>);
+                   && type.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
 
         public static bool IsObject(this Type type)
         {
             Debug.Assert(type != null);
 
-            return typeof (object) == type;
+            return typeof(object) == type;
         }
 
         public static bool IsInteger(this Type type)
         {
             Debug.Assert(type != null);
 
-            return typeof (int) == type;
+            return typeof(int) == type;
         }
 
         public static bool IsNonNullableValueType(this Type type)
@@ -262,7 +262,7 @@ namespace ExpressiveAnnotations
             Debug.Assert(type != null);
 
             return type.IsNullable() ? Nullable.GetUnderlyingType(type) : type;
-        }        
+        }
 
         public static IEnumerable<Type> GetLoadableTypes(this ITypeProvider provider)
         {
@@ -320,7 +320,7 @@ namespace ExpressiveAnnotations
             Debug.Assert(element != null);
 
 #if NET40
-            return element.GetCustomAttributes(typeof (T), false).Cast<T>();
+            return element.GetCustomAttributes(typeof(T), false).Cast<T>();
 #else
             return element.GetCustomAttributes<T>(false);
 #endif
@@ -348,7 +348,7 @@ namespace ExpressiveAnnotations
         public static void ComputeContactLocation(this string input, string output, out int line, out int column)
         {
             Debug.Assert(input != null);
-            Debug.Assert(output != null);            
+            Debug.Assert(output != null);
 
             var redundancy = input.RemoveSuffix(output);
             var lastLineBreak = redundancy.LastIndexOf('\n');

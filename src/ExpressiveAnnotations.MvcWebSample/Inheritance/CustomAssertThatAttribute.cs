@@ -11,7 +11,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Inheritance
         public CustomAssertThatAttribute(string expression)
             : base(expression, () => // alternative way of providing dynamic messages resolution - using error message accessor
                 {
-                    var rm = new ResourceManager(typeof (Resources));
+                    var rm = new ResourceManager(typeof(Resources));
                     return rm.GetString("CustomizedAssertThatDefaultError");
                 })
         {

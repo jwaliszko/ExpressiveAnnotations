@@ -15,7 +15,7 @@ var
             debug: false, // output debug info messages to the web console (should be disabled for release code)
             optimize: true, // if flag is on, requirement expression is not evaluated for empty fields (otherwise, it is evaluated and such an evaluation result is provided to eavalid event)
             enumsAsNumbers: true, // specifies whether values of enum types are internally treated as integral numerics or string identifiers (should be consistent with the way of how input fields values are stored in HTML)
-            dependencyTriggers: 'change keyup', // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names) for which fields directly dependent on referenced DOM field are validated            
+            dependencyTriggers: 'change keyup', // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names) for which fields directly dependent on referenced DOM field are validated
 
             apply: function(options) { // alternative way of settings setup (recommended), crucial to invoke e.g. for new set of dependency triggers to be re-bound
                 function verifySetup() {
@@ -63,7 +63,7 @@ var
         },                                         //             func - parse logic
                                                    // e.g. for objects when stored in non-json format or dates when stored in non-standard format (not proper for Date.parse(dateString)),
                                                    // i.e. suppose DOM field date string is given in dd/mm/yyyy format:
-                                                   // ea.addValueParser('dateparser', function(value, field) { // parameters: value - raw data string extracted by default from DOM element 
+                                                   // ea.addValueParser('dateparser', function(value, field) { // parameters: value - raw data string extracted by default from DOM element
                                                    //                                                          //             field - DOM element name for which parser was invoked
                                                    //     var arr = value.split('/'); return new Date(arr[2], arr[1] - 1, arr[0]).getTime(); // return milliseconds since January 1, 1970, 00:00:00 UTC
                                                    // });
@@ -649,7 +649,7 @@ var
                 }).on(namespacedEvents.join(' '), function(event) {
                     var field = $(this).attr('name');
                     logger.dump(typeHelper.string.format('Dependency validation trigger - {0} event, handled.', event.type));
-                    validationHelper.validateReferences(field, form); // validate referenced fields only                    
+                    validationHelper.validateReferences(field, form); // validate referenced fields only
                 });
             }
         }
@@ -687,23 +687,21 @@ var
     },
 
     computeAssertThat = function(value, element, params) {
-        value = modelHelper.adjustGivenValue(value, element, params); // preprocess given value (here basically we are concerned about determining if such a value is null or not, to determine if the attribute 
+        value = modelHelper.adjustGivenValue(value, element, params); // preprocess given value (here basically we are concerned about determining if such a value is null or not, to determine if the attribute
                                                                       // logic should be invoked or not - full type-detection parsing is not required at this stage, but we may have to extract such a value using
                                                                       // value parser, e.g. for an array which values are distracted among multiple fields)
         if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
             var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model);
             logger.dump(typeHelper.string.format('AssertThat expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
-            if (!modelHelper.ctxEval(params.expression, model)) { // check if the assertion condition is not satisfied
-                return false; // assertion not satisfied => notify
-            }
+            return modelHelper.ctxEval(params.expression, model); // verify assertion, if not satisfied => notify (return false)
         }
         return true;
     },
 
     computeRequiredIf = function(value, element, params) {
         value = modelHelper.adjustGivenValue(value, element, params);
-        
+
         var exprVal, model;
         var message = 'RequiredIf expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}';
         if (!api.settings.optimize) { // no optimization - compute requirement condition despite the fact field value may be provided
@@ -717,23 +715,19 @@ var
             || (!/\S/.test(value) && !params.allowEmpty)) {
 
             if (exprVal !== undefined) {
-                if (exprVal) { // check if the requirement condition is satisfied
-                    return {
-                        valid: false, // requirement confirmed => notify
-                        condition: exprVal
-                    }
+                return {
+                    valid: !exprVal,
+                    condition: exprVal
                 }
             }
 
             model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model);
             logger.dump(typeHelper.string.format(message, element.name, params.expression, model));
-            exprVal = modelHelper.ctxEval(params.expression, model);
-            if (exprVal) { // check if the requirement condition is satisfied
-                return {
-                    valid: false, // requirement confirmed => notify
-                    condition: exprVal
-                }
+            exprVal = modelHelper.ctxEval(params.expression, model); // verify requirement, if satisfied => notify (return false)
+            return {
+                valid: !exprVal,
+                condition: exprVal
             }
         }
         return {

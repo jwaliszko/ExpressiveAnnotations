@@ -61,7 +61,7 @@ namespace ExpressiveAnnotations.Analysis
         /// </summary>
         /// <param name="error">The error message.</param>
         /// <param name="expression">The expression.</param>
-        /// <param name="location">The error location.</param>        
+        /// <param name="location">The error location.</param>
         /// <param name="innerException">The inner exception.</param>
         public ParseErrorException(string error, string expression, Location location, Exception innerException)
             : base(location.BuildParseError(error, expression), innerException)
@@ -80,9 +80,9 @@ namespace ExpressiveAnnotations.Analysis
         protected ParseErrorException(SerializationInfo info, StreamingContext context) // serialization constructor (without it deserialization will fail), protected for unsealed classes, private for sealed classes
             : base(info, context)
         {
-            Error = (string) info.GetValue("Error", typeof (string));
-            Expression = (string) info.GetValue("Expression", typeof (string));
-            Location = (Location) info.GetValue("Location", typeof (Location));
+            Error = (string) info.GetValue("Error", typeof(string));
+            Expression = (string) info.GetValue("Expression", typeof(string));
+            Location = (Location) info.GetValue("Location", typeof(Location));
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace ExpressiveAnnotations.Analysis
 
         /// <summary>
         ///     Gets the expression.
-        /// </summary>        
+        /// </summary>
         public string Expression { get; private set; }
 
         /// <summary>
@@ -106,14 +106,14 @@ namespace ExpressiveAnnotations.Analysis
         /// <param name="info">The information.</param>
         /// <param name="context">The context.</param>
         [SecurityCritical]
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)] // deny creating an object of this type from a data that wasn't created by this serialization code 
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)] // deny creating an object of this type from a data that wasn't created by this serialization code
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             Debug.Assert(info != null);
 
-            info.AddValue("Error", Error, typeof (string));
-            info.AddValue("Expression", Expression, typeof (string));
-            info.AddValue("Location", Location, typeof (Location));            
+            info.AddValue("Error", Error, typeof(string));
+            info.AddValue("Expression", Expression, typeof(string));
+            info.AddValue("Location", Location, typeof(Location));
             base.GetObjectData(info, context);
         }
     }

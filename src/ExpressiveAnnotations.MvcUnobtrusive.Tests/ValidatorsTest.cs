@@ -44,7 +44,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             Assert.Equal(27, i); // 27 attributes passed
             Assert.Equal(
                 "AssertThatValidator: collecting of client validation rules for Value field failed.",
-                e.Message);                
+                e.Message);
             Assert.IsType<InvalidOperationException>(e.InnerException);
             Assert.Equal(
                 "No more than 27 unique attributes of the same type can be applied for a single field or property.",
@@ -262,10 +262,10 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
     ^--- Invalid token.",
                 e.InnerException.Message);
 
-            e = Assert.Throws<ValidationException>(() => new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute("Value > #")));            
+            e = Assert.Throws<ValidationException>(() => new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute("Value > #")));
             Assert.Equal(
                 "RequiredIfValidator: validation applied to Value field failed.",
-                e.Message);                
+                e.Message);
             Assert.IsType<ParseErrorException>(e.InnerException);
             Assert.Equal(
                 @"Parse error on line 1, column 9:
@@ -448,7 +448,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             const int testLoops = 10;
             var generatedCode = Enumerable.Repeat(0, 100).Select(x => "!(1 < 0*~0)")
                 .Aggregate("!(1 < 0*~0)", (accumulator, item) => $"({accumulator} && {item})"); // give the parser some work (deep dive)
-            
+
             var model = new Model();
             var metadata = GetModelMetadata(model, m => m.Value);
             var controllerContext = GetControllerContext();
@@ -513,7 +513,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             [Display(Name = "_{Value}_")]
             public int Value { get; set; }
 
-            [Display(ResourceType = typeof (Resources), Name = "Lang")]
+            [Display(ResourceType = typeof(Resources), Name = "Lang")]
             public string Lang { get; set; }
         }
 

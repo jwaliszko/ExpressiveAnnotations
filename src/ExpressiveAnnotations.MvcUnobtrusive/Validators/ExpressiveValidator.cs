@@ -39,7 +39,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
 
                 var fieldId = $"{metadata.ContainerType.FullName}.{metadata.PropertyName}".ToLowerInvariant();
                 AttributeFullId = $"{attribute.TypeId}.{fieldId}".ToLowerInvariant();
-                AttributeWeakId = $"{typeof (T).FullName}.{fieldId}".ToLowerInvariant();
+                AttributeWeakId = $"{typeof(T).FullName}.{fieldId}".ToLowerInvariant();
                 FieldName = metadata.PropertyName;
 
                 ResetSuffixAllocation();
@@ -150,7 +150,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
 
         /// <summary>
         ///     Gets name of the annotated field.
-        /// </summary>        
+        /// </summary>
         private string FieldName { get; set; }
 
         /// <summary>

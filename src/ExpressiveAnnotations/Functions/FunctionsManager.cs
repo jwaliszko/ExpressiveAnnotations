@@ -13,7 +13,7 @@ namespace ExpressiveAnnotations.Functions
     ///     Registers new functions of predefined signatures.
     /// </summary>
     /// <seealso cref="IFunctionsManager" />
-    /// <seealso cref="IFunctionsProvider" />    
+    /// <seealso cref="IFunctionsProvider" />
     public class FunctionsManager : IFunctionsManager, IFunctionsProvider
     {
         /// <summary>

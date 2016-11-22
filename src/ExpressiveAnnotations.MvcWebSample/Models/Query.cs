@@ -58,27 +58,27 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 
         public TimeSpan WeekPeriod => new TimeSpan(7, 0, 0, 0);
 
-        [Display(ResourceType = typeof (Resources), Name = nameof(Resources.GoAbroad))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.GoAbroad))]
         public bool GoAbroad { get; set; }
-        
-        [Required(ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.FieldRequired))]
-        [Display(ResourceType = typeof (Resources), Name = nameof(Resources.Age))]
+
+        [Required(ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.FieldRequired))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.Age))]
         public ushort? Age { get; set; }
 
         [RequiredIf("GoAbroad == true", ErrorMessage = "?")]
         public string ID { get; set; }
 
         [RequiredIf("GoAbroad == true",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.FieldConditionallyRequired))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.FieldConditionallyRequired))]
         [AssertThat("IsDigitChain(PassportNumber)",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.DigitsOnlyAccepted))]
-        [Display(ResourceType = typeof (Resources), Name = nameof(Resources.PassportNumber))]
-        public string PassportNumber { get; set; }        
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.DigitsOnlyAccepted))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.PassportNumber))]
+        public string PassportNumber { get; set; }
 
-        [Display(ResourceType = typeof (Resources), Name = nameof(Resources.Country))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.Country))]
         public string Country { get; set; }
 
-        [Display(ResourceType = typeof (Resources), Name = nameof(Resources.NextCountry))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.NextCountry))]
         public string NextCountry { get; set; }
 
         [RequiredIf(@"GoAbroad == true
@@ -86,12 +86,12 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
                              (NextCountry != 'Other' && NextCountry == Country)
                              || (Age > 24 && 55 >= Age)
                          )",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.ReasonForTravelRequired))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.ReasonForTravelRequired))]
         [RequiredIf("ArrayContains(Age, [15, 16, 17])", // alternative without array literal: ArrayContains(Age, EarlyYears)",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.ReasonForTravelRequiredForYouth))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.ReasonForTravelRequiredForYouth))]
         [AssertThat(@"ReasonForTravel != 'John\'s cat named ""\\\'""\n (Backslash Quote)' && ReasonForTravel != SIMONS_CAT",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.SecretAnswerDetected))]
-        [Display(ResourceType = typeof (Resources), Name = nameof(Resources.ReasonForTravel))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.SecretAnswerDetected))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.ReasonForTravel))]
         public string ReasonForTravel { get; set; }
 
         [UIHint("ISO8601Date")]
@@ -100,90 +100,90 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public DateTime LatestSuggestedReturnDate { get; set; }
 
         [RequiredIf("GoAbroad == true",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.FieldConditionallyRequired))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.FieldConditionallyRequired))]
         [AssertThat("ReturnDate >= Today()", Priority = 1, // to be invoked firstly
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.FutureDateRequired))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.FutureDateRequired))]
         [AssertThat("ReturnDate >= Today() + WeekPeriod", Priority = 2, // to be invoked secondly
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.MoreThanAWeekRequired))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.MoreThanAWeekRequired))]
         [AssertThat("ReturnDate < AddYears(Today(), 1)",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.NoMoreThanAYear))]
-        [Display(ResourceType = typeof (Resources), Name = nameof(Resources.ReturnDate))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.NoMoreThanAYear))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.ReturnDate))]
         [ValueParser("NonStandardDateParser")]
         public DateTime? ReturnDate { get; set; }
 
         [RequiredIf("GoAbroad == true && ReturnDate > LatestSuggestedReturnDate", AllowEmptyStrings = true,
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.ReasonForLongTravelRequired))]
-        [Display(ResourceType = typeof (Resources), Name = nameof(Resources.ReasonForLongTravel))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.ReasonForLongTravelRequired))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.ReasonForLongTravel))]
         public string ReasonForLongTravel { get; set; }
 
         [RequiredIf("GoAbroad == true",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.FieldConditionallyRequired))]
-        [Display(ResourceType = typeof (Resources), Name = nameof(Resources.PoliticalStability))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.FieldConditionallyRequired))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.PoliticalStability))]
         public Stability? PoliticalStability { get; set; }
 
         //[AssertThat(@"(
         //                  AwareOfTheRisks == true
         //                  && (PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain)
-        //              ) 
+        //              )
         //              || PoliticalStability == null || PoliticalStability == Stability.High",
-        //    ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.AwareOfTheRisksRequired))]
+        //    ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.AwareOfTheRisksRequired))]
         [AssertThat("(PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain) ? AwareOfTheRisks == true : true", // expresses the same as the assertion above
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.AwareOfTheRisksRequired))]
-        [Display(ResourceType = typeof (Resources), Name = nameof(Resources.AwareOfTheRisks))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.AwareOfTheRisks))]
         public bool AwareOfTheRisks { get; set; }
 
-        [Display(ResourceType = typeof (Resources), Name = nameof(Resources.SportType))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.SportType))]
         public string SportType { get; set; }
 
         [RequiredIf("SportType == 'Extreme' || (SportType != 'None' && GoAbroad == true)",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.BloodTypeRequired))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.BloodTypeRequired))]
         [AssertThat("IsBloodType(Trim(BloodType))",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.BloodTypeInvalid))]
-        [Display(ResourceType = typeof (Resources), Name = nameof(Resources.BloodType))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.BloodTypeInvalid))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.BloodType))]
         public string BloodType { get; set; }
 
         [AssertThat("AgreeForContact == true",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.AgreeForContactRequired))]
-        [Display(ResourceType = typeof (Resources), Name = nameof(Resources.AgreeForContact))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.AgreeForContactRequired))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.AgreeForContact))]
         public bool AgreeForContact { get; set; }
 
         [RequiredIf(@"AgreeForContact == true
                       && (ContactDetails.Email != null || ContactDetails.Phone != null)
                       && (ContactDetails.Addresses[0].Details != null || ContactDetails.Addresses[1].Details != null)",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.ImmediateContactRequired))]
-        [Display(ResourceType = typeof (Resources), Name = nameof(Resources.ImmediateContact))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.ImmediateContactRequired))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.ImmediateContact))]
         public bool? ImmediateContact { get; set; }
 
         [AssertThat(@"FlightId != Guid('00000000-0000-0000-0000-000000000000') || !GoAbroad",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.FlightIdentifierInvalid))]        
-        [Display(ResourceType = typeof (Resources), Name = nameof(Resources.FlightId))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.FlightIdentifierInvalid))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.FlightId))]
         public Guid FlightId { get; set; }
 
         [RequiredIf("GoAbroad == true",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.FieldConditionallyRequired))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.FieldConditionallyRequired))]
         [AssertThat(@"GoAbroad
                           ? ArrayLength(SelectedDonations) > 2
                           : ArrayLength(SelectedDonations) > 1",
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.NotEnoughDonations))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.NotEnoughDonations))]
         [ValueParser("ArrayParser")]
-        [Display(ResourceType = typeof (Resources), Name = nameof(Resources.Donation))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.Donation))]
         public int[] SelectedDonations { get; set; }
 
         [CustomRequiredIf("GoAbroad == true")]
         [CustomAssertThat("Length(コメント) > 1e1 - 1", Priority = 2)]
-        [CustomAssertThat("Length(コメント) > 1e1 - 6", Priority = 1, 
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.JustAFewCharsMore))]
-        [Display(ResourceType = typeof (Resources), Name = nameof(Resources.Comment))]
+        [CustomAssertThat("Length(コメント) > 1e1 - 6", Priority = 1,
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.JustAFewCharsMore))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.Comment))]
         public string コメント { get; set; }
 
         public Contact ContactDetails { get; set; }
 
         public bool IsBloodType(string group)
         {
-            return Regex.IsMatch(group, @"^(A|B|AB|0)[\+-]$"); /* Reminder: verbatim string usage is adviced when working with regex patterns. Regex patterns are full of backslashes, 
-                                                                * and backslash characters need to be escaped in regular string literals. Verbatim string literal, on the other hand, 
-                                                                * is such a string which does not need to be escaped. It is treated literally by the compiler, since compiler does not 
-                                                                * interpret backslash control characters anymore - they lose any special significance for it (one thing to remember is 
+            return Regex.IsMatch(group, @"^(A|B|AB|0)[\+-]$"); /* Reminder: verbatim string usage is adviced when working with regex patterns. Regex patterns are full of backslashes,
+                                                                * and backslash characters need to be escaped in regular string literals. Verbatim string literal, on the other hand,
+                                                                * is such a string which does not need to be escaped. It is treated literally by the compiler, since compiler does not
+                                                                * interpret backslash control characters anymore - they lose any special significance for it (one thing to remember is
                                                                 * usage of "" for quote escape sequence: http://msdn.microsoft.com/en-us/library/aa691090(v=vs.71).aspx).
                                                                 */
         }

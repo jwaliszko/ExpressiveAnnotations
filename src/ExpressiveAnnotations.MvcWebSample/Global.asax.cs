@@ -12,7 +12,7 @@ using ExpressiveAnnotations.MvcWebSample.Misc;
 
 namespace ExpressiveAnnotations.MvcWebSample
 {
-    // Note: For instructions on enabling IIS6 or IIS7 classic mode, 
+    // Note: For instructions on enabling IIS6 or IIS7 classic mode,
     // visit http://go.microsoft.com/?LinkId=9394801
     public class MvcApplication : HttpApplication
     {
@@ -28,8 +28,8 @@ namespace ExpressiveAnnotations.MvcWebSample
             // ea model validation provider added here, it automatically registers adapters for expressive validation attributes and respects their processing priorities when validation is performed
             // RegisterExpressiveModelValidatorProvider();
 
-            // just for demo, if you redefine attributes and validators, because you need to e.g. override global error messages, register them here as well            
-            // RegisterAdditionalExpressiveAttributes();            
+            // just for demo, if you redefine attributes and validators, because you need to e.g. override global error messages, register them here as well
+            // RegisterAdditionalExpressiveAttributes();
 
             // best way - write custom provider by inheriting from ExpressiveAnnotationsModelValidatorProvider, and do it all there (keeps priorities working everywhere)
             RegisterCustomExpressiveModelValidatorProvider();
@@ -47,9 +47,9 @@ namespace ExpressiveAnnotations.MvcWebSample
         //private static void RegisterExpressiveAttributes()
         //{
         //    DataAnnotationsModelValidatorProvider.RegisterAdapter(
-        //        typeof (RequiredIfAttribute), typeof (RequiredIfValidator));
+        //        typeof(RequiredIfAttribute), typeof(RequiredIfValidator));
         //    DataAnnotationsModelValidatorProvider.RegisterAdapter(
-        //        typeof (AssertThatAttribute), typeof (AssertThatValidator));
+        //        typeof(AssertThatAttribute), typeof(AssertThatValidator));
         //}
 
         //private static void RegisterExpressiveModelValidatorProvider()
@@ -62,9 +62,9 @@ namespace ExpressiveAnnotations.MvcWebSample
         //private static void RegisterAdditionalExpressiveAttributes()
         //{
         //    DataAnnotationsModelValidatorProvider.RegisterAdapter(
-        //        typeof (CustomRequiredIfAttribute), typeof (CustomRequiredIfValidator));
+        //        typeof(CustomRequiredIfAttribute), typeof(CustomRequiredIfValidator));
         //    DataAnnotationsModelValidatorProvider.RegisterAdapter(
-        //        typeof (CustomAssertThatAttribute), typeof (CustomAssertThatValidator));
+        //        typeof(CustomAssertThatAttribute), typeof(CustomAssertThatValidator));
         //}
 
         private static void RegisterCustomExpressiveModelValidatorProvider()

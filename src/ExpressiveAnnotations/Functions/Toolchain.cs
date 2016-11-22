@@ -27,7 +27,7 @@ namespace ExpressiveAnnotations.Functions
     ///     Contains a set of predefined methods.
     /// </summary>
     /// <seealso cref="IFunctionsProvider" />
-    /// <seealso cref="IFunctionsManager" />    
+    /// <seealso cref="IFunctionsManager" />
     /// <seealso cref="IFunctionsProvider" />
     public class Toolchain : IFunctionsManager, IFunctionsProvider
     {
@@ -71,10 +71,10 @@ namespace ExpressiveAnnotations.Functions
             AddFunction<string, string, bool>("IsRegexMatch", (str, regex) => str != null && regex != null && Regex.IsMatch(str, regex));
             AddFunction<string, Guid>("Guid", str => new Guid(str));
             AddFunction("Min", (Expression<ParamsDelegate<double, double>>)(items => items.Min()));
-            AddFunction("Max", (Expression<ParamsDelegate<double, double>>)(items => items.Max()));            
+            AddFunction("Max", (Expression<ParamsDelegate<double, double>>)(items => items.Max()));
             AddFunction("Sum", (Expression<ParamsDelegate<double, double>>)(items => items.Sum()));
             AddFunction("Average", (Expression<ParamsDelegate<double, double>>)(items => items.Average()));
-        }        
+        }
 
         /// <summary>
         /// Gets the singleton instance.

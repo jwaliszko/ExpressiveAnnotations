@@ -100,9 +100,9 @@ namespace ExpressiveAnnotations.Analysis
 
         public void OfType<T>(Expression arg, Location pos)
         {
-            if (arg.Type != typeof (T))
+            if (arg.Type != typeof(T))
                 throw new ParseErrorException(
-                    $"Argument must be of type '{typeof (T)}'.", ExprString, pos);
+                    $"Argument must be of type '{typeof(T)}'.", ExprString, pos);
         }
 
         private void AssertArgsNotNullLiterals(Expression arg1, Expression arg2, Token oper)

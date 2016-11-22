@@ -63,12 +63,12 @@ namespace ExpressiveAnnotations.Attributes
 
         /// <summary>
         ///     Gets the parser.
-        /// </summary>        
+        /// </summary>
         protected Parser Parser { get; private set; }
 
         /// <summary>
         ///     Gets the annotated property type.
-        /// </summary>        
+        /// </summary>
         protected Type PropertyType { get; private set; }
 
         /// <summary>
@@ -77,10 +77,10 @@ namespace ExpressiveAnnotations.Attributes
         public string Expression { get; private set; }
 
         /// <summary>
-        ///     Gets or sets the hint, available for any concerned external components, indicating the order in which this attribute should be 
+        ///     Gets or sets the hint, available for any concerned external components, indicating the order in which this attribute should be
         ///     executed among others of its kind, i.e. <see cref="ExpressiveAttribute" />.
         ///     <para>
-        ///         Consumers must use the <see cref="GetPriority" /> method to retrieve the value, as this property getter will throw an 
+        ///         Consumers must use the <see cref="GetPriority" /> method to retrieve the value, as this property getter will throw an
         ///         exception if the value has not been set.
         ///     </para>
         /// </summary>
@@ -92,14 +92,14 @@ namespace ExpressiveAnnotations.Attributes
         /// </remarks>
         /// <exception cref="System.InvalidOperationException">
         ///     If the getter of this property is invoked when the value has not been explicitly set using the setter.
-        /// </exception> 
+        /// </exception>
         public int Priority
         {
             get
             {
                 if (!_priority.HasValue)
                     throw new InvalidOperationException(
-                        $"The {"Priority"} property has not been set. Use the {"GetPriority"} method to get the value.");
+                        $"The {nameof(Priority)} property has not been set. Use the {nameof(GetPriority)} method to get the value.");
                 return _priority.Value;
             }
             set { _priority = value; }
@@ -108,9 +108,9 @@ namespace ExpressiveAnnotations.Attributes
         /// <summary>
         ///     When implemented in a derived class, gets a unique identifier for this <see cref="T:System.Attribute" />.
         /// </summary>
-        public override object TypeId => $"{GetType().FullName}[{Regex.Replace(Expression, @"\s+", string.Empty)}]"; /* distinguishes instances based on provided expressions - that way of TypeId creation is chosen over the alternatives below: 
-                                                                                                                      *     - returning new object - it is too much, instances would be always different, 
-                                                                                                                      *     - returning hash code based on expression - can lead to collisions (infinitely many strings can't be mapped injectively into any finite set - best unique identifier for string is the string itself) 
+        public override object TypeId => $"{GetType().FullName}[{Regex.Replace(Expression, @"\s+", string.Empty)}]"; /* distinguishes instances based on provided expressions - that way of TypeId creation is chosen over the alternatives below:
+                                                                                                                      *     - returning new object - it is too much, instances would be always different,
+                                                                                                                      *     - returning hash code based on expression - can lead to collisions (infinitely many strings can't be mapped injectively into any finite set - best unique identifier for string is the string itself)
                                                                                                                       */
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace ExpressiveAnnotations.Attributes
         ///     Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        ///     A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        ///     A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
         public override int GetHashCode()
         {
@@ -194,7 +194,7 @@ namespace ExpressiveAnnotations.Attributes
             {
                 throw new FormatException(
                     $"Problem with error message processing. The message is following: {ErrorMessageString}", e);
-            }            
+            }
         }
 
         /// <summary>
@@ -231,7 +231,7 @@ namespace ExpressiveAnnotations.Attributes
                     $"Problem with error message processing. The message is following: {ErrorMessageString}", e);
             }
         }
-        
+
         /// <summary>
         ///     Gets the value of <see cref="Priority" /> if it has been set, or <c>null</c>.
         /// </summary>
@@ -268,7 +268,7 @@ namespace ExpressiveAnnotations.Attributes
         /// <exception cref="System.ComponentModel.DataAnnotations.ValidationException"></exception>
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
-            Debug.Assert(validationContext != null);            
+            Debug.Assert(validationContext != null);
 
             try
             {

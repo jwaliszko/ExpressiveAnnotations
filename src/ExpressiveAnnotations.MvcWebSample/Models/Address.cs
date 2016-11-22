@@ -7,9 +7,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public string Type { get; set; }
 
         [AssertThat("StartsWith(Details, StreetPrefix)", Priority = 1,
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.AddressDetailsFormatInvalid))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.AddressDetailsFormatInvalid))]
         [AssertThat("Length(Trim(Details)) > Length(StreetPrefix) + 1", Priority = 2,
-            ErrorMessageResourceType = typeof (Resources), ErrorMessageResourceName = nameof(Resources.AddressDetailsTooShort))]
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.AddressDetailsTooShort))]
         public string Details { get; set; }
 
         public string StreetPrefix => Resources.StreetPrefix;

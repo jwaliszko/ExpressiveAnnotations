@@ -26,7 +26,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
         public CultureInfo Load(HttpContextBase httpContext)
         {
             var culture = GetValueFromCookie(httpContext);
-            if (culture != null) 
+            if (culture != null)
                 return culture;
 
             culture = CultureInfo.CreateSpecificCulture("en"); // force default culture to be "en"

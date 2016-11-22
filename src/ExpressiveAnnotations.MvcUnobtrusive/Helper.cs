@@ -62,7 +62,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive
             level = -1;
 
             var segmentsA = listA.Select(x => x.Split('.')).ToList();
-            var segmentsB = listB.Select(x => x.Split('.')).ToList();            
+            var segmentsB = listB.Select(x => x.Split('.')).ToList();
 
             foreach (var segA in segmentsA)
             {
@@ -83,7 +83,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive
                         name = segA[boundary];
                         level = boundary;
                         return true;
-                    }                    
+                    }
                 }
             }
             return false;

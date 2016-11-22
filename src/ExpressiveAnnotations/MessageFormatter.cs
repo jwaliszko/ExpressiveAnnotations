@@ -67,7 +67,7 @@ namespace ExpressiveAnnotations
                 message.Append(current.Uuid);
             }
 
-            if(prev != null)            
+            if (prev != null)
                 message.Append(input.Substring(prev.Index + prev.Length));
 
             return message.Length > 0 ? message.ToString() : input;

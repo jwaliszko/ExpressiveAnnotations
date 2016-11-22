@@ -193,7 +193,7 @@ namespace ExpressiveAnnotations.Tests
         {
             var parser = new Parser();
             Toolchain.Instance.AddFunction("ArrayLength", (object arr) => ((Array) arr).Length);
-            parser.RegisterToolchain();            
+            parser.RegisterToolchain();
 
             Assert.True(parser.Parse<bool>("YesNo.Yes == 0").Invoke());
             Assert.True(parser.Parse<bool>("YesNo.Yes < YesNo.No").Invoke());
@@ -227,9 +227,9 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.True(parser.Parse<bool>("(true || ((true || (false || true)))) || (true && true && false || (false || true && (true && true || ((false))))) && false").Invoke());
             Assert.True(parser.Parse<bool>("( !!((!(!!!true || !!false || !true))) && true && !(true && false) ) && (!((!(!true))) || !!!(((!true))))").Invoke());
-            
-            Assert.True(parser.Parse<bool>("(0b0101 & 0b1100) == 0b0100").Invoke());            
-            Assert.True(parser.Parse<bool>("(0b0101 | 0b1100) == 0b1101").Invoke());            
+
+            Assert.True(parser.Parse<bool>("(0b0101 & 0b1100) == 0b0100").Invoke());
+            Assert.True(parser.Parse<bool>("(0b0101 | 0b1100) == 0b1101").Invoke());
             Assert.True(parser.Parse<bool>("(0b0101 ^ 0b1100) == 0b1001").Invoke());
             Assert.True(parser.Parse<bool>("(5 & 12) == 4").Invoke());
             Assert.True(parser.Parse<bool>("(5 | 12) == 13").Invoke());
@@ -252,7 +252,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<bool>("8 >> 2 >> 1 << 1 << 2 == 8").Invoke());
 
             Assert.True(parser.Parse<bool>("0 == 0 && 1 < 2").Invoke());
-                                             
+
             Assert.False(parser.Parse<bool>("0 != 0").Invoke());
             Assert.True(parser.Parse<bool>("0 >= 0").Invoke());
             Assert.True(parser.Parse<bool>("0 <= 0").Invoke());
@@ -381,7 +381,7 @@ namespace ExpressiveAnnotations.Tests
                 Chaaar = 'a',
                 Flag = true,
                 NFlag = true,
-                Text = "hello world",                
+                Text = "hello world",
                 PoliticalStability = Utility.Stability.High,
                 SbyteNumber = SbyteEnum.First,
                 ByteNumber = ByteEnum.First,
@@ -400,14 +400,14 @@ namespace ExpressiveAnnotations.Tests
                 IntJaggedArray = new[]
                 {
                   new[] {1,2,3},
-                  new[] {4,5,6},    
+                  new[] {4,5,6},
                 },
                 Array = new[]
                 {
                     new Model {Number = -1, Array = new[] {new Model {Number = -2}}},
                     new Model {Number = 1, Array = new[] {new Model {Number = 2}}}
                 },
-                Collection = new CustomCollection<Model>(),                
+                Collection = new CustomCollection<Model>(),
                 SubModel = new Model
                 {
                     NDate = now.AddDays(1),
@@ -429,7 +429,7 @@ namespace ExpressiveAnnotations.Tests
             Toolchain.Instance.AddFunction("GetModels", () => new[] {model});
             parser.RegisterToolchain();
 
-            Assert.True(parser.Parse<Model, bool>("Chaaar == 'a'").Invoke(model));            
+            Assert.True(parser.Parse<Model, bool>("Chaaar == 'a'").Invoke(model));
 
             Assert.True(parser.Parse<bool>(model.GetType(), "Number < 1").Invoke(model));
             Assert.True(parser.Parse<bool>(model.GetType(), "Number == 0").Invoke(model));
@@ -522,22 +522,22 @@ namespace ExpressiveAnnotations.Tests
                                     && Collection[true ? 0 : 1].Number < 0
                                     && PoliticalStability == Utility.Stability.High
                                 )
-                         ) 
+                         )
                       && Const + Tools.Utility.Const == 'insideoutside2'";
             var func = parser.Parse<bool>(model.GetType(), expression);
             Assert.True(func(model));
 
             parser.GetFields()["Flag"] = null; // try to mess up with internal fields - original data should not be affected
-            var parsedFields = parser.GetFields();            
+            var parsedFields = parser.GetFields();
             var expectedFields = new Dictionary<string, Type>
             {
-                {"Flag", typeof (bool)},
-                {"Text", typeof (string)},
-                {"Date", typeof (DateTime)},
-                {"SubModel.Date", typeof (DateTime)},
-                {"Number", typeof (int?)},
-                {"Collection[true ? 0 : 1].Number", typeof (int?)},
-                {"PoliticalStability", typeof (Utility.Stability?)}                
+                {"Flag", typeof(bool)},
+                {"Text", typeof(string)},
+                {"Date", typeof(DateTime)},
+                {"SubModel.Date", typeof(DateTime)},
+                {"Number", typeof(int?)},
+                {"Collection[true ? 0 : 1].Number", typeof(int?)},
+                {"PoliticalStability", typeof(Utility.Stability?)}
             };
             Assert.Equal(expectedFields.Count, parsedFields.Count);
             Assert.True(
@@ -546,7 +546,7 @@ namespace ExpressiveAnnotations.Tests
                            EqualityComparer<Type>.Default.Equals(expectedFields[key], parsedFields[key].Type)));
 
             parser.GetConsts()["Const"] = null; // try to mess up with internal fields - original data should not be affected
-            var parsedConsts = parser.GetConsts();            
+            var parsedConsts = parser.GetConsts();
             var expectedConsts = new Dictionary<string, object>
             {
                 {"Const", Model.Const},
@@ -598,8 +598,8 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<bool>(firstDerived.GetType(), "Value").Invoke(firstDerived));
             Assert.True(parser.Parse<bool>(secondDerived.GetType(), "Value").Invoke(secondDerived));
 
-            Assert.True(parser.Parse<bool>(typeof (ModelBase), "Value").Invoke(firstDerived));
-            Assert.True(parser.Parse<bool>(typeof (ModelBase), "Value").Invoke(secondDerived));
+            Assert.True(parser.Parse<bool>(typeof(ModelBase), "Value").Invoke(firstDerived));
+            Assert.True(parser.Parse<bool>(typeof(ModelBase), "Value").Invoke(secondDerived));
         }
 
         [Fact]
@@ -613,7 +613,7 @@ namespace ExpressiveAnnotations.Tests
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object, bool>("1"));
             Assert.Equal("Parse fatal error.", e.Message);
 
-            e = Assert.Throws<ParseErrorException>(() => parser.Parse<bool>(typeof (object), "1"));
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<bool>(typeof(object), "1"));
             Assert.Equal("Parse fatal error.", e.Message);
         }
 
@@ -630,7 +630,7 @@ namespace ExpressiveAnnotations.Tests
 
             e = Assert.Throws<ArgumentNullException>(() => parser.Parse<bool>(null, null));
             Assert.Equal("Context not provided.\r\nParameter name: context", e.Message);
-            e = Assert.Throws<ArgumentNullException>(() => parser.Parse<bool>(typeof (object), null));
+            e = Assert.Throws<ArgumentNullException>(() => parser.Parse<bool>(typeof(object), null));
             Assert.Equal("Expression not provided.\r\nParameter name: expression", e.Message);
         }
 
@@ -671,7 +671,7 @@ namespace ExpressiveAnnotations.Tests
 
             funcManager.AddFunction("Whoami", () => "utility method");
             funcManager.AddFunction<int, string>("Whoami", i => $"utility method {i}");
-            funcManager.AddFunction<int, string, string>("Whoami", (i, s) => $"utility method {i} - {s}");            
+            funcManager.AddFunction<int, string, string>("Whoami", (i, s) => $"utility method {i} - {s}");
 
             Assert.True(parser.Parse<object, bool>("Whoami() == 'utility method'").Invoke(null));
             Assert.True(parser.Parse<object, bool>("Whoami(1) == 'utility method 1'").Invoke(null));
@@ -794,7 +794,7 @@ namespace ExpressiveAnnotations.Tests
         public void verify_enumeration_ambiguity()
         {
             var parser = new Parser();
-            
+
             // ensure that this doesn't consider Dog and HotDog enums to be ambiguous
             Assert.True(parser.Parse<object, bool>("Dog.Collie == 0").Invoke(null));
             var e = Assert.Throws<ParseErrorException>(() => parser.Parse<object, bool>("Stability.High == 0"));
@@ -1074,7 +1074,7 @@ namespace ExpressiveAnnotations.Tests
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object, bool>($"Now() {oper} Today()"));
             Assert.Equal($"Operator '{oper}' cannot be applied to operands of type 'System.DateTime' and 'System.DateTime'.", e.Error);
             Assert.Equal(new Location(1, 7), e.Location, new LocationComparer());
-            
+
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model, bool>($"YesNo.Yes {oper} YesNo.No"));
             Assert.Equal($"Operator '{oper}' cannot be applied to operands of type 'ExpressiveAnnotations.Tests.ParserTest+YesNo' and 'ExpressiveAnnotations.Tests.ParserTest+YesNo'.", e.Error);
             Assert.Equal(new Location(1, 11), e.Location, new LocationComparer());
@@ -1645,7 +1645,7 @@ namespace ExpressiveAnnotations.Tests
             public int[] IntArray { get; set; }
             public int[][] IntJaggedArray { get; set; }
 
-            public Model[] Array { get; set; } // array            
+            public Model[] Array { get; set; } // array
             public IEnumerable<Model> Items { get; set; } // collection without indexer
             public CustomCollection<Model> Collection { get; set; } // collection with indexer, like e.g List<>
 
@@ -1836,7 +1836,7 @@ namespace ExpressiveAnnotations.Tests
             public static int operator ~(Overloaded a) { return 0; }
             public static int operator &(Overloaded a, Overloaded b) { return 0; }
             public static int operator ^(Overloaded a, Overloaded b) { return 0; }
-            public static int operator |(Overloaded a, Overloaded b) { return 0; }            
+            public static int operator |(Overloaded a, Overloaded b) { return 0; }
             public static int operator <<(Overloaded a, int b) { return 0; }
             public static int operator >>(Overloaded a, int b) { return 0; }
         }

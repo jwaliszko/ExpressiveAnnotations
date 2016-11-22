@@ -18,32 +18,32 @@ namespace ExpressiveAnnotations.Tests
         [Fact]
         public void verify_attributes_uniqueness()
         {
-            var attributes = typeof (Model).GetProperty("Value1")
+            var attributes = typeof(Model).GetProperty("Value1")
                 .GetCustomAttributes()
                 .DistinctBy(x => x.TypeId)
                 .ToList();
             Assert.Equal(2, attributes.Count); // ignores redundant attributes of the same type id, because they do nothing new (exact type name, exact expression)
             Assert.True(new[]
             {
-                typeof (RequiredIfAttribute),
-                typeof (AssertThatAttribute)
+                typeof(RequiredIfAttribute),
+                typeof(AssertThatAttribute)
             }.All(x => attributes.Select(y => y.GetType()).Contains(x)));
 
-            attributes = typeof (Model).GetProperty("Value2")
+            attributes = typeof(Model).GetProperty("Value2")
                 .GetCustomAttributes()
                 .DistinctBy(x => x.TypeId)
                 .ToList();
             Assert.Equal(4, attributes.Count); // all type ids are unique (despite the same type names of some attributes, they contain different expressions)
             Assert.True(new[]
             {
-                typeof (RequiredIfAttribute),
-                typeof (AssertThatAttribute)
+                typeof(RequiredIfAttribute),
+                typeof(AssertThatAttribute)
             }.All(x => attributes.Select(y => y.GetType()).Contains(x)));
         }
 
         [Fact]
         public void no_errors_during_derived_types_validation()
-        {            
+        {
             var firstDerived = new FirstDerived();
             var secondDerived = new SecondDerived();
             var firstContext = new ValidationContext(firstDerived);
@@ -100,17 +100,17 @@ namespace ExpressiveAnnotations.Tests
             const int testLoops = 10;
             List<ExpressiveAttribute> attribs = null;
 
-            var nonCached = MeasureExecutionTime(() => attribs = typeof (WorkModel).CompileExpressiveAttributes().ToList());
+            var nonCached = MeasureExecutionTime(() => attribs = typeof(WorkModel).CompileExpressiveAttributes().ToList());
             for (var i = 0; i < testLoops; i++)
             {
-                var cached = MeasureExecutionTime(() => attribs.ForEach(x => x.Compile(typeof (WorkModel))));
+                var cached = MeasureExecutionTime(() => attribs.ForEach(x => x.Compile(typeof(WorkModel))));
                 Assert.True(nonCached > cached);
             }
 
-            nonCached = MeasureExecutionTime(() => attribs.ForEach(x => x.Compile(typeof (WorkModel), force: true))); // forcibly recompile already compiled expressions
+            nonCached = MeasureExecutionTime(() => attribs.ForEach(x => x.Compile(typeof(WorkModel), force: true))); // forcibly recompile already compiled expressions
             for (var i = 0; i < testLoops; i++)
             {
-                var cached = MeasureExecutionTime(() => attribs.ForEach(x => x.Compile(typeof (WorkModel))));
+                var cached = MeasureExecutionTime(() => attribs.ForEach(x => x.Compile(typeof(WorkModel))));
                 Assert.True(nonCached > cached);
             }
         }
@@ -120,23 +120,23 @@ namespace ExpressiveAnnotations.Tests
         {
             var model = new BrokenModel();
             var context = new ValidationContext(model);
-            
-            model.Value = 0;                
+
+            model.Value = 0;
             var e = Assert.Throws<ValidationException>(() => Validator.TryValidateObject(model, context, null, true));
             Assert.Equal(
-                "AssertThatAttribute: validation applied to Value field failed.", 
+                "AssertThatAttribute: validation applied to Value field failed.",
                 e.Message);
             Assert.IsType<ParseErrorException>(e.InnerException);
             Assert.Equal(
                 @"Parse error on line 1, column 9:
 ... # ...
     ^--- Invalid token.",
-                e.InnerException.Message);            
+                e.InnerException.Message);
 
             model.Value = null;
             e = Assert.Throws<ValidationException>(() => Validator.TryValidateObject(model, context, null, true));
             Assert.Equal(
-                "RequiredIfAttribute: validation applied to Value field failed.", 
+                "RequiredIfAttribute: validation applied to Value field failed.",
                 e.Message);
             Assert.IsType<ParseErrorException>(e.InnerException);
             Assert.Equal(
@@ -208,7 +208,7 @@ namespace ExpressiveAnnotations.Tests
                 Assert.Equal("Input string was not in a correct format.", e.InnerException.Message);
 
                 IDictionary<string, Guid> errFieldsMap;
-                e = Assert.Throws<FormatException>(() => attrib.FormatErrorMessage("asd", "true", typeof (object), out errFieldsMap));
+                e = Assert.Throws<FormatException>(() => attrib.FormatErrorMessage("asd", "true", typeof(object), out errFieldsMap));
                 Assert.Equal($"Problem with error message processing. The message is following: {msg}", e.Message);
                 Assert.IsType<FormatException>(e.InnerException);
                 Assert.Equal("Input string was not in a correct format.", e.InnerException.Message);
@@ -370,10 +370,10 @@ namespace ExpressiveAnnotations.Tests
             var assertThat = new AssertThatAttribute("1!=1");
             var requiredIf = new RequiredIfAttribute("1==1");
 
-            var isValid = typeof (ExpressiveAttribute).GetMethod("IsValid", BindingFlags.NonPublic | BindingFlags.Instance);
+            var isValid = typeof(ExpressiveAttribute).GetMethod("IsValid", BindingFlags.NonPublic | BindingFlags.Instance);
             var context = new ValidationContext(new MsgModel
             {
-                Value1 = 0,                
+                Value1 = 0,
                 Internal = new MsgModel
                 {
                     Value1 = 1,
@@ -386,7 +386,7 @@ namespace ExpressiveAnnotations.Tests
 
             if (input != null)
                 assertThat.ErrorMessage = requiredIf.ErrorMessage = input;
-            
+
             var assertThatResult = (ValidationResult) isValid.Invoke(assertThat, new[] {new object(), context});
             var requiredIfResult = (ValidationResult) isValid.Invoke(requiredIf, new[] {null, context});
 
@@ -434,10 +434,10 @@ namespace ExpressiveAnnotations.Tests
             [Display(Name = "_{Value1}_")]
             public int? Value1 { get; set; }
 
-            [Display(ResourceType = typeof (Resources), Name = "Value2")]
-            public int Value2 { get; set; }            
+            [Display(ResourceType = typeof(Resources), Name = "Value2")]
+            public int Value2 { get; set; }
 
-            [Display(ResourceType = typeof (Resources), Name = "Lang")]
+            [Display(ResourceType = typeof(Resources), Name = "Lang")]
             public string Lang { get; set; }
 
             public MsgModel Internal { get; set; }
@@ -466,7 +466,7 @@ namespace ExpressiveAnnotations.Tests
 
         private class MisusedRequirementModel
         {
-            [RequiredIf("true")]            
+            [RequiredIf("true")]
             public int Value { get; set; }
         }
 
