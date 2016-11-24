@@ -21,7 +21,7 @@ A small .NET and JavaScript library which provides annotation-based conditional 
  - [How to construct conditional validation attributes?](#how-to-construct-conditional-validation-attributes)
    - [Signatures description](#signatures)
    - [Implementation details outline](#implementation)
-   - [Traps (discrepancies between server- and client-side expressions evaluation)](#traps)   
+   - [Traps (discrepancies between server- and client-side expressions evaluation)](#traps)
  - [What about the support of ASP.NET MVC client-side validation?](#what-about-the-support-of-aspnet-mvc-client-side-validation)
  - [Frequently asked questions](#frequently-asked-questions)
    - [Is it possible to compile all usages of annotations at once?](#is-it-possible-to-compile-all-usages-of-annotations-at-once) <sup>(re server-side)</sup>
@@ -43,7 +43,7 @@ A small .NET and JavaScript library which provides annotation-based conditional 
 
 ###<a id="what-is-the-context-behind-this-implementation">What is the context behind this work?</a>
 
-There are number of cases where the concept of metadata is used for justified reasons. Attributes are one of the ways to associate complementary information with existing data. Such annotations may also define the correctness of data. 
+There are number of cases where the concept of metadata is used for justified reasons. Attributes are one of the ways to associate complementary information with existing data. Such annotations may also define the correctness of data.
 
 Declarative validation when [compared](#declarative-vs-imperative-programming---what-is-it-about) to imperative approach seems to be more convenient in many cases. Clean, compact code - all validation logic defined within the model scope. Simple to write, obvious to read.
 
@@ -82,7 +82,7 @@ As shown below, both types of attributes may be combined (moreover, the same typ
 [AssertThat("AgreeToContact == true")]
 public bool? AgreeToContact { get; set; }
 ```
-Literal translation means, that if either email or phone is provided, you are forced to authorize someone to contact with you (boolean value indicating contact permission has to be true). What is more, we can see that nested properties are supported by [the expressions parser](#implementation). 
+Literal translation means, that if either email or phone is provided, you are forced to authorize someone to contact with you (boolean value indicating contact permission has to be true). What is more, we can see that nested properties are supported by [the expressions parser](#implementation).
 
 Finally, take a brief look at following construction:
 ```C#
@@ -118,8 +118,8 @@ If we choose this way instead of model fields decoration, it has negative impact
         return View("Success");
     if (model.NextCountry != model.Country)
         return View("Success");
-    
-    ModelState.AddModelError("ReasonForTravel", 
+
+    ModelState.AddModelError("ReasonForTravel",
         "If you plan to travel abroad, why visit the same country twice?");
     return View("Home", model);
 }
@@ -130,7 +130,7 @@ Here instead, we're saying "If condition is met, return some view. Otherwise, ad
 
 #####<a id="grammar">Grammar definition</a>
 
-Valid expressions handled by EA parser comply with syntax defined by the following grammar:
+Expressions handled by EA parser, in order to have valid syntax, must comply with the following grammar:
 
 ```
 exp         => cond-exp
@@ -154,7 +154,7 @@ arr-access  => arr-lit |
 id-access   => identifier |
                identifier ('[' exp ']' | '.' identifier)* |
                func-call ('[' exp ']' | '.' identifier)*
-               
+
 func-call   => identifier '(' [exp-list] ')'
 
 null-lit    => 'null'
@@ -167,7 +167,7 @@ exp-list    => exp (',' exp)*
 ```
 Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar except for *dec-lit*, *bin-lit*, *hex-lit*, *float-lit*, *string-lit* and *identifier*, which are assumed to be implicitly defined (*identifier* specifies names of functions, properties, constants and enums).
 
-Expressions are built of unicode letters and numbers (i.e. `[L*]` and `[N*]` [categories](https://en.wikipedia.org/wiki/Unicode_character_property) respectively) with the usage of following components:
+Expressions are built of Unicode letters and numbers (i.e. `[L*]` and `[N*]` [categories](https://en.wikipedia.org/wiki/Unicode_character_property) respectively) with the usage of following components:
 
 * logical operators: `!a`, `a||b`, `a&&b`,
 * comparison operators: `a==b`, `a!=b`, `a<b`, `a<=b`, `a>b`, `a>=b`,
@@ -183,6 +183,10 @@ Expressions are built of unicode letters and numbers (i.e. `[L*]` and `[N*]` [ca
   * string, e.g. `'in single quotes'` (internal quote escape sequence is `\'`, character representing new line is `\n`),
   * array (comma separated items within square brackets), e.g. `[1,2,3]`,
   * identifier, i.e. names of functions, properties, constants and enums.
+
+Expressions must be valid no only at the lexical and syntax level, but must have appropriate semantics as well. In our case, it simply means that all the requirements on the types of the operands must be realized.
+
+Prior to execution of an operation, type checks, and eventual type conversions, are made. The result type, e.g. of a valid binary operation is, most of the time but not always, the same as the most general of the input types. When a binary operation is used then a generalization of operands is performed, to make the two operands the same (most general) type, before the operation is done. The order of generalization, from most general to most specific, is briefly described as follows: `string` (generalization done using the current locale) -> `double` -> `int`. Also nullable types are more general than their non-nullable counterparts.
 
 #####<a id="operators-precedence">Operators precedence and associativity</a>
 
@@ -338,8 +342,8 @@ Toolchain functions available out of the box at server- and client-side:
 * `string Concat(string strA, string strB, strC)`
     * Concatenates three specified strings (null-safe).
 * `int CompareOrdinal(string strA, string strB)`
-    * Compares strings using ordinal sort rules. An integer that indicates the lexical relationship 
-      between the two comparands is returned (null-safe): 
+    * Compares strings using ordinal sort rules. An integer that indicates the lexical relationship
+      between the two comparands is returned (null-safe):
         * -1    - strA is less than strB,
         * &nbsp;0    - strA and strB are equal,
         * &nbsp;1    - strA is greater than strB.
@@ -365,6 +369,8 @@ Toolchain functions available out of the box at server- and client-side:
     * Indicates whether a specified string represents integer or float number (ASCII characters only, null-safe).
 * `bool IsEmail(string str)`
     * Indicates whether a specified string represents valid e-mail address (null-safe).
+* `bool IsPhone(string str)`
+    * Indicates whether a specified string represents valid phone number (null-safe).
 * `bool IsUrl(string str)`
     * Indicates whether a specified string represents valid url (null-safe).
 * `bool IsRegexMatch(string str, string regex)`
@@ -387,33 +393,33 @@ Toolchain functions available out of the box at server- and client-side:
 ```
 RequiredIfAttribute(
     string expression,
-    [bool AllowEmptyStrings], 
-    [int Priority]           
+    [bool AllowEmptyStrings],
+    [int Priority]
     [string ErrorMessage]    ...) - Validation attribute, executed for null-only annotated
                                     field, which indicates that such a field is required
-                                    to be non-null, when computed result of given logical 
+                                    to be non-null, when computed result of given logical
                                     expression is true.
 AssertThatAttribute(
     string expression,
-    [int Priority]           
-    [string ErrorMessage]    ...) - Validation attribute, executed for non-null annotated 
-                                    field, which indicates that assertion given in logical 
-                                    expression has to be satisfied, for such a field to be 
+    [int Priority]
+    [string ErrorMessage]    ...) - Validation attribute, executed for non-null annotated
+                                    field, which indicates that assertion given in logical
+                                    expression has to be satisfied, for such a field to be
                                     considered as valid.
 
 expression        - The logical expression based on which specified condition is computed.
-AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should allow empty 
+AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should allow empty
                     or whitespace strings. False by default.
-Priority          - Gets or sets the hint, available for any concerned external components, 
-                    indicating the order in which this attribute should be executed among 
+Priority          - Gets or sets the hint, available for any concerned external components,
+                    indicating the order in which this attribute should be executed among
                     others of its kind, i.e. ExpressiveAttribute. Value is optional and not
                     set by default, which means that execution order is undefined.
-ErrorMessage      - Gets or sets an explicit error message string. A difference to default 
-                    behavior is awareness of new format items, i.e. {fieldPath[:indicator]}. 
-                    Given in curly brackets, can be used to extract values of specified 
-                    fields, e.g. {field}, {field.field}, within current model context or 
-                    display names of such fields, e.g. {field:n}. Braces can be escaped by 
-                    double-braces, i.e. to output a { use {{ and to output a } use }}. The 
+ErrorMessage      - Gets or sets an explicit error message string. A difference to default
+                    behavior is awareness of new format items, i.e. {fieldPath[:indicator]}.
+                    Given in curly brackets, can be used to extract values of specified
+                    fields, e.g. {field}, {field.field}, within current model context or
+                    display names of such fields, e.g. {field:n}. Braces can be escaped by
+                    double-braces, i.e. to output a { use {{ and to output a } use }}. The
                     same logic works for messages provided in resources.
 ```
 
@@ -423,7 +429,11 @@ Note above covers almost exhaustively what is actually needed to work with EA. N
 
 Implementation core is based on [expressions parser](src/ExpressiveAnnotations/Analysis/Parser.cs?raw=true), which runs on the grammar [shown above](#grammar-definition).
 
-Specified expression string is parsed and converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object. As a result of expression evaluation, boolean flag is returned, indicating that expression is true or false.
+Firstly, at the lexical analysis stage, character stream of the expression is converted into token stream (whitespaces ignored, characters grouped into tokens and associated with position in the text). Next, at the syntax analysis level, abstract syntax tree is constructed according to the rules defined by the grammar mentioned earlier. While the tree is being built, also the 3rd stage, mainly semantic analysis, is being performed. This stage is directly related to operands type checking (and eventual type conversions, according to type generalization rules, when incompatible types are detected).
+
+Valid expression string is finally converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object.
+
+When expression is provided to the attribute, it should be of a boolean type. The result of its evaluation indicates whether such an expression is true or false, which directly determines whether the assertion or requirement condition is satisfied or not.
 
 For the sake of performance optimization, expressions provided to attributes are compiled only once. Such compiled lambdas are then cached inside attributes instances and invoked for any subsequent validation requests without recompilation.
 
@@ -459,7 +469,7 @@ Client-side validation is fully supported. Enable it for your web project within
     Alternatively, use predefined `ExpressiveAnnotationsModelValidatorProvider` (recommended):
     ```C#
     using ExpressiveAnnotations.MvcUnobtrusive.Providers;
-    
+
     protected void Application_Start()
     {
         ModelValidatorProviders.Providers.Remove(
@@ -484,7 +494,7 @@ For supplementary reading visit the [installation section](#installation).
 
 #####<a id="is-it-possible-to-compile-all-usages-of-annotations-at-once">Is it possible to compile all usages of annotations at once?</a>
 
-Yes, a complete list of types with annotations can be retrieved and compiled collectively. It can be useful, e.g. during unit tesing phase, when without the necessity of your main application startup, all the compile-time errors (syntax errors, typechecking errors) done to your expressions can be discovered. The following extension is helpful:
+Yes, a complete list of types with annotations can be retrieved and compiled collectively. It can be useful, e.g. during unit testing phase, when without the necessity of your main application startup, all the compile-time errors (syntax errors, type checking errors) done to your expressions can be discovered. The following extension is helpful:
 
 ```C#
 public static IEnumerable<ExpressiveAttribute> CompileExpressiveAttributes(this Type type)
@@ -523,7 +533,7 @@ compiled.ForEach(x => x.Compile(typeof (SomeModel));
 ```
 do nothing (due to optimization purposes), unless invoked with enabled recompilation switch:
 ```C#
-compiled.ForEach(x => x.Compile(typeof (SomeModel), force: true); 
+compiled.ForEach(x => x.Compile(typeof (SomeModel), force: true);
 ```
 Finally, this reveals compile-time errors only, you can still can get runtime errors though, e.g.:
 
@@ -541,7 +551,7 @@ Create it yourself. Any custom function defined within the model class scope at 
 ```C#
 class Model
 {
-    public bool IsBloodType(string group) 
+    public bool IsBloodType(string group)
     {
         return Regex.IsMatch(group, @"^(A|B|AB|0)[\+-]$");
     }
@@ -551,7 +561,7 @@ class Model
 ```
  If client-side validation is needed as well, function of the same signature (name and the number of parameters) must be available there. JavaScript corresponding implementation should be registered by the following instruction:
 ```JavaScript
-<script>    
+<script>
     ea.addMethod('IsBloodType', function(group) {
         return /^(A|B|AB|0)[\+-]$/.test(group);
     });
@@ -585,12 +595,12 @@ Sure, provide your own methods provider, or extend existing global one, i.e.
 
     protected void Application_Start()
     {
-        Toolchain.Instance.Recharge(new CustomFunctionsProvider()); 
+        Toolchain.Instance.Recharge(new CustomFunctionsProvider());
 ```
 
 #####<a id="how-to-cope-with-values-of-custom-types">How to cope with values of custom types?</a>
 
-If you need to handle value string extracted from DOM field in any non built-in way, you can redefine given type-detection logic. The default mechanism recognizes and handles automatically types identified as: `timespan`, `datetime`, `numeric`, `string`, `bool` and `guid`. If non of them is matched for a particular field, JSON deserialization is invoked. You can provide your own deserializers though. The process is as follows:
+If you need to handle value string extracted from DOM field in any non built-in way, you can redefine given type-detection logic. The default mechanism recognizes and handles automatically types identified as: `timespan`, `datetime`, `enumeration`, `number`, `string`, `bool` and `guid`. If non of them is matched for a particular field, JSON deserialization is invoked. You can provide your own deserializers though. The process is as follows:
 
 * at server-side decorate your property with special attribute which gives a hint to client-side, which parser should be chosen for corresponding DOM field value deserialization:
     ```C#
@@ -676,29 +686,30 @@ Alternatively, to enforce re-binding of already attached validation handlers, us
 If you need more insightful overview of what client-side script is doing (including warnings if detected) enable logging:
 ```JavaScript
 <script>
-    ea.settings.debug = true; // output debug messages to the web console 
+    ea.settings.debug = true; // output debug messages to the web console
                               // (should be disabled for release code)
 ```
 
 #####<a id="#how-to-fetch-field-value-or-display-name-in-error-message">How to fetch field value or display name in error message?</a>
 
 * to get a value, wrap the field name in braces, e.g. `{field}`, or for nested fields - `{field.field}`,
-* to get display name, given in `DisplayAttribute`, use additional `n` (or `N`) suffix, e.g. `{field:n}`. 
+* to get display name, given in `DisplayAttribute`, use additional `n` (or `N`) suffix, e.g. `{field:n}`.
 
 Notice that `{{` is treated as the escaped bracket character.
 
 #####<a id="#is-there-any-event-raised-when-validation-is-done">Is there any event raised when validation is done?</a>
 
-Each element validated by EA triggers an `eavalid` event, with the following extra parameters:
+Each element validated by EA triggers one or more `eavalid` events, with the following extra parameters:
 
-* type of the attribute for which validation was executed: `'requiredif'` or `'assertthat'`,
-* state of the validation: `true` or `false`,
-* expression which was evaluated.
+* `type` - type of the attribute for which validation was executed: `'requiredif'` or `'assertthat'`,
+* `valid` - state of the validation: `true` or `false`,
+* `expr` - expression which was evaluated,
+* `cond` - expression evaluation result - optional parameter, available only when the value of `type` parameter is `'requiredif'` and `ea.settings.optimize` flag is set to `false`.
 
 Attach to it in the following manner:
 ```JavaScript
 <script>
-    $('form').find('input, select, textarea').on('eavalid', function(e, type, valid, expr) {
+    $('form').find('input, select, textarea').on('eavalid', function(e, type, valid, expr, cond) {
         console.log('event triggered by ' + e.currentTarget.name);
     });
 ```

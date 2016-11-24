@@ -327,6 +327,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<bool>("1/2==0.5").Invoke());
             Assert.True(parser.Parse<bool>("-1*-+- -+-1==-1").Invoke());
             Assert.True(parser.Parse<bool>("- - -1+'a'+'b'+null+''+'c'+1+2=='-1abc12'").Invoke());
+            Assert.True(parser.Parse<bool>("1.2 + 'a' + .12=='1.2a0.12'").Invoke());
 
             Assert.True(parser.Parse<bool>("1 - 2 -(6 / ((2*1.5 - 1) + 1)) * -2 + 1/2/1 == 3.50").Invoke());
             Assert.True(parser.Parse<bool>("-.11e-10+.11e-10==.0-.0").Invoke());
