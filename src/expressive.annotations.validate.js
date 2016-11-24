@@ -690,7 +690,7 @@ var
         value = modelHelper.adjustGivenValue(value, element, params); // preprocess given value (here basically we are concerned about determining if such a value is null or not, to determine if the attribute
                                                                       // logic should be invoked or not - full type-detection parsing is not required at this stage, but we may have to extract such a value using
                                                                       // value parser, e.g. for an array which values are distracted among multiple fields)
-        if (!(value === undefined || value === null || value === '')) { // check if the field value is set (continue if so, otherwise skip condition verification)
+        if (value !== undefined && value !== null && value !== '') { // check if the field value is set (continue if so, otherwise skip condition verification)
             var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model);
             logger.dump(typeHelper.string.format('AssertThat expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
@@ -732,7 +732,7 @@ var
         }
         return {
             valid: true,
-            condition: exprVal
+            condition: exprVal  // undefined when optimize flag is on
         }
     },
 

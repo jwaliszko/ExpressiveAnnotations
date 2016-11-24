@@ -8,7 +8,11 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
     {
         public Contact()
         {
-            Addresses = new List<Address> { new Address { Type = Resources.HomeAddress }, new Address { Type = Resources.OfficeAddress } };
+            Addresses = new List<Address>
+            {
+                new Address {Type = Resources.HomeAddress},
+                new Address {Type = Resources.OfficeAddress}
+            };
         }
 
         [RequiredIf("Phone == null",

@@ -11,6 +11,8 @@
     qunit.testDone(function() { // reset state for further tests
         ea.settings.apply({
             debug: false,
+            optimize: true,
+            enumsAsNumbers: true,
             dependencyTriggers: 'change keyup'
         });
     });
@@ -104,7 +106,7 @@
         assert.equal(actual, expected, "custom value parser properly handles non-standard dd/mm/yyyy format");
     });
 
-    qunit.test("verify_non_standard_object_format_parsing", function(assert) {        
+    qunit.test("verify_non_standard_object_format_parsing", function(assert) {
         var result = eapriv.typeHelper.tryParse("<rss version='2.0'><channel><title>RSS Title</title></channel></rss>", "object", undefined);
         assert.ok(result.error, "default object parse fails to understand non-json format");
         var expected = "Given value was not recognized as a valid JSON.";
@@ -292,7 +294,7 @@
         assert.ok(!eapriv.typeHelper.isBool("false"), "'false' string not recognized as bool");
         assert.ok(!eapriv.typeHelper.isBool("False"), "'False' string not recognized as bool");
         assert.ok(!eapriv.typeHelper.isBool(""), "empty string not recognized as bool");
-        assert.ok(!eapriv.typeHelper.isBool(0), "0 integer not recognized as bool");        
+        assert.ok(!eapriv.typeHelper.isBool(0), "0 integer not recognized as bool");
         assert.ok(!eapriv.typeHelper.isBool(1), "positive integer not recognized as bool");
         assert.ok(!eapriv.typeHelper.isBool(-1), "negative integer not recognized as bool");
         assert.ok(!eapriv.typeHelper.isBool({}), "empty object not recognized as bool");
@@ -396,7 +398,7 @@
         assert.ok(eapriv.typeHelper.isNumeric(m.ToDate('2016-04-27')), "ToDate() returns number (of milliseconds)");
 
         assert.ok(m.Now() > m.Today());
-        assert.ok(m.Date(1985, 2, 20) < m.Date(1985, 2, 20, 0, 0, 1));        
+        assert.ok(m.Date(1985, 2, 20) < m.Date(1985, 2, 20, 0, 0, 1));
         assert.equal(m.Date(1, 1, 1), new Date(new Date(1, 0, 1).setFullYear(1)).getTime());
         assert.equal(m.Date(1, 1, 1), m.Date(1, 1, 1, 0, 0, 0));
         assert.equal(m.ToDate('2016-04-27'), Date.parse('2016-04-27'));
@@ -451,7 +453,7 @@
         assert.equal(m.CompareOrdinalIgnoreCase('', null), 1);
         assert.equal(m.CompareOrdinalIgnoreCase(null, null), 0);
         assert.equal(m.CompareOrdinalIgnoreCase('', ''), 0);
-        
+
         assert.ok(!m.StartsWith(' ab c', ' A'));
         assert.ok(m.StartsWith(' ab c', ' a'));
         assert.ok(m.StartsWith(' ', ' '));
@@ -467,7 +469,7 @@
         assert.ok(!m.StartsWithIgnoreCase(null, ''));
         assert.ok(!m.StartsWithIgnoreCase('', null));
         assert.ok(!m.StartsWithIgnoreCase(null, null));
-        
+
         assert.ok(!m.EndsWith(' ab c', ' C'));
         assert.ok(m.EndsWith(' ab c', ' c'));
         assert.ok(m.EndsWith(' ', ' '));
@@ -483,7 +485,7 @@
         assert.ok(!m.EndsWithIgnoreCase(null, ''));
         assert.ok(!m.EndsWithIgnoreCase('', null));
         assert.ok(!m.EndsWithIgnoreCase(null, null));
-        
+
         assert.ok(!m.Contains(' ab c', 'B '));
         assert.ok(m.Contains(' ab c', 'b '));
         assert.ok(m.Contains(' ', ' '));
@@ -534,6 +536,14 @@
         assert.ok(m.IsEmail('nickname@domain.com'));
         assert.ok(!m.IsEmail(null));
         assert.ok(!m.IsEmail(''));
+
+        assert.ok(m.IsPhone('+48 999 888 777'));
+        assert.ok(m.IsPhone('(0048) 999 888 777'));
+        assert.ok(m.IsPhone('(+48) 999888777'));
+        assert.ok(m.IsPhone('112'));
+        assert.ok(!m.IsPhone('11 22 333xx'));
+        assert.ok(!m.IsPhone(null));
+        assert.ok(!m.IsPhone(''));
 
         assert.ok(m.IsUrl('http://www.github.com/'));
         assert.ok(!m.IsUrl(null));

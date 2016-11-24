@@ -211,6 +211,7 @@ namespace ExpressiveAnnotations
             {
                 {typeof(sbyte), typeof(sbyte?)},
                 {typeof(byte), typeof(byte?)},
+                {typeof(char), typeof(char?)},
                 {typeof(short), typeof(short?)},
                 {typeof(ushort), typeof(ushort?)},
                 {typeof(int), typeof(int?)},
