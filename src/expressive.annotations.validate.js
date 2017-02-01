@@ -530,7 +530,8 @@ var
             }
             return parsedValue;
         },
-        deserializeObject: function(form, fieldsMap, constsMap, enumsMap, parsersMap, prefix) {
+        deserializeObject: function (form, fieldsMap, constsMap, enumsMap, parsersMap, prefix) {
+            var arrayPat = /^([a-z_0-9]+)\[([0-9]+)\]$/i;
             function buildField(fieldName, fieldValue, object) {
                 var props, parent, i, match, arridx;
                 props = fieldName.split('.');
@@ -538,7 +539,7 @@ var
                 for (i = 0; i < props.length - 1; i++) {
                     fieldName = props[i];
 
-                    match = /^([a-z_0-9]+)\[([0-9]+)\]$/i.exec(fieldName); // check for array element access
+                    match = arrayPat.exec(fieldName); // check for array element access
                     if (match) {
                         fieldName = match[1];
                         arridx = match[2];
@@ -556,7 +557,16 @@ var
                     parent = parent[fieldName];
                 }
                 fieldName = props[props.length - 1];
-                parent[fieldName] = fieldValue;
+
+                var endMatch = arrayPat.exec(fieldName);
+                if (endMatch) { // our fieldName is array pattern eg. SelectedDays[0]
+                    var arrayName = endMatch[1];
+                    var arrayIndex = endMatch[2];
+                    parent[arrayName] = parent[arrayName] || []; // create it if needed.
+                    parent[arrayName][arrayIndex] = fieldValue;
+                } else {
+                    parent[fieldName] = fieldValue;
+                }
             }
 
             var model = {}, name, type, value, parser;
