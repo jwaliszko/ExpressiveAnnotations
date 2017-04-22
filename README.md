@@ -1,6 +1,6 @@
 ﻿![logo](logo.png)
 
-#<a id="expressiveannotations-annotation-based-conditional-validation">ExpressiveAnnotations<sup><sup><sup>[annotation-based conditional validation]</sup></sup></sup></a>
+# <a id="expressiveannotations-annotation-based-conditional-validation">ExpressiveAnnotations<sup><sup><sup>[annotation-based conditional validation]</sup></sup></sup></a>
 
 [![Build status](https://img.shields.io/appveyor/ci/jwaliszko/ExpressiveAnnotations.svg)](https://ci.appveyor.com/project/jwaliszko/ExpressiveAnnotations)
 [![Coverage status](https://img.shields.io/codecov/c/github/jwaliszko/ExpressiveAnnotations.svg)](https://codecov.io/github/jwaliszko/ExpressiveAnnotations)
@@ -9,13 +9,14 @@
 
 A small .NET and JavaScript library which provides annotation-based conditional validation mechanisms. Given attributes allow to forget about imperative way of step-by-step verification of validation conditions in many cases. Since fields validation requirements are applied as metadata, domain-related code is more condensed.
 
-###Table of contents
+### Table of contents
  - [What is the context behind this work?](#what-is-the-context-behind-this-implementation)
  - [`RequiredIf` vs. `AssertThat` - where is the difference?](#requiredif-vs-assertthat---where-is-the-difference)
  - [What are brief examples of usage?](#what-are-brief-examples-of-usage)
  - [Declarative vs. imperative programming - what is it about?](#declarative-vs-imperative-programming---what-is-it-about)
  - [EA expressions specification](#expressions-specification)
    - [Grammar definition](#grammar-definition)
+   - [Where syntax meets semantics](#where-syntax-meets-semantics)
    - [Operators precedence and associativity](#operators-precedence)
    - [Built-in functions (methods ready to be used by expressions)](#built-in-functions)
  - [How to construct conditional validation attributes?](#how-to-construct-conditional-validation-attributes)
@@ -41,18 +42,18 @@ A small .NET and JavaScript library which provides annotation-based conditional 
  - [Contributors](#contributors)
  - [License](#license)
 
-###<a id="what-is-the-context-behind-this-implementation">What is the context behind this work?</a>
+### <a id="what-is-the-context-behind-this-implementation">What is the context behind this work?</a>
 
 There are number of cases where the concept of metadata is used for justified reasons. Attributes are one of the ways to associate complementary information with existing data. Such annotations may also define the correctness of data.
 
 Declarative validation when [compared](#declarative-vs-imperative-programming---what-is-it-about) to imperative approach seems to be more convenient in many cases. Clean, compact code - all validation logic defined within the model scope. Simple to write, obvious to read.
 
-###<a id="requiredif-vs-assertthat---where-is-the-difference">`RequiredIf` vs. `AssertThat` - where is the difference?</a>
+### <a id="requiredif-vs-assertthat---where-is-the-difference">`RequiredIf` vs. `AssertThat` - where is the difference?</a>
 
 * `RequiredIf` - if value is not yet provided, check whether it is required (annotated field is required to be non-null, when given condition is satisfied),
 * `AssertThat` - if value is already provided, check whether the condition is met (non-null annotated field is considered as valid, when given condition is satisfied).
 
-###<a id="what-are-brief-examples-of-usage">What are brief examples of usage?</a>
+### <a id="what-are-brief-examples-of-usage">What are brief examples of usage?</a>
 
 If you'll be interested in comprehensive examples afterwards, take a look inside chosen demo project:
 
@@ -60,31 +61,38 @@ If you'll be interested in comprehensive examples afterwards, take a look inside
 * [**WPF MVVM desktop sample**](src/ExpressiveAnnotations.MvvmDesktopSample).
 
 For the time being, to keep your ear to the ground, let's walk through few exemplary code snippets:
+
 ```C#
 using ExpressiveAnnotations.Attributes;
 
 [RequiredIf("GoAbroad == true")]
 public string PassportNumber { get; set; }
 ```
+
 Above we are saying, that annotated field is required when condition given in the logical expression is satisfied (passport number is required, if go abroad field has true boolean value).
 
 Simple enough, let's move to another variation:
+
 ```C#
 [AssertThat("ReturnDate >= Today()")]
 public DateTime? ReturnDate { get; set; }
 ```
+
 By the usage of this attribute type, we are not validating field requirement as before - its value is allowed to be null this time. Nevertheless, if some value is already given, provided restriction needs to be satisfied (return date needs to be greater than or equal to the date returned by `Today()` [built-in function](#built-in-functions)).
 
 As shown below, both types of attributes may be combined (moreover, the same type can be applied multiple times for a single field):
+
 ```C#
 [RequiredIf("Details.Email != null")]
 [RequiredIf("Details.Phone != null")]
 [AssertThat("AgreeToContact == true")]
 public bool? AgreeToContact { get; set; }
 ```
+
 Literal translation means, that if either email or phone is provided, you are forced to authorize someone to contact with you (boolean value indicating contact permission has to be true). What is more, we can see that nested properties are supported by [the expressions parser](#implementation).
 
-Finally, take a brief look at following construction:
+The complexity of expressions may be arbitrarily increased, e.g. take a brief look at the following construction:
+
 ```C#
 [RequiredIf(@"GoAbroad == true
               && (
@@ -94,23 +102,41 @@ Finally, take a brief look at following construction:
 public string ReasonForTravel { get; set; }
 ```
 
-Restriction above is slightly more complex than its predecessors, but still can be quickly understood (reason for travel has to be provided if you plan to go abroad and, either want to visit the same definite country twice, or are between 25 and 55).
+Restriction above, despite being more specific than its predecessors, still can be quickly understood (reason for travel has to be provided if you plan to go abroad and, either want to visit the same definite country twice, or are between 25 and 55).
 
-###<a id="declarative-vs-imperative-programming---what-is-it-about">Declarative vs. imperative programming - what is it about?</a>
+Conditional operations are supported as well. You can imply various assertions on specific field based on certain condition (or nested conditions), e.g.
+
+```C#
+[AssertThat("Switch == 'on' ? Voltage1 == Voltage2 : true")]
+public int Voltage1 { get; set; }
+```
+
+Here, when switch is on voltages must be equal, otherwise everything is OK. You could express the same statement without conditional operator, i.e.
+
+```C#
+[AssertThat("Switch == 'on' && (Voltage1 == Voltage2) || (Switch != 'on')")]
+```
+
+but it is less verbose.
+
+### <a id="declarative-vs-imperative-programming---what-is-it-about">Declarative vs. imperative programming - what is it about?</a>
 
 With **declarative** programming you write logic that expresses *what* you want, but not necessarily *how* to achieve it. You declare your desired results, but not step-by-step.
 
 In our case, this concept is materialized by attributes, e.g.
+
 ```C#
 [RequiredIf("GoAbroad == true && NextCountry != 'Other' && NextCountry == Country",
     ErrorMessage = "If you plan to travel abroad, why visit the same country twice?")]
 public string ReasonForTravel { get; set; }
 ```
+
 Here, we're saying "Ensure the field is required according to given condition."
 
 With **imperative** programming you define the control flow of the computation which needs to be done. You tell the compiler what you want, exactly step by step.
 
 If we choose this way instead of model fields decoration, it has negative impact on the complexity of the code. Logic responsible for validation is now implemented somewhere else in our application, e.g. inside controllers actions instead of model class itself:
+
 ```C#
     if (!model.GoAbroad)
         return View("Success");
@@ -124,13 +150,14 @@ If we choose this way instead of model fields decoration, it has negative impact
     return View("Home", model);
 }
 ```
+
 Here instead, we're saying "If condition is met, return some view. Otherwise, add error message to state container. Return other view."
 
-###<a id="expressions-specification">EA expressions specification</a>
+### <a id="expressions-specification">EA expressions specification</a>
 
-#####<a id="grammar">Grammar definition</a>
+##### <a id="grammar">Grammar definition</a>
 
-Expressions handled by EA parser, in order to have valid syntax, must comply with the following grammar:
+Expressions handled by EA parser must comply with the following grammar:
 
 ```
 exp         => cond-exp
@@ -165,9 +192,10 @@ array-lit   => '[' [exp-list] ']'
 
 exp-list    => exp (',' exp)*
 ```
+
 Terminals are expressed in quotes. Each nonterminal is defined by a rule in the grammar except for *dec-lit*, *bin-lit*, *hex-lit*, *float-lit*, *string-lit* and *identifier*, which are assumed to be implicitly defined (*identifier* specifies names of functions, properties, constants and enums).
 
-Expressions are built of Unicode letters and numbers (i.e. `[L*]` and `[N*]` [categories](https://en.wikipedia.org/wiki/Unicode_character_property) respectively) with the usage of following components:
+Expressions are built of Unicode letters and numbers (i.e. `[L*]` and `[N*]` [categories](https://en.wikipedia.org/wiki/Unicode_character_property) respectively) with the usage of the following components:
 
 * logical operators: `!a`, `a||b`, `a&&b`,
 * comparison operators: `a==b`, `a!=b`, `a<b`, `a<=b`, `a>b`, `a>=b`,
@@ -184,11 +212,19 @@ Expressions are built of Unicode letters and numbers (i.e. `[L*]` and `[N*]` [ca
   * array (comma separated items within square brackets), e.g. `[1,2,3]`,
   * identifier, i.e. names of functions, properties, constants and enums.
 
-Expressions must be valid no only at the lexical and syntax level, but must have appropriate semantics as well. In our case, it simply means that all the requirements on the types of the operands must be realized.
+##### <a id="where-syntax-meets-semantics">Where syntax meets semantics</a>
 
-Prior to execution of an operation, type checks, and eventual type conversions, are made. The result type, e.g. of a valid binary operation is, most of the time but not always, the same as the most general of the input types. When a binary operation is used then a generalization of operands is performed, to make the two operands the same (most general) type, before the operation is done. The order of generalization, from most general to most specific, is briefly described as follows: `string` (generalization done using the current locale) -> `double` -> `int`. Also nullable types are more general than their non-nullable counterparts.
+EA expressions syntax is defined by the grammar shown above.
 
-#####<a id="operators-precedence">Operators precedence and associativity</a>
+Valid expressions must follow not only lexical and syntax level rules, but must have appropriate semantics as well.
+
+Grammars, as already mentioned, naturally define the language syntax - but not only. Grammars in general contribute to the semantics a little, by defining the parse tree - thus denoting the precedence and associativity of operators. This being said, it is not just about the legal string being produced - the structure of parse tree corresponds to the order, in which various parts of the expression are to be evaluated.
+
+Such contribution to semantics is not enough though. Grammar says nothing about the types of operands. For the expressions to have valid semantics, all the requirements on the types of operands must be realized as well.
+
+Prior to execution of an operation, type checks and eventual type conversions are made. The result type, e.g. of a valid binary operation is, most of the time but not always, the same as the most general of the input types. When a binary operation is used then a generalization of operands is performed, to make the two operands the same (most general) type, before the operation is done. The order of generalization, from most general to most specific, is briefly described as follows: `string` (generalization done using the current locale) -> `double` -> `int`. Also nullable types are more general than their non-nullable counterparts.
+
+##### <a id="operators-precedence">Operators precedence and associativity</a>
 
 The following table lists the precedence and associativity of operators (listed top to bottom, in descending precedence):
 
@@ -312,13 +348,15 @@ The following table lists the precedence and associativity of operators (listed 
     </tbody>
 </table>
 
-#####<a id="built-in-functions">Built-in functions (methods ready to be used by expressions)</a>
+##### <a id="built-in-functions">Built-in functions (methods ready to be used by expressions)</a>
 
 As already noted, there is an option to reinforce expressions with functions, e.g.
+
 ```C#
 [AssertThat("StartsWith(CodeName, 'abc.') || EndsWith(CodeName, '.xyz')")]
 public string CodeName { get; set; }
 ```
+
 Toolchain functions available out of the box at server- and client-side:
 
 * `DateTime Now()`
@@ -386,9 +424,9 @@ Toolchain functions available out of the box at server- and client-side:
 * `double Average(params double[] values)`
     * Computes the average of the numeric values in a sequence.
 
-###<a id="how-to-construct-conditional-validation-attributes">How to construct conditional validation attributes?</a>
+### <a id="how-to-construct-conditional-validation-attributes">How to construct conditional validation attributes?</a>
 
-#####<a id="signatures">Signatures description</a>
+##### <a id="signatures">Signatures description</a>
 
 ```
 RequiredIfAttribute(
@@ -425,21 +463,21 @@ ErrorMessage      - Gets or sets an explicit error message string. A difference 
 
 Note above covers almost exhaustively what is actually needed to work with EA. Nevertheless, the full API documentation, generated with [Sandcastle](https://sandcastle.codeplex.com/) (with the support of [SHFB](http://shfb.codeplex.com/)), can be downloaded (in the form of compiled HTML help file) from [here](doc/api/api.chm?raw=true) (includes only C# API, no JavaScript part there).
 
-#####<a id="implementation">Implementation details outline</a>
+##### <a id="implementation">Implementation details outline</a>
 
 Implementation core is based on [expressions parser](src/ExpressiveAnnotations/Analysis/Parser.cs?raw=true), which runs on the grammar [shown above](#grammar-definition).
 
-Firstly, at the lexical analysis stage, character stream of the expression is converted into token stream (whitespaces ignored, characters grouped into tokens and associated with position in the text). Next, at the syntax analysis level, abstract syntax tree is constructed according to the rules defined by the grammar mentioned earlier. While the tree is being built, also the 3rd stage, mainly semantic analysis, is being performed. This stage is directly related to operands type checking (and eventual type conversions, according to type generalization rules, when incompatible types are detected).
+Firstly, at the lexical analysis stage, character stream of the expression is converted into token stream (whitespaces ignored, characters grouped into tokens and associated with position in the text). Next, at the syntax analysis level, abstract syntax tree is constructed according to the rules defined by the grammar. While the tree is being built, also the 3rd stage, mainly semantic analysis, is being performed. This stage is directly related to operands type checking (and eventual type conversions according to type generalization rules, when incompatible types are detected).
 
-Valid expression string is finally converted into [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parser job. Such delegate is then invoked for specified model object.
+Based on valid expression string [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure is finally being built. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parsersing mechanism. Such delegate can be then invoked for specified model object.
 
-When expression is provided to the attribute, it should be of a boolean type. The result of its evaluation indicates whether such an expression is true or false, which directly determines whether the assertion or requirement condition is satisfied or not.
+When expression is provided to the attribute, it should be of a boolean type. The result of its evaluation indicates whether the assertion or requirement condition is satisfied or not.
 
 For the sake of performance optimization, expressions provided to attributes are compiled only once. Such compiled lambdas are then cached inside attributes instances and invoked for any subsequent validation requests without recompilation.
 
 When working with ASP.NET MVC stack, unobtrusive client-side validation mechanism is [additionally available](#what-about-the-support-of-aspnet-mvc-client-side-validation). Client receives unchanged expression string from server. Such an expression is then evaluated using JavaScript [`eval()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval) method within the context of reflected model object. Such a model, analogously to the server-side one, is basically deserialized DOM form (with some type-safety assurances and registered toolchain methods).
 
-#####<a id="traps">Traps (discrepancies between server- and client-side expressions evaluation)</a>
+##### <a id="traps">Traps (discrepancies between server- and client-side expressions evaluation)</a>
 
 Because client-side handles expressions in its unchanged form (as provided to attribute), attention is needed when dealing with `null` keyword - there are discrepancies between EA parser (mostly follows C# rules) and JavaScript, e.g.
 
@@ -448,7 +486,7 @@ Because client-side handles expressions in its unchanged form (as provided to at
 * `null > -1`     - in C# `false` , in JS `true`,
 * and more...
 
-###<a id="what-about-the-support-of-aspnet-mvc-client-side-validation">What about the support of ASP.NET MVC client-side validation?</a>
+### <a id="what-about-the-support-of-aspnet-mvc-client-side-validation">What about the support of ASP.NET MVC client-side validation?</a>
 
 Client-side validation is fully supported. Enable it for your web project within the next few steps:
 
@@ -466,7 +504,9 @@ Client-side validation is fully supported. Enable it for your web project within
         DataAnnotationsModelValidatorProvider.RegisterAdapter(
             typeof (AssertThatAttribute), typeof (AssertThatValidator));
     ```
+    
     Alternatively, use predefined `ExpressiveAnnotationsModelValidatorProvider` (recommended):
+    
     ```C#
     using ExpressiveAnnotations.MvcUnobtrusive.Providers;
 
@@ -478,6 +518,7 @@ Client-side validation is fully supported. Enable it for your web project within
         ModelValidatorProviders.Providers.Add(
             new ExpressiveAnnotationsModelValidatorProvider());
     ```
+    
     Despite the fact this provider automatically registers adapters for expressive validation attributes, it additionally respects their processing priorities when validation is performed (i.e. the [`Priority`](#signatures) property actually means something in practice).
 3. Include [**expressive.annotations.validate.js**](src/expressive.annotations.validate.js?raw=true) script in your page (it should be included in bundle below jQuery validation files):
 
@@ -490,9 +531,9 @@ Client-side validation is fully supported. Enable it for your web project within
 
 For supplementary reading visit the [installation section](#installation).
 
-###<a id="frequently-asked-questions">Frequently asked questions</a>
+### <a id="frequently-asked-questions">Frequently asked questions</a>
 
-#####<a id="is-it-possible-to-compile-all-usages-of-annotations-at-once">Is it possible to compile all usages of annotations at once?</a>
+##### <a id="is-it-possible-to-compile-all-usages-of-annotations-at-once">Is it possible to compile all usages of annotations at once?</a>
 
 Yes, a complete list of types with annotations can be retrieved and compiled collectively. It can be useful, e.g. during unit testing phase, when without the necessity of your main application startup, all the compile-time errors (syntax errors, type checking errors) done to your expressions can be discovered. The following extension is helpful:
 
@@ -511,6 +552,7 @@ public static IEnumerable<ExpressiveAttribute> CompileExpressiveAttributes(this 
     return attributes;
 }
 ```
+
 with the succeeding usage manner:
 
 ```C#
@@ -526,16 +568,21 @@ compiled = AppDomain.CurrentDomain.GetAssemblies()
     .SelectMany(a => a.GetTypes()
         .SelectMany(t => t.CompileExpressiveAttributes())).ToList();
 ```
+
 Notice that such compiled lambdas will be cached inside attributes instances stored in `compiled` list.
 That means that subsequent compilation requests:
+
 ```C#
 compiled.ForEach(x => x.Compile(typeof (SomeModel));
 ```
+
 do nothing (due to optimization purposes), unless invoked with enabled recompilation switch:
+
 ```C#
 compiled.ForEach(x => x.Compile(typeof (SomeModel), force: true);
 ```
-Finally, this reveals compile-time errors only, you can still can get runtime errors though, e.g.:
+
+Finally, this solution reveals compile-time errors only, you can still can get runtime errors though, e.g.:
 
 ```C#
 var parser = new Parser();
@@ -545,9 +592,10 @@ parser.Parse<object>("CastToBool(null)"); // compilation succeeds
 parser.Parse<object>("CastToBool(null)").Invoke(null); // invocation fails (type casting err)
 ```
 
-#####<a id="what-if-there-is-no-built-in-function-i-need">What if there is no built-in function I need?</a>
+##### <a id="what-if-there-is-no-built-in-function-i-need">What if there is no built-in function I need?</a>
 
 Create it yourself. Any custom function defined within the model class scope at server-side is automatically recognized and can be used inside expressions, e.g.
+
 ```C#
 class Model
 {
@@ -559,16 +607,19 @@ class Model
     [AssertThat("IsBloodType(BloodType)")] // method known here (context aware expressions)
     public string BloodType { get; set; }
 ```
+
  If client-side validation is needed as well, function of the same signature (name and the number of parameters) must be available there. JavaScript corresponding implementation should be registered by the following instruction:
+ 
 ```JavaScript
 <script>
     ea.addMethod('IsBloodType', function(group) {
         return /^(A|B|AB|0)[\+-]$/.test(group);
     });
 ```
+
 Many signatures can be defined for a single function name. Types are not taken under consideration as a differentiating factor though. Methods overloading is based on the number of arguments only. Functions with the same name and exact number of arguments are considered as ambiguous. The next issue important here is the fact that custom methods take precedence over built-in ones. If exact signatures are provided built-in methods are simply overridden by new definitions.
 
-#####<a id="can-I-have-custom-utility-like-functions-outside-of-my-models">Can I have custom utility-like functions outside of my models?
+##### <a id="can-I-have-custom-utility-like-functions-outside-of-my-models">Can I have custom utility-like functions outside of my models?
 
 Sure, provide your own methods provider, or extend existing global one, i.e.
 
@@ -579,6 +630,7 @@ Sure, provide your own methods provider, or extend existing global one, i.e.
     {
         Toolchain.Instance.AddFunction<int[], int>("ArrayLength", array => array.Length);
 ```
+
 * define new provider:
 
  ```C#
@@ -598,11 +650,12 @@ Sure, provide your own methods provider, or extend existing global one, i.e.
         Toolchain.Instance.Recharge(new CustomFunctionsProvider());
 ```
 
-#####<a id="how-to-cope-with-values-of-custom-types">How to cope with values of custom types?</a>
+##### <a id="how-to-cope-with-values-of-custom-types">How to cope with values of custom types?</a>
 
 If you need to handle value string extracted from DOM field in any non built-in way, you can redefine given type-detection logic. The default mechanism recognizes and handles automatically types identified as: `timespan`, `datetime`, `enumeration`, `number`, `string`, `bool` and `guid`. If non of them is matched for a particular field, JSON deserialization is invoked. You can provide your own deserializers though. The process is as follows:
 
 * at server-side decorate your property with special attribute which gives a hint to client-side, which parser should be chosen for corresponding DOM field value deserialization:
+
     ```C#
     class Model
     {
@@ -611,6 +664,7 @@ If you need to handle value string extracted from DOM field in any non built-in 
     ```
 
 * at client-side register such a parser:
+
     ```JavaScript
     <script>
         ea.addValueParser('customparser', function(value, field) {
@@ -621,27 +675,31 @@ If you need to handle value string extracted from DOM field in any non built-in 
     ```
 
 Finally, there is a possibility to override built-in conversion globally. In this case, use the type name to register your value parser - all fields of such a type will be intercepted by it, e.g.
+
 ```JavaScript
 <script>
     ea.addValueParser('typename', function (value) {
         return ... // handle specified type (numeric, datetime, etc.) parsing on your own
     });
 ```
+
 If you redefine default mechanism, you can still have the `ValueParser` annotation on any fields you consider exceptional - annotation gives the highest parsing priority.
 
-#####<a id="how-to-cope-with-dates-given-in-non-standard-formats">How to cope with dates given in non-standard formats?</a>
+##### <a id="how-to-cope-with-dates-given-in-non-standard-formats">How to cope with dates given in non-standard formats?</a>
 
 When values of DOM elements are extracted, they are converted to appropriate types. For fields containing date strings, JavaScript `Date.parse()` method is used by default. As noted in [MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/parse), the input parameter is:
 
 >A string representing an RFC 2822 or ISO 8601 date (other formats may be used, but results may be unexpected)
 
 When some non-standard format needs to be handled, simply override the default behavior and provide your own implementation. E.g. when dealing with UK format dd/mm/yyyy, solution is:
+
 ```C#
 class Model
 {
     [ValueParser('ukdateparser')]
     public DateTime SomeField { get; set; }
 ```
+
 ```JavaScript
 <script>
     ea.addValueParser('ukdateparser', function(value) {
@@ -651,29 +709,33 @@ class Model
     });
 ```
 
-#####<a id="what-if-ea-variable-is-already-used-by-another-library">What if `ea` variable is already used by another library?</a>
+##### <a id="what-if-ea-variable-is-already-used-by-another-library">What if `ea` variable is already used by another library?</a>
 
 Use `noConflict()` method. In case of naming collision return control of the `ea` variable back to its origins. Old references of `ea` are saved during ExpressiveAnnotations initialization - `noConflict()` simply restores them:
+
 ```JavaScript
 <script src="another.js"></script>
 <script src="expressive.annotations.validate.js"></script>
 <script>
-    var expann = ea.noConflict();
+    var expann = ea.noConflict(); // relinquish EA's control of the `ea` variable
     expann.addMethod... // do something with ExpressiveAnnotations
     ea... // do something with original ea variable
 ```
 
-#####<a id="how-to-control-frequency-of-dependent-fields-validation">How to control frequency of dependent fields validation?</a>
+##### <a id="how-to-control-frequency-of-dependent-fields-validation">How to control frequency of dependent fields validation?</a>
 
 When a field value is modified, validation results for some other fields, directly dependent on currenty modified one, may be affected. To control the frequency of when dependent fields validation is triggered, change default `ea.settings.dependencyTriggers` settings. It is a string containing one or more DOM field event types (such as *change*, *keyup* or custom event names), associated with currently modified field, for which fields directly dependent on are validated. Multiple event types can be bound at once by including each one separated by a space.
 
 Default value is *'change keyup'* (for more information check `eventType` parameter of jQuery [`bind()`](http://api.jquery.com/bind) method). If you want to turn this feature off entirely, set it to *undefined* (validation will be fired on form submit attempt only).
+
 ```JavaScript
 <script>
     ea.settings.dependencyTriggers = 'change'; // mute some excessive activity if you wish,
                                                // or turn it off entirely (set to undefined)
 ```
+
 Alternatively, to enforce re-binding of already attached validation handlers, use following construction:
+
 ```JavaScript
 <script>
     ea.settings.apply({
@@ -681,23 +743,24 @@ Alternatively, to enforce re-binding of already attached validation handlers, us
     });
 ```
 
-#####<a id="can-i-increase-web-console-verbosity-for-debug-purposes">Can I increase web console verbosity for debug purposes?</a>
+##### <a id="can-i-increase-web-console-verbosity-for-debug-purposes">Can I increase web console verbosity for debug purposes?</a>
 
 If you need more insightful overview of what client-side script is doing (including warnings if detected) enable logging:
+
 ```JavaScript
 <script>
     ea.settings.debug = true; // output debug messages to the web console
                               // (should be disabled for release code)
 ```
 
-#####<a id="#how-to-fetch-field-value-or-display-name-in-error-message">How to fetch field value or display name in error message?</a>
+##### <a id="#how-to-fetch-field-value-or-display-name-in-error-message">How to fetch field value or display name in error message?</a>
 
 * to get a value, wrap the field name in braces, e.g. `{field}`, or for nested fields - `{field.field}`,
 * to get display name, given in `DisplayAttribute`, use additional `n` (or `N`) suffix, e.g. `{field:n}`.
 
 Notice that `{{` is treated as the escaped bracket character.
 
-#####<a id="#is-there-any-event-raised-when-validation-is-done">Is there any event raised when validation is done?</a>
+##### <a id="#is-there-any-event-raised-when-validation-is-done">Is there any event raised when validation is done?</a>
 
 Each element validated by EA triggers one or more `eavalid` events, with the following extra parameters:
 
@@ -707,6 +770,7 @@ Each element validated by EA triggers one or more `eavalid` events, with the fol
 * `cond` - expression evaluation result - optional parameter, available only when the value of `type` parameter is `'requiredif'` and `ea.settings.optimize` flag is set to `false`.
 
 Attach to it in the following manner:
+
 ```JavaScript
 <script>
     $('form').find('input, select, textarea').on('eavalid', function(e, type, valid, expr, cond) {
@@ -714,7 +778,7 @@ Attach to it in the following manner:
     });
 ```
 
-#####<a id="#requiredif-attribute-is-not-working-what-is-wrong">`RequiredIf` attribute is not working, what is wrong?</a>
+##### <a id="#requiredif-attribute-is-not-working-what-is-wrong">`RequiredIf` attribute is not working, what is wrong?</a>
 
 Make sure `RequiredIf` is applied to a field which *accepts null values*.
 
@@ -724,20 +788,21 @@ In the other words, it is redundant to apply this attribute to a field of non-nu
 [RequiredIf("true")] // no effect...
 public int Value { get; set; } // ...unless int? is used
 ```
+
 ```C#
 [RequiredIf("true")] // no effect...
 public DateTime Value { get; set; } // ...unless DateTime? is used
 ```
 
-#####<a id="#is-there-a-possibility-to-perform-asynchronous-validation">Is there a possibility to perform asynchronous validation?</a>
+##### <a id="#is-there-a-possibility-to-perform-asynchronous-validation">Is there a possibility to perform asynchronous validation?</a>
 
 Currently not. Although there is an ongoing work on [async-work branch](https://github.com/jwaliszko/ExpressiveAnnotations/tree/async-work), created especially for asynchronous-related ideas. If you feel you'd like to contribute, either by providing better solution, review code or just test what is currently there, your help is always highly appreciated.
 
-#####<a id="what-if-my-question-is-not-covered-by-faq-section">What if my question is not covered by FAQ section?</a>
+##### <a id="what-if-my-question-is-not-covered-by-faq-section">What if my question is not covered by FAQ section?</a>
 
 If you're searching for an answer to some other problem, not covered by this document, try to browse through [already posted issues](../../issues?q=label%3Aquestion) labelled by *question* tag, or possibly have a look [at Stack Overflow](http://stackoverflow.com/search?tab=newest&q=expressiveannotations).
 
-###<a id="installation">Installation instructions</a>
+### <a id="installation">Installation instructions</a>
 
 Simplest way is using the [NuGet](https://www.nuget.org) Package Manager Console:
 
@@ -753,13 +818,13 @@ Simplest way is using the [NuGet](https://www.nuget.org) Package Manager Console
 
     ###`PM> Install-Package ExpressiveAnnotations.dll`
 
-###<a id="contributors">Contributors</a>
+### <a id="contributors">Contributors</a>
 
 [GitHub Users](../../graphs/contributors)
 
 Special thanks to Szymon Małczak
 
-###<a id="license">License</a>
+### <a id="license">License</a>
 
 Copyright (c) 2014 Jarosław Waliszko
 
