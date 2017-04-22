@@ -810,13 +810,13 @@ Simplest way is using the [NuGet](https://www.nuget.org) Package Manager Console
 
     [![NuGet complete](https://img.shields.io/nuget/v/ExpressiveAnnotations.svg)](http://nuget.org/packages/ExpressiveAnnotations)
 
-    ###`PM> Install-Package ExpressiveAnnotations`
+    ### `PM> Install-Package ExpressiveAnnotations`
 
 * [minimal package](https://www.nuget.org/packages/ExpressiveAnnotations.dll) - core assembly only (MVC-related client-side coating components excluded):
 
     [![NuGet minimal](https://img.shields.io/nuget/v/ExpressiveAnnotations.dll.svg)](http://nuget.org/packages/ExpressiveAnnotations.dll)
 
-    ###`PM> Install-Package ExpressiveAnnotations.dll`
+    ### `PM> Install-Package ExpressiveAnnotations.dll`
 
 ### <a id="contributors">Contributors</a>
 
