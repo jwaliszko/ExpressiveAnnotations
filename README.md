@@ -104,17 +104,17 @@ public string ReasonForTravel { get; set; }
 
 Restriction above, despite being more specific than its predecessors, still can be quickly understood (reason for travel has to be provided if you plan to go abroad and, either want to visit the same definite country twice, or are between 25 and 55).
 
-Conditional operations are supported as well. You can imply various assertions on specific field based on certain condition (or nested conditions), e.g.
+Conditional operations are supported (ternary operator defined). You can imply various assertions on specific field based on certain condition (or nested conditions), e.g.
 
 ```C#
-[AssertThat("Switch == 'on' ? Voltage1 == Voltage2 : true")]
+[AssertThat("Switch == 'ON' ? Voltage1 == Voltage2 : true")]
 public int Voltage1 { get; set; }
 ```
 
-Here, when switch is on voltages must be equal, otherwise everything is OK. You could express the same statement without conditional operator, i.e.
+Here, when switch is ON, voltages must be equal - otherwise everything is OK. You could express the same statement without conditional operator, i.e.
 
 ```C#
-[AssertThat("Switch == 'on' && (Voltage1 == Voltage2) || (Switch != 'on')")]
+[AssertThat("Switch == 'ON' && (Voltage1 == Voltage2) || (Switch != 'ON')")]
 ```
 
 but it is less verbose.
@@ -469,7 +469,7 @@ Implementation core is based on [expressions parser](src/ExpressiveAnnotations/A
 
 Firstly, at the lexical analysis stage, character stream of the expression is converted into token stream (whitespaces ignored, characters grouped into tokens and associated with position in the text). Next, at the syntax analysis level, abstract syntax tree is constructed according to the rules defined by the grammar. While the tree is being built, also the 3rd stage, mainly semantic analysis, is being performed. This stage is directly related to operands type checking (and eventual type conversions according to type generalization rules, when incompatible types are detected).
 
-Based on valid expression string [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure is finally being built. A delegate containing compiled version of the lambda expression described by produced expression tree is returned as a result of the parsersing mechanism. Such delegate can be then invoked for specified model object.
+Based on valid expression string [expression tree](http://msdn.microsoft.com/en-us/library/bb397951.aspx) structure is finally being built. A delegate containing compiled version of the lambda expression (defined by the expression tree) is returned as a result of the parsersing mechanism. Such delegate can be then invoked for specified model object.
 
 When expression is provided to the attribute, it should be of a boolean type. The result of its evaluation indicates whether the assertion or requirement condition is satisfied or not.
 
