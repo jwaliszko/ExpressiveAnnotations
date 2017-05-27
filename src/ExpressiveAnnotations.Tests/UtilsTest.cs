@@ -103,14 +103,17 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal(null, ExpressiveAnnotations.Helper.ExtractValue(model, "Internal.Value2"));
 
             var e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractValue(model, "internal"));
-            Assert.Equal("Value extraction interrupted. Field internal not found.\r\nParameter name: internal", e.Message);
+            Assert.StartsWith("Value extraction interrupted. Field internal not found.", e.Message);
+            Assert.Equal("internal", e.ParamName);
 
             e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractValue(model, "Internal.Value123"));
-            Assert.Equal("Value extraction interrupted. Field Value123 not found.\r\nParameter name: Internal.Value123", e.Message);
+            Assert.StartsWith("Value extraction interrupted. Field Value123 not found.", e.Message);
+            Assert.Equal("Internal.Value123", e.ParamName);
 
             model.Internal = null;
             e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractValue(model, "Internal.Value1"));
-            Assert.Equal("Value extraction interrupted. Field Internal is null.\r\nParameter name: Internal.Value1", e.Message);
+            Assert.StartsWith("Value extraction interrupted. Field Internal is null.", e.Message);
+            Assert.Equal("Internal.Value1", e.ParamName);
         }
 
         [Fact]
@@ -125,13 +128,16 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("_{Value2}_", ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Internal.Value2"));
 
             var e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "internal"));
-            Assert.Equal("Display name extraction interrupted. Field internal not found.\r\nParameter name: internal", e.Message);
+            Assert.StartsWith("Display name extraction interrupted. Field internal not found.", e.Message);
+            Assert.Equal("internal", e.ParamName);
 
             e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "Internal.Value123"));
-            Assert.Equal("Display name extraction interrupted. Field Value123 not found.\r\nParameter name: Internal.Value123", e.Message);
+            Assert.StartsWith("Display name extraction interrupted. Field Value123 not found.", e.Message);
+            Assert.Equal("Internal.Value123", e.ParamName);
 
             e = Assert.Throws<ArgumentException>(() => ExpressiveAnnotations.Helper.ExtractDisplayName(typeof(Model), "NoName"));
-            Assert.Equal("No display name provided for NoName field. Use either Display attribute or DisplayName attribute.\r\nParameter name: NoName", e.Message);
+            Assert.StartsWith("No display name provided for NoName field. Use either Display attribute or DisplayName attribute.", e.Message);
+            Assert.Equal("NoName", e.ParamName);
         }
 
         [Fact]
@@ -205,9 +211,11 @@ namespace ExpressiveAnnotations.Tests
         public void throw_when_non_positive_parameters_are_provided_for_error_message_construction()
         {
             var e = Assert.Throws<ArgumentOutOfRangeException>(() => new Location(0, 1));
-            Assert.Equal("Line number should be positive.\r\nParameter name: line", e.Message);
+            Assert.StartsWith("Line number should be positive.", e.Message);
+            Assert.Equal("line", e.ParamName);
             e = Assert.Throws<ArgumentOutOfRangeException>(() => new Location(1, 0));
-            Assert.Equal("Column number should be positive.\r\nParameter name: column", e.Message);
+            Assert.StartsWith("Column number should be positive.", e.Message);
+            Assert.Equal("column", e.ParamName);
         }
 
         [Fact]

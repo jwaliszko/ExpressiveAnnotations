@@ -496,7 +496,7 @@ namespace ExpressiveAnnotations.Analysis
                 switch (oper.Type)
                 {
                     case TokenType.ADD:
-                        arg1 = (arg1.Type.IsString() || arg2.Type.IsString())
+                        arg1 = arg1.Type.IsString() || arg2.Type.IsString()
                             ? Expression.Add(
                                 Expression.Convert(arg1, typeof(object)),
                                 Expression.Convert(arg2, typeof(object)),

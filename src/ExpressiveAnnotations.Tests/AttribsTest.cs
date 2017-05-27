@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
 using Xunit;
@@ -218,16 +216,8 @@ namespace ExpressiveAnnotations.Tests
         [Fact]
         public void verify_that_culture_change_affects_validation_message()
         {
-            AssertErrorMessage("{Lang:n}", "default");
-
-            // change culture
-            var culture = Thread.CurrentThread.CurrentUICulture;
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture("pl");
-
-            AssertErrorMessage("{Lang:n}", "polski");
-
-            // restore culture
-            Thread.CurrentThread.CurrentUICulture = culture;
+            Helper.CulturalExecutionUI(() => AssertErrorMessage("{Lang:n}", "default"), "en"); // default translation picked
+            Helper.CulturalExecutionUI(() => AssertErrorMessage("{Lang:n}", "polski"), "pl");  // known translation picked
         }
 
         [Fact]
@@ -269,9 +259,11 @@ namespace ExpressiveAnnotations.Tests
         public void verify_attribute_constructor_invalid_parameter()
         {
             var e = Assert.Throws<ArgumentNullException>(() => new AssertThatAttribute(null));
-            Assert.Equal("Expression not provided.\r\nParameter name: expression", e.Message);
+            Assert.StartsWith("Expression not provided.", e.Message);
+            Assert.Equal("expression", e.ParamName);
             e = Assert.Throws<ArgumentNullException>(() => new RequiredIfAttribute(null));
-            Assert.Equal("Expression not provided.\r\nParameter name: expression", e.Message);
+            Assert.StartsWith("Expression not provided.", e.Message);
+            Assert.Equal("expression", e.ParamName);
         }
 
         [Fact]

@@ -119,3 +119,4 @@ UpgradeLog*.XML
 /build/*.xml
 /build/*.js
 /src/_Chutzpah.*
+/.vs

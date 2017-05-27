@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using ExpressiveAnnotations.Attributes;
 
 namespace ExpressiveAnnotations.Tests
@@ -139,7 +141,10 @@ namespace ExpressiveAnnotations.Tests
             }
             else if ((conste = exp as ConstantExpression) != null)
             {
-                sb.Append(conste.Value);
+                var val = conste.Value.ToString();
+                if (conste.Type == typeof(double))
+                    val = ((double) conste.Value).ToString(CultureInfo.InvariantCulture);
+                sb.Append(val);
             }
             else
             {
@@ -198,6 +203,22 @@ namespace ExpressiveAnnotations.Tests
                 default:
                     throw new NotImplementedException("Operator printout undefined.");
             }
+        }
+
+        public static void CulturalExecution(Action action, string culture)
+        {
+            var temp = Thread.CurrentThread.CurrentCulture; // backup current culture
+            Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture(culture);
+            action();
+            Thread.CurrentThread.CurrentCulture = temp; // restore culture
+        }
+
+        public static void CulturalExecutionUI(Action action, string culture)
+        {
+            var temp = Thread.CurrentThread.CurrentUICulture; // backup current UI culture
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture(culture);
+            action();
+            Thread.CurrentThread.CurrentUICulture = temp; // restore culture
         }
     }
 }

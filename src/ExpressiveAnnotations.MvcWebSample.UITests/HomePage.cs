@@ -108,6 +108,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
 
         public void SetDate(string id, string text) // simulation of datepicker instant date selection (instead of sending key characters, one after another)
         {
+            WaitForLoad(); // wait for jQuery to load prior to execute jQuery script
             _driver.ExecuteScript($"$('#{id}').attr('value', '{text}')");
             _driver.ExecuteScript("$('.date').trigger('change')");
         }
@@ -151,11 +152,11 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             wait.Until(d => d.ExecuteJavaScript<bool>("return jQuery.active === 0")); // $.active returns the number of active Ajax requests
         }
 
-        //private void WaitForLoad() // wait for the DOM to be in a complete state - the document and all sub-resources have finished loading (load event has been fired, page is fully loaded)
-        //{
-        //    var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
-        //    wait.Until(d => d.ExecuteJavaScript<bool>("return document.readyState === 'complete'")); // document.readyState describes the loading state of the document
-        //}
+        private void WaitForLoad() // wait for the DOM to be in a complete state - the document and all sub-resources have finished loading (load event has been fired, page is fully loaded)
+        {
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
+            wait.Until(d => d.ExecuteJavaScript<bool>("return document.readyState === 'complete'")); // document.readyState describes the loading state of the document
+        }
 
         //private void SafeClick(IWebElement elem)
         //{

@@ -327,8 +327,9 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<bool>("1/2==0.5").Invoke());
             Assert.True(parser.Parse<bool>("-1*-+- -+-1==-1").Invoke());
             Assert.True(parser.Parse<bool>("- - -1+'a'+'b'+null+''+'c'+1+2=='-1abc12'").Invoke());
-            Assert.True(parser.Parse<bool>("1.2 + 'a' + .12=='1.2a0.12'").Invoke());
-
+            Helper.CulturalExecution(() => Assert.True(parser.Parse<bool>("1.2 + 'a' + .12=='1.2a0.12'").Invoke()), "en");
+            Helper.CulturalExecution(() => Assert.True(parser.Parse<bool>("1.2 + 'a' + .12=='1,2a0,12'").Invoke()), "pl"); // regional specific decimal separator
+            
             Assert.True(parser.Parse<bool>("1 - 2 -(6 / ((2*1.5 - 1) + 1)) * -2 + 1/2/1 == 3.50").Invoke());
             Assert.True(parser.Parse<bool>("-.11e-10+.11e-10==.0-.0").Invoke());
 
@@ -624,15 +625,20 @@ namespace ExpressiveAnnotations.Tests
             var parser = new Parser();
 
             var e = Assert.Throws<ArgumentNullException>(() => parser.Parse<bool>(null));
-            Assert.Equal("Expression not provided.\r\nParameter name: expression", e.Message);
+            Assert.StartsWith("Expression not provided.", e.Message);
+            Assert.Equal("expression", e.ParamName);
 
             e = Assert.Throws<ArgumentNullException>(() => parser.Parse<object, bool>(null));
-            Assert.Equal("Expression not provided.\r\nParameter name: expression", e.Message);
+            Assert.StartsWith("Expression not provided.", e.Message);
+            Assert.Equal("expression", e.ParamName);
 
             e = Assert.Throws<ArgumentNullException>(() => parser.Parse<bool>(null, null));
-            Assert.Equal("Context not provided.\r\nParameter name: context", e.Message);
+            Assert.StartsWith("Context not provided.", e.Message);
+            Assert.Equal("context", e.ParamName);
+
             e = Assert.Throws<ArgumentNullException>(() => parser.Parse<bool>(typeof(object), null));
-            Assert.Equal("Expression not provided.\r\nParameter name: expression", e.Message);
+            Assert.StartsWith("Expression not provided.", e.Message);
+            Assert.Equal("expression", e.ParamName);
         }
 
         [Fact]
@@ -1056,8 +1062,8 @@ namespace ExpressiveAnnotations.Tests
 
             Assert.True(parser.Parse<bool>("Guid('a1111111-1111-1111-1111-111111111111') == Guid('A1111111-1111-1111-1111-111111111111')").Invoke());
 
-            var e = Assert.Throws<FormatException>(() => parser.Parse<bool>("Guid('abc') == Guid('abc')").Invoke());
-            Assert.Equal("Guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).", e.Message);
+            Assert.Throws<FormatException>(() => parser.Parse<bool>("Guid('abc') == Guid('abc')").Invoke()); // Guid should contain 32 digits with 4 dashes (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)
+            // do not assert on framework exception messages (different translations for various regional settings)
         }
 
         public static IEnumerable<object[]> BitwiseOperators

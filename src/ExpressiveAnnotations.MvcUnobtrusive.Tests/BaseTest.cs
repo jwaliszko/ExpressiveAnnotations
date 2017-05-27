@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
@@ -35,6 +37,14 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             mockHttpContext.Setup(c => c.Request).Returns(request.Object);
             var controllerContext = new ControllerContext(mockHttpContext.Object, new RouteData(), new Mock<ControllerBase>().Object);
             return controllerContext;
+        }
+
+        protected void CulturalExecutionUI(Action action, string culture)
+        {
+            var temp = Thread.CurrentThread.CurrentUICulture; // backup current UI culture
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture(culture);
+            action();
+            Thread.CurrentThread.CurrentUICulture = temp; // restore culture
         }
     }
 }

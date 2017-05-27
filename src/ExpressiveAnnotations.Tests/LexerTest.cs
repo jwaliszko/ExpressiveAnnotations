@@ -110,7 +110,8 @@ namespace ExpressiveAnnotations.Tests
         {
             var lexer = new Lexer();
             var e = Assert.Throws<ArgumentNullException>(() => lexer.Analyze(null));
-            Assert.Equal("Expression not provided.\r\nParameter name: expression", e.Message);
+            Assert.StartsWith("Expression not provided.", e.Message);
+            Assert.Equal("expression", e.ParamName);
         }
 
         [Fact]

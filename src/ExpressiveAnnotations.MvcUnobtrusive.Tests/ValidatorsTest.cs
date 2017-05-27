@@ -1,9 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
-using System.Threading;
 using System.Web;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
@@ -366,21 +364,20 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             var metadata = GetModelMetadata(model, m => m.Lang);
             var controllerContext = GetControllerContext();
 
-            var assert = new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("1 > 2") {ErrorMessage = "{Lang:n}"});
-            var assertRule = assert.GetClientValidationRules().Single();
-            Assert.Equal("default", assertRule.ErrorMessage);
-
-            // change culture
-            var culture = Thread.CurrentThread.CurrentUICulture;
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture("pl");
+            CulturalExecutionUI(() =>
+            {
+                var assert = new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("1 > 2") {ErrorMessage = "{Lang:n}"});
+                var assertRule = assert.GetClientValidationRules().Single();
+                Assert.Equal("default", assertRule.ErrorMessage);
+            }, "en");
 
             // simulate next request - create new validator
-            assert = new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("1 > 2") {ErrorMessage = "{Lang:n}"});
-            assertRule = assert.GetClientValidationRules().Single();
-            Assert.Equal("polski", assertRule.ErrorMessage);
-
-            // restore culture
-            Thread.CurrentThread.CurrentUICulture = culture;
+            CulturalExecutionUI(() =>
+            {
+                var assert = new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("1 > 2") {ErrorMessage = "{Lang:n}"});
+                var assertRule = assert.GetClientValidationRules().Single();
+                Assert.Equal("polski", assertRule.ErrorMessage);
+            }, "pl");
         }
 
         [Fact]

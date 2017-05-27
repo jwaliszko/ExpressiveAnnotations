@@ -12,10 +12,11 @@ build:
   parallel: true
   verbosity: minimal
 test_script:
+  - "SET NODE_PATH=%AppData%\\npm\\node_modules"
   - ps: build\test.ps1
   - "SET PATH=C:\\Python34;C:\\Python34\\Scripts;%PATH%"
   - pip install codecov
   - codecov --no-color -f "csharp-coverage.xml" "javascript-coverage.lcov"
 install:
-  - choco install firefox --version 46.0.1
+  - choco install firefox --version 46.0.1 --x86
   - npm install uglify-js -g
