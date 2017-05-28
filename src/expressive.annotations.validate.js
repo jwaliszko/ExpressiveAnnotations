@@ -738,16 +738,18 @@ var
 
     annotations = ' abcdefghijklmnopqrstuvwxyz'; // suffixes for attributes annotating single field multiple times
 
+    // bind requirements first...
     $.each(annotations.split(''), function() { // it would be ideal to have exactly as many handlers as there are unique annotations, but the number of annotations isn't known untill DOM is ready
-        var adapter = typeHelper.string.format('assertthat{0}', $.trim(this));
-        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'enumsMap', 'parsersMap', 'errFieldsMap'], function(options) {
+        var adapter = typeHelper.string.format('requiredif{0}', $.trim(this));
+        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'enumsMap', 'parsersMap', 'errFieldsMap', 'allowEmpty'], function(options) {
             buildAdapter(adapter, options);
         });
     });
 
+    // ...then move to asserts
     $.each(annotations.split(''), function() {
-        var adapter = typeHelper.string.format('requiredif{0}', $.trim(this));
-        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'enumsMap', 'parsersMap', 'errFieldsMap', 'allowEmpty'], function(options) {
+        var adapter = typeHelper.string.format('assertthat{0}', $.trim(this));
+        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'enumsMap', 'parsersMap', 'errFieldsMap'], function(options) {
             buildAdapter(adapter, options);
         });
     });

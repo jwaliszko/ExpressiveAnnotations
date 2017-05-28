@@ -665,8 +665,10 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             });
         }
 
+        // -------- asterisks verification
+
         [Fact]
-        public void verify_empty_identification_is_denoted_as_required()
+        public void empty_identification_is_denoted_as_required()
         {
             Watch(() =>
             {
@@ -675,7 +677,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         }
 
         [Fact]
-        public void verify_filled_identification_is_denoted_as_required()
+        public void filled_identification_is_denoted_as_required()
         {
             Watch(() =>
             {
@@ -695,7 +697,52 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         }
 
         [Fact]
-        public void verify_reason_for_travel_field_is_denoted_as_required_when_any_attribute_demands_it()
+        public void empty_identification_value_denoted_as_required_when_identification_is_selected_and_not_required_when_unselected()
+        {
+            Watch(() =>
+            {
+                Assert.False(Home.AsteriskVisible("IdentificationValue"));
+
+                Home.Select("Identification", "ID");
+                Assert.True(Home.AsteriskVisible("IdentificationValue"));
+                Home.Select("Identification", "Passport");
+                Assert.True(Home.AsteriskVisible("IdentificationValue"));
+
+                Home.Select("Identification", "");
+                Assert.False(Home.AsteriskVisible("IdentificationValue"));
+            });
+        }
+
+        [Fact]
+        public void properly_filled_identification_value_denoted_as_required_when_identification_is_selected_and_not_required_when_unselected()
+        {
+            Watch(() =>
+            {
+                Home.WriteInput("IdentificationValue", "qwe123123");
+                Home.Select("Identification", "ID");
+                Assert.True(Home.AsteriskVisible("IdentificationValue"));
+
+                Home.Select("Identification", ""); // unselect
+                Assert.False(Home.AsteriskVisible("IdentificationValue"));
+            });
+        }
+
+        [Fact]
+        public void improperly_filled_identification_value_denoted_as_required_when_identification_is_selected_and_not_required_when_unselected()
+        {
+            Watch(() =>
+            {
+                Home.WriteInput("IdentificationValue", "qwe123123");
+                Home.Select("Identification", "Passport");
+                Assert.True(Home.AsteriskVisible("IdentificationValue"));
+
+                Home.Select("Identification", ""); // unselect
+                Assert.False(Home.AsteriskVisible("IdentificationValue"));
+            });
+        }
+
+        [Fact]
+        public void reason_for_travel_field_denoted_as_required_when_any_attribute_demands_it()
         {
             Watch(() =>
             {

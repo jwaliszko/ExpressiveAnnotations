@@ -27,6 +27,9 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             profile.SetPreference("webdriver.log.profiler.ignore", true);
             profile.SetPreference("webdriver.log.init", false);
             profile.SetPreference("webdriver.log.driver.level", "OFF");
+            // disable start page
+            profile.SetPreference("browser.startup.homepage_override.mstone", "ignore");
+            profile.SetPreference("startup.homepage_welcome_url.additional", "about:blank");
             Driver = new FirefoxDriver(profile);
         }
 
