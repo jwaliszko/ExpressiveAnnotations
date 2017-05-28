@@ -210,6 +210,21 @@
   <data name="HomeAddress" xml:space="preserve">
     <value>Adres domowy</value>
   </data>
+  <data name="ID" xml:space="preserve">
+    <value>Dowód osobisty</value>
+  </data>
+  <data name="Identification" xml:space="preserve">
+    <value>Dokument tożsamości</value>
+  </data>
+  <data name="IdentificationValue" xml:space="preserve">
+    <value>Numer dokumentu</value>
+  </data>
+  <data name="IDNumberInvalid" xml:space="preserve">
+    <value>Niepoprawny numer dowodu (wymagane 3 litery i 6 cyfr)</value>
+  </data>
+  <data name="IDNumberMissing" xml:space="preserve">
+    <value>Numer dowodu jest wymagany</value>
+  </data>
   <data name="ImmediateContact" xml:space="preserve">
     <value>Kontakt natychmiastowy</value>
   </data>
@@ -252,8 +267,14 @@
   <data name="Other" xml:space="preserve">
     <value>Inny</value>
   </data>
-  <data name="PassportNumber" xml:space="preserve">
-    <value>Numer paszportu</value>
+  <data name="Passport" xml:space="preserve">
+    <value>Paszport</value>
+  </data>
+  <data name="PassportNumberInvalid" xml:space="preserve">
+    <value>Niepoprawny numer paszportu (wymagane 2 litery i 7 cyfr)</value>
+  </data>
+  <data name="PassportNumberMissing" xml:space="preserve">
+    <value>Numer paszportu jest wymagany</value>
   </data>
   <data name="Phone" xml:space="preserve">
     <value>Telefon</value>

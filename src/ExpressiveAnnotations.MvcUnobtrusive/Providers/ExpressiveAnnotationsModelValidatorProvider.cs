@@ -43,8 +43,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Providers
         {
             var allAttribs = attributes.ToList();
             var orderedAttribs = allAttribs
-                .Where(x => x is ExpressiveAttribute)
-                .Cast<ExpressiveAttribute>()
+                .OfType<ExpressiveAttribute>()
                 .Where(x => x.GetPriority().HasValue)
                 .OrderBy(x => x.Priority)
                 .Cast<Attribute>()

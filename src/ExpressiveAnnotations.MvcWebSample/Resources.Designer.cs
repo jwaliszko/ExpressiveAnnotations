@@ -340,6 +340,51 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ID.
+        /// </summary>
+        public static string ID {
+            get {
+                return ResourceManager.GetString("ID", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Identification.
+        /// </summary>
+        public static string Identification {
+            get {
+                return ResourceManager.GetString("Identification", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Identification value.
+        /// </summary>
+        public static string IdentificationValue {
+            get {
+                return ResourceManager.GetString("IdentificationValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ID number invalid (3 letters and 6 digits expected).
+        /// </summary>
+        public static string IDNumberInvalid {
+            get {
+                return ResourceManager.GetString("IDNumberInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ID number missing.
+        /// </summary>
+        public static string IDNumberMissing {
+            get {
+                return ResourceManager.GetString("IDNumberMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Immediate contact.
         /// </summary>
         public static string ImmediateContact {
@@ -466,11 +511,29 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Passport number.
+        ///   Looks up a localized string similar to Passport.
         /// </summary>
-        public static string PassportNumber {
+        public static string Passport {
             get {
-                return ResourceManager.GetString("PassportNumber", resourceCulture);
+                return ResourceManager.GetString("Passport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Passport number invalid (2 letters and 7 digits expected).
+        /// </summary>
+        public static string PassportNumberInvalid {
+            get {
+                return ResourceManager.GetString("PassportNumberInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Passport number missing.
+        /// </summary>
+        public static string PassportNumberMissing {
+            get {
+                return ResourceManager.GetString("PassportNumberMissing", resourceCulture);
             }
         }
         

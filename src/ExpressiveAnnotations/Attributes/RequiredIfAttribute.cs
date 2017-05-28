@@ -81,7 +81,7 @@ namespace ExpressiveAnnotations.Attributes
 
             if (value != null && PropertyType.IsNonNullableValueType())
                 throw new InvalidOperationException(
-                    $"{nameof(RequiredIfAttribute)} has no effect when applied to a field of non-nullable value type '{PropertyType.FullName}'. Use nullable '{PropertyType.FullName}?' version instead.");
+                    $"{nameof(RequiredIfAttribute)} has no effect when applied to a field of non-nullable value type '{PropertyType.FullName}'. Use nullable '{PropertyType.FullName}?' version instead, or switch to {nameof(AssertThatAttribute)} otherwise.");
         }
     }
 }

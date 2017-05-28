@@ -33,7 +33,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 var propType = metadata.ModelType;
                 if (propType.IsNonNullableValueType())
                     throw new InvalidOperationException(
-                        $"{nameof(RequiredIfAttribute)} has no effect when applied to a field of non-nullable value type '{propType.FullName}'. Use nullable '{propType.FullName}?' version instead.");
+                        $"{nameof(RequiredIfAttribute)} has no effect when applied to a field of non-nullable value type '{propType.FullName}'. Use nullable '{propType.FullName}?' version instead, or switch to {nameof(AssertThatAttribute)} otherwise.");
             }
             catch (Exception e)
             {

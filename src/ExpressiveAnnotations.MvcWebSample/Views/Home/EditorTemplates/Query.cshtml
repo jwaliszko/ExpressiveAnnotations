@@ -31,21 +31,23 @@
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>
-            @Html.LabelFor(model => model.ID, new { @class = "inline prefix" })
-            @Html.TextBoxFor(model => model.ID)
-            @Html.ValidationMessageFor(model => model.ID)
+            @Html.LabelFor(model => model.Identification, new { @class = "inline prefix" })
+            @Html.EnumDropDownListFor(model => model.Identification)
+            @Html.ValidationMessageFor(model => model.Identification)
         </div>
     </li>
     <li>
         <pre class="code">
-[RequiredIf("GoAbroad == true")]
-[AssertThat("IsDigitChain(PassportNumber)")]
+[RequiredIf("Identification == Document.ID"]
+[RequiredIf("Identification == Document.Passport"]
+[AssertThat("Identification == Document.ID ? IsRegexMatch(IdentificationValue, '^[a-zA-Z]{3}[0-9]{6}$') : true"]
+[AssertThat("Identification == Document.Passport ? IsRegexMatch(IdentificationValue, '^[a-zA-Z]{2}[0-9]{7}$') : true"]
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>
-            @Html.LabelFor(model => model.PassportNumber, new { @class = "inline prefix" })
-            @Html.TextBoxFor(model => model.PassportNumber)
-            @Html.ValidationMessageFor(model => model.PassportNumber)
+            @Html.LabelFor(model => model.IdentificationValue, new { @class = "inline prefix" })
+            @Html.TextBoxFor(model => model.IdentificationValue)
+            @Html.ValidationMessageFor(model => model.IdentificationValue)
         </div>
     </li>
     <li>

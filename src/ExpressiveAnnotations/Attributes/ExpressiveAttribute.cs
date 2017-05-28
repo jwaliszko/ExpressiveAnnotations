@@ -78,7 +78,7 @@ namespace ExpressiveAnnotations.Attributes
 
         /// <summary>
         ///     Gets or sets the hint, available for any concerned external components, indicating the order in which this attribute should be
-        ///     executed among others of its kind, i.e. <see cref="ExpressiveAttribute" />.
+        ///     executed among others of its kind.
         ///     <para>
         ///         Consumers must use the <see cref="GetPriority" /> method to retrieve the value, as this property getter will throw an
         ///         exception if the value has not been set.

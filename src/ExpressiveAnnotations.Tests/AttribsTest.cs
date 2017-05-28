@@ -309,7 +309,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("RequiredIfAttribute: validation applied to Value field failed.", e.Message);
             Assert.IsType<InvalidOperationException>(e.InnerException);
             Assert.Equal(
-                "RequiredIfAttribute has no effect when applied to a field of non-nullable value type 'System.Int32'. Use nullable 'System.Int32?' version instead.",
+                "RequiredIfAttribute has no effect when applied to a field of non-nullable value type 'System.Int32'. Use nullable 'System.Int32?' version instead, or switch to AssertThatAttribute otherwise.",
                 e.InnerException.Message);
         }
 

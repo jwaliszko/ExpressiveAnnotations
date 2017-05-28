@@ -8,6 +8,16 @@ using ExpressiveAnnotations.Attributes;
 
 namespace ExpressiveAnnotations.MvvmDesktopSample.Models
 {
+    public enum Stability
+    {
+        [Display(Name = "High")]
+        High,
+        [Display(Name = "Low")]
+        Low,
+        [Display(Name = "Uncertain")]
+        Uncertain,
+    }
+
     public class QueryVM : ExpressiveVM
     {
         public const string SIMONS_CAT = @"Simon's cat named ""\\""

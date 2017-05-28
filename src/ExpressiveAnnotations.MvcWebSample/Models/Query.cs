@@ -9,6 +9,24 @@ using ExpressiveAnnotations.MvcWebSample.Inheritance;
 
 namespace ExpressiveAnnotations.MvcWebSample.Models
 {
+    public enum Document
+    {
+        [Display(ResourceType = typeof(Resources), Name = "ID")]
+        ID,
+        [Display(ResourceType = typeof(Resources), Name = "Passport")]
+        Passport
+    }
+
+    public enum Stability
+    {
+        [Display(ResourceType = typeof(Resources), Name = "High")]
+        High,
+        [Display(ResourceType = typeof(Resources), Name = "Low")]
+        Low,
+        [Display(ResourceType = typeof(Resources), Name = "Uncertain")]
+        Uncertain,
+    }
+
     public class Query
     {
         public const string SIMONS_CAT = @"Simon's cat named ""\\""
@@ -66,14 +84,19 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public ushort? Age { get; set; }
 
         [RequiredIf("GoAbroad == true", ErrorMessage = "?")]
-        public string ID { get; set; }
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.Identification))]
+        public Document? Identification { get; set; }
 
-        [RequiredIf("GoAbroad == true",
-            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.FieldConditionallyRequired))]
-        [AssertThat("IsDigitChain(PassportNumber)",
-            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.DigitsOnlyAccepted))]
-        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.PassportNumber))]
-        public string PassportNumber { get; set; }
+        [RequiredIf("Identification == Document.ID",
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.IDNumberMissing))]
+        [RequiredIf("Identification == Document.Passport",
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.PassportNumberMissing))]
+        [AssertThat("Identification == Document.ID ? IsRegexMatch(IdentificationValue, '^[a-zA-Z]{3}[0-9]{6}$') : true",
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.IDNumberInvalid))]
+        [AssertThat("Identification == Document.Passport ? IsRegexMatch(IdentificationValue, '^[a-zA-Z]{2}[0-9]{7}$') : true",
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.PassportNumberInvalid))]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.IdentificationValue))]
+        public string IdentificationValue { get; set; }
 
         [Display(ResourceType = typeof(Resources), Name = nameof(Resources.Country))]
         public string Country { get; set; }
@@ -101,9 +124,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 
         [RequiredIf("GoAbroad == true",
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.FieldConditionallyRequired))]
-        [AssertThat("ReturnDate >= Today()", Priority = 1, // to be invoked firstly
+        [AssertThat("ReturnDate >= Today()", Priority = 1, // to be invoked firstly (among AssertThat attribs)
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.FutureDateRequired))]
-        [AssertThat("ReturnDate >= Today() + WeekPeriod", Priority = 2, // to be invoked secondly
+        [AssertThat("ReturnDate >= Today() + WeekPeriod", Priority = 2, // to be invoked secondly (among AssertThat attribs)
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.MoreThanAWeekRequired))]
         [AssertThat("ReturnDate < AddYears(Today(), 1)",
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.NoMoreThanAYear))]

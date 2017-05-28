@@ -74,7 +74,6 @@
       <DependentUpon>QueryView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\QueryVM.cs" />
-    <Compile Include="Models\Stability.cs" />
     <Compile Include="Models\ExpressiveVM.cs" />
     <Page Include="Views\AddressView.xaml">
       <Generator>MSBuild:Compile</Generator>

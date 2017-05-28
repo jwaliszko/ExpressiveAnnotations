@@ -666,31 +666,31 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         }
 
         [Fact]
-        public void verify_password_is_denoted_as_required()
+        public void verify_empty_identification_is_denoted_as_required()
         {
             Watch(() =>
             {
-                Assert.True(Home.AsteriskVisible("PassportNumber"));
+                Assert.True(Home.AsteriskVisible("Identification"));
             });
         }
 
         [Fact]
-        public void verify_password_is_denoted_as_required_even_when_valid()
+        public void verify_filled_identification_is_denoted_as_required()
         {
             Watch(() =>
             {
-                Home.WriteInput("PassportNumber", "0123456789");
-                Assert.True(Home.AsteriskVisible("PassportNumber"));
+                Home.Select("Identification", "ID");
+                Assert.True(Home.AsteriskVisible("Identification"));
             });
         }
 
         [Fact]
-        public void unselect_goabroad_and_verify_password_is_not_denoted_as_required()
+        public void unselect_goabroad_and_verify_identification_is_not_denoted_as_required()
         {
             Watch(() =>
             {
                 Home.ClickCheckbox("GoAbroad");
-                Assert.False(Home.AsteriskVisible("PassportNumber"));
+                Assert.False(Home.AsteriskVisible("Identification"));
             });
         }
 
