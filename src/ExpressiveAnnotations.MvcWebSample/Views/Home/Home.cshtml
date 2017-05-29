@@ -156,24 +156,11 @@
 
                 $form.validate().settings.ignore = ''; // enable validation for ':hidden' fields (to have hidden fields visibility re-computed)
 
-                $(selector).on(ea.settings.dependencyTriggers, function() { // reset remembered conditions for every field when user activity is detected
-                    $form.find(selector).each(function() {
-                        if ($(this).attr('data-val-requiredif') !== undefined) {
-                            this.eacond = undefined; // forget previous condition result which may now have changed
-                        }
-                    });
-                });
-
-                $form.find(selector).each(function() { // apply asterisks for required or conditionally required fields
-                    if ($(this).attr('data-val-required') !== undefined
-                        || $(this).attr('data-val-requiredif') !== undefined) {
-                        var div = $(this).parent('div');
-                        div.prepend('<span class="asterisk">*</span>');
-                    }
-                });
-
-                $form.find(selector).on('eavalid', function(e, type, valid, expr, cond) { // verify asterisk visibility based on computed condition
+                $form.find(selector).on('eavalid', function(e, type, valid, expr, cond, idx) { // verify asterisk visibility based on computed condition
                     if (type === 'requiredif' && cond !== undefined) {
+                        if (idx === 0) { // if first of its kind...
+                            e.currentTarget.eacond = undefined; // ...reset asterisk visibility flag
+                        }
                         e.currentTarget.eacond |= cond; // multiple requiredif attributes can be applied to a single field - remember if any condition is true
                         var li = $(e.currentTarget).closest('li');
                         var asterisk = li.find('.asterisk');
@@ -193,17 +180,19 @@
                     }
                 });
 
-                $form.find(selector).each(function() { // run validation for every field to initialize asterisks
+                $form.find(selector).each(function() { // apply asterisks for required or conditionally required fields
+                    if ($(this).attr('data-val-required') !== undefined
+                        || $(this).attr('data-val-requiredif') !== undefined) {
+                        var div = $(this).parent('div');
+                        div.prepend('<span class="asterisk">*</span>');
+                    }
+                });
+
+                $form.find(selector).each(function() { // run validation for every field to verify asterisks visibility
                     if ($(this).attr('data-val-requiredif') !== undefined) {
                         $(this).valid();
                         $(this).removeClass('input-validation-error');
                         $(this).parent().find('.field-validation-error').empty();
-                    }
-                });
-
-                $form.find(selector).each(function() {
-                    if ($(this).attr('data-val-requiredif') !== undefined) {
-                        this.eacond = undefined; // forget previous condition result which may now have changed
                     }
                 });
             }

@@ -80,17 +80,17 @@ var
     logger = {
         dump: function(message) {
             if (api.settings.debug && console && typeof console.log === 'function') { // flush in debug mode only
-                console.log(message);
+                console.log('[info] : ' + message);
             }
         },
         warn: function(message) {
             if (console && typeof console.warn === 'function') {
-                console.warn(message);
+                console.warn('[warn] : ' + message);
             }
         },
         fail: function(message) {
             if (console && typeof console.error === 'function') {
-                console.error(message);
+                console.error('[fail] : ' + message);
             }
         }
     },
@@ -693,7 +693,8 @@ var
         if (value !== undefined && value !== null && value !== '') { // check if the field value is set (continue if so, otherwise skip condition verification)
             var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model);
-            logger.dump(typeHelper.string.format('AssertThat expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}', element.name, params.expression, model));
+            var message = 'AssertThat expression @ {0} field:\n[{1}]\nto be executed within the following context (methods hidden):\n{2}';
+            logger.dump(typeHelper.string.format(message, element.name, params.expression, model));
             return modelHelper.ctxEval(params.expression, model); // verify assertion, if not satisfied => notify (return false)
         }
         return true;
@@ -703,7 +704,7 @@ var
         value = modelHelper.adjustGivenValue(value, element, params);
 
         var exprVal, model;
-        var message = 'RequiredIf expression of {0} field:\n{1}\nwill be executed within following context (methods hidden):\n{2}';
+        var message = 'RequiredIf expression @ {0} field:\n[{1}]\nto be executed within the following context (methods hidden):\n{2}';
         if (!api.settings.optimize) { // no optimization - compute requirement condition despite the fact field value may be provided
             model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model);
@@ -755,7 +756,8 @@ var
     });
 
     $.each(annotations.split(''), function() {
-        var method = typeHelper.string.format('assertthat{0}', $.trim(this));
+        var suffix = $.trim(this);
+        var method = typeHelper.string.format('assertthat{0}', suffix);
         $.validator.addMethod(method, function(value, element, params) {
             try {
                 var valid = computeAssertThat(value, element, params);
@@ -768,11 +770,12 @@ var
     });
 
     $.each(annotations.split(''), function() {
-        var method = typeHelper.string.format('requiredif{0}', $.trim(this));
+        var suffix = $.trim(this);
+        var method = typeHelper.string.format('requiredif{0}', suffix);
         $.validator.addMethod(method, function(value, element, params) {
             try {
                 var result = computeRequiredIf(value, element, params);
-                $(element).trigger('eavalid', ['requiredif', result.valid, params.expression, result.condition]);
+                $(element).trigger('eavalid', ['requiredif', result.valid, params.expression, result.condition, annotations.indexOf(suffix)]);
                 return result.valid;
             } catch (ex) {
                 logger.fail(ex);

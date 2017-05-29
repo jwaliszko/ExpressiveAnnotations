@@ -708,6 +708,9 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                 Home.Select("Identification", "Passport");
                 Assert.True(Home.AsteriskVisible("IdentificationValue"));
 
+                Home.WriteInput("IdentificationValue", ""); // empty already empty to generate some events
+                Assert.True(Home.AsteriskVisible("IdentificationValue"));
+
                 Home.Select("Identification", "");
                 Assert.False(Home.AsteriskVisible("IdentificationValue"));
             });
