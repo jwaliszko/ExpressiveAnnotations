@@ -38,7 +38,7 @@
             </div>
         </div>
         @Html.EditorFor(model => model)
-        <input type="submit" />
+        <input type="submit" value="Submit" />
     </fieldset>
 }
 
@@ -181,7 +181,7 @@
                 });
 
                 $form.find(selector).each(function() { // apply asterisks for required or conditionally required fields
-                    if ($(this).attr('data-val-required') !== undefined
+                    if ($(this).attr('data-val-required') !== undefined // make sure implicit required attributes for value types are disabled i.e. DataAnnotationsModelValidatorProvider.AddImplicitRequiredAttributeForValueTypes = false
                         || $(this).attr('data-val-requiredif') !== undefined) {
                         var div = $(this).parent('div');
                         div.prepend('<span class="asterisk">*</span>');

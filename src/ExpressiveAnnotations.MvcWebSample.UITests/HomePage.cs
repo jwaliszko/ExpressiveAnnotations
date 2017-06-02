@@ -124,7 +124,7 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             var elem = _driver.FindElementByXPath($"//input[@id='{id}'] | //select[@id='{id}'] | //textarea[@id='{id}']");
             var parent = elem.FindElement(By.XPath(".."));
             var asterisk = parent.FindElements(By.XPath("span[@class='asterisk']"));
-            return asterisk.Single().Displayed;
+            return asterisk.Single().Displayed; // single implies that asterisk is there, but not necessarily visible
         }
 
         public string GetErrorMessage(string id)
