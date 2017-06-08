@@ -11,7 +11,7 @@ namespace ExpressiveAnnotations.Attributes
     ///     Validation attribute, executed for null-only annotated field, which indicates that such a field
     ///     is required to be non-null, when computed result of given logical expression is true.
     /// </summary>
-    public sealed class RequiredIfAttribute : ExpressiveAttribute
+    public class RequiredIfAttribute : ExpressiveAttribute
     {
         private static string _defaultErrorMessage = "The {0} field is required by the following logic: {1}";
 
