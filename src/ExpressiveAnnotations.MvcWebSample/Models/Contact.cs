@@ -15,14 +15,16 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             };
         }
 
-        [RequiredIf("Phone == null",
+        public Query Parent { get; set; }
+
+        [RequiredIf("Parent.GoAbroad && Phone == null", // reference to Parent.GoAbroad must by explicitly defined in the view
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.EmailOrPhoneRequired))]
         [AssertThat("IsEmail(Email)",
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.EmailFormatInvalid))]
         [Display(ResourceType = typeof(Resources), Name = nameof(Resources.Email))]
         public string Email { get; set; }
 
-        [RequiredIf("Email == null",
+        [RequiredIf("Parent.GoAbroad && Email == null",
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.EmailOrPhoneRequired))]
         //[AssertThat("IsPhone(Phone)")]
         [AssertThat(@"IsRegexMatch(Phone, '^\\d+$')", // regex pattern escaped despite verbatim string - it's because our expressive language parser

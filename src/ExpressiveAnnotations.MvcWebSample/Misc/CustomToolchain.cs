@@ -12,8 +12,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
     //    {
     //        return new Dictionary<string, IList<LambdaExpression>>
     //        {
-    //            {"ArrayLength", new LambdaExpression[] {(Expression<Func<int[], int>>) (array => array.Length)}},
-    //            {"ArrayContains", new LambdaExpression[] {(Expression<Func<int?, int[], bool>>) ((value, array) => value != null && array.Contains((int)value))}}
+    //            {"IntArrayLength", new LambdaExpression[] {(Expression<Func<int[], int>>) (array => array.Length)}},
+    //            {"StringArrayLength", new LambdaExpression[] {(Expression<Func<string[], int>>) (array => array.Length)}},
+    //            {"IntArrayContains", new LambdaExpression[] {(Expression<Func<int?, int[], bool>>) ((value, array) => value != null && array.Contains((int)value))}}
     //        };
     //    }
     //}
@@ -24,8 +25,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Misc
         {
             // Toolchain.Instance.Recharge(new CustomFunctionsProvider()); // load complately new set of functions...
             // ...or simply add some new ones to existing toolchain:
-            Toolchain.Instance.AddFunction<int[], int>("ArrayLength", array => array.Length);
-            Toolchain.Instance.AddFunction<int?, int[], bool>("ArrayContains", (value, array) => value != null && array.Contains((int)value));
+            Toolchain.Instance.AddFunction<int[], int>("IntArrayLength", array => array.Length);
+            Toolchain.Instance.AddFunction<string[], int>("StringArrayLength", array => array.Length);
+            Toolchain.Instance.AddFunction<int?, int[], bool>("IntArrayContains", (value, array) => value != null && array.Contains((int)value));
         }
     }
 }

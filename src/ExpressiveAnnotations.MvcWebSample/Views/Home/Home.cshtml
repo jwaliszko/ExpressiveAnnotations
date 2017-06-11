@@ -104,14 +104,27 @@
                 from.setFullYear(to);
                 return from.getTime();
             });
-            ea.addMethod('ArrayContains', function(value, array) {
-                return $.inArray(value, array) >= 0;
-            });
-            ea.addMethod('ArrayLength', function(array) {
+            ea.addMethod('IntArrayLength', function(array) {
                 return array.length;
+            });
+            ea.addMethod('StringArrayLength', function (array) {
+                return array.length;
+            });
+            ea.addMethod('IntArrayContains', function (value, array) {
+                return $.inArray(value, array) >= 0;
             });
 
             // ----- do some other stuff, not necessarily related to ea directly -----
+
+            function Mimic(src, dst) { // clones the value and behaviour of src field into dst one
+                $('input[name="' + src + '"]').on(ea.settings.dependencyTriggers,
+                    function(e) {
+                        var $src = $(this);
+                        var value = $src.attr('type') === 'checkbox' ? $src.is(':checked') : $src.val();
+                        $('input[name="' + dst + '"]').val(value);
+                        $('input[name="' + dst + '"]').trigger(e.type); // trigger the change for dependency validation
+                    });
+            }
 
             $(document).ready(function() {
                 var validator = $('form').data('validator'); // get validator associated with the form (association established by jquery.validate.unobtrusive.js)
@@ -146,6 +159,9 @@
                         $(e.target).trigger(e.type);
                     }, 50);
                 });
+
+                Mimic('@Html.NameFor(m => m.GoAbroad)',
+                      '@Html.NameFor(m => m.ContactDetails.Parent.GoAbroad)');
 
                 annotateRequiredFields(false);
             });

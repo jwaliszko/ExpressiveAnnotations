@@ -173,6 +173,23 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         }
 
         [Fact]
+        public void submit_then_select_one_language_and_verify_error_for_known_languages_in_client_mode()
+        {
+            Watch(() =>
+            {
+                Home.Submit();
+                Assert.Equal(
+                    "The Known languages field is required.",
+                    Home.GetErrorMessage("KnownLanguages"));
+
+                Home.Select("KnownLanguages", "Polski");
+                Assert.Equal(
+                    "More than one language must be known.",
+                    Home.GetErrorMessage("KnownLanguages"));
+            });
+        }
+
+        [Fact]
         public void select_boundary_date_and_verify_no_error_for_long_travel_reason_in_client_mode()
         {
             Watch(() =>
@@ -392,6 +409,40 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                 Assert.Equal(
                     "Blood type is required if you do extreme sports, or if you do any type of sport and plan to go abroad.",
                     Home.GetErrorMessage("BloodType"));
+            });
+        }
+
+        [Fact]
+        public void email_and_phone_are_mutually_exclusive_in_client_mode()
+        {
+            Watch(() =>
+            {
+                Home.ClickCheckbox("GoAbroad"); // uncheck
+                Assert.Equal(
+                    string.Empty, 
+                    Home.GetErrorMessage("ContactDetails.Email"));
+                Assert.Equal(
+                    string.Empty,
+                    Home.GetErrorMessage("ContactDetails.Phone"));
+
+                Home.ClickCheckbox("GoAbroad"); // check
+                Assert.Equal(
+                    "You do not enter any contact information. At least e-mail or phone should be provided.",
+                    Home.GetErrorMessage("ContactDetails.Email"));
+                Assert.Equal(
+                    "You do not enter any contact information. At least e-mail or phone should be provided.",
+                    Home.GetErrorMessage("ContactDetails.Phone"));
+
+                Home.WriteInput("ContactDetails_Email", "qwe");
+                Assert.Equal(
+                    string.Empty,
+                    Home.GetErrorMessage("ContactDetails.Phone"));
+
+                Home.ClearInput("ContactDetails_Email");
+                Home.WriteInput("ContactDetails_Phone", "123");
+                Assert.Equal(
+                    string.Empty,
+                    Home.GetErrorMessage("ContactDetails.Email"));
             });
         }
 
@@ -741,6 +792,31 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
 
                 Home.Select("Identification", ""); // unselect
                 Assert.False(Home.AsteriskVisible("IdentificationValue"));
+            });
+        }
+
+        [Fact]
+        public void email_and_phone_asterisks_are_mutually_exclusive_in_client_mode()
+        {
+            Watch(() =>
+            {
+                Assert.True(Home.AsteriskVisible("ContactDetails_Email"));
+                Assert.True(Home.AsteriskVisible("ContactDetails_Phone"));
+
+                Home.ClickCheckbox("GoAbroad"); // uncheck
+                Assert.False(Home.AsteriskVisible("ContactDetails_Email"));
+                Assert.False(Home.AsteriskVisible("ContactDetails_Phone"));
+
+                Home.ClickCheckbox("GoAbroad"); // check
+
+                Home.WriteInput("ContactDetails_Email", "qwe");
+                Assert.True(Home.AsteriskVisible("ContactDetails_Email"));
+                Assert.False(Home.AsteriskVisible("ContactDetails_Phone"));
+
+                Home.ClearInput("ContactDetails_Email");
+                Home.WriteInput("ContactDetails_Phone", "123");
+                Assert.False(Home.AsteriskVisible("ContactDetails_Email"));
+                Assert.True(Home.AsteriskVisible("ContactDetails_Phone"));
             });
         }
 

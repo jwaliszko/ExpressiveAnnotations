@@ -127,9 +127,9 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             return asterisk.Single().Displayed; // single implies that asterisk is there, but not necessarily visible
         }
 
-        public string GetErrorMessage(string id)
+        public string GetErrorMessage(string name)
         {
-            var elem = _driver.FindElementByXPath($"//span[@data-valmsg-for='{id}']");
+            var elem = _driver.FindElementByXPath($"//span[@data-valmsg-for='{name}']");
             var generated = elem.FindElements(By.TagName("span"));
             return generated.Any() ? generated.Single().Text : elem.Text;
         }

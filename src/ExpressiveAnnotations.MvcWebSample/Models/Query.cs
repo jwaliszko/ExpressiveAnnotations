@@ -34,7 +34,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
 
         public Query()
         {
-            ContactDetails = new Contact();
+            ContactDetails = new Contact {Parent = this};
         }
 
         public IEnumerable<SelectListItem> Sports => new[]
@@ -49,6 +49,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             new SelectListItem {Text = Resources.Poland, Value = "Poland"},
             new SelectListItem {Text = Resources.Germany, Value = "Germany"},
             new SelectListItem {Text = Resources.France, Value = "France"},
+            new SelectListItem {Text = Resources.Japan, Value = "Japan"},
+            new SelectListItem {Text = Resources.China, Value = "China"},
+            new SelectListItem {Text = Resources.Israel, Value = "Israel"},
             new SelectListItem {Text = Resources.Other, Value = "Other"}
         };
 
@@ -65,6 +68,11 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             new SelectListItem {Text = "58776d02-7028-4299-81f5-db234c44b294", Value = "58776d02-7028-4299-81f5-db234c44b294"},
             new SelectListItem {Text = "8b7ee575-eeaa-441c-811f-db6eaacc7115", Value = "8b7ee575-eeaa-441c-811f-db6eaacc7115"},
             new SelectListItem {Text = "6b403167-5792-4871-bdf3-cdce8e9b90c0", Value = "6b403167-5792-4871-bdf3-cdce8e9b90c0"}
+        };
+
+        public IEnumerable<string> Languages => new[]
+        {
+            "Polski", "Deutsch", "Français", "日本語", "中文", "עברית"
         };
 
         public IEnumerable<int?> Years => Enumerable.Range(15, 82).Cast<int?>();
@@ -104,13 +112,20 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [Display(ResourceType = typeof(Resources), Name = nameof(Resources.NextCountry))]
         public string NextCountry { get; set; }
 
+        [Required]
+        [AssertThat("Country != NextCountry ? StringArrayLength(KnownLanguages) > 1 : true",
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.LanguagesSelectionInsufficient))]
+        [ValueParser("ArrayParser")]
+        [Display(ResourceType = typeof(Resources), Name = nameof(Resources.KnownLanguages))]
+        public string[] KnownLanguages { get; set; }
+
         [RequiredIf(@"GoAbroad == true
                       && (
                              (NextCountry != 'Other' && NextCountry == Country)
                              || (Age > 24 && 55 >= Age)
                          )",
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.ReasonForTravelRequired))]
-        [RequiredIf("ArrayContains(Age, [15, 16, 17])", // alternative without array literal: ArrayContains(Age, EarlyYears)",
+        [RequiredIf("IntArrayContains(Age, [15, 16, 17])", // alternative without array literal: IntArrayContains(Age, EarlyYears)",
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.ReasonForTravelRequiredForYouth))]
         [AssertThat(@"ReasonForTravel != 'John\'s cat named ""\\\'""\n (Backslash Quote)' && ReasonForTravel != SIMONS_CAT",
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.SecretAnswerDetected))]
@@ -185,8 +200,8 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         [RequiredIf("GoAbroad == true",
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.FieldConditionallyRequired))]
         [AssertThat(@"GoAbroad
-                          ? ArrayLength(SelectedDonations) > 2
-                          : ArrayLength(SelectedDonations) > 1",
+                          ? IntArrayLength(SelectedDonations) > 2
+                          : IntArrayLength(SelectedDonations) > 1",
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.NotEnoughDonations))]
         [ValueParser("ArrayParser")]
         [Display(ResourceType = typeof(Resources), Name = nameof(Resources.Donation))]

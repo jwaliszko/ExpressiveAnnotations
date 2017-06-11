@@ -160,6 +160,15 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to China.
+        /// </summary>
+        public static string China {
+            get {
+                return ResourceManager.GetString("China", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Comment.
         /// </summary>
         public static string Comment {
@@ -403,11 +412,47 @@ namespace ExpressiveAnnotations.MvcWebSample {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Israel.
+        /// </summary>
+        public static string Israel {
+            get {
+                return ResourceManager.GetString("Israel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Japan.
+        /// </summary>
+        public static string Japan {
+            get {
+                return ResourceManager.GetString("Japan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Just a few characters more....
         /// </summary>
         public static string JustAFewCharsMore {
             get {
                 return ResourceManager.GetString("JustAFewCharsMore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Known languages.
+        /// </summary>
+        public static string KnownLanguages {
+            get {
+                return ResourceManager.GetString("KnownLanguages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to More than one language must be known..
+        /// </summary>
+        public static string LanguagesSelectionInsufficient {
+            get {
+                return ResourceManager.GetString("LanguagesSelectionInsufficient", resourceCulture);
             }
         }
         

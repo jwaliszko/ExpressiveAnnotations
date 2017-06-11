@@ -5,6 +5,7 @@ using System.Net.Http.Formatting;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using ExpressiveAnnotations.MvcWebSample.Models;
+using Newtonsoft.Json;
 
 namespace ExpressiveAnnotations.MvcWebSample.Controllers
 {
@@ -52,7 +53,11 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
             {
                 Debug.Assert(Request.Url != null);
                 client.BaseAddress = new Uri($"{Request.Url.Scheme}://{Request.Url.Authority}/");
-                return await client.PostAsync("api/Default/Save", model, new JsonMediaTypeFormatter());
+                var formatter = new JsonMediaTypeFormatter
+                {
+                    SerializerSettings = {ReferenceLoopHandling = ReferenceLoopHandling.Ignore}
+                };
+                return await client.PostAsync("api/Default/Save", model, formatter);
             }
         }
     }

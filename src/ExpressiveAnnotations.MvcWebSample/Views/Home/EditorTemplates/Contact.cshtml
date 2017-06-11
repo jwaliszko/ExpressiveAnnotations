@@ -1,9 +1,13 @@
 ﻿@model ExpressiveAnnotations.MvcWebSample.Models.Contact
 
+@{
+    var client = "client".Equals(ViewBag.Validation);
+}
+
 <ol>
     <li>
         <pre class="code">
-[RequiredIf("Phone == null")]
+[RequiredIf("Parent.GoAbroad && Phone == null")]
 [AssertThat("IsEmail(Email)")]
 </pre>
         <pre class="action">[show attribute]</pre>
@@ -15,7 +19,7 @@
     </li>
     <li>
         <pre class="code">
-[RequiredIf("Email == null")]
+[RequiredIf("Parent.GoAbroad && Email == null")]
 [AssertThat(@@"IsRegexMatch(Phone, '^\\d+$'), Priority = 1")]
 [AssertThat("Length(Phone) > 8 && Length(Phone) < 16", Priority = 2)]
 </pre>
@@ -35,3 +39,8 @@
 }
 
 </ol>
+
+@if (client)
+{
+    @Html.HiddenFor(m => m.Parent.GoAbroad) @*hidden mock of GoAbroad field from Parent context*@
+}

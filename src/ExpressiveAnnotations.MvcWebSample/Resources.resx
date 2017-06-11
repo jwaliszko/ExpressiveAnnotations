@@ -330,4 +330,19 @@
   <data name="Yes" xml:space="preserve">
     <value>Yes</value>
   </data>
+  <data name="China" xml:space="preserve">
+    <value>China</value>
+  </data>
+  <data name="Israel" xml:space="preserve">
+    <value>Israel</value>
+  </data>
+  <data name="Japan" xml:space="preserve">
+    <value>Japan</value>
+  </data>
+  <data name="KnownLanguages" xml:space="preserve">
+    <value>Known languages</value>
+  </data>
+  <data name="LanguagesSelectionInsufficient" xml:space="preserve">
+    <value>More than one language must be known.</value>
+  </data>
 </root>

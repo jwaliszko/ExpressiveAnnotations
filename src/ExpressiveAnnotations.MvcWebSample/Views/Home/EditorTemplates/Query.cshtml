@@ -65,6 +65,19 @@
         </div>
     </li>
     <li>
+        <pre class="code">
+[Required]
+[AssertThat("Country != NextCountry ? StringArrayLength(KnownLanguages) > 1 : true")]
+[ValueParser("ArrayParser")]
+</pre>
+        <pre class="action">[show attribute]</pre>
+        <div>
+            @Html.LabelFor(model => model.KnownLanguages, new {@class = "inline prefix"})
+            @Html.ListBoxFor(model => model.KnownLanguages, new SelectList(Model.Languages, null), string.Empty)
+            @Html.ValidationMessageFor(model => model.KnownLanguages)
+        </div>
+    </li>
+    <li>
         @Html.DisplayFor(model => model.EarlyYears) @*hidden backing field storing JSON array of ints (IntArray template pointed by UIHint attrib)*@
         <pre class="code">
 [RequiredIf(@@"GoAbroad == true
@@ -72,7 +85,7 @@
                      (NextCountry != 'Other' && NextCountry == Country)
                      || (Age > 24 && 55 &ge; Age)
                  )")]
-[RequiredIf("ArrayContains(Age, [15, 16, 17])")] @*alternative: [RequiredIf("ArrayContains(Age, EarlyYears)")]*@
+[RequiredIf("IntArrayContains(Age, [15, 16, 17])")] @*alternative: [RequiredIf("IntArrayContains(Age, EarlyYears)")]*@
 [AssertThat(@@"ReasonForTravel != 'John\'s cat named ""\\\'""\n (Backslash Quote)' && ReasonForTravel != SIMONS_CAT")]
 </pre>
         <pre class="action">[show attribute]</pre>
@@ -202,8 +215,8 @@
         <pre class="code">
 [RequiredIf("GoAbroad == true")]
 [AssertThat("GoAbroad
-                 ? ArrayLength(SelectedDonations) > 2
-                 : ArrayLength(SelectedDonations) > 1")]
+                 ? IntArrayLength(SelectedDonations) > 2
+                 : IntArrayLength(SelectedDonations) > 1")]
 [ValueParser("ArrayParser")]
 </pre>
         <pre class="action">[show attribute]</pre>
