@@ -23,5 +23,12 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
             TriggersManager.Instance.Save(events, HttpContext);
             return Json(new {success = true});
         }
+
+        [HttpPost]
+        public JsonResult SetVerbosity(bool value)
+        {
+            VerbosityManager.Instance.Save(value, HttpContext);
+            return Json(new {success = true});
+        }
     }
 }

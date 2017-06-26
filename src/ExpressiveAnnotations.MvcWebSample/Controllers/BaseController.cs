@@ -19,6 +19,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
 
             var triggers = TriggersManager.Instance.Load(HttpContext);
             ViewBag.Triggers = triggers;
+
+            var verbose = VerbosityManager.Instance.Load(HttpContext);
+            ViewBag.Verbose = verbose;
         }
     }
 }

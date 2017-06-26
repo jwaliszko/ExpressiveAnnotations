@@ -141,6 +141,7 @@
     <Compile Include="Misc\TriggersManager.cs" />
     <Compile Include="Misc\ValidationManager.cs" />
     <Compile Include="Misc\CultureManager.cs" />
+    <Compile Include="Misc\VerbosityManager.cs" />
     <Compile Include="Models\Address.cs" />
     <Compile Include="Models\Contact.cs" />
     <Compile Include="Models\Query.cs" />

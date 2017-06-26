@@ -6,7 +6,7 @@
     var lang = Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName;
     var client = "client".Equals(ViewBag.Validation);
     var triggers = ViewBag.Triggers;
-    var debug = Html.IsDebug().ToString().ToLowerInvariant();
+    var verbose = ViewBag.Verbose;
 }
 
 <div class="box">
@@ -56,7 +56,7 @@
             // ----- define your settings -----
 
             ea.settings.apply({
-                debug: '@debug' === 'true',
+                debug: '@verbose' === 'True',
                 optimize: false,
                 enumsAsNumbers: true,
                 dependencyTriggers: '@triggers' // if not explicitly provided, default setup is: 'change keyup'
@@ -148,6 +148,23 @@
                         success: function(result) {
                             if (result.success) {
                                 ea.settings.apply({ dependencyTriggers: triggers });
+                            }
+                        }
+                    });
+                });
+
+                $('#debug input[type="checkbox"]').on('click', function() {
+                    var verbose = $('#debug input[type="checkbox"]').is(':checked');
+
+                    $.ajax({
+                        type: 'POST',
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        url: '/System/SetVerbosity',
+                        data: JSON.stringify({ value: verbose }),
+                        success: function(result) {
+                            if (result.success) {
+                                ea.settings.apply({ debug: verbose });
                             }
                         }
                     });

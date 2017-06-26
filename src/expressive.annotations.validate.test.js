@@ -613,7 +613,29 @@
                 ea.settings.apply({ debug: 1 });
             },
             function(ex) {
-                return ex.toString() === 'debug value must be a boolean (true or false)';
+                return ex.toString() === 'EA settings error: debug value must be a boolean (true or false)';
+            }
+        );
+    });
+
+    qunit.test("detect_invalid_optimize_setup", function(assert) {
+        assert.throws(
+            function() {
+                ea.settings.apply({ optimize: 1 });
+            },
+            function(ex) {
+                return ex.toString() === 'EA settings error: optimize value must be a boolean (true or false)';
+            }
+        );
+    });
+
+    qunit.test("detect_invalid_enums_setup", function(assert) {
+        assert.throws(
+            function() {
+                ea.settings.apply({ enumsAsNumbers: 1 });
+            },
+            function(ex) {
+                return ex.toString() === 'EA settings error: enumsAsNumbers value must be a boolean (true or false)';
             }
         );
     });
@@ -624,7 +646,7 @@
                 ea.settings.apply({ dependencyTriggers: false });
             },
             function(ex) {
-                return ex.toString() === 'dependencyTriggers value must be a string (multiple event types can be bound at once by including each one separated by a space), null or undefined';
+                return ex.toString() === 'EA settings error: dependencyTriggers value must be a string (multiple event types can be bound at once by including each one separated by a space), null or undefined';
             }
         );
     });

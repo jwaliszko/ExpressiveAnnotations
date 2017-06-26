@@ -13,3 +13,7 @@
     <input type="checkbox" id="pasteTrigger" name="pasteTrigger" data-val="afterpaste" @(ViewBag.Triggers.Contains("afterpaste") ? Html.Raw("checked=\"checked\"") : Html.Raw("")) /> paste
     <input type="checkbox" id="keyupTrigger" name="keyupTrigger" data-val="keyup" @(ViewBag.Triggers.Contains("keyup") ? Html.Raw("checked=\"checked\"") : Html.Raw("")) /> keyup
 </div>
+<div id="debug">
+    <a href="https://github.com/jwaliszko/ExpressiveAnnotations#can-i-increase-web-console-verbosity-for-debug-purposes">verbose web console output</a>:
+    <input type="checkbox" id="debugFlag" name="debugFlag" data-val="change" @(ViewBag.Verbose ? Html.Raw("checked=\"checked\"") : Html.Raw(""))/>
+</div>

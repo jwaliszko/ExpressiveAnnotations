@@ -20,17 +20,17 @@ var
             apply: function(options) { // alternative way of settings setup (recommended), crucial to invoke e.g. for new set of dependency triggers to be re-bound
                 function verifySetup() {
                     if (!typeHelper.isBool(api.settings.debug)) {
-                        throw 'debug value must be a boolean (true or false)';
+                        throw 'EA settings error: debug value must be a boolean (true or false)';
                     }
                     if (!typeHelper.isBool(api.settings.optimize)) {
-                        throw 'optimize value must be a boolean (true or false)';
+                        throw 'EA settings error: optimize value must be a boolean (true or false)';
                     }
                     if (!typeHelper.isBool(api.settings.enumsAsNumbers)) {
-                        throw 'enumsAsNumbers value must be a boolean (true or false)';
+                        throw 'EA settings error: enumsAsNumbers value must be a boolean (true or false)';
                     }
                     if (!typeHelper.isString(api.settings.dependencyTriggers)
                         && api.settings.dependencyTriggers !== null && api.settings.dependencyTriggers !== undefined) {
-                        throw 'dependencyTriggers value must be a string (multiple event types can be bound at once by including each one separated by a space), null or undefined';
+                        throw 'EA settings error: dependencyTriggers value must be a string (multiple event types can be bound at once by including each one separated by a space), null or undefined';
                     }
                 }
                 function extend(target, source) { // custom implementation over jQuery.extend() because null/undefined merge is needed as well
