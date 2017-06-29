@@ -48,7 +48,7 @@ select {
 .box-small {
     float: right;
     font-size: 0.8em;
-    margin-top: 35px;
+    margin-top: 45px;
     position: relative;
     width: 65%;
     z-index: 1;
@@ -246,6 +246,10 @@ input[type="radio"].input-validation-error {
 @media only screen and (max-width: 850px) {
     .inline {
         display: block;
+    }
+
+    .cboxlist .inline {
+        display: inline;
     }
 
     .field-validation-error {

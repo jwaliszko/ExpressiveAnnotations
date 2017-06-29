@@ -12,6 +12,7 @@ A small .NET and JavaScript library which provides annotation-based conditional 
 ### Table of contents
  - [What is the context behind this work?](#what-is-the-context-behind-this-implementation)
  - [`RequiredIf` vs. `AssertThat` - where is the difference?](#requiredif-vs-assertthat---where-is-the-difference)
+ - [Sample projects + demo](#sample-projects-+-demo)
  - [What are brief examples of usage?](#what-are-brief-examples-of-usage)
  - [Declarative vs. imperative programming - what is it about?](#declarative-vs-imperative-programming---what-is-it-about)
  - [EA expressions specification](#expressions-specification)
@@ -53,14 +54,16 @@ Declarative validation when [compared](#declarative-vs-imperative-programming---
 * `RequiredIf` - if value is not yet provided, check whether it is required (annotated field is required to be non-null, when given condition is satisfied),
 * `AssertThat` - if value is already provided, check whether the condition is met (non-null annotated field is considered as valid, when given condition is satisfied).
 
-### <a id="what-are-brief-examples-of-usage">What are brief examples of usage?</a>
-
-If you'll be interested in comprehensive examples afterwards, take a look inside chosen demo project:
+### <a id="sample-projects-+-demo">Sample projects + demo</a>
 
 * [**ASP.NET MVC web sample**](src/ExpressiveAnnotations.MvcWebSample),
 * [**WPF MVVM desktop sample**](src/ExpressiveAnnotations.MvvmDesktopSample).
 
-For the time being, to keep your ear to the ground, let's walk through few exemplary code snippets:
+ASP.NET MVC web sample is also hosted online - http://expressiveannotations.net/.
+
+### <a id="what-are-brief-examples-of-usage">What are brief examples of usage?</a>
+
+This section presents few exemplary code snippets. Sample projects in the section above contain much more comprehensive set of use cases.
 
 ```C#
 using ExpressiveAnnotations.Attributes;
