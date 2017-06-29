@@ -3,17 +3,7 @@
     var serverLabel = "server".Equals(ViewBag.Validation) ? "[server]" : "server";
 }
 <div>
-    disable or enable unobtusive client validation:
+    disable or enable client-side validation:
     <a href="@Url.Action("SetValidation", "System", new {type = "client", returnUrl = Request.RawUrl}, null)">@clientLabel</a>
     <a href="@Url.Action("SetValidation", "System", new {type = "server", returnUrl = Request.RawUrl}, null)">@serverLabel</a>
-</div>
-<div id="triggers">
-    <a href="https://github.com/jwaliszko/ExpressiveAnnotations#how-to-control-frequency-of-dependent-fields-validation">dependency validation triggers</a>:
-    <input type="checkbox" id="changeTrigger" name="changeTrigger" data-val="change" @(ViewBag.Triggers.Contains("change") ? Html.Raw("checked=\"checked\"") : Html.Raw("")) /> change
-    <input type="checkbox" id="pasteTrigger" name="pasteTrigger" data-val="afterpaste" @(ViewBag.Triggers.Contains("afterpaste") ? Html.Raw("checked=\"checked\"") : Html.Raw("")) /> paste
-    <input type="checkbox" id="keyupTrigger" name="keyupTrigger" data-val="keyup" @(ViewBag.Triggers.Contains("keyup") ? Html.Raw("checked=\"checked\"") : Html.Raw("")) /> keyup
-</div>
-<div id="debug">
-    <a href="https://github.com/jwaliszko/ExpressiveAnnotations#can-i-increase-web-console-verbosity-for-debug-purposes">verbose web console output</a>:
-    <input type="checkbox" id="debugFlag" name="debugFlag" data-val="change" @(ViewBag.Verbose ? Html.Raw("checked=\"checked\"") : Html.Raw(""))/>
 </div>

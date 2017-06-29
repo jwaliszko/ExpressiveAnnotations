@@ -48,15 +48,15 @@ select {
 .box-small {
     float: right;
     font-size: 0.8em;
-    margin-top: 45px;
     position: relative;
-    width: 65%;
+    width: 55%;
     z-index: 1;
 }
 
     .box-small div {
         text-align: right;
         width: 100%;
+        padding-bottom: 2px;
     }
 
     .box-small input[type="checkbox"] {
@@ -248,7 +248,7 @@ input[type="radio"].input-validation-error {
         display: block;
     }
 
-    .cboxlist .inline {
+    .cboxlist.inline {
         display: inline;
     }
 

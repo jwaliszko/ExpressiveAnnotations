@@ -5,6 +5,7 @@
 @{
     var lang = Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName;
     var client = "client".Equals(ViewBag.Validation);
+    var indication = ViewBag.Indication;
     var triggers = ViewBag.Triggers;
     var verbose = ViewBag.Verbose;
 }
@@ -32,10 +33,10 @@
     <fieldset>
         <legend>Usage sample for model validation in ASP.NET MVC</legend>
         <div class="box-small">
-            <div class="right-corner">
-                @Html.Partial("_Culture")
-                @Html.Partial("_Validation")
-            </div>
+            @Html.Partial("_Culture")
+            @Html.Partial("_Validation")
+            @Html.Partial("_Indications")
+            @Html.Partial("_EAOptions")
         </div>
         @Html.EditorFor(model => model)
         <input type="submit" value="Submit" />
@@ -180,7 +181,9 @@
                 Mimic('@Html.NameFor(m => m.GoAbroad)',
                       '@Html.NameFor(m => m.ContactDetails.Parent.GoAbroad)');
 
-                annotateRequiredFields(false);
+                if ('@indication' !== 'no-annotating') {
+                    annotateRequiredFields('@indication' === 'asterisks-with-hiding');
+                }
             });
 
             function annotateRequiredFields(hideNonRequired) { // an example of how eavalid event can be used (annotate required fields, hide non-required fields, etc.)
@@ -255,8 +258,6 @@
                     $(this).valid(); // triggers the validation test on change (jquery.validate.js does not trigger checkbox and radio validation on click, if such a click occurs prior to first submission attempt of entire form - later, validation is triggered
                 }
             }); // (downside of this hack - validation triggered 2 times for these fields after first form submission attempt is done)
-
-            $('#triggers input[type="checkbox"]').attr('disabled', @Json.Encode(!client));
 
             $('form').on('submit', function() {
                 $(".message-success").hide();

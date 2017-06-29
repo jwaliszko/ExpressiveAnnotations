@@ -17,6 +17,9 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
             var validation = ValidationManager.Instance.Load(HttpContext);
             ViewBag.Validation = validation;
 
+            var indication = IndicationsManager.Instance.Load(HttpContext);
+            ViewBag.Indication = indication;
+
             var triggers = TriggersManager.Instance.Load(HttpContext);
             ViewBag.Triggers = triggers;
 

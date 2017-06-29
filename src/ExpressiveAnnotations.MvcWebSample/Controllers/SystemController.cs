@@ -17,6 +17,12 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
             return Redirect(returnUrl);
         }
 
+        public ActionResult SetIndication(string value, string returnUrl)
+        {
+            IndicationsManager.Instance.Save(value, HttpContext);
+            return Redirect(returnUrl);
+        }
+
         [HttpPost]
         public JsonResult SetTriggers(string events)
         {

@@ -222,9 +222,7 @@
         <pre class="action">[show attribute]</pre>
         <div>
             @Html.LabelFor(model => model.SelectedDonations, new { @class = "inline prefix" })
-            <span class="cboxlist">
-                @Html.CheckBoxListFor(model => model.SelectedDonations, model => model.AvailableDonations, item => item, item => item, model => model.SelectedDonations, Position.Horizontal, model => new { @class = "inline" })
-            </span>
+            @Html.CheckBoxListFor(model => model.SelectedDonations, model => model.AvailableDonations, item => item, item => item, model => model.SelectedDonations, Position.Horizontal, model => new { @class = "cboxlist inline" })
             @Html.ValidationMessageFor(model => model.SelectedDonations)
         </div>
     </li>
