@@ -35,6 +35,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
         public Query()
         {
             ContactDetails = new Contact {Parent = this};
+            SelectedCurrencies = new List<bool>();
         }
 
         public IEnumerable<SelectListItem> Sports => new[]
@@ -201,11 +202,17 @@ namespace ExpressiveAnnotations.MvcWebSample.Models
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.FieldConditionallyRequired))]
         [AssertThat(@"GoAbroad
                           ? IntArrayLength(SelectedDonations) > 2
-                          : IntArrayLength(SelectedDonations) > 1",
+                          : IntArrayLength(SelectedDonations) > 1", Priority = 1,
             ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.NotEnoughDonations))]
+        [AssertThat(@"SelectedDonations != null && IntArrayLength(SelectedDonations) > 0 
+                          ? SelectedCurrencies[0] || SelectedCurrencies[1]
+                          : true", Priority = 2,
+            ErrorMessageResourceType = typeof(Resources), ErrorMessageResourceName = nameof(Resources.SelectCurrency))]
         [ValueParser("ArrayParser")]
         [Display(ResourceType = typeof(Resources), Name = nameof(Resources.Donation))]
         public int[] SelectedDonations { get; set; }
+
+        public List<bool> SelectedCurrencies { get; set; }
 
         [CustomRequiredIf("GoAbroad == true")]
         [CustomAssertThat("Length(コメント) > 1e1 - 1", Priority = 2)]

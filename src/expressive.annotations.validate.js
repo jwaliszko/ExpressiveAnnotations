@@ -530,24 +530,24 @@ var
             }
             return parsedValue;
         },
-        deserializeObject: function (form, fieldsMap, constsMap, enumsMap, parsersMap, prefix) {
-            var arrayPat = /^([a-z_0-9]+)\[([0-9]+)\]$/i;
+        deserializeObject: function(form, fieldsMap, constsMap, enumsMap, parsersMap, prefix) {
             function buildField(fieldName, fieldValue, object) {
-                var props, parent, i, match, arridx;
+                var props, parent, i, match, arrayIndex, arrayName, arrayPat;
+                arrayPat = /^([a-z_0-9]+)\[([0-9]+)\]$/i;
                 props = fieldName.split('.');
                 parent = object;
                 for (i = 0; i < props.length - 1; i++) {
                     fieldName = props[i];
-
+                    
                     match = arrayPat.exec(fieldName); // check for array element access
                     if (match) {
                         fieldName = match[1];
-                        arridx = match[2];
+                        arrayIndex = match[2];
                         if (!parent.hasOwnProperty(fieldName)) {
                             parent[fieldName] = {};
                         }
-                        parent[fieldName][arridx] = {};
-                        parent = parent[fieldName][arridx];
+                        parent[fieldName][arrayIndex] = {};
+                        parent = parent[fieldName][arrayIndex];
                         continue;
                     }
 
@@ -559,10 +559,10 @@ var
                 fieldName = props[props.length - 1];
 
                 var endMatch = arrayPat.exec(fieldName);
-                if (endMatch) { // our fieldName is array pattern eg. SelectedDays[0]
-                    var arrayName = endMatch[1];
-                    var arrayIndex = endMatch[2];
-                    parent[arrayName] = parent[arrayName] || []; // create it if needed.
+                if (endMatch) { // our fieldName matches array access pattern i.e. arr[idx]
+                    arrayName = endMatch[1];
+                    arrayIndex = endMatch[2];
+                    parent[arrayName] = parent[arrayName] || []; // create it if needed
                     parent[arrayName][arrayIndex] = fieldValue;
                 } else {
                     parent[fieldName] = fieldValue;

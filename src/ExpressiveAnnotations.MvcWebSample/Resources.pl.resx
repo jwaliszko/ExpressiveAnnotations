@@ -345,4 +345,7 @@
   <data name="LanguagesSelectionInsufficient" xml:space="preserve">
     <value>Musisz znać więcej niż jeden język.</value>
   </data>
+  <data name="SelectCurrency" xml:space="preserve">
+    <value>Zaznacz walutę.</value>
+  </data>
 </root>

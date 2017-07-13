@@ -573,22 +573,21 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         }
 
         [Fact]
-        public void select_two_donations_if_not_going_abroad_and_verify_no_error_for_donations_in_server_mode()
+        public void select_one_donation_without_currency_if_not_going_abroad_and_verify_error_for_donations_in_server_mode()
         {
             Watch(() =>
             {
                 Home.ClickCheckbox("GoAbroad");
-                Home.ClickCheckbox("SelectedDonations", "1");
-                Home.ClickCheckbox("SelectedDonations", "4");
+                Home.ClickCheckbox("SelectedDonations", "16");
                 Home.Submit();
                 Assert.Equal(
-                    string.Empty,
+                    "More separate donations are required: if I am going abroad field is checked - at least 3, otherwise - at least 2.",
                     Home.GetErrorMessage("SelectedDonations"));
             });
         }
 
         [Fact]
-        public void select_two_donations_if_going_abroad_and_verify_error_for_donations_in_server_mode()
+        public void select_two_donations_without_currency_if_going_abroad_and_verify_error_for_donations_in_server_mode()
         {
             Watch(() =>
             {
@@ -602,13 +601,29 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
         }
 
         [Fact]
-        public void select_three_donations_if_going_abroad_and_verify_no_error_for_donations_in_server_mode()
+        public void select_three_donations_without_currency_if_going_abroad_and_verify_currency_error_in_server_mode()
         {
             Watch(() =>
             {
                 Home.ClickCheckbox("SelectedDonations", "1");
                 Home.ClickCheckbox("SelectedDonations", "4");
                 Home.ClickCheckbox("SelectedDonations", "25");
+                Home.Submit();
+                Assert.Equal(
+                    "Select currency.",
+                    Home.GetErrorMessage("SelectedDonations"));
+            });
+        }
+
+        [Fact]
+        public void select_three_donations_with_currency_if_going_abroad_and_verify_no_error_for_donations_in_server_mode()
+        {
+            Watch(() =>
+            {
+                Home.ClickCheckbox("SelectedDonations", "1");
+                Home.ClickCheckbox("SelectedDonations", "4");
+                Home.ClickCheckbox("SelectedDonations", "25");
+                Home.ClickCheckbox("SelectedCurrencies_1_");
                 Home.Submit();
                 Assert.Equal(
                     string.Empty,
@@ -733,6 +748,9 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
                 Home.WriteInput("BloodType", "A+");
                 Home.WriteInput("ContactDetails_Phone", "123456789");
                 Home.ClickRadio("AgreeForContact", "True");
+                Home.ClickCheckbox("SelectedDonations", "1");
+                Home.ClickCheckbox("SelectedDonations", "4");
+                Home.ClickCheckbox("SelectedCurrencies_1_");
                 Home.Submit();
                 Assert.True(Home.SubmitSucceed());
             });

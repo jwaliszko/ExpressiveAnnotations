@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Formatting;
@@ -20,6 +21,7 @@ namespace ExpressiveAnnotations.MvcWebSample.Controllers
                 NextCountry = "Other",
                 SportType = "Extreme",
                 AgreeForContact = false,
+                SelectedCurrencies = new List<bool> {false, false},
                 LatestSuggestedReturnDate = DateTime.Today.AddMonths(1)
             };
 

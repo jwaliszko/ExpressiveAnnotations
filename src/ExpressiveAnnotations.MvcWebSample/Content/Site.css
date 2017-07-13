@@ -225,7 +225,8 @@ button {
     outline: 1px solid #e80c4d;
 }
 
-input[type="radio"].input-validation-error {
+input[type="radio"].input-validation-error,
+input[type="checkbox"].input-validation-error {
     outline: 0 none;
 }
 

@@ -58,7 +58,7 @@
 
             ea.settings.apply({
                 debug: '@verbose' === 'True',
-                optimize: false,
+                optimize: '@indication' === 'no-annotating',
                 enumsAsNumbers: true,
                 dependencyTriggers: '@triggers' // if not explicitly provided, default setup is: 'change keyup'
             });
@@ -108,10 +108,10 @@
             ea.addMethod('IntArrayLength', function(array) {
                 return array.length;
             });
-            ea.addMethod('StringArrayLength', function (array) {
+            ea.addMethod('StringArrayLength', function(array) {
                 return array.length;
             });
-            ea.addMethod('IntArrayContains', function (value, array) {
+            ea.addMethod('IntArrayContains', function(value, array) {
                 return $.inArray(value, array) >= 0;
             });
 

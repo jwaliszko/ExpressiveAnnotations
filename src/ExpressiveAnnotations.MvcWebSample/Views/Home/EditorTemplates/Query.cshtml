@@ -216,13 +216,19 @@
 [RequiredIf("GoAbroad == true")]
 [AssertThat("GoAbroad
                  ? IntArrayLength(SelectedDonations) > 2
-                 : IntArrayLength(SelectedDonations) > 1")]
+                 : IntArrayLength(SelectedDonations) > 1", Priority = 1)]
+[AssertThat("SelectedDonations != null && IntArrayLength(SelectedDonations) > 0 
+                 ? SelectedCurrencies[0] || SelectedCurrencies[1]
+                 : true", Priority = 2")]
 [ValueParser("ArrayParser")]
 </pre>
         <pre class="action">[show attribute]</pre>
         <div>
             @Html.LabelFor(model => model.SelectedDonations, new { @class = "inline prefix" })
             @Html.CheckBoxListFor(model => model.SelectedDonations, model => model.AvailableDonations, item => item, item => item, model => model.SelectedDonations, Position.Horizontal, model => new { @class = "cboxlist inline" })
+            &nbsp;
+            @Html.CheckBoxFor(model => model.SelectedCurrencies[0]) <span class="cbox inline">Bitcoin</span>
+            @Html.CheckBoxFor(model => model.SelectedCurrencies[1]) <span class="cbox inline">Ethereum</span>
             @Html.ValidationMessageFor(model => model.SelectedDonations)
         </div>
     </li>
