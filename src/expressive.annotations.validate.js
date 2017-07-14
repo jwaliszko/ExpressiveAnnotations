@@ -546,7 +546,7 @@ var
                         if (!parent.hasOwnProperty(fieldName)) {
                             parent[fieldName] = {};
                         }
-                        parent[fieldName][arrayIndex] = {};
+                        parent[fieldName][arrayIndex] = parent[fieldName][arrayIndex] || {}; // create if needed
                         parent = parent[fieldName][arrayIndex];
                         continue;
                     }
@@ -562,7 +562,7 @@ var
                 if (endMatch) { // our fieldName matches array access pattern i.e. arr[idx]
                     arrayName = endMatch[1];
                     arrayIndex = endMatch[2];
-                    parent[arrayName] = parent[arrayName] || []; // create it if needed
+                    parent[arrayName] = parent[arrayName] || []; // create if needed
                     parent[arrayName][arrayIndex] = fieldValue;
                 } else {
                     parent[fieldName] = fieldValue;

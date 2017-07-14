@@ -16,7 +16,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
         [AssertThat("IsEmail(Email)")]
         public string Email
         {
-            get { return _email; }
+            get => _email;
             set
             {
                 _email = value;
@@ -29,7 +29,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
         [AssertThat("Length(Phone) > 8 && Length(Phone) < 16")]
         public string Phone
         {
-            get { return _phone; }
+            get => _phone;
             set
             {
                 _phone = value;
@@ -37,6 +37,6 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
             }
         }
 
-        public AddressVm[] Addresses { get; private set; }
+        public AddressVm[] Addresses { get; }
     }
 }

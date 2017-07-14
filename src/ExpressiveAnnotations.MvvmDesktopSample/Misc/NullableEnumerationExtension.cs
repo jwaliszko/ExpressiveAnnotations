@@ -12,14 +12,12 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Misc
 
         public NullableEnumerationExtension(Type enumType)
         {
-            if (enumType == null)
-                throw new ArgumentNullException(nameof(enumType));
-            EnumType = enumType;
+            EnumType = enumType ?? throw new ArgumentNullException(nameof(enumType));
         }
 
         private Type EnumType
         {
-            get { return _enumType; }
+            get => _enumType;
             set
             {
                 if (_enumType == value)

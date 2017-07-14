@@ -1,5 +1,11 @@
+param (
+    [ValidateSet("Release", "Debug")]
+    [string]$buildcfg = "Release",
+    [switch]$nocs = $false,
+    [switch]$nojs = $false
+ )
+
 $rootdir  = (Get-Item -Path ".." -Verbose).FullName
-$buildcfg = "Release"
 
 # redefine above variables for appveyor
 if($env:APPVEYOR -eq $true) {
@@ -36,37 +42,44 @@ $formtest    = "$rootdir\src\form.tests.harness.html"
 $formtestnew = "$rootdir\src\form.tests.harness.latestdeps.html"
 
 # run tests and analyze code coverage
-& $opencover -register:user "-target:$xunit" "-targetargs:$testdlls -nologo -noshadow -appveyor" "-targetdir:$webmvcbin" "-filter:+[ExpressiveAnnotations(.MvcUnobtrusive)?]*" -output:csharp-coverage.xml -hideskipped:All -mergebyhash -returntargetcode
 
-if($LastExitCode -ne 0) {
-    if($env:APPVEYOR -eq $true) {
-        $host.SetShouldExit($LastExitCode)
+if($nocs -eq $false) {
+    Write-Host "C# tests started..." -foregroundcolor "yellow"
+    & $opencover -register:user "-target:$xunit" "-targetargs:$testdlls -nologo -noshadow -appveyor" "-targetdir:$webmvcbin" "-filter:+[ExpressiveAnnotations(.MvcUnobtrusive)?]*" -output:csharp-coverage.xml -hideskipped:All -mergebyhash -returntargetcode
+
+    if($LastExitCode -ne 0) {
+        if($env:APPVEYOR -eq $true) {
+            $host.SetShouldExit($LastExitCode)
+        }
+        throw "C# tests failed"
     }
-    throw "C# tests failed"
 }
-    
-& $chutzpah /nologo /silent /path $formtest /path $formtestnew /path $maintest /junit chutzpah-tests.xml /coverage /coverageIgnores "*test*, *jquery*" /coveragehtml javascript-coverage.html /lcov javascript-coverage.lcov
+   
+if($nojs -eq $false) {
+    Write-Host "JS tests started..." -foregroundcolor "yellow"
+    & $chutzpah /nologo /silent /path $formtest /path $formtestnew /path $maintest /junit chutzpah-tests.xml /coverage /coverageIgnores "*test*, *jquery*" /coveragehtml javascript-coverage.html /lcov javascript-coverage.lcov
 
-if($LastExitCode -ne 0) {
-    if($env:APPVEYOR -eq $true) {
-        $host.SetShouldExit($LastExitCode)
+    if($LastExitCode -ne 0) {
+        if($env:APPVEYOR -eq $true) {
+            $host.SetShouldExit($LastExitCode)
+        }
+        throw "JS tests failed"
     }
-    throw "JS tests failed"
-}
 
-# manually submit chutzpah test results to appveyor
-if($env:APPVEYOR -eq $true) {
-    $results = [xml](Get-Content chutzpah-tests.xml)
+    # manually submit chutzpah test results to appveyor
+    if($env:APPVEYOR -eq $true) {
+        $results = [xml](Get-Content chutzpah-tests.xml)
 
-    foreach ($testsuite in $results.testsuites.testsuite) {
-        foreach ($testcase in $testsuite.testcase) {
-            $module,$test = $testcase.name.split(':')
+        foreach ($testsuite in $results.testsuites.testsuite) {
+            foreach ($testcase in $testsuite.testcase) {
+                $module,$test = $testcase.name.split(':')
 
-            if ($testcase.failure) {
-                Add-AppveyorTest $test -Outcome Failed -FileName $testsuite.name -ErrorMessage $testcase.failure.message -Duration $testcase.time
-            }
-            else {
-                Add-AppveyorTest $test -Outcome Passed -FileName $testsuite.name -Duration $testcase.time
+                if ($testcase.failure) {
+                    Add-AppveyorTest $test -Outcome Failed -FileName $testsuite.name -ErrorMessage $testcase.failure.message -Duration $testcase.time
+                }
+                else {
+                    Add-AppveyorTest $test -Outcome Passed -FileName $testsuite.name -Duration $testcase.time
+                }
             }
         }
     }

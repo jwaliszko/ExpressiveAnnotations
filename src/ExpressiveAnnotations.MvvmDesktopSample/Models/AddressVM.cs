@@ -11,7 +11,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
         [AssertThat("StartsWith(Details, 'Street')")]
         public string Details
         {
-            get { return _details; }
+            get => _details;
             set
             {
                 _details = value;

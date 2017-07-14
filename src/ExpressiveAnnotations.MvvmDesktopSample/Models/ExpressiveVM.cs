@@ -25,8 +25,8 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
         }
         
         public static event EventHandler ValidationStateChanged;        
-        public static Dictionary<string, IEnumerable<string>> ValidationErrorsMap { get; private set; }
-        public static Dictionary<ExpressiveVM, IEnumerable<PropertyInfo>> AnnotatedPropertiesMap { get; private set; }
+        public static Dictionary<string, IEnumerable<string>> ValidationErrorsMap { get; }
+        public static Dictionary<ExpressiveVM, IEnumerable<PropertyInfo>> AnnotatedPropertiesMap { get; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

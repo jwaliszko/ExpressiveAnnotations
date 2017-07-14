@@ -77,7 +77,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
 
         public bool GoAbroad
         {
-            get { return _goAbroad; }
+            get => _goAbroad;
             set
             {
                 _goAbroad = value;
@@ -88,7 +88,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
         [Required]
         public int? Age
         {
-            get { return _age; }
+            get => _age;
             set
             {
                 _age = value;
@@ -100,7 +100,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
         [AssertThat("IsDigitChain(PassportNumber)")]
         public string PassportNumber
         {
-            get { return _passportNumber; }
+            get => _passportNumber;
             set
             {
                 _passportNumber = value;
@@ -110,7 +110,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
 
         public string Country
         {
-            get { return _country; }
+            get => _country;
             set
             {
                 _country = value;
@@ -120,7 +120,7 @@ namespace ExpressiveAnnotations.MvvmDesktopSample.Models
 
         public string NextCountry
         {
-            get { return _nextCountry; }
+            get => _nextCountry;
             set
             {
                 _nextCountry = value;
@@ -137,7 +137,7 @@ GoAbroad == true
         [AssertThat(@"ReasonForTravel != 'John\'s cat named ""\\\'""\n (Backslash Quote)' && ReasonForTravel != SIMONS_CAT")]
         public string ReasonForTravel
         {
-            get { return _reasonForTravel; }
+            get => _reasonForTravel;
             set
             {
                 _reasonForTravel = value;
@@ -153,7 +153,7 @@ GoAbroad == true
         [AssertThat("ReturnDate < AddYears(Today(), 1)")]
         public DateTime? ReturnDate
         {
-            get { return _returnDate; }
+            get => _returnDate;
             set
             {
                 _returnDate = value;
@@ -164,7 +164,7 @@ GoAbroad == true
         [RequiredIf("GoAbroad == true && ReturnDate > LatestSuggestedReturnDate")]
         public string ReasonForLongTravel
         {
-            get { return _reasonForLongTravel; }
+            get => _reasonForLongTravel;
             set
             {
                 _reasonForLongTravel = value;
@@ -175,7 +175,7 @@ GoAbroad == true
         [RequiredIf("GoAbroad == true")]
         public Stability? PoliticalStability
         {
-            get { return _politicalStability; }
+            get => _politicalStability;
             set
             {
                 _politicalStability = value;
@@ -183,15 +183,10 @@ GoAbroad == true
             }
         }
 
-        [AssertThat(@"
-(
-    AwareOfTheRisks == true
-    && (PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain)
-) 
-|| PoliticalStability == null || PoliticalStability == Stability.High")]
+        [AssertThat("(PoliticalStability == Stability.Low || PoliticalStability == Stability.Uncertain) ? AwareOfTheRisks == true : true")]
         public bool AwareOfTheRisks
         {
-            get { return _awareOfTheRisks; }
+            get => _awareOfTheRisks;
             set
             {
                 _awareOfTheRisks = value;
@@ -201,7 +196,7 @@ GoAbroad == true
 
         public string SportType
         {
-            get { return _sportType; }
+            get => _sportType;
             set
             {
                 _sportType = value;
@@ -213,7 +208,7 @@ GoAbroad == true
         [AssertThat("IsBloodType(Trim(BloodType))")]
         public string BloodType
         {
-            get { return _bloodType; }
+            get => _bloodType;
             set
             {
                 _bloodType = value;
@@ -224,7 +219,7 @@ GoAbroad == true
         [AssertThat("AgreeForContact == true")]
         public bool AgreeForContact
         {
-            get { return _agreeForContact; }
+            get => _agreeForContact;
             set
             {
                 _agreeForContact = value;
@@ -237,7 +232,7 @@ GoAbroad == true
 && (ContactDetails.Addresses[0].Details != null || ContactDetails.Addresses[1].Details != null)")]
         public bool? ImmediateContact
         {
-            get { return _immediateContact; }
+            get => _immediateContact;
             set
             {
                 _immediateContact = value;
@@ -250,7 +245,7 @@ FlightId != Guid('00000000-0000-0000-0000-000000000000')
 && FlightId != Guid('11111111-1111-1111-1111-111111111111')")]
         public Guid? FlightId
         {
-            get { return _flightId; }
+            get => _flightId;
             set
             {
                 _flightId = value;
@@ -258,7 +253,7 @@ FlightId != Guid('00000000-0000-0000-0000-000000000000')
             }
         }
 
-        public ContactVM ContactDetails { get; private set; }
+        public ContactVM ContactDetails { get; }
 
         public bool IsBloodType(string group)
         {
@@ -270,9 +265,6 @@ FlightId != Guid('00000000-0000-0000-0000-000000000000')
             return from.AddYears(years);
         }
 
-        public TimeSpan WeekPeriod
-        {
-            get { return new TimeSpan(7, 0, 0, 0); }
-        }
+        public TimeSpan WeekPeriod => new TimeSpan(7, 0, 0, 0);
     }
 }

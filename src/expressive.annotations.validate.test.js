@@ -322,18 +322,34 @@
                 7: {
                     Items: {
                         6: {
-                            Val: "abc"
+                            Val: "abc",
+                            Arr: [1.1, 2.2]
                         }
                     }
                 }
-            }
+            },
+            Days: [true, false]
         }
-        var deserizedModel = eapriv.modelHelper.deserializeObject(null, null, { "Number": 123, "Stability.High": 0, "Items[7].Items[6].Val": "abc" }, null);
-        assert.deepEqual(deserizedModel, model, 'model deserialized properly based on given consts map');
+        var deserializedModel = eapriv.modelHelper.deserializeObject(
+            null,  // form
+            null,  // fieldsMap
+            {      // constsMap
+                "Number": 123,
+                "Stability.High": 0,
+                "Items[7].Items[6].Val": "abc",
+                "Items[7].Items[6].Arr[1]": 2.2,
+                "Items[7].Items[6].Arr[0]": 1.1,
+                "Days[0]": true,
+                "Days[1]": false
+            },
+            null,  // enumsMap
+            null,  // parsersMap
+            null); // prefix
+        assert.deepEqual(deserializedModel, model, 'model not deserialized properly based on given consts map');
 
-        var expression = "Number - 23 == 100 && Stability.High == 0 && Items[7].Items[6].Val == 'abc'";
+        var expression = "Number - 23 == 100 && Stability.High == 0 && Items[7].Items[6].Val == 'abc' && Items[7].Items[6].Arr[1] / 2 == Items[7].Items[6].Arr[0] && Days[1] == false && Days[0] == true";
         var result = eapriv.modelHelper.ctxEval(expression, model);
-        assert.ok(result, "expression evaluated correctly within given model context");
+        assert.ok(result, "expression not evaluated correctly within given model context");
 
         with (model) {
             assert.ok(result === eval(expression), "ctxEval gives the same result as native eval");
