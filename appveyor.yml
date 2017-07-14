@@ -11,6 +11,7 @@ build:
   project: src\ExpressiveAnnotations.sln
   parallel: true
   verbosity: minimal
+image: Visual Studio 2017
 test_script:
   - "SET NODE_PATH=%AppData%\\npm\\node_modules"
   - ps: build\test.ps1
