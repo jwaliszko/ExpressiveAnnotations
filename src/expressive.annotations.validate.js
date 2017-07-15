@@ -12,10 +12,14 @@ var
 
     api = { // to be accesssed from outer scope
         settings: {
-            debug: false, // output debug info messages to the web console (should be disabled for release code)
-            optimize: true, // if flag is on, requirement expression is not evaluated for empty fields (otherwise, it is evaluated and such an evaluation result is provided to eavalid event)
-            enumsAsNumbers: true, // specifies whether values of enum types are internally treated as integral numerics or string identifiers (should be consistent with the way of how input fields values are stored in HTML)
-            dependencyTriggers: 'change keyup', // a string containing one or more DOM field event types (such as "change", "keyup" or custom event names) for which fields directly dependent on referenced DOM field are validated
+            debug: false, // outputs debug messages to the web console (should be disabled for release code)
+            optimize: true, // if flag is on, requirement expression is not evaluated for empty fields (otherwise, it is evaluated and such an evaluation result
+                            // is provided to the eavalid event)
+            enumsAsNumbers: true, // specifies whether values of enum types are internally treated as integral numerics or string identifiers (should be consistent
+                                  // with the way of how input fields values are stored in HTML)
+            dependencyTriggers: 'change keyup', // a string containing one or more space-separated DOM field event types (such as "change", "keyup" or custom event
+                                                // names) for which fields directly dependent on referenced DOM field are validated - for this feature to be off
+                                                // entirely, initialize with empty string, null or undefined (validation will be fired on form submit attempt only)
 
             apply: function(options) { // alternative way of settings setup (recommended), crucial to invoke e.g. for new set of dependency triggers to be re-bound
                 function verifySetup() {
@@ -538,7 +542,7 @@ var
                 parent = object;
                 for (i = 0; i < props.length - 1; i++) {
                     fieldName = props[i];
-                    
+
                     match = arrayPat.exec(fieldName); // check for array element access
                     if (match) {
                         fieldName = match[1];
@@ -715,7 +719,7 @@ var
 
         var exprVal, model;
         var message = 'RequiredIf expression @ {0} field:\n[{1}]\nto be executed within the following context (methods hidden):\n{2}';
-        if (!api.settings.optimize) { // no optimization - compute requirement condition despite the fact field value may be provided
+        if (!api.settings.optimize) { // no optimization - compute requirement condition (which now may have changed) despite the fact field value may be provided
             model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model);
             logger.dump(typeHelper.string.format(message, element.name, params.expression, model));

@@ -120,3 +120,4 @@ UpgradeLog*.XML
 /build/*.js
 /src/_Chutzpah.*
 /.vs
+/src/ExpressiveAnnotations.MvcWebSample/Properties/PublishProfiles/FolderProfile.pubxml

@@ -1,7 +1,7 @@
 (function($, qunit, ea) {
     qunit.module("html_based_full_computation_flow");
 
-    qunit.test("verify_sample_form_validation", function(assert) { // relies on form defined in test harness file
+    qunit.test("verify_sample_field_validation_with_default_options", function(assert) { // relies on form defined in test harness file
 
         ea.addMethod('Whoami', function() {
             return 'root';
@@ -33,9 +33,13 @@
         assert.ok(triggered);
         assert.ok(!result);
         assert.equal(validator.errorList[0].message, 'Provided email ea{at}home.com (yes ea{at}home.com) cannot be accepted {0}{1}.');
+    });
 
-        triggered = false;
-        element = $('#basic_test_form').find('[name="ContactDetails.Letters"]');
+    qunit.test("eavalid_event_optimization_is_respected", function(assert) { // relies on form defined in test harness file
+
+        ea.settings.optimize = true; // default
+        var triggered = false;
+        var element = $('#basic_test_form').find('[name="ContactDetails.Letters"]');
         $(element).on('eavalid', function(e, type, valid, expr, cond) {
             triggered = true;
 
@@ -45,13 +49,13 @@
             assert.equal(expr, "true");
             assert.equal(cond, undefined); // optimization on - no redundant expression evaluation is performed
         });
-        result = element.valid();
+        var result = element.valid();
+        $(element).off('eavalid');
         assert.ok(triggered);
         assert.ok(result);
 
-        triggered = false;
-        $(element).off('eavalid');
         ea.settings.optimize = false;
+        triggered = false;
         $(element).on('eavalid', function(e, type, valid, expr, cond) {
             triggered = true;
 
@@ -62,18 +66,47 @@
             assert.equal(cond, true);
         });
         result = element.valid();
+        $(element).off('eavalid');
         assert.ok(triggered);
         assert.ok(result);
+    });
 
-        element = $('#basic_test_form').find('[name="ContactDetails.PoliticalStabilityA"]');
-        result = element.valid();
+    qunit.test("enums_handling_behaves_as_expected", function(assert) {
+
+        ea.settings.enumsAsNumbers = true; // default
+        var element = $('#basic_test_form').find('[name="ContactDetails.PoliticalStabilityA"]');
+        var result = element.valid();
         assert.ok(result);
 
         ea.settings.enumsAsNumbers = false;
-
         element = $('#basic_test_form').find('[name="ContactDetails.PoliticalStabilityB"]');
         result = element.valid();
         assert.ok(result);
+    });
+
+    qunit.test("dependency_trigger_initiates_dependent_field_validation_when_not_ignored", function(assert) {
+
+        var validator = $('#basic_test_form').validate();
+        var element = $('#basic_test_form').find('[name="ContactDetails.Letters"]');
+
+        var triggered = false;
+        var dependant = $('#basic_test_form').find('[name="Dummy"]');
+        $(dependant).on('eavalid', function(e, type, valid, expr, cond) {
+            triggered = true;
+        });
+
+        validator.settings.ignore = ':hidden'; // ignore ':hidden' fields when validating
+        element.trigger('change');
+        assert.ok(!triggered);
+
+        validator.settings.ignore = ''; // do not ignore any fields when validating
+        element.trigger('change');
+        assert.ok(triggered);
+
+        ea.settings.apply({ dependencyTriggers: '' }); // turn off dependency validation (apply for dependency triggers to be re-bound)
+        triggered = false;
+        element.trigger('change');
+        assert.ok(!triggered);
     });
 
 }($, QUnit, window.ea));

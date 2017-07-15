@@ -54,7 +54,7 @@ if($nocs -eq $false) {
         throw "C# tests failed"
     }
 }
-   
+
 if($nojs -eq $false) {
     Write-Host "JS tests started..." -foregroundcolor "yellow"
     & $chutzpah /nologo /silent /path $formtest /path $formtestnew /path $maintest /junit chutzpah-tests.xml /coverage /coverageIgnores "*test*, *jquery*" /coveragehtml javascript-coverage.html /lcov javascript-coverage.lcov

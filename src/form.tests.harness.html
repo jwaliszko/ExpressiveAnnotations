@@ -9,7 +9,7 @@
 <body>
     <div id="qunit"></div>
 
-    <div id="qunit-fixture">
+    <div> <!--id="qunit-fixture" - this attribute resets the container for each test which is unwanted-->
         <form id="basic_test_form">
             <input data-val="true"
                    data-val-assertthat="Provided email 02b4c617-f4a4-4820-9624-6bc4cd0922c5 (yes 02b4c617-f4a4-4820-9624-6bc4cd0922c5) cannot be accepted {0}{1}."
@@ -44,6 +44,13 @@
                    name="ContactDetails.PoliticalStabilityB"
                    type="text"
                    value="High">
+            <input data-val="true"
+                   data-val-assertthat="Dummy assertion not satisfied."
+                   data-val-assertthat-expression="&quot;ContactDetails.Letters == 'a'&quot;"
+                   data-val-assertthat-fieldsmap="{&quot;ContactDetails.Letters&quot;:&quot;string&quot;}"
+                   name="Dummy"
+                   type="hidden"
+                   value="_">
         </form>
     </div>
 
