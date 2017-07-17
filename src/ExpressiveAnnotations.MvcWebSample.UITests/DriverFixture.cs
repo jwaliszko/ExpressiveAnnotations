@@ -22,11 +22,17 @@ namespace ExpressiveAnnotations.MvcWebSample.UITests
             //Driver.Manage().Timeouts().ImplicitlyWait(new TimeSpan(0, 0, 0, 5));
 
             var profile = new FirefoxProfile();
+
+            // try to suppress diagnostic info
             profile.SetPreference("webdriver.log.browser.ignore", true);
             profile.SetPreference("webdriver.log.driver.ignore", true);
             profile.SetPreference("webdriver.log.profiler.ignore", true);
+            profile.SetPreference("webdriver.log.browser.file", "");
+            profile.SetPreference("webdriver.log.driver.file", "");
+            profile.SetPreference("webdriver.log.profiler.file", "");
             profile.SetPreference("webdriver.log.init", false);
             profile.SetPreference("webdriver.log.driver.level", "OFF");
+
             // disable start page
             profile.SetPreference("browser.startup.homepage_override.mstone", "ignore");
             profile.SetPreference("startup.homepage_welcome_url.additional", "about:blank");

@@ -32,7 +32,7 @@
 
     <fieldset>
         <legend>Usage sample for model validation in ASP.NET MVC</legend>
-        <div class="box-small">
+        <div id="panel" class="box-small">
             @Html.Partial("_Culture")
             @Html.Partial("_Validation")
             @Html.Partial("_Indications")
@@ -194,8 +194,10 @@
                 var $form = $('form');
                 var selector = 'input, select, textarea';
 
-                var validator = $('form').validate();
-                validator.settings.ignore = ''; // enable validation for ':hidden' fields (to have hidden fields visibility re-computed)
+                if (hideNonRequired) {
+                    var validator = $form.validate();
+                    validator.settings.ignore = ''; // enable validation for ':hidden' fields (to have hidden fields visibility re-computed)
+                }
 
                 $form.find(selector).on('eavalid', function(e, type, valid, expr, cond, idx) { // verify asterisk visibility based on computed condition
                     if (type === 'requiredif' && cond !== undefined) {

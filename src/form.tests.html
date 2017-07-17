@@ -1,0 +1,45 @@
+﻿<!--form injected into chutzpah-created test harness file, when debuger invoked from the form.test.js level in visual studio-->
+<form id="basic_test_form">
+    <input data-val="true"
+           data-val-assertthat="Provided email 02b4c617-f4a4-4820-9624-6bc4cd0922c5 (yes 02b4c617-f4a4-4820-9624-6bc4cd0922c5) cannot be accepted {0}{1}."
+           data-val-assertthat-constsmap="{&quot;LetterA&quot;:&quot;a&quot;}"
+           data-val-assertthat-enumsmap="{&quot;Stability.Low&quot;:0}"
+           data-val-assertthat-expression="&quot;Whoami() == 'root' && ArrayContains(LetterA, Letters) && PoliticalStabilityA == Stability.High && IsEmail(Email)&quot;"
+           data-val-assertthat-fieldsmap="{&quot;Letters&quot;:&quot;unknowntype&quot;,&quot;PoliticalStabilityA&quot;:&quot;enumeration&quot;,&quot;Email&quot;:&quot;string&quot;}"
+           data-val-assertthat-parsersmap="{&quot;Letters&quot;:&quot;ArrayParser&quot;}"
+           data-val-assertthat-errfieldsmap="{&quot;Email&quot;:&quot;02b4c617-f4a4-4820-9624-6bc4cd0922c5&quot;}"
+           name="ContactDetails.Email"
+           type="text"
+           value="ea{at}home.com">
+    <input data-val="true"
+           data-val-requiredif="Field required."
+           data-val-requiredif-expression="&quot;true&quot;"
+           data-val-requiredifa="Field required."
+           data-val-requiredifa-expression="&quot;false&quot;"
+           name="ContactDetails.Letters"
+           type="text"
+           value="a,b,c">
+    <input data-val="true"
+           data-val-assertthat="Assertion not satisfied."
+           data-val-assertthat-enumsmap="{&quot;Stability.High&quot;:1}"
+           data-val-assertthat-expression="&quot;PoliticalStabilityA == Stability.High&quot;"
+           data-val-assertthat-fieldsmap="{&quot;PoliticalStabilityA&quot;:&quot;enumeration&quot;}"
+           name="ContactDetails.PoliticalStabilityA"
+           type="text"
+           value="1">
+    <input data-val="true"
+           data-val-assertthat="Assertion not satisfied."
+           data-val-assertthat-enumsmap="{&quot;Stability.High&quot;:1}"
+           data-val-assertthat-expression="&quot;PoliticalStabilityB == Stability.High&quot;"
+           data-val-assertthat-fieldsmap="{&quot;PoliticalStabilityB&quot;:&quot;enumeration&quot;}"
+           name="ContactDetails.PoliticalStabilityB"
+           type="text"
+           value="High">
+    <input data-val="true"
+           data-val-assertthat="Hidden assertion not satisfied."
+           data-val-assertthat-expression="&quot;ContactDetails.Letters == 'a'&quot;"
+           data-val-assertthat-fieldsmap="{&quot;ContactDetails.Letters&quot;:&quot;string&quot;}"
+           name="Hidden"
+           type="hidden"
+           value="_">
+</form>

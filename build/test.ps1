@@ -1,3 +1,7 @@
+# usages:
+#    ./test.ps1
+#    ./test.ps1 -buildcfg debug -nojs
+
 param (
     [ValidateSet("Release", "Debug")]
     [string]$buildcfg = "Release",
@@ -8,7 +12,7 @@ param (
 $rootdir  = (Get-Item -Path ".." -Verbose).FullName
 
 # redefine above variables for appveyor
-if($env:APPVEYOR -eq $true) {
+if ($env:APPVEYOR -eq $true) {
     $rootdir  = $env:APPVEYOR_BUILD_FOLDER
     $buildcfg = $env:CONFIGURATION
 }
@@ -43,31 +47,31 @@ $formtestnew = "$rootdir\src\form.tests.harness.latestdeps.html"
 
 # run tests and analyze code coverage
 
-if($nocs -eq $false) {
-    Write-Host "C# tests started..." -foregroundcolor "yellow"
+if ($nocs -eq $false) {
+    Write-Host "`nC# tests started..." -foregroundcolor "yellow"
     & $opencover -register:user "-target:$xunit" "-targetargs:$testdlls -nologo -noshadow -appveyor" "-targetdir:$webmvcbin" "-filter:+[ExpressiveAnnotations(.MvcUnobtrusive)?]*" -output:csharp-coverage.xml -hideskipped:All -mergebyhash -returntargetcode
 
-    if($LastExitCode -ne 0) {
-        if($env:APPVEYOR -eq $true) {
+    if ($LastExitCode -ne 0) {
+        if ($env:APPVEYOR -eq $true) {
             $host.SetShouldExit($LastExitCode)
         }
         throw "C# tests failed"
     }
 }
 
-if($nojs -eq $false) {
-    Write-Host "JS tests started..." -foregroundcolor "yellow"
+if ($nojs -eq $false) {
+    Write-Host "`nJS tests started..." -foregroundcolor "yellow"
     & $chutzpah /nologo /silent /path $formtest /path $formtestnew /path $maintest /junit chutzpah-tests.xml /coverage /coverageIgnores "*test*, *jquery*" /coveragehtml javascript-coverage.html /lcov javascript-coverage.lcov
 
-    if($LastExitCode -ne 0) {
-        if($env:APPVEYOR -eq $true) {
+    if ($LastExitCode -ne 0) {
+        if ($env:APPVEYOR -eq $true) {
             $host.SetShouldExit($LastExitCode)
         }
         throw "JS tests failed"
     }
 
     # manually submit chutzpah test results to appveyor
-    if($env:APPVEYOR -eq $true) {
+    if ($env:APPVEYOR -eq $true) {
         $results = [xml](Get-Content chutzpah-tests.xml)
 
         foreach ($testsuite in $results.testsuites.testsuite) {

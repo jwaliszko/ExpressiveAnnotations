@@ -25,6 +25,8 @@
             <input data-val="true"
                    data-val-requiredif="Field required."
                    data-val-requiredif-expression="&quot;true&quot;"
+                   data-val-requiredifa="Field required."
+                   data-val-requiredifa-expression="&quot;false&quot;"
                    name="ContactDetails.Letters"
                    type="text"
                    value="a,b,c">
@@ -45,10 +47,10 @@
                    type="text"
                    value="High">
             <input data-val="true"
-                   data-val-assertthat="Dummy assertion not satisfied."
+                   data-val-assertthat="Hidden assertion not satisfied."
                    data-val-assertthat-expression="&quot;ContactDetails.Letters == 'a'&quot;"
                    data-val-assertthat-fieldsmap="{&quot;ContactDetails.Letters&quot;:&quot;string&quot;}"
-                   name="Dummy"
+                   name="Hidden"
                    type="hidden"
                    value="_">
         </form>
