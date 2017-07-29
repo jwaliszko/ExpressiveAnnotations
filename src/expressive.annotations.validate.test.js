@@ -8,7 +8,47 @@
 (function($, qunit, ea, eapriv) {
     // equal( actual, expected [, message ] )
 
-    qunit.testDone(function() { // reset state for further tests
+    qunit.begin(function() { // fires once before all tests
+        window.console = (function(wndconsole) { // mock console for tests
+            var message = null;
+            var suspend = false;
+
+            var log = function(msg) {
+                message = msg;
+                if (!suspend) {
+                    wndconsole.log(msg); // call original console
+                }
+            }
+            var warn = function(msg) {
+                message = msg;
+                if (!suspend) {
+                    wndconsole.warn(msg);
+                }
+            }
+            var error = function(msg) {
+                message = msg;
+                if (!suspend) {
+                    wndconsole.error(msg);
+                }
+            }
+            var read = function() {
+                return message;
+            }
+            var clear = function() {
+                message = null; // clear buffer
+            }
+            var suppress = function() {
+                suspend = true; // prervent console logging
+            }
+            var restore = function() {
+                suspend = false; // restore console logging
+            }
+
+            return { log: log, warn: warn, error: error, read: read, clear: clear, suppress: suppress, restore: restore }
+        })(window.console);
+    });
+
+    qunit.testDone(function() { // reset state for subsequent test
         ea.settings.apply({
             debug: false,
             optimize: true,
@@ -46,18 +86,44 @@
 
     qunit.test("verify_string_formatting", function(assert) {
         assert.equal(eapriv.typeHelper.string.format("{0}", "a"), "a", "string.format({0}, 'a') succeed");
+        assert.equal(eapriv.typeHelper.string.format("{0}", "a", "b"), "a", "string.format({0}, 'a', 'b') succeed");
+        assert.equal(eapriv.typeHelper.string.format("{1}", "a", "b"), "b", "string.format({1}, 'a', 'b') succeed");
         assert.equal(eapriv.typeHelper.string.format("{0}{1}", "a", "b"), "ab", "string.format({0}{1}, 'a', 'b') succeed");
+        assert.equal(eapriv.typeHelper.string.format("{1}{0}", "a", "b"), "ba", "string.format({1}{0}, 'a', 'b') succeed");
         assert.equal(eapriv.typeHelper.string.format("{0}{0}", "a", "b"), "aa", "string.format({0}{0}, 'a', 'b') succeed");
         assert.equal(eapriv.typeHelper.string.format("{0}{0}", "a"), "aa", "string.format({0}{0}, 'a') succeed");
         assert.equal(eapriv.typeHelper.string.format("{0}", { a: true }), "{\n    \"a\": true\n}", "string.format({0}, object) succeed");
-        assert.equal(eapriv.typeHelper.string.format("a{0}b", "$'"), "a$'b", "string.format({0}, '$\'') succeed");
+        assert.equal(eapriv.typeHelper.string.format("a{0}b", "$'"), "a$'b", "string.format(a{0}b, '$\'') succeed");
 
         assert.equal(eapriv.typeHelper.string.format("{0}", ["a"]), "a", "string.format({0}, ['a']) succeed");
+        assert.equal(eapriv.typeHelper.string.format("{0}", ["a", "b"]), "a", "string.format({0}, ['a', 'b']) succeed");
+        assert.equal(eapriv.typeHelper.string.format("{1}", ["a", "b"]), "b", "string.format({1}, ['a', 'b']) succeed");
         assert.equal(eapriv.typeHelper.string.format("{0}{1}", ["a", "b"]), "ab", "string.format({0}{1}, ['a', 'b']) succeed");
+        assert.equal(eapriv.typeHelper.string.format("{1}{0}", ["a", "b"]), "ba", "string.format({1}{0}, ['a', 'b']) succeed");
         assert.equal(eapriv.typeHelper.string.format("{0}{0}", ["a", "b"]), "aa", "string.format({0}{0}, ['a', 'b']) succeed");
         assert.equal(eapriv.typeHelper.string.format("{0}{0}", ["a"]), "aa", "string.format({0}{0}, ['a']) succeed");
         assert.equal(eapriv.typeHelper.string.format("{0}", [{ a: true }]), "{\n    \"a\": true\n}", "string.format({0}, [object]) succeed");
-        assert.equal(eapriv.typeHelper.string.format("a{0}b", ["$'"]), "a$'b", "string.format({0}, ['$\'']) succeed");
+        assert.equal(eapriv.typeHelper.string.format("a{0}b", ["$'"]), "a$'b", "string.format(a{0}b, ['$\'']) succeed");
+    });
+
+    qunit.test("verify_string_indentation", function(assert) {
+        var result = eapriv.typeHelper.string.indent("1st line\n2nd line\n3rd line");
+        assert.equal(result, "1st line\n2nd line\n3rd line");
+        result = eapriv.typeHelper.string.indent("1st line\n2nd line\n3rd line", 0);
+        assert.equal(result, "1st line\n2nd line\n3rd line");
+        result = eapriv.typeHelper.string.indent("1st line\n2nd line\n3rd line", 1);
+        assert.equal(result, " 1st line\n 2nd line\n 3rd line");
+        result = eapriv.typeHelper.string.indent("1st line\n2nd line\n3rd line", 5);
+        assert.equal(result, "     1st line\n     2nd line\n     3rd line");
+    });
+
+    qunit.test("verify_datetime_stamp", function(assert) {
+        var result = eapriv.typeHelper.datetime.stamp(new Date(2017, 07, 29, 0, 0, 0));
+        assert.equal(result, "00:00:00");
+        result = eapriv.typeHelper.datetime.stamp(new Date(2017, 07, 29, 1, 11, 1));
+        assert.equal(result, "01:11:01");
+        result = eapriv.typeHelper.datetime.stamp(new Date(2017, 07, 29, 11, 11, 11));
+        assert.equal(result, "11:11:11");
     });
 
     qunit.test("verify_type_parsing", function(assert) {
@@ -354,6 +420,50 @@
         with (model) {
             assert.ok(result === eval(expression), "ctxEval gives the same result as native eval");
         }
+    });
+
+    qunit.module("logger");
+
+    qunit.test("indentation_provided_for_logged_messages", function(assert) {
+        var actual = eapriv.logger.prep("1st line\n2nd line\n3rd line");
+        var expected = "1st line\n                   2nd line\n                   3rd line";
+        assert.equal(actual, expected);
+
+        actual = eapriv.logger.prep("1st line");
+        expected = "1st line"; // no new line at the end
+        assert.equal(actual, expected);
+
+        var date = new Date(2017, 07, 29, 11, 5, 0);
+        actual = eapriv.logger.prep("1st line\n2nd line\n3rd line", date);
+        expected = "(11:05:00): 1st line\n                   2nd line\n                   3rd line";
+        assert.equal(actual, expected);
+
+        actual = eapriv.logger.prep("1st line", date);
+        expected = "(11:05:00): 1st line";
+        assert.equal(actual, expected);
+    });
+
+    qunit.test("proper_prefixes_applied_to_logged_messages", function(assert) {
+        window.console.clear(); // clear possible leftover from mocked console buffer
+        window.console.suppress();
+
+        eapriv.logger.info("msg");
+        assert.ok(console.read() === null, "information should not be logged for non-debug mode");
+        eapriv.logger.warn("msg");
+        assert.ok(console.read().slice(0, 8) === "[warn] (", "warning prefix broken for non-debug mode");
+        eapriv.logger.fail("msg");
+        assert.ok(console.read().slice(0, 8) === "[fail] (", "failure prefix broken for non-debug mode");
+
+        ea.settings.debug = true; // switch to debug-mode
+
+        eapriv.logger.info("msg");
+        assert.ok(console.read().slice(0, 8) === "[info] (", "information prefix broken for debug mode");
+        eapriv.logger.warn("msg");
+        assert.ok(console.read().slice(0, 8) === "[warn] (", "warning prefix broken for debug mode");
+        eapriv.logger.fail("msg");
+        assert.ok(console.read().slice(0, 8) === "[fail] (", "failure prefix broken for debug mode");
+
+        window.console.restore();
     });
 
     qunit.module("toolchain");
@@ -673,26 +783,26 @@
 
         var elementMock = { name: 'name' };
         var paramsMock = { expression: 'false', fieldsMap: {}, constsMap: {}, parsersMap: {} };
-        var result = eapriv.computeAssertThat(null, elementMock, paramsMock);
-        assert.ok(result); // ok - satisfied despite false assertion (not invoked due to null value)
+        var result = eapriv.computeAssertThat('asserthat', null, elementMock, paramsMock);
+        assert.ok(result.valid); // ok - satisfied despite false assertion (not invoked due to null value)
 
         // the same behavior for empty or undefined
-        result = eapriv.computeAssertThat('', elementMock, paramsMock);
-        assert.ok(result);
-        result = eapriv.computeAssertThat(undefined, elementMock, paramsMock);
-        assert.ok(result);
+        result = eapriv.computeAssertThat('asserthat', '', elementMock, paramsMock);
+        assert.ok(result.valid);
+        result = eapriv.computeAssertThat('asserthat', undefined, elementMock, paramsMock);
+        assert.ok(result.valid);
     });
 
     qunit.test("verify_requiredif_not_computed_for_non_null_value", function(assert) {
 
         var elementMock = { name: 'name' };
         var paramsMock = { expression: 'true', fieldsMap: {}, constsMap: {}, parsersMap: {} };
-        var result = eapriv.computeRequiredIf({}, elementMock, paramsMock);
+        var result = eapriv.computeRequiredIf('requiredif', {}, elementMock, paramsMock);
         assert.ok(result.valid); // ok - not required despite requirement obligation (not invoked due to non-null value)
 
         // the same behavior for whitespace string if allowed
         paramsMock.allowEmpty = true;
-        result = eapriv.computeRequiredIf(' ', elementMock, paramsMock);
+        result = eapriv.computeRequiredIf('requiredif', ' ', elementMock, paramsMock);
         assert.ok(result.valid);
     });
 
@@ -700,26 +810,26 @@
 
         var elementMock = { name: 'name' };
         var paramsMock = { expression: 'false', fieldsMap: {}, constsMap: {}, parsersMap: {} };
-        var result = eapriv.computeAssertThat({}, elementMock, paramsMock);
-        assert.ok(!result); // not ok - not satisfied because of false assertion
+        var result = eapriv.computeAssertThat('asserthat', {}, elementMock, paramsMock);
+        assert.ok(!result.valid); // not ok - not satisfied because of false assertion
     });
 
     qunit.test("verify_requiredif_computed_for_null_value", function(assert) {
 
         var elementMock = { name: 'name' };
         var paramsMock = { expression: 'true', fieldsMap: {}, constsMap: {}, parsersMap: {} };
-        var result = eapriv.computeRequiredIf(null, elementMock, paramsMock);
+        var result = eapriv.computeRequiredIf('requiredif', null, elementMock, paramsMock);
         assert.ok(!result.valid); // not ok - required because of requirement obligation
 
         // the same behavior for empty or undefined
-        result = eapriv.computeRequiredIf('', elementMock, paramsMock);
+        result = eapriv.computeRequiredIf('requiredif', '', elementMock, paramsMock);
         assert.ok(!result.valid);
-        result = eapriv.computeRequiredIf(undefined, elementMock, paramsMock);
+        result = eapriv.computeRequiredIf('requiredif', undefined, elementMock, paramsMock);
         assert.ok(!result.valid);
 
         // the same behavior for whitespace string if not allowed
         paramsMock.allowEmpty = false;
-        result = eapriv.computeRequiredIf(' ', elementMock, paramsMock);
+        result = eapriv.computeRequiredIf('requiredif', ' ', elementMock, paramsMock);
         assert.ok(!result.valid);
     });
 
@@ -744,8 +854,8 @@
             constsMap: {},
             parsersMap: {}
         }
-        var result = eapriv.computeAssertThat({}, elementMock, paramsMock);
-        assert.ok(!result);
+        var result = eapriv.computeAssertThat('asserthat', {}, elementMock, paramsMock);
+        assert.ok(!result.valid);
     });
 
     qunit.test("verify_requiredif_complex_expression_computation", function(assert) {
@@ -769,7 +879,7 @@
             constsMap: {},
             parsersMap: {}
         }
-        var result = eapriv.computeRequiredIf(null, elementMock, paramsMock);
+        var result = eapriv.computeRequiredIf('requiredif', null, elementMock, paramsMock);
         assert.ok(!result.valid);
     });
 

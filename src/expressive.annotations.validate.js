@@ -12,7 +12,7 @@ var
 
     api = { // to be accesssed from outer scope
         settings: {
-            debug: false, // outputs debug messages to the web console (should be disabled for release code)
+            debug: false, // outputs debug messages to the web console (should be disabled in release code not to introduce redundant overhead)
             optimize: true, // if flag is on, requirement expression is not evaluated for empty fields (otherwise, it is evaluated and such an evaluation result
                             // is provided to the eavalid event)
             enumsAsNumbers: true, // specifies whether values of enum types are internally treated as integral numerics or string identifiers (should be consistent
@@ -82,20 +82,28 @@ var
     },
 
     logger = {
-        dump: function(message) {
+        info: function(message) {
             if (api.settings.debug && console && typeof console.log === 'function') { // flush in debug mode only
-                console.log('[info] : ' + message);
+                console.log('[info] ' + logger.prep(message, new Date()));
             }
         },
         warn: function(message) {
             if (console && typeof console.warn === 'function') {
-                console.warn('[warn] : ' + message);
+                console.warn('[warn] ' + logger.prep(message, new Date()));
             }
         },
         fail: function(message) {
             if (console && typeof console.error === 'function') {
-                console.error('[fail] : ' + message);
+                console.error('[fail] ' + logger.prep(message, new Date()));
             }
+        },
+        prep: function(message, date) {
+            var lines = message.split('\n');
+            var stamp = date !== undefined && date !== null ? '(' + typeHelper.datetime.stamp(date) + '): ' : '';
+            var fline = stamp + lines.shift();
+            return lines.length > 0
+                ? fline + '\n' + typeHelper.string.indent(lines.join('\n'), 19)
+                : fline;
         }
     },
 
@@ -355,6 +363,10 @@ var
                 }
                 return text;
             },
+            indent: function(str, spaces) {
+                var indent = Array((spaces || 0) + 1).join(' ');
+                return str.replace(/^/gm, indent);
+            },
             tryParse: function(value) {
                 if (typeHelper.isString(value)) {
                     return value;
@@ -415,6 +427,10 @@ var
             }
         },
         datetime: {
+            stamp: function(date) {
+                function pad(n) { return ('0' + n).slice(-2); }
+                return pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds());
+            },
             tryParse: function(value) {
                 if (typeHelper.isDate(value)) {
                     return value.getTime(); // return the time value in milliseconds
@@ -635,7 +651,7 @@ var
             validator = $(form).validate(); // get validator attached to the form
             referencedFields = this.referencesMap[name];
             if (referencedFields !== undefined && referencedFields !== null) {
-                logger.dump(typeHelper.string.format('Validation triggered for following {0} dependencies: {1}.', name, referencedFields.join(', ')));
+                logger.info(typeHelper.string.format('Validation triggered for the following dependencies of {0}:\n{1}.', name, referencedFields.join(', ')));
                 i = referencedFields.length;
                 while (i--) {
                     field = $(form).find(typeHelper.string.format(':input[data-val][name="{0}"]', referencedFields[i])).not(validator.settings.ignore);
@@ -644,7 +660,7 @@ var
                     }
                 }
             } else {
-                logger.dump(typeHelper.string.format('No dependencies of {0} field detected.', name));
+                logger.info(typeHelper.string.format('No fields dependent on {0} detected.', name));
             }
         },
         bindFields: function(form, force) { // attach validation handlers to dependency triggers (events) for some form elements
@@ -662,7 +678,7 @@ var
                     return !force && bound;
                 }).on(namespacedEvents.join(' '), function(event) {
                     var field = $(this).attr('name');
-                    logger.dump(typeHelper.string.format('Dependency validation trigger - {0} event, handled.', event.type));
+                    logger.info(typeHelper.string.format('Dependency validation trigger - {0} event, handled.', event.type));
                     validationHelper.validateReferences(field, form); // validate referenced fields only
                 });
             }
@@ -700,29 +716,36 @@ var
         options.rules[adapter] = rules;
     },
 
-    computeAssertThat = function(value, element, params) {
+    computeAssertThat = function(method, value, element, params) {
         value = modelHelper.adjustGivenValue(value, element, params); // preprocess given value (here basically we are concerned about determining if such a value is null or not, to determine if the attribute
                                                                       // logic should be invoked or not - full type-detection parsing is not required at this stage, but we may have to extract such a value using
                                                                       // value parser, e.g. for an array which values are distracted among multiple fields)
         if (value !== undefined && value !== null && value !== '') { // check if the field value is set (continue if so, otherwise skip condition verification)
             var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model);
-            var message = 'AssertThat expression @ {0} field:\n[{1}]\nto be executed within the following context (methods hidden):\n{2}';
-            logger.dump(typeHelper.string.format(message, element.name, params.expression, model));
-            return modelHelper.ctxEval(params.expression, model); // verify assertion, if not satisfied => notify (return false)
+            var message = '{0} at {1}:\n[{2}]\nto be executed within the following context (methods hidden):\n{3}';
+            logger.info(typeHelper.string.format(message, method, element.name, params.expression, model));
+            var exprVal = modelHelper.ctxEval(params.expression, model); // verify assertion, if not satisfied => notify (return false)
+            return {
+                valid: exprVal,
+                condition: exprVal
+            }
         }
-        return true;
+        return {
+            valid: true,
+            condition: undefined // undefined always when value is set (computation redundant)
+        }
     },
 
-    computeRequiredIf = function(value, element, params) {
+    computeRequiredIf = function(method, value, element, params) {
         value = modelHelper.adjustGivenValue(value, element, params);
 
-        var exprVal, model;
-        var message = 'RequiredIf expression @ {0} field:\n[{1}]\nto be executed within the following context (methods hidden):\n{2}';
+        var exprVal = undefined, model;
+        var message = '{0} at {1}:\n[{2}]\nto be executed within the following context (methods hidden):\n{3}';
         if (!api.settings.optimize) { // no optimization - compute requirement condition (which now may have changed) despite the fact field value may be provided
             model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model);
-            logger.dump(typeHelper.string.format(message, element.name, params.expression, model));
+            logger.info(typeHelper.string.format(message, method, element.name, params.expression, model));
             exprVal = modelHelper.ctxEval(params.expression, model);
         }
 
@@ -738,7 +761,7 @@ var
 
             model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model);
-            logger.dump(typeHelper.string.format(message, element.name, params.expression, model));
+            logger.info(typeHelper.string.format(message, method, element.name, params.expression, model));
             exprVal = modelHelper.ctxEval(params.expression, model); // verify requirement, if satisfied => notify (return false)
             return {
                 valid: !exprVal,
@@ -747,7 +770,7 @@ var
         }
         return {
             valid: true,
-            condition: exprVal  // undefined when optimize flag is on
+            condition: exprVal  // undefined when optimize flag is on and value is not set (computation redundant)
         }
     },
 
@@ -774,9 +797,17 @@ var
         var method = typeHelper.string.format('assertthat{0}', suffix);
         $.validator.addMethod(method, function(value, element, params) {
             try {
-                var valid = computeAssertThat(value, element, params);
-                $(element).trigger('eavalid', ['assertthat', valid, params.expression]);
-                return valid;
+                var result = computeAssertThat(method, value, element, params);
+                logger.info(typeHelper.string.format('Field {0}: {1}, assertion {2}.',
+                    element.name,
+                    result.condition === undefined
+                        ? 'assertion condition computation redundant'
+                        : result.condition
+                            ? 'expr true'
+                            : 'expr false',
+                    result.valid ? 'satisfied' : 'not satisfied'));
+                $(element).trigger('eavalid', ['assertthat', result.valid, params.expression]);
+                return result.valid;
             } catch (ex) {
                 logger.fail(ex);
             }
@@ -788,7 +819,15 @@ var
         var method = typeHelper.string.format('requiredif{0}', suffix);
         $.validator.addMethod(method, function(value, element, params) {
             try {
-                var result = computeRequiredIf(value, element, params);
+                var result = computeRequiredIf(method, value, element, params);
+                logger.info(typeHelper.string.format('Field {0}: {1}, requirement {2}.',
+                    element.name,
+                    result.condition === undefined
+                        ? 'requirement condition computation redundant'
+                        : result.condition
+                            ? 'required'
+                            : 'not required',
+                    result.valid ? 'satisfied' : 'not satisfied'));
                 $(element).trigger('eavalid', ['requiredif', result.valid, params.expression, result.condition, annotations.indexOf(suffix)]);
                 return result.valid;
             } catch (ex) {
