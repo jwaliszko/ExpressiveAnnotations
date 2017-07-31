@@ -52,6 +52,8 @@ var
                     $(this).find('input, select, textarea').off('.expressive.annotations'); // remove all event handlers in the '.expressive.annotations' namespace
                     validationHelper.bindFields(this, true);
                 });
+
+                logger.info(typeHelper.string.format("EA settings applied:\n{0}", options));
             }
         },
         addMethod: function(name, func) {    // provide custom function to be accessible for expression
@@ -651,7 +653,7 @@ var
             validator = $(form).validate(); // get validator attached to the form
             referencedFields = this.referencesMap[name];
             if (referencedFields !== undefined && referencedFields !== null) {
-                logger.info(typeHelper.string.format('Validation triggered for the following dependencies of {0}:\n{1}.', name, referencedFields.join(', ')));
+                logger.info(typeHelper.string.format('Validation triggered for the following dependencies of {0} field:\n{1}.', name, referencedFields.join(', ')));
                 i = referencedFields.length;
                 while (i--) {
                     field = $(form).find(typeHelper.string.format(':input[data-val][name="{0}"]', referencedFields[i])).not(validator.settings.ignore);
@@ -723,8 +725,8 @@ var
         if (value !== undefined && value !== null && value !== '') { // check if the field value is set (continue if so, otherwise skip condition verification)
             var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model);
-            var message = '{0} at {1}:\n[{2}]\nto be executed within the following context (methods hidden):\n{3}';
-            logger.info(typeHelper.string.format(message, method, element.name, params.expression, model));
+            var message = 'Field {0} - {1} expression:\n[{2}]\nto be executed within the following context (methods not shown):\n{3}';
+            logger.info(typeHelper.string.format(message, element.name, method, params.expression, model));
             var exprVal = modelHelper.ctxEval(params.expression, model); // verify assertion, if not satisfied => notify (return false)
             return {
                 valid: exprVal,
@@ -741,11 +743,11 @@ var
         value = modelHelper.adjustGivenValue(value, element, params);
 
         var exprVal = undefined, model;
-        var message = '{0} at {1}:\n[{2}]\nto be executed within the following context (methods hidden):\n{3}';
+        var message = 'Field {0} - {1} expression:\n[{2}]\nto be executed within the following context (methods not shown):\n{3}';
         if (!api.settings.optimize) { // no optimization - compute requirement condition (which now may have changed) despite the fact field value may be provided
             model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model);
-            logger.info(typeHelper.string.format(message, method, element.name, params.expression, model));
+            logger.info(typeHelper.string.format(message, element.name, method, params.expression, model));
             exprVal = modelHelper.ctxEval(params.expression, model);
         }
 
@@ -761,7 +763,7 @@ var
 
             model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model);
-            logger.info(typeHelper.string.format(message, method, element.name, params.expression, model));
+            logger.info(typeHelper.string.format(message, element.name, method, params.expression, model));
             exprVal = modelHelper.ctxEval(params.expression, model); // verify requirement, if satisfied => notify (return false)
             return {
                 valid: !exprVal,
@@ -798,14 +800,17 @@ var
         $.validator.addMethod(method, function(value, element, params) {
             try {
                 var result = computeAssertThat(method, value, element, params);
-                logger.info(typeHelper.string.format('Field {0}: {1}, assertion {2}.',
+
+                logger.info(typeHelper.string.format('Field {0} - {1} outcome: {2}, assertion {3}.',
                     element.name,
+                    method,
                     result.condition === undefined
-                        ? 'assertion condition computation redundant'
+                        ? 'assertion expression computation redundant'
                         : result.condition
-                            ? 'expr true'
-                            : 'expr false',
+                            ? 'expression true'
+                            : 'expression false',
                     result.valid ? 'satisfied' : 'not satisfied'));
+
                 $(element).trigger('eavalid', ['assertthat', result.valid, params.expression]);
                 return result.valid;
             } catch (ex) {
@@ -820,14 +825,17 @@ var
         $.validator.addMethod(method, function(value, element, params) {
             try {
                 var result = computeRequiredIf(method, value, element, params);
-                logger.info(typeHelper.string.format('Field {0}: {1}, requirement {2}.',
+
+                logger.info(typeHelper.string.format('Field {0} - {1} outcome: {2}, requirement {3}.',
                     element.name,
+                    method,
                     result.condition === undefined
-                        ? 'requirement condition computation redundant'
+                        ? 'requirement expression computation redundant'
                         : result.condition
                             ? 'required'
                             : 'not required',
                     result.valid ? 'satisfied' : 'not satisfied'));
+
                 $(element).trigger('eavalid', ['requiredif', result.valid, params.expression, result.condition, annotations.indexOf(suffix)]);
                 return result.valid;
             } catch (ex) {

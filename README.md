@@ -11,9 +11,9 @@ A small .NET and JavaScript library which provides annotation-based conditional 
 
 ### Table of contents
  - [What is the context behind this work?](#what-is-the-context-behind-this-implementation)
- - [`RequiredIf` vs. `AssertThat` - where is the difference?](#requiredif-vs-assertthat---where-is-the-difference)
+ - [RequiredIf vs. AssertThat - where is the difference?](#requiredif-vs-assertthat---where-is-the-difference)
  - [Sample projects + demo](#sample-projects-+-demo)
- - [What are brief examples of usage?](#what-are-brief-examples-of-usage)
+ - [What are a brief examples of usage?](#what-are-a-brief-examples-of-usage)
  - [Declarative vs. imperative programming - what is it about?](#declarative-vs-imperative-programming---what-is-it-about)
  - [EA expressions specification](#expressions-specification)
    - [Grammar definition](#grammar-definition)
@@ -31,12 +31,15 @@ A small .NET and JavaScript library which provides annotation-based conditional 
    - [Can I have custom utility-like functions outside of my models?](#can-I-have-custom-utility-like-functions-outside-of-my-models) <sup>(re server-side)</sup>
    - [How to cope with values of custom types?](#how-to-cope-with-values-of-custom-types) <sup>(re client-side)</sup>
    - [How to cope with dates given in non-standard formats?](#how-to-cope-with-dates-given-in-non-standard-formats) <sup>(re client-side)</sup>
-   - [What if `ea` variable is already used by another library?](#what-if-ea-variable-is-already-used-by-another-library) <sup>(re client-side)</sup>
+   - [What if "ea" variable is already used by another library?](#what-if-ea-variable-is-already-used-by-another-library) <sup>(re client-side)</sup>
    - [How to control frequency of dependent fields validation?](#how-to-control-frequency-of-dependent-fields-validation) <sup>(re client-side)</sup>
    - [Can I increase web console verbosity for debug purposes?](#can-i-increase-web-console-verbosity-for-debug-purposes) <sup>(re client-side)</sup>
-   - [How to fetch field value or display name in error message?](#how-to-fetch-field-value-or-display-name-in-error-message) <sup>(re client and server-side)</sup>
+   - [I prefer enum values to be rendered as numbers, is it allowed?](#i-prefer-enum-values-to-be-rendered-as-numbers-is-it-allowed) <sup>(re client-side)</sup>
+   - [How to fetch field's value or its display name in error message?](#how-to-fetch-fields-value-or-its-display-name-in-error-message) <sup>(re client and server-side)</sup>
    - [Is there any event raised when validation is done?](#is-there-any-event-raised-when-validation-is-done) <sup>(re client-side)</sup>
-   - [`RequiredIf` attribute is not working, what is wrong?](#requiredif-attribute-is-not-working-what-is-wrong) <sup>(re client and server-side)</sup>
+   - [RequiredIf attribute is not working, what is wrong?](#requiredif-attribute-is-not-working-what-is-wrong) <sup>(re client and server-side)</sup>
+   - [Few fields seem to be bypassed during validation, any clues?](#few-fields-seem-to-be-bypassed-during-validation-any-clues) <sup>(re client-side)</sup>
+   - [Client-side validation doesn't work, how to troubleshoot it?](#client---side-validation-doesnt-work-how-to-troubleshoot-it) <sup>(re client-side)</sup>
    - [Is there a possibility to perform asynchronous validation?](#is-there-a-possibility-to-perform-asynchronous-validation) <sup>(re client-side, experimental)</sup>
    - [What if my question is not covered by FAQ section?](#what-if-my-question-is-not-covered-by-faq-section)
  - [Installation instructions](#installation)
@@ -49,7 +52,7 @@ There are number of cases where the concept of metadata is used for justified re
 
 Declarative validation when [compared](#declarative-vs-imperative-programming---what-is-it-about) to imperative approach seems to be more convenient in many cases. Clean, compact code - all validation logic defined within the model scope. Simple to write, obvious to read.
 
-### <a id="requiredif-vs-assertthat---where-is-the-difference">`RequiredIf` vs. `AssertThat` - where is the difference?</a>
+### <a id="requiredif-vs-assertthat---where-is-the-difference">RequiredIf vs. AssertThat - where is the difference?</a>
 
 * `RequiredIf` - if value is not yet provided, check whether it is required (annotated field is required to be non-null, when given condition is satisfied),
 * `AssertThat` - if value is already provided, check whether the condition is met (non-null annotated field is considered as valid, when given condition is satisfied).
@@ -61,7 +64,7 @@ Declarative validation when [compared](#declarative-vs-imperative-programming---
 
 ASP.NET MVC web sample is also hosted online - http://expressiveannotations.net/.
 
-### <a id="what-are-brief-examples-of-usage">What are brief examples of usage?</a>
+### <a id="what-are-a-brief-examples-of-usage">What are a brief examples of usage?</a>
 
 This section presents few exemplary code snippets. Sample projects in the section above contain much more comprehensive set of use cases.
 
@@ -712,7 +715,7 @@ class Model
     });
 ```
 
-##### <a id="what-if-ea-variable-is-already-used-by-another-library">What if `ea` variable is already used by another library?</a>
+##### <a id="what-if-ea-variable-is-already-used-by-another-library">What if "ea" variable is already used by another library?</a>
 
 Use `noConflict()` method. In case of naming collision return control of the `ea` variable back to its origins. Old references of `ea` are saved during ExpressiveAnnotations initialization - `noConflict()` simply restores them:
 
@@ -753,35 +756,43 @@ If you need more insightful overview of what client-side script is doing (includ
 ```JavaScript
 <script>
     ea.settings.debug = true; // output debug messages to the web console
-                              // (should be disabled for release code)
+                              // (should be disabled for release code not to introduce redundant overhead)
 ```
 
-##### <a id="#how-to-fetch-field-value-or-display-name-in-error-message">How to fetch field value or display name in error message?</a>
+##### <a id="i-prefer-enum-values-to-be-rendered-as-numbers-is-it-allowed">I prefer enum values to be rendered as numbers, is it allowed?</a>
+
+There is a possibility to setup of how enumeration values are internally processed: as integral numerics or string identifiers - see `enumsAsNumbers` settings flag in the script.
+
+This setting should be consistent with the way of how input fields values are stored in HTML, e.g. `@Html.EditorFor(m => m.EnumValue)` renders to string identifier by default, in contrast to `@Html.EditorFor("EnumValue", (int)Model.EnumValue)` statement, where value is explicitly casted to `int`. The flag setup should reflect that behavior, to have the internal JS model context deserialized accordingly.
+
+##### <a id="how-to-fetch-fields-value-or-its-display-name-in-error-message">How to fetch field's value or its display name in error message?</a>
 
 * to get a value, wrap the field name in braces, e.g. `{field}`, or for nested fields - `{field.field}`,
 * to get display name, given in `DisplayAttribute`, use additional `n` (or `N`) suffix, e.g. `{field:n}`.
 
 Notice that `{{` is treated as the escaped bracket character.
 
-##### <a id="#is-there-any-event-raised-when-validation-is-done">Is there any event raised when validation is done?</a>
+##### <a id="is-there-any-event-raised-when-validation-is-done">Is there any event raised when validation is done?</a>
 
-Each element validated by EA triggers one or more `eavalid` events, with the following extra parameters:
-
-* `type` - type of the attribute for which validation was executed: `'requiredif'` or `'assertthat'`,
-* `valid` - state of the validation: `true` or `false`,
-* `expr` - expression which was evaluated,
-* `cond` - expression evaluation result - optional parameter, available only when the value of `type` parameter is `'requiredif'` and `ea.settings.optimize` flag is set to `false`.
-
-Attach to it in the following manner:
+Each element validated by EA triggers one or more `eavalid` events. Attach to this event type in the following manner:
 
 ```JavaScript
 <script>
-    $('form').find('input, select, textarea').on('eavalid', function(e, type, valid, expr, cond) {
+    $('form').find('input, select, textarea').on('eavalid', function(e, type, valid, expr, cond, index) {
         console.log('event triggered by ' + e.currentTarget.name);
     });
 ```
 
-##### <a id="#requiredif-attribute-is-not-working-what-is-wrong">`RequiredIf` attribute is not working, what is wrong?</a>
+The parameters are as follows:
+* `type`  - type of the attribute for which validation was executed: `'requiredif'` or `'assertthat'`,
+* `valid` - state of the validation: `true` (passed, i.e. field is either not required, required but value is provided, or assertion is satisfied) or `false` (failed, i.e. field is either required but value is not provided, or assertion is not satisfied),
+* `expr`  - expression string which was evaluated,
+* `cond`*  - expression evaluation result - optional parameter available when `ea.settings.optimize` flag is set to `false`, otherwise `undefined`,
+* `index`* - execution round among other attributes of the same type applied to a single field, which are executed one after another: requiredif - 1st (index 0), requiredifa - 2nd (index 1) ... requiredifz - last (index n-1).
+
+*where the last two parameters are available only for `'requiredif'` type of validation.
+
+##### <a id="requiredif-attribute-is-not-working-what-is-wrong">RequiredIf attribute is not working, what is wrong?</a>
 
 Make sure `RequiredIf` is applied to a field which *accepts null values*.
 
@@ -797,7 +808,32 @@ public int Value { get; set; } // ...unless int? is used
 public DateTime Value { get; set; } // ...unless DateTime? is used
 ```
 
-##### <a id="#is-there-a-possibility-to-perform-asynchronous-validation">Is there a possibility to perform asynchronous validation?</a>
+##### <a id="few-fields-seem-to-be-bypassed-during-validation-any-clues">Few fields seem to be bypassed during validation, any clues?</a>
+
+Most likely these input fields are hidden, and `:hidden` fields validation is off by default.
+
+Such a fields are ignored by default by jquery-validation plugin, and EA follows analogic rules. If this is true, try to enable validation for hidden fields (empty-out the ignore filter), i.e.:
+
+```
+<script>
+    $(function() { // DOM needs to be ready...
+        var validator = $('form').validate(); // ...for the form to be found
+        validator.settings.ignore = ''; // enable validation for ':hidden' fields
+    });
+```
+
+##### <a id="client---side-validation-doesnt-work-how-to-troubleshoot-it">Client-side validation doesn't work, how to troubleshoot it?</a>
+
+* Check whether setup is done correctly, as described in the [installation section](#what-about-the-support-of-aspnet-mvc-client-side-validation) of this document.
+* Verify if the HTML code generated by the HTML helpers contains all the `data-val-*` attributes used by EA, with correct names (the same as used in related expressions).
+* Check whether *jquery.validate.js* and *jquery.validate.unobtrusive.js* are not accidentaly loaded twice on the page.
+* Verify if simple `Required` attribute works at client-side - if not, it most likely means your issue is not related to EA script.
+* Set EA into [debug mode](#can-i-increase-web-console-verbosity-for-debug-purposes) and open the browser web console (F12). Look for suspicious EA activity (if any) or some other JavaScript exceptions which may abort further client-side execution, forcing immediate post-back to the server. The error, if any, should appear just before sending the request. Please note if the console log is not preserved, whatever is recorded there will be cleared on page reload as soon as response arrives.
+* Make sure the fields to be validated are not hidden, otherwise [enable validation of hidden fields](#few-fields-seem-to-be-bypassed-during-validation-any-clues).
+* Check whether [attributes](#requiredif-vs-assertthat---where-is-the-difference) are used [properly](#requiredif-attribute-is-not-working-what-is-wrong).
+* Finally, please take a look at other [FAQs](#frequently-asked-questions), or go [beond that](#what-if-my-question-is-not-covered-by-faq-section) if solution is yet to be found.
+
+##### <a id="is-there-a-possibility-to-perform-asynchronous-validation">Is there a possibility to perform asynchronous validation?</a>
 
 Currently not. Although there is an ongoing work on [async-work branch](https://github.com/jwaliszko/ExpressiveAnnotations/tree/async-work), created especially for asynchronous-related ideas. If you feel you'd like to contribute, either by providing better solution, review code or just test what is currently there, your help is always highly appreciated.
 
