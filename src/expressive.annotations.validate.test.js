@@ -38,7 +38,7 @@
                 message = null; // clear buffer
             }
             var suppress = function() {
-                suspend = true; // prervent console logging
+                suspend = true; // prevent console logging (e.g. not to pollute the test-console output)
             }
             var restore = function() {
                 suspend = false; // restore console logging
@@ -714,8 +714,12 @@
     });
 
     qunit.test("verify_allowed_settings_setup", function(assert) {
+        window.console.clear(); // clear possible leftover from mocked console buffer
+        window.console.suppress();
         ea.settings.apply({ debug: true });
         assert.equal(ea.settings.debug, true);
+        assert.ok(console.read().indexOf("EA settings applied") !== -1, "EA setup not logged for debug mode");
+        window.console.restore();
 
         ea.settings.apply({ debug: false });
         assert.equal(ea.settings.debug, false);

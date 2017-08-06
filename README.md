@@ -37,6 +37,8 @@ A small .NET and JavaScript library which provides annotation-based conditional 
    - [I prefer enum values to be rendered as numbers, is it allowed?](#i-prefer-enum-values-to-be-rendered-as-numbers-is-it-allowed) <sup>(re client-side)</sup>
    - [How to fetch field's value or its display name in error message?](#how-to-fetch-fields-value-or-its-display-name-in-error-message) <sup>(re client and server-side)</sup>
    - [Is there any event raised when validation is done?](#is-there-any-event-raised-when-validation-is-done) <sup>(re client-side)</sup>
+   - [Can I decorate conditionally required fields with asterisks?](#can-i-decorate-conditionally-required-fields-with-asterisks) <sup>(re client-side)</sup>
+   - [How to handle validation based on parent model field?](#how-to-handle-validation-based-on-parent-model-field) <sup>(re client and server-side)</sup>
    - [RequiredIf attribute is not working, what is wrong?](#requiredif-attribute-is-not-working-what-is-wrong) <sup>(re client and server-side)</sup>
    - [Few fields seem to be bypassed during validation, any clues?](#few-fields-seem-to-be-bypassed-during-validation-any-clues) <sup>(re client-side)</sup>
    - [Client-side validation doesn't work, how to troubleshoot it?](#client---side-validation-doesnt-work-how-to-troubleshoot-it) <sup>(re client-side)</sup>
@@ -434,23 +436,25 @@ Toolchain functions available out of the box at server- and client-side:
 
 ##### <a id="signatures">Signatures description</a>
 
-```
+```C#
 RequiredIfAttribute(
     string expression,
     [bool AllowEmptyStrings],
     [int Priority]
-    [string ErrorMessage]    ...) - Validation attribute, executed for null-only annotated
-                                    field, which indicates that such a field is required
-                                    to be non-null, when computed result of given logical
-                                    expression is true.
+    [string ErrorMessage]    ...) /* Validation attribute, executed for null-only annotated
+                                   * field, which indicates that such a field is required
+                                   * to be non-null, when computed result of given logical
+                                   * expression is true. */
 AssertThatAttribute(
     string expression,
     [int Priority]
-    [string ErrorMessage]    ...) - Validation attribute, executed for non-null annotated
-                                    field, which indicates that assertion given in logical
-                                    expression has to be satisfied, for such a field to be
-                                    considered as valid.
+    [string ErrorMessage]    ...) /* Validation attribute, executed for non-null annotated
+                                   * field, which indicates that assertion given in logical
+                                   * expression has to be satisfied, for such a field to be
+                                   * considered as valid. */
+```
 
+```
 expression        - The logical expression based on which specified condition is computed.
 AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should allow empty
                     or whitespace strings. False by default.
@@ -676,7 +680,7 @@ If you need to handle value string extracted from DOM field in any non built-in 
         ea.addValueParser('customparser', function(value, field) {
             // parameters: value - raw data string extracted by default from DOM element
             //             field - DOM element name for which parser was invoked
-            return ... // handle exctracted field value string on your own
+            return ... // handle extracted field value string on your own
         });
     ```
 
@@ -792,6 +796,136 @@ The parameters are as follows:
 
 *where the last two parameters are available only for `'requiredif'` type of validation.
 
+##### <a id="can-i-decorate-conditionally-required-fields-with-asterisks">Can I decorate conditionally required fields with asterisks?</a>
+
+EA does not provide any built-in mechanisms to manipulate DOM. Nevertheless, the asterisk decoration (or any similar effect) can be relatively easily achieved with the support of a supplementary code you could write for yourself. It will be based on the [`eavalid`](#is-there-any-event-raised-when-validation-is-done) events handling. Such an event type is triggered by EA when a field validation is performed. Please take a look at the snippet below (or run [web sample](src/ExpressiveAnnotations.MvcWebSample) to see it working):
+
+```JavaScript
+<script>
+    ea.settings.optimize = false; // if flag is on, requirement expression is not needlessly evaluated for non-empty fields
+                                  // otherwise, it is evaluated and such an evaluation result is provided to the eavalid event
+    
+    $('form').find(selector).on('eavalid', function(e, type, valid, expr, cond, idx) { // verify asterisk visibility based on computed condition
+        if (type === 'requiredif' && cond !== undefined) {
+            if (idx === 0) { // if first of its kind...
+                e.currentTarget.eacond = undefined; // ...reset asterisk visibility flag
+            }
+            e.currentTarget.eacond |= cond; // multiple requiredif attributes can be applied to a single field - remember if any condition is true
+            var li = $(e.currentTarget).closest('li');
+            var asterisk = li.find('.asterisk');
+    
+            if (e.currentTarget.eacond) {
+                asterisk.show(); // show asterisk for required fields (no matter if valid or not)
+            }
+            else {
+                asterisk.hide();
+            }
+        }
+    });
+    
+    $('form').find(selector).each(function() { // apply asterisks for required or conditionally required fields
+        if ($(this).attr('data-val-required') !== undefined // make sure implicit required attributes for value types are disabled i.e. DataAnnotationsModelValidatorProvider.AddImplicitRequiredAttributeForValueTypes = false
+            || $(this).attr('data-val-requiredif') !== undefined) {
+            var div = $(this).parent('div');
+            div.prepend('<span class="asterisk">*</span>');
+        }
+    });
+    
+    $('form').find(selector).each(function() { // run validation for every field to verify asterisks visibility
+        if ($(this).attr('data-val-requiredif') !== undefined) {
+            $(this).valid();
+            $(this).removeClass('input-validation-error');
+            $(this).parent().find('.field-validation-error').empty();
+        }
+    });
+```
+
+For the needs of this example, the code above makes assumptions:
+
+* about the existence of `.asterisk` class in the CSS:
+
+    ```CSS
+    .asterisk {
+        color: #ff0000;
+        vertical-align: top;
+        margin-left: -10px;
+        float: left;
+    }
+    ```
+
+* about specific HTML structure, where input fields are placed between the `<li></li>` tags:
+
+    ```HTML
+    <li>
+        <label ...
+        <input data-val=...
+    </li>
+    <li>
+        <label ...
+        <input data-val=...
+    </li>
+    ```
+
+##### <a id="how-to-handle-validation-based-on-parent-model-field">How to handle validation based on parent model field?</a>
+
+In this case you need to have a back reference to your container, i.e.
+
+```C#
+public class TParent
+{
+    public TParent()
+    {
+        Child.Parent = this;
+    }
+
+    public TChild Child { get; set; }
+    public bool Flag { get; set; }
+}
+
+public class TChild
+{     
+    public TParent Parent { get; set; } // back-reference to parent
+
+    [RequiredIf("Parent.Flag")]
+    public string IsRequired { get; set; }
+}
+```
+
+This is all you need for server-side. Unfortunately, out-of-the-box client-side support of back-references to the parent context is not implemented. EA at client-side is straightforward and designed to handle nested properties when explicitly provided to the view, without abilities to infer any relationships.
+
+There still exists a way to handle it though. When using HTML helpers at the client-side, the more nested property, the more prefixed name. When reference to container is used in the expression, what client-side script actually does, it looks for such a property within the **current** context, i.e. within the fields of names annotated with the **current** prefix. EA internally has no idea that such a property refers to a field from a container (most likely already existing form field with different prefix).
+
+In this exemplary case above, the `Flag` property used in the expression `Parent.Flag != null`, makes client-side EA to look for analogic input field within current scope, i.e. `Child.Parent.Flag`. The *"Child."* prefix corresponds with what HTML helper prepends to names of nested properties from the `Child` object.
+
+The solution is to provide such a field, EA expects to find, i.e.
+
+```C#
+@Html.HiddenFor(m => m.Child.Parent.Flag) // hidden mock
+```
+
+Next, make the mocked field clone the behavior of the original (from parent) one:
+
+```JavaScript
+<script type="text/javascript">
+
+    function Mimic(src, dest) {
+        $(src).on(ea.settings.dependencyTriggers,
+            function(e) {
+                $(dest).val($(this).val());
+                $(dest).trigger(e.type); // trigger the change for dependency validation
+            });
+    }
+
+    $(document).ready(function () {
+        Mimic('input[name="@Html.NameFor(m => m.Flag)"]',
+              'input[name="@Html.NameFor(m => m.Child.Parent.Flag)"]');
+    });
+
+</script>
+```
+
+Please note, that this slightly hacky workaround is only needed for such a specific cases, where back-references are required to be handled by client-side EA logic.
+
 ##### <a id="requiredif-attribute-is-not-working-what-is-wrong">RequiredIf attribute is not working, what is wrong?</a>
 
 Make sure `RequiredIf` is applied to a field which *accepts null values*.
@@ -814,7 +948,7 @@ Most likely these input fields are hidden, and `:hidden` fields validation is of
 
 Such a fields are ignored by default by jquery-validation plugin, and EA follows analogic rules. If this is true, try to enable validation for hidden fields (empty-out the ignore filter), i.e.:
 
-```
+```JavaScript
 <script>
     $(function() { // DOM needs to be ready...
         var validator = $('form').validate(); // ...for the form to be found
@@ -828,7 +962,7 @@ Such a fields are ignored by default by jquery-validation plugin, and EA follows
 * Verify if the HTML code generated by the HTML helpers contains all the `data-val-*` attributes used by EA, with correct names (the same as used in related expressions).
 * Check whether *jquery.validate.js* and *jquery.validate.unobtrusive.js* are not accidentaly loaded twice on the page.
 * Verify if simple `Required` attribute works at client-side - if not, it most likely means your issue is not related to EA script.
-* Set EA into [debug mode](#can-i-increase-web-console-verbosity-for-debug-purposes) and open the browser web console (F12). Look for suspicious EA activity (if any) or some other JavaScript exceptions which may abort further client-side execution, forcing immediate post-back to the server. The error, if any, should appear just before sending the request. Please note if the console log is not preserved, whatever is recorded there will be cleared on page reload as soon as response arrives.
+* Set EA into [debug mode](#can-i-increase-web-console-verbosity-for-debug-purposes) and open the browser web console (F12). Look for suspicious EA activity (if any) or some other JavaScript exceptions which may abort further client-side execution, forcing immediate post-back to the server. The error, if any, should appear just before sending the request. Please note, if the console log is not preserved, whatever is recorded there will be cleared on page reload as soon as response arrives.
 * Make sure the fields to be validated are not hidden, otherwise [enable validation of hidden fields](#few-fields-seem-to-be-bypassed-during-validation-any-clues).
 * Check whether [attributes](#requiredif-vs-assertthat---where-is-the-difference) are used [properly](#requiredif-attribute-is-not-working-what-is-wrong).
 * Finally, please take a look at other [FAQs](#frequently-asked-questions), or go [beond that](#what-if-my-question-is-not-covered-by-faq-section) if solution is yet to be found.

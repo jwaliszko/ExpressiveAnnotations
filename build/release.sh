@@ -12,15 +12,14 @@ fi
 
 productVersion=$1
 keyfile=$2
-msbuild="/cygdrive/c/Program Files (x86)/Msbuild/14.0/bin/MSBuild.exe"
-msbuildVersion=14.0
-visualStudioVersion=14.0
+msbuild="/cygdrive/c/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/Bin/MSBuild.exe"
+visualStudioVersion=15.0
 targets=( v4.0 v4.5 )
 
 rm -fr $productVersion
 
 echo -e "\n------ package restoration..."
-./nuget.exe restore ../src/ExpressiveAnnotations.sln -MSBuildVersion $msbuildVersion -verbosity quiet
+./nuget.exe restore ../src/ExpressiveAnnotations.sln -verbosity quiet
 
 if [ $? -ne 0 ]; then
     exit 1
@@ -29,7 +28,7 @@ fi
 for target in "${targets[@]}"
 do
     const="NET"`echo $target | sed 's/[.v]//g'`
-    
+
     echo -e "\n------ release $const compilation..."
     "$msbuild" /nologo ../src/ExpressiveAnnotations.MvcUnobtrusive/ExpressiveAnnotations.MvcUnobtrusive.csproj "/t:Clean;Rebuild" /p:BuildProjectReferences=true /p:Configuration=Release /p:PlatformTarget=AnyCPU /p:AssemblyOriginatorKeyFile=$keyfile /p:TreatWarningsAsErrors=true /p:TargetFrameworkVersion=$target "/p:DefineConstants=$const SIGNED" /p:RunCodeAnalysis=False /p:SignAssembly=True /p:VisualStudioVersion=$visualStudioVersion /verbosity:minimal
 
@@ -55,15 +54,15 @@ uglifyjs --compress --mangle --comments /Copyright/ --output expressive.annotati
 cp expressive.annotations.validate.min.js ../src/expressive.annotations.validate.min.js
 
 echo -e "\n------ package building..."
-coreVersion=`strings ../src/ExpressiveAnnotations/bin/Release/ExpressiveAnnotations.dll | egrep '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | cut -f1,2,3 -d"."`
-./nuget.exe pack ExpressiveAnnotations.nuspec -version $productVersion -symbols -MSBuildVersion $msbuildVersion
-./nuget.exe pack ExpressiveAnnotations.dll.nuspec -version $coreVersion -symbols -MSBuildVersion $msbuildVersion
+coreVersion=`strings ../src/ExpressiveAnnotations/bin/Release/ExpressiveAnnotations.dll | egrep '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | cut -f1,2,3 -d"."`
+./nuget.exe pack ExpressiveAnnotations.nuspec -version $productVersion -symbols
+./nuget.exe pack ExpressiveAnnotations.dll.nuspec -version $coreVersion -symbols
 
 scriptVersion=`strings ../src/expressive.annotations.validate.js | egrep -o -m1 '[0-9]+\.[0-9]+\.[0-9]+'`
 sed -E 's/[0-9]+\.[0-9]+\.[0-9]+-pre/'$scriptVersion'/' ../bower.json > bower.json
 sed -E 's/[0-9]+\.[0-9]+\.[0-9]+-pre/'$scriptVersion'/' ../package.json > package.json
 
-unobVersion=`strings ../src/ExpressiveAnnotations.MvcUnobtrusive/bin/Release/ExpressiveAnnotations.MvcUnobtrusive.dll | egrep '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' | cut -f1,2,3 -d"."`
+unobVersion=`strings ../src/ExpressiveAnnotations.MvcUnobtrusive/bin/Release/ExpressiveAnnotations.MvcUnobtrusive.dll | egrep '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | cut -f1,2,3 -d"."`
 
 echo "This product version contains following components:
 ExpressiveAnnotations.dll v"$coreVersion", ExpressiveAnnotations.MvcUnobtrusive.dll v"$unobVersion", expressive.annotations.validate.js v"$scriptVersion"" > readme.txt

@@ -10,11 +10,11 @@
 var
     backup = window.ea, // map over the ea in case of overwrite
 
-    api = { // to be accesssed from outer scope
+    api = { // to be accessed from outer scope
         settings: {
             debug: false, // outputs debug messages to the web console (should be disabled in release code not to introduce redundant overhead)
-            optimize: true, // if flag is on, requirement expression is not evaluated for empty fields (otherwise, it is evaluated and such an evaluation result
-                            // is provided to the eavalid event)
+            optimize: true, // if flag is on, requirement expression is not needlessly evaluated for non-empty fields (otherwise, it is evaluated
+                            // and such an evaluation result is provided to the eavalid event)
             enumsAsNumbers: true, // specifies whether values of enum types are internally treated as integral numerics or string identifiers (should be consistent
                                   // with the way of how input fields values are stored in HTML)
             dependencyTriggers: 'change keyup', // a string containing one or more space-separated DOM field event types (such as "change", "keyup" or custom event
@@ -60,7 +60,7 @@ var
             toolchain.addMethod(name, func); // parameters: name - method name
         },                                   //             func - method body
                                              // e.g. if server-side uses following attribute: [AssertThat("IsBloodType(BloodType)")], where IsBloodType() is a custom method available at C# side,
-                                             // its client-side equivalet, mainly function of the same signature (name and the number of parameters), must be also provided, i.e.
+                                             // its client-side equivalent, mainly function of the same signature (name and the number of parameters), must be also provided, i.e.
                                              // ea.addMethod('IsBloodType', function(group) {
                                              //     return /^(A|B|AB|0)[\+-]$/.test(group);
                                              // });
@@ -494,7 +494,7 @@ var
             }
             parseFunc = typeHelper.findValueParser(field, type); // custom type-specific parser lookup - secondary parsing priority
             if (!parseFunc.error) {
-                logger.warn(typeHelper.string.format('Overriden {0} type parsing runs for {1} field. All fields of {0} type are going to be parsed using your value parser. If such a behavior is unintentional, change the name of your value parser to one, which does not indicate at {0} (or any other) type name.', type, field));
+                logger.warn(typeHelper.string.format('Overridden {0} type parsing runs for {1} field. All fields of {0} type are going to be parsed using your value parser. If such a behavior is unintentional, change the name of your value parser to one, which does not indicate at {0} (or any other) type name.', type, field));
                 return parseFunc(value, field);
             }
             return typeHelper.tryAutoParse(value, type); // built-in parser lookup - lowest parsing priority
