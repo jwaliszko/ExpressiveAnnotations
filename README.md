@@ -792,7 +792,7 @@ The parameters are as follows:
 * `valid` - state of the validation: `true` (passed, i.e. field is either not required, required but value is provided, or assertion is satisfied) or `false` (failed, i.e. field is either required but value is not provided, or assertion is not satisfied),
 * `expr`  - expression string which was evaluated,
 * `cond`*  - expression evaluation result - optional parameter available when `ea.settings.optimize` flag is set to `false`, otherwise `undefined`,
-* `index`* - execution round among other attributes of the same type applied to a single field, which are executed one after another: requiredif - 1st (index 0), requiredifa - 2nd (index 1) ... requiredifz - last (index n-1).
+* `index`* - validation execution index in a sequence of all attributes (of the same type) to be executed for a particular field: *requiredif* - 1st (index 0), *requiredifa* - 2nd (index 1) ... *requiredifz* - last (index n-1).
 
 *where the last two parameters are available only for `'requiredif'` type of validation.
 
@@ -965,9 +965,9 @@ Such a fields are ignored by default by jquery-validation plugin, and EA follows
 * Set EA into [debug mode](#can-i-increase-web-console-verbosity-for-debug-purposes) and open the browser web console (F12). Look for suspicious EA activity (if any) or some other JavaScript exceptions which may abort further client-side execution, forcing immediate post-back to the server. The error, if any, should appear just before sending the request. Please note, if the console log is not preserved, whatever is recorded there will be cleared on page reload as soon as response arrives.
 * Make sure the fields to be validated are not hidden, otherwise [enable validation of hidden fields](#few-fields-seem-to-be-bypassed-during-validation-any-clues).
 * Check whether [attributes](#requiredif-vs-assertthat---where-is-the-difference) are used [properly](#requiredif-attribute-is-not-working-what-is-wrong).
-* Finally, please take a look at other [FAQs](#frequently-asked-questions), or go [beond that](#what-if-my-question-is-not-covered-by-faq-section) if solution is yet to be found.
+* Finally, please take a look at other [FAQs](#frequently-asked-questions), or go [beyond that](#what-if-my-question-is-not-covered-by-faq-section) if solution is yet to be found.
 
-##### <a id="is-there-a-possibility-to-perform-asynchronous-validation">Is there a possibility to perform asynchronous validation?</a>
+##### <a id="is-there-a-possibility-to-perform-asynchronous-validation">Is there a possibility to perform asynchronous validation?</a> 
 
 Currently not. Although there is an ongoing work on [async-work branch](https://github.com/jwaliszko/ExpressiveAnnotations/tree/async-work), created especially for asynchronous-related ideas. If you feel you'd like to contribute, either by providing better solution, review code or just test what is currently there, your help is always highly appreciated.
 
