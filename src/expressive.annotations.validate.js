@@ -1,4 +1,4 @@
-/* expressive.annotations.validate.js - v2.7.1
+/* expressive.annotations.validate.js - v2.7.2
  * Client-side component of ExpressiveAnnotations - annotation-based conditional validation library.
  * https://github.com/jwaliszko/ExpressiveAnnotations
  *
@@ -128,6 +128,10 @@ var
             this.initialize();
             for (name in this.methods) {
                 if (this.methods.hasOwnProperty(name)) {
+                    if (model.hasOwnProperty(name)) {
+                        logger.warn(typeHelper.string.format('Skipping {0} function registration due to naming conflict (property of the same name already defined within the context).', name));
+                        continue;
+                    }
                     body = this.methods[name];
                     model[name] = body;
                 }

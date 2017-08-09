@@ -713,6 +713,30 @@
         assert.equal(m.Guid('a1111111-1111-1111-1111-111111111111'), m.Guid('A1111111-1111-1111-1111-111111111111'));
     });
 
+    qunit.test("method_property_naming_conflict_detected", function (assert) {
+        window.console.clear();
+        window.console.suppress();
+
+        var model = {
+            Length: 123
+        }
+        eapriv.toolchain.registerMethods(model); // verify collision with built-in method
+        assert.ok(console.read().indexOf("Skipping Length function registration due to naming conflict (property of the same name already defined within the context).") !== -1, "Naming collision not detected.");
+        assert.equal(model.Length, 123);
+
+        model = {
+            Custom: 123
+        }
+        eapriv.toolchain.addMethod("Custom", function () { });
+        eapriv.toolchain.registerMethods(model); // verify collision with user-defined method
+        assert.ok(console.read().indexOf("Skipping Custom function registration due to naming conflict (property of the same name already defined within the context).") !== -1, "Naming collision not detected.");
+        assert.equal(model.Custom, 123);
+
+        window.console.restore();
+    });
+
+    qunit.module("settings");
+
     qunit.test("verify_allowed_settings_setup", function(assert) {
         window.console.clear(); // clear possible leftover from mocked console buffer
         window.console.suppress();
