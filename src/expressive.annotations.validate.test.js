@@ -9,43 +9,31 @@
     // equal( actual, expected [, message ] )
 
     qunit.begin(function() { // fires once before all tests
-        window.console = (function(wndconsole) { // mock console for tests
+        // debugger; // enable firebug (preferably, check 'on for all web pages' option) for the debugger to launch
+
+        var buffer = (function(wndconsole) { // mock console for tests
             var message = null;
-            var suspend = false;
 
             var log = function(msg) {
                 message = msg;
-                if (!suspend) {
-                    wndconsole.log(msg); // call original console
-                }
             }
             var warn = function(msg) {
                 message = msg;
-                if (!suspend) {
-                    wndconsole.warn(msg);
-                }
             }
             var error = function(msg) {
                 message = msg;
-                if (!suspend) {
-                    wndconsole.error(msg);
-                }
             }
             var read = function() {
                 return message;
             }
             var clear = function() {
-                message = null; // clear buffer
-            }
-            var suppress = function() {
-                suspend = true; // prevent console logging (e.g. not to pollute the test-console output)
-            }
-            var restore = function() {
-                suspend = false; // restore console logging
+                message = null;
             }
 
-            return { log: log, warn: warn, error: error, read: read, clear: clear, suppress: suppress, restore: restore }
+            return { log: log, warn: warn, error: error, read: read, clear: clear }
         })(window.console);
+
+        eapriv.setBuffer(buffer);
     });
 
     qunit.testDone(function() { // reset state for subsequent test
@@ -55,12 +43,12 @@
             enumsAsNumbers: true,
             dependencyTriggers: 'change keyup'
         });
+        eapriv.getBuffer().clear(); // clear possible leftover from mocked console buffer
     });
 
     qunit.module("type_helper");
 
     qunit.test("verify_array_storage", function(assert) {
-        // debugger; // enable firebug (preferably, check 'on for all web pages' option) for the debugger to launch
         assert.ok(eapriv.typeHelper.array.contains(["a"], "a"), "single element array contains its only item");
         assert.ok(eapriv.typeHelper.array.contains(["a", "b"], "a"), "multiple elements array contains its first item");
         assert.ok(eapriv.typeHelper.array.contains(["a", "b"], "b"), "multiple elements array contains its last item");
@@ -444,26 +432,21 @@
     });
 
     qunit.test("proper_prefixes_applied_to_logged_messages", function(assert) {
-        window.console.clear(); // clear possible leftover from mocked console buffer
-        window.console.suppress();
-
         eapriv.logger.info("msg");
-        assert.ok(console.read() === null, "information should not be logged for non-debug mode");
+        assert.ok(eapriv.getBuffer().read() === null, "information should not be logged for non-debug mode");
         eapriv.logger.warn("msg");
-        assert.ok(console.read().slice(0, 8) === "[warn] (", "warning prefix broken for non-debug mode");
+        assert.ok(eapriv.getBuffer().read().slice(0, 8) === "[warn] (", "warning should be logged for non-debug mode");
         eapriv.logger.fail("msg");
-        assert.ok(console.read().slice(0, 8) === "[fail] (", "failure prefix broken for non-debug mode");
+        assert.ok(eapriv.getBuffer().read().slice(0, 8) === "[fail] (", "failure should be logged for non-debug mode");
 
         ea.settings.debug = true; // switch to debug-mode
 
         eapriv.logger.info("msg");
-        assert.ok(console.read().slice(0, 8) === "[info] (", "information prefix broken for debug mode");
+        assert.ok(eapriv.getBuffer().read().slice(0, 8) === "[info] (", "information should be logged for debug mode");
         eapriv.logger.warn("msg");
-        assert.ok(console.read().slice(0, 8) === "[warn] (", "warning prefix broken for debug mode");
+        assert.ok(eapriv.getBuffer().read().slice(0, 8) === "[warn] (", "warning should be logged for debug mode");
         eapriv.logger.fail("msg");
-        assert.ok(console.read().slice(0, 8) === "[fail] (", "failure prefix broken for debug mode");
-
-        window.console.restore();
+        assert.ok(eapriv.getBuffer().read().slice(0, 8) === "[fail] (", "failure should be logged for debug mode");
     });
 
     qunit.module("toolchain");
@@ -484,6 +467,9 @@
         assert.equal(m.Whoami(), 'method A');
         assert.equal(m.Whoami(1), 'method A1');
         assert.equal(m.Whoami(2, 'final'), 'method A2 - final');
+
+        eapriv.toolchain.registerMethods({});
+        assert.ok(eapriv.getBuffer().read() === null, "no naming collision should appear (one function with multiple bodies properly fetched when needed)");
     });
 
     qunit.test("verify_methods_overriding", function(assert) {
@@ -509,6 +495,9 @@
 
         assert.equal(m.Whoami(), 'method B');
         assert.equal(m.Whoami(1), 'method B1');
+
+        eapriv.toolchain.registerMethods({});
+        assert.ok(eapriv.getBuffer().read() === null, "no naming collision should appear (functions are replaced by subsequent alternatives)");
     });
 
     qunit.test("verify_toolchain_methods_logic", function(assert) {
@@ -713,37 +702,29 @@
         assert.equal(m.Guid('a1111111-1111-1111-1111-111111111111'), m.Guid('A1111111-1111-1111-1111-111111111111'));
     });
 
-    qunit.test("method_property_naming_conflict_detected", function (assert) {
-        window.console.clear();
-        window.console.suppress();
-
+    qunit.test("method_property_naming_conflict_detected", function(assert) {
         var model = {
             Length: 123
         }
         eapriv.toolchain.registerMethods(model); // verify collision with built-in method
-        assert.ok(console.read().indexOf("Skipping Length function registration due to naming conflict (property of the same name already defined within the context).") !== -1, "Naming collision not detected.");
+        assert.ok(eapriv.getBuffer().read().indexOf("Skipping Length function registration due to naming conflict (property of the same name already defined within the context).") !== -1, "Naming collision not detected.");
         assert.equal(model.Length, 123);
 
         model = {
             Custom: 123
         }
-        eapriv.toolchain.addMethod("Custom", function () { });
+        eapriv.toolchain.addMethod("Custom", function() { });
         eapriv.toolchain.registerMethods(model); // verify collision with user-defined method
-        assert.ok(console.read().indexOf("Skipping Custom function registration due to naming conflict (property of the same name already defined within the context).") !== -1, "Naming collision not detected.");
+        assert.ok(eapriv.getBuffer().read().indexOf("Skipping Custom function registration due to naming conflict (property of the same name already defined within the context).") !== -1, "Naming collision not detected.");
         assert.equal(model.Custom, 123);
-
-        window.console.restore();
     });
 
     qunit.module("settings");
 
     qunit.test("verify_allowed_settings_setup", function(assert) {
-        window.console.clear(); // clear possible leftover from mocked console buffer
-        window.console.suppress();
         ea.settings.apply({ debug: true });
         assert.equal(ea.settings.debug, true);
-        assert.ok(console.read().indexOf("EA settings applied") !== -1, "EA setup not logged for debug mode");
-        window.console.restore();
+        assert.ok(eapriv.getBuffer().read().indexOf("EA settings applied") !== -1, "EA setup not logged for debug mode");
 
         ea.settings.apply({ debug: false });
         assert.equal(ea.settings.debug, false);

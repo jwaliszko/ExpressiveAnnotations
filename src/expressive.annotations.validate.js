@@ -9,6 +9,7 @@
     'use strict';
 var
     backup = window.ea, // map over the ea in case of overwrite
+    buffer = window.console,
 
     api = { // to be accessed from outer scope
         settings: {
@@ -85,18 +86,18 @@ var
 
     logger = {
         info: function(message) {
-            if (api.settings.debug && console && typeof console.log === 'function') { // flush in debug mode only
-                console.log('[info] ' + logger.prep(message, new Date()));
+            if (api.settings.debug && buffer && typeof buffer.log === 'function') { // flush in debug mode only
+                buffer.log('[info] ' + logger.prep(message, new Date()));
             }
         },
         warn: function(message) {
-            if (console && typeof console.warn === 'function') {
-                console.warn('[warn] ' + logger.prep(message, new Date()));
+            if (buffer && typeof buffer.warn === 'function') {
+                buffer.warn('[warn] ' + logger.prep(message, new Date()));
             }
         },
         fail: function(message) {
-            if (console && typeof console.error === 'function') {
-                console.error('[fail] ' + logger.prep(message, new Date()));
+            if (buffer && typeof buffer.error === 'function') {
+                buffer.error('[fail] ' + logger.prep(message, new Date()));
             }
         },
         prep: function(message, date) {
@@ -856,7 +857,9 @@ var
         modelHelper: modelHelper,
         validationHelper: validationHelper,
         computeRequiredIf: computeRequiredIf,
-        computeAssertThat: computeAssertThat
+        computeAssertThat: computeAssertThat,
+        getBuffer: function() { return buffer; },
+        setBuffer: function(buff) { buffer = buff; }
     };
     // !debug section leave ----------------------------------------
 

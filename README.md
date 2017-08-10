@@ -460,8 +460,8 @@ AllowEmptyStrings - Gets or sets a flag indicating whether the attribute should 
                     or whitespace strings. False by default.
 Priority          - Gets or sets the hint, available for any concerned external components,
                     indicating the order in which this attribute should be executed among
-                    others of its kind, i.e. ExpressiveAttribute. Value is optional and not
-                    set by default, which means that execution order is undefined.
+                    others of its kind. Value is optional and not set by default, which 
+                    means that execution order is undefined.
 ErrorMessage      - Gets or sets an explicit error message string. A difference to default
                     behavior is awareness of new format items, i.e. {fieldPath[:indicator]}.
                     Given in curly brackets, can be used to extract values of specified
@@ -688,7 +688,7 @@ Finally, there is a possibility to override built-in conversion globally. In thi
 
 ```JavaScript
 <script>
-    ea.addValueParser('typename', function (value) {
+    ea.addValueParser('typename', function(value) {
         return ... // handle specified type (numeric, datetime, etc.) parsing on your own
     });
 ```
@@ -808,17 +808,15 @@ EA does not provide any built-in mechanisms to manipulate DOM. Nevertheless, the
     $('form').find(selector).on('eavalid', function(e, type, valid, expr, cond, idx) { // verify asterisk visibility based on computed condition
         if (type === 'requiredif' && cond !== undefined) {
             if (idx === 0) { // if first of its kind...
-                e.currentTarget.eacond = undefined; // ...reset asterisk visibility flag
+                e.currentTarget.eacond = false; // ...reset asterisk visibility flag
             }
             e.currentTarget.eacond |= cond; // multiple requiredif attributes can be applied to a single field - remember if any condition is true
-            var li = $(e.currentTarget).closest('li');
-            var asterisk = li.find('.asterisk');
-    
+
             if (e.currentTarget.eacond) {
-                asterisk.show(); // show asterisk for required fields (no matter if valid or not)
+                $(e.currentTarget).closest('li').find('.asterisk').show(); // show asterisk for required fields (no matter if valid or not)
             }
             else {
-                asterisk.hide();
+                $(e.currentTarget).closest('li').find('.asterisk').hide();
             }
         }
     });
@@ -916,7 +914,7 @@ Next, make the mocked field clone the behavior of the original (from parent) one
             });
     }
 
-    $(document).ready(function () {
+    $(document).ready(function() {
         Mimic('input[name="@Html.NameFor(m => m.Flag)"]',
               'input[name="@Html.NameFor(m => m.Child.Parent.Flag)"]');
     });
