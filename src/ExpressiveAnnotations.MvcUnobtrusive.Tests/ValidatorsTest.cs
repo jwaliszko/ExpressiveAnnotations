@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web;
 using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
+using ExpressiveAnnotations.Functions;
 using ExpressiveAnnotations.MvcUnobtrusive.Validators;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -381,7 +382,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
         }
 
         [Fact]
-        public void possible_naming_colission_at_client_side_are_detected()
+        public void segments_collisions_are_detected()
         {
             // A.B.C = 0    {"A":{"B":{"C":0}}}
             // A.D = true   {"A":{"D":true}}
@@ -393,29 +394,33 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
 
             string name;
             int level;
-            Assert.False(Helper.SegmentsCollide(new string[0], new string[0], out name, out level));
-            Assert.False(Helper.SegmentsCollide(new[] {"A"}, new string[0], out name, out level));
-            Assert.False(Helper.SegmentsCollide(new string[0], new[] {"A"}, out name, out level));
-            Assert.False(Helper.SegmentsCollide(new[] {"A"}, new[] {"B"}, out name, out level));
-            Assert.False(Helper.SegmentsCollide(new[] {"A.A"}, new[] {"A.B"}, out name, out level));
-            Assert.False(Helper.SegmentsCollide(new[] {"A.B.C"}, new[] {"A.B.D"}, out name, out level));
-            Assert.False(Helper.SegmentsCollide(new[] {"A.B.C", "A.B.E"}, new[] {"B.B", "B.C", "B.E"}, out name, out level));
+            Assert.False(new string[0].SegmentsCollide(new string[0], out name, out level));
+            Assert.False(new[] {"A"}.SegmentsCollide(new string[0], out name, out level));
+            Assert.False(new string[0].SegmentsCollide(new[] {"A"}, out name, out level));
+            Assert.False(new[] {"A"}.SegmentsCollide(new[] {"B"}, out name, out level));
+            Assert.False(new[] {"A.A"}.SegmentsCollide(new[] {"A.B"}, out name, out level));
+            Assert.False(new[] {"A.B.C"}.SegmentsCollide(new[] {"A.B.D"}, out name, out level));
+            Assert.False(new[] {"A.B.C", "A.B.E"}.SegmentsCollide(new[] {"B.B", "B.C", "B.E"}, out name, out level));
 
             Assert.Equal(null, name);
             Assert.Equal(level, -1);
 
-            Assert.True(Helper.SegmentsCollide(new[] {"A"}, new[] {"A"}, out name, out level));
+            Assert.True(new[] {"A"}.SegmentsCollide(new[] {"A"}, out name, out level));
             Assert.Equal("A", name);
             Assert.Equal(level, 0);
 
-            Assert.True(Helper.SegmentsCollide(new[] {"A.B"}, new[] {"A.B"}, out name, out level));
+            Assert.True(new[] {"A.B"}.SegmentsCollide(new[] {"A.B"}, out name, out level));
             Assert.Equal("B", name);
             Assert.Equal(level, 1);
 
-            Assert.True(Helper.SegmentsCollide(new[] {"A.B.C"}, new[] {"A.B"}, out name, out level));
+            Assert.True(new[] {"A.B.C"}.SegmentsCollide(new[] {"A.B"}, out name, out level));
             Assert.Equal("B", name);
             Assert.Equal(level, 1);
+        }
 
+        [Fact]
+        public void naming_colissions_at_client_side_are_detected()
+        {
             var model = new Model();
             var metadata = GetModelMetadata(model, m => m.Value);
             var controllerContext = GetControllerContext();
@@ -436,6 +441,71 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             Assert.IsType<InvalidOperationException>(e.InnerException);
             Assert.Equal(
                 "Naming collisions cannot be accepted by client-side - Value part at level 0 is ambiguous.",
+                e.InnerException.Message);
+
+            Toolchain.Instance.AddFunction("Number", (int n) => n);
+
+            var cfm = new CollisionFieldModel();
+            metadata = GetModelMetadata(cfm, m => m.Number);
+
+            e = Assert.Throws<ValidationException>(() => new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("Number(Number.One) == 0")));
+            Assert.Equal(
+                "AssertThatValidator: validation applied to Number field failed.",
+                e.Message);
+            Assert.IsType<InvalidOperationException>(e.InnerException);
+            Assert.Equal(
+                "Naming collisions cannot be accepted by client-side - method Number(...) is colliding with Number.One field identifier.",
+                e.InnerException.Message);
+
+            e = Assert.Throws<ValidationException>(() => new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute("Number(Number.One) == 0")));
+            Assert.Equal(
+                "RequiredIfValidator: validation applied to Number field failed.",
+                e.Message);
+            Assert.IsType<InvalidOperationException>(e.InnerException);
+            Assert.Equal(
+                "Naming collisions cannot be accepted by client-side - method Number(...) is colliding with Number.One field identifier.",
+                e.InnerException.Message);
+
+            var ccm = new CollisionConstModel();
+            metadata = GetModelMetadata(ccm, m => m.Value);
+
+            e = Assert.Throws<ValidationException>(() => new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("Number(Number) == 0")));
+            Assert.Equal(
+                "AssertThatValidator: validation applied to Value field failed.",
+                e.Message);
+            Assert.IsType<InvalidOperationException>(e.InnerException);
+            Assert.Equal(
+                "Naming collisions cannot be accepted by client-side - method Number(...) is colliding with Number const identifier.",
+                e.InnerException.Message);
+
+            e = Assert.Throws<ValidationException>(() => new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute("Number(Number) == 0")));
+            Assert.Equal(
+                "RequiredIfValidator: validation applied to Value field failed.",
+                e.Message);
+            Assert.IsType<InvalidOperationException>(e.InnerException);
+            Assert.Equal(
+                "Naming collisions cannot be accepted by client-side - method Number(...) is colliding with Number const identifier.",
+                e.InnerException.Message);
+
+            var cem = new CollisionEnumModel();
+            metadata = GetModelMetadata(cem, m => m.Value);
+
+            e = Assert.Throws<ValidationException>(() => new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("Number(Number.One) == 0")));
+            Assert.Equal(
+                "AssertThatValidator: validation applied to Value field failed.",
+                e.Message);
+            Assert.IsType<InvalidOperationException>(e.InnerException);
+            Assert.Equal(
+                "Naming collisions cannot be accepted by client-side - method Number(...) is colliding with Number.One enum identifier.",
+                e.InnerException.Message);
+
+            e = Assert.Throws<ValidationException>(() => new RequiredIfValidator(metadata, controllerContext, new RequiredIfAttribute("Number(Number.One) == 0")));
+            Assert.Equal(
+                "RequiredIfValidator: validation applied to Value field failed.",
+                e.Message);
+            Assert.IsType<InvalidOperationException>(e.InnerException);
+            Assert.Equal(
+                "Naming collisions cannot be accepted by client-side - method Number(...) is colliding with Number.One enum identifier.",
                 e.InnerException.Message);
         }
 
@@ -503,6 +573,32 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             {
                 public const double PI = 3.142;
             }
+        }
+
+        public class CollisionFieldModel
+        {
+            public N Number { get; set; }
+
+            public class N
+            {
+                public int One { get; set; }
+            }
+        }
+
+        public class CollisionConstModel
+        {
+            public int Value { get; set; }
+            public const int Number = 0;
+        }
+
+        public class CollisionEnumModel
+        {
+            public int Value { get; set; }
+
+            public enum Number
+            {
+                One
+            };
         }
 
         public class MsgModel

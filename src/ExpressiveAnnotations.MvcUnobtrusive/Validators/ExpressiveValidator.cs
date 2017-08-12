@@ -56,6 +56,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                     FieldsMap = fields.ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value.Type));
                     ConstsMap = parser.GetConsts();
                     EnumsMap = parser.GetEnums();
+                    MethodsList = parser.GetMethods();
                     ParsersMap = fields
                         .Select(kvp => new
                         {
@@ -73,7 +74,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                             ParsersMap.Add(new KeyValuePair<string, string>(metadata.PropertyName, valueParser.ParserName));
                     }
 
-                    AssertNoNamingCollisionsAtCorrespondingSegments();
+                    AssertClientSideCompatibility();
                     attribute.Compile(metadata.ContainerType); // compile expressions in attributes (to be cached for subsequent invocations)
 
                     return new CacheItem
@@ -81,6 +82,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                         FieldsMap = FieldsMap,
                         ConstsMap = ConstsMap,
                         EnumsMap = EnumsMap,
+                        MethodsList = MethodsList,
                         ParsersMap = ParsersMap
                     };
                 });
@@ -88,6 +90,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 FieldsMap = item.FieldsMap;
                 ConstsMap = item.ConstsMap;
                 EnumsMap = item.EnumsMap;
+                MethodsList = item.MethodsList;
                 ParsersMap = item.ParsersMap;
 
                 Expression = attribute.Expression;
@@ -139,6 +142,11 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         protected IDictionary<string, object> EnumsMap { get; private set; }
 
         /// <summary>
+        ///     Gets names of methods extracted from specified expression within given context.
+        /// </summary>
+        protected IEnumerable<string> MethodsList { get; private set; }
+
+        /// <summary>
         ///     Gets attribute strong identifier - attribute type identifier concatenated with annotated field identifier.
         /// </summary>
         private string AttributeFullId { get; set; }
@@ -182,6 +190,9 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 Debug.Assert(EnumsMap != null);
                 if (EnumsMap.Any())
                     rule.ValidationParameters.Add("enumsmap", EnumsMap.ToJson());
+                Debug.Assert(MethodsList != null);
+                if (MethodsList.Any())
+                    rule.ValidationParameters.Add("methodslist", MethodsList.ToJson());
                 Debug.Assert(ParsersMap != null);
                 if (ParsersMap.Any())
                     rule.ValidationParameters.Add("parsersmap", ParsersMap.ToJson());
@@ -224,16 +235,42 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
             RequestStorage.Remove(AttributeWeakId);
         }
 
+        private void AssertClientSideCompatibility() // verify client-side compatibility of current expression
+        {
+            AssertNoNamingCollisionsAtCorrespondingSegments();
+        }
+
         private void AssertNoNamingCollisionsAtCorrespondingSegments()
         {
             string name;
             int level;
-            var collision = Helper.SegmentsCollide(FieldsMap.Keys, ConstsMap.Keys, out name, out level)
-                            || Helper.SegmentsCollide(FieldsMap.Keys, EnumsMap.Keys, out name, out level)
-                            || Helper.SegmentsCollide(ConstsMap.Keys, EnumsMap.Keys, out name, out level);
+            var prefix = "Naming collisions cannot be accepted by client-side";
+            var collision = FieldsMap.Keys.SegmentsCollide(ConstsMap.Keys, out name, out level)
+                            || FieldsMap.Keys.SegmentsCollide(EnumsMap.Keys, out name, out level)
+                            || ConstsMap.Keys.SegmentsCollide(EnumsMap.Keys, out name, out level); // combination (3 2) => 3!/(2!1!) = 3
             if (collision)
                 throw new InvalidOperationException(
-                    $"Naming collisions cannot be accepted by client-side - {name} part at level {level} is ambiguous.");
+                    $"{prefix} - {name} part at level {level} is ambiguous.");
+
+            // instead of extending the checks above to combination (4 2), check for collisions with methods is done separately to provide more accurate messages:
+
+            var fields = FieldsMap.Keys.Select(x => x.Split('.').First());
+            name = MethodsList.Intersect(fields).FirstOrDefault();
+            if (name != null)
+                throw new InvalidOperationException(
+                    $"{prefix} - method {name}(...) is colliding with {FieldsMap.Keys.First(x => x.StartsWith(name))} field identifier.");
+
+            var consts = ConstsMap.Keys.Select(x => x.Split('.').First());
+            name = MethodsList.Intersect(consts).FirstOrDefault();
+            if (name != null)
+                throw new InvalidOperationException(
+                    $"{prefix} - method {name}(...) is colliding with {ConstsMap.Keys.First(x => x.StartsWith(name))} const identifier.");
+
+            var enums = EnumsMap.Keys.Select(x => x.Split('.').First());
+            name = MethodsList.Intersect(enums).FirstOrDefault();
+            if (name != null)
+                throw new InvalidOperationException(
+                    $"{prefix} - method {name}(...) is colliding with {EnumsMap.Keys.First(x => x.StartsWith(name))} enum identifier.");
         }
 
         private void AssertAttribsQuantityAllowed(int count)

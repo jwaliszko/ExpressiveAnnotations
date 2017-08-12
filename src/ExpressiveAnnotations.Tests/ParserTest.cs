@@ -329,7 +329,7 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<bool>("- - -1+'a'+'b'+null+''+'c'+1+2=='-1abc12'").Invoke());
             Helper.CulturalExecution(() => Assert.True(parser.Parse<bool>("1.2 + 'a' + .12=='1.2a0.12'").Invoke()), "en");
             Helper.CulturalExecution(() => Assert.True(parser.Parse<bool>("1.2 + 'a' + .12=='1,2a0,12'").Invoke()), "pl"); // regional specific decimal separator
-            
+
             Assert.True(parser.Parse<bool>("1 - 2 -(6 / ((2*1.5 - 1) + 1)) * -2 + 1/2/1 == 3.50").Invoke());
             Assert.True(parser.Parse<bool>("-.11e-10+.11e-10==.0-.0").Invoke());
 
@@ -429,12 +429,14 @@ namespace ExpressiveAnnotations.Tests
             var parser = new Parser();
             Toolchain.Instance.AddFunction("GetModel", () => model);
             Toolchain.Instance.AddFunction("GetModels", () => new[] {model});
+            Toolchain.Instance.AddFunction("Number", (int n) => n);
             parser.RegisterToolchain();
 
             Assert.True(parser.Parse<Model, bool>("Chaaar == 'a'").Invoke(model));
 
             Assert.True(parser.Parse<bool>(model.GetType(), "Number < 1").Invoke(model));
             Assert.True(parser.Parse<bool>(model.GetType(), "Number == 0").Invoke(model));
+            Assert.True(parser.Parse<bool>(model.GetType(), "Number(Number) == 0").Invoke(model));
             Assert.True(parser.Parse<bool>(model.GetType(), "Number != null").Invoke(model));
             Assert.True(parser.Parse<bool>(model.GetType(), "SubModel.Number / 2 == 0.5").Invoke(model));
 
@@ -521,7 +523,7 @@ namespace ExpressiveAnnotations.Tests
                              (Text != 'hello world' && Date < SubModel.Date)
                              || (
                                     (Number >= 0 && Number < 1)
-                                    && Collection[true ? 0 : 1].Number < 0
+                                    && Number(Collection[true ? 0 : 1].Number) < Number(IncNumber(DecNumber(0)))
                                     && PoliticalStability == Utility.Stability.High
                                 )
                          )
@@ -529,7 +531,7 @@ namespace ExpressiveAnnotations.Tests
             var func = parser.Parse<bool>(model.GetType(), expression);
             Assert.True(func(model));
 
-            parser.GetFields()["Flag"] = null; // try to mess up with internal fields - original data should not be affected
+            parser.GetFields()["Flag"] = null; // try to mess up with internal items - original data should not be affected
             var parsedFields = parser.GetFields();
             var expectedFields = new Dictionary<string, Type>
             {
@@ -547,7 +549,7 @@ namespace ExpressiveAnnotations.Tests
                     key => parsedFields.ContainsKey(key) &&
                            EqualityComparer<Type>.Default.Equals(expectedFields[key], parsedFields[key].Type)));
 
-            parser.GetConsts()["Const"] = null; // try to mess up with internal fields - original data should not be affected
+            parser.GetConsts()["Const"] = null; // try to mess up with internal items - original data should not be affected
             var parsedConsts = parser.GetConsts();
             var expectedConsts = new Dictionary<string, object>
             {
@@ -560,7 +562,7 @@ namespace ExpressiveAnnotations.Tests
                     key => parsedConsts.ContainsKey(key) &&
                            EqualityComparer<object>.Default.Equals(expectedConsts[key], parsedConsts[key])));
 
-            parser.GetEnums()["Enum"] = null; // try to mess up with internal fields - original data should not be affected
+            parser.GetEnums()["Enum"] = null; // try to mess up with internal items - original data should not be affected
             var parsedEnums = parser.GetEnums();
             var expectedEnums = new Dictionary<string, object>
             {
@@ -571,6 +573,12 @@ namespace ExpressiveAnnotations.Tests
                 expectedEnums.Keys.All(
                     key => parsedEnums.ContainsKey(key) &&
                            EqualityComparer<object>.Default.Equals(expectedEnums[key], parsedEnums[key])));
+
+            parser.GetMethods().ToList()[0] = null; // try to mess up with internal items - original data should not be affected
+            var parsedMethods = parser.GetMethods().ToList();
+            var expectedMethods = new[] {"Number", "IncNumber", "DecNumber"};
+            Assert.Equal(expectedMethods.Length, parsedMethods.Count);
+            Assert.True(!expectedMethods.Except(parsedMethods).Any());
 
             Assert.True(parser.Parse<Model, bool>("Array[0] != null && Array[1] != null").Invoke(model));
             Assert.True(parser.Parse<Model, bool>("Array[0].Number + Array[0].Array[0].Number + Array[1].Number + Array[1].Array[0].Number == 0").Invoke(model));
@@ -840,7 +848,7 @@ namespace ExpressiveAnnotations.Tests
         }
 
         [Fact]
-        public void verify_naming_collisions()
+        public void parser_properly_handles_situations_when_names_are_collided()
         {
             var parser = new Parser();
 

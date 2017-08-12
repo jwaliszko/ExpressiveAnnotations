@@ -26,8 +26,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Caching
                 k => new Lazy<TValue>(
                     () => valueFactory(k),
                     LazyThreadSafetyMode.ExecutionAndPublication));
-            return lazyResult.Value; /* From http://bit.ly/2b8E1AS: If multiple concurrent threads try to call GetOrAdd with the same key at once, multiple Lazy objects may be 
-                                      * created but these are cheap, and all but one will be thrown away. The return Lazy object will be the same across all threads, and the 
+            return lazyResult.Value; /* From http://bit.ly/2b8E1AS: If multiple concurrent threads try to call GetOrAdd with the same key at once, multiple Lazy objects may be
+                                      * created but these are cheap, and all but one will be thrown away. The return Lazy object will be the same across all threads, and the
                                       * first one to call the Value property will run the expensive delegate method, whilst the other threads are locked, waiting for the result. */
         }
 
@@ -42,6 +42,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Caching
         public IDictionary<string, string> FieldsMap { get; set; }
         public IDictionary<string, object> ConstsMap { get; set; }
         public IDictionary<string, object> EnumsMap { get; set; }
+        public IEnumerable<string> MethodsList { get; set; }
         public IDictionary<string, string> ParsersMap { get; set; }
     }
 }

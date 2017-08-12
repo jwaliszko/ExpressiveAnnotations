@@ -53,7 +53,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive
             }
         }
 
-        public static bool SegmentsCollide(IEnumerable<string> listA, IEnumerable<string>listB, out string name, out int level)
+        public static bool SegmentsCollide(this IEnumerable<string> listA, IEnumerable<string>listB, out string name, out int level)
         {
             Debug.Assert(listA != null);
             Debug.Assert(listB != null);

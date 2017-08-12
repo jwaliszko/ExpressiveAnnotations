@@ -13,21 +13,29 @@
 
         var buffer = (function(wndconsole) { // mock console for tests
             var message = null;
+            var type = null;
 
             var log = function(msg) {
                 message = msg;
+                type = 'info';
             }
             var warn = function(msg) {
                 message = msg;
+                type = 'warn';
             }
             var error = function(msg) {
                 message = msg;
+                type = 'fail';
             }
             var read = function() {
-                return message;
+                return {
+                    message: message,
+                    type: type
+                };
             }
             var clear = function() {
                 message = null;
+                type = null;
             }
 
             return { log: log, warn: warn, error: error, read: read, clear: clear }
@@ -43,6 +51,7 @@
             enumsAsNumbers: true,
             dependencyTriggers: 'change keyup'
         });
+        eapriv.toolchain.methods = {};
         eapriv.getBuffer().clear(); // clear possible leftover from mocked console buffer
     });
 
@@ -397,6 +406,7 @@
                 "Days[1]": false
             },
             null,  // enumsMap
+            null,  // methodsList
             null,  // parsersMap
             null); // prefix
         assert.deepEqual(deserializedModel, model, 'model not deserialized properly based on given consts map');
@@ -429,24 +439,37 @@
         actual = eapriv.logger.prep("1st line", date);
         expected = "(11:05:00): 1st line";
         assert.equal(actual, expected);
+
+        var ex = {
+            message: "exception message",
+            toString: function() { return this.message + "!" }
+        }
+        actual = eapriv.logger.prep(ex, date);
+        expected = "(11:05:00): exception message!";
+        assert.equal(actual, expected);
     });
 
     qunit.test("proper_prefixes_applied_to_logged_messages", function(assert) {
         eapriv.logger.info("msg");
-        assert.ok(eapriv.getBuffer().read() === null, "information should not be logged for non-debug mode");
+        assert.ok(eapriv.getBuffer().read().message === null, "information should not be logged for non-debug mode");
         eapriv.logger.warn("msg");
-        assert.ok(eapriv.getBuffer().read().slice(0, 8) === "[warn] (", "warning should be logged for non-debug mode");
+        assert.equal(eapriv.getBuffer().read().type, "warn");
+        assert.ok(eapriv.getBuffer().read().message.slice(0, 8) === "[warn] (", "warning should be logged for non-debug mode");
         eapriv.logger.fail("msg");
-        assert.ok(eapriv.getBuffer().read().slice(0, 8) === "[fail] (", "failure should be logged for non-debug mode");
+        assert.equal(eapriv.getBuffer().read().type, "fail");
+        assert.ok(eapriv.getBuffer().read().message.slice(0, 8) === "[fail] (", "failure should be logged for non-debug mode");
 
         ea.settings.debug = true; // switch to debug-mode
 
         eapriv.logger.info("msg");
-        assert.ok(eapriv.getBuffer().read().slice(0, 8) === "[info] (", "information should be logged for debug mode");
+        assert.equal(eapriv.getBuffer().read().type, "info");
+        assert.ok(eapriv.getBuffer().read().message.slice(0, 8) === "[info] (", "information should be logged for debug mode");
         eapriv.logger.warn("msg");
-        assert.ok(eapriv.getBuffer().read().slice(0, 8) === "[warn] (", "warning should be logged for debug mode");
+        assert.equal(eapriv.getBuffer().read().type, "warn");
+        assert.ok(eapriv.getBuffer().read().message.slice(0, 8) === "[warn] (", "warning should be logged for debug mode");
         eapriv.logger.fail("msg");
-        assert.ok(eapriv.getBuffer().read().slice(0, 8) === "[fail] (", "failure should be logged for debug mode");
+        assert.equal(eapriv.getBuffer().read().type, "fail");
+        assert.ok(eapriv.getBuffer().read().message.slice(0, 8) === "[fail] (", "failure should be logged for debug mode");
     });
 
     qunit.module("toolchain");
@@ -467,9 +490,6 @@
         assert.equal(m.Whoami(), 'method A');
         assert.equal(m.Whoami(1), 'method A1');
         assert.equal(m.Whoami(2, 'final'), 'method A2 - final');
-
-        eapriv.toolchain.registerMethods({});
-        assert.ok(eapriv.getBuffer().read() === null, "no naming collision should appear (one function with multiple bodies properly fetched when needed)");
     });
 
     qunit.test("verify_methods_overriding", function(assert) {
@@ -495,15 +515,10 @@
 
         assert.equal(m.Whoami(), 'method B');
         assert.equal(m.Whoami(1), 'method B1');
-
-        eapriv.toolchain.registerMethods({});
-        assert.ok(eapriv.getBuffer().read() === null, "no naming collision should appear (functions are replaced by subsequent alternatives)");
     });
 
     qunit.test("verify_toolchain_methods_logic", function(assert) {
-
-        var o = {};
-        eapriv.toolchain.registerMethods(o);
+        eapriv.toolchain.initialize();
         var m = eapriv.toolchain.methods;
 
         assert.ok(eapriv.typeHelper.isNumeric(m.Now()), "Now() returns number (of milliseconds)");
@@ -702,29 +717,13 @@
         assert.equal(m.Guid('a1111111-1111-1111-1111-111111111111'), m.Guid('A1111111-1111-1111-1111-111111111111'));
     });
 
-    qunit.test("method_property_naming_conflict_detected", function(assert) {
-        var model = {
-            Length: 123
-        }
-        eapriv.toolchain.registerMethods(model); // verify collision with built-in method
-        assert.ok(eapriv.getBuffer().read().indexOf("Skipping Length function registration due to naming conflict (property of the same name already defined within the context).") !== -1, "Naming collision not detected.");
-        assert.equal(model.Length, 123);
-
-        model = {
-            Custom: 123
-        }
-        eapriv.toolchain.addMethod("Custom", function() { });
-        eapriv.toolchain.registerMethods(model); // verify collision with user-defined method
-        assert.ok(eapriv.getBuffer().read().indexOf("Skipping Custom function registration due to naming conflict (property of the same name already defined within the context).") !== -1, "Naming collision not detected.");
-        assert.equal(model.Custom, 123);
-    });
-
     qunit.module("settings");
 
     qunit.test("verify_allowed_settings_setup", function(assert) {
         ea.settings.apply({ debug: true });
         assert.equal(ea.settings.debug, true);
-        assert.ok(eapriv.getBuffer().read().indexOf("EA settings applied") !== -1, "EA setup not logged for debug mode");
+        assert.equal(eapriv.getBuffer().read().type, "info");
+        assert.ok(eapriv.getBuffer().read().message.indexOf("EA settings applied") !== -1, "EA setup not logged for debug mode");
 
         ea.settings.apply({ debug: false });
         assert.equal(ea.settings.debug, false);
@@ -791,7 +790,7 @@
     qunit.test("verify_assertthat_not_computed_for_null_value", function(assert) {
 
         var elementMock = { name: 'name' };
-        var paramsMock = { expression: 'false', fieldsMap: {}, constsMap: {}, parsersMap: {} };
+        var paramsMock = { expression: 'false', fieldsMap: {}, constsMap: {}, enumsMap: {}, methodsList: [], parsersMap: {} };
         var result = eapriv.computeAssertThat('asserthat', null, elementMock, paramsMock);
         assert.ok(result.valid); // ok - satisfied despite false assertion (not invoked due to null value)
 
@@ -805,7 +804,7 @@
     qunit.test("verify_requiredif_not_computed_for_non_null_value", function(assert) {
 
         var elementMock = { name: 'name' };
-        var paramsMock = { expression: 'true', fieldsMap: {}, constsMap: {}, parsersMap: {} };
+        var paramsMock = { expression: 'true', fieldsMap: {}, constsMap: {}, enumsMap: {}, methodsList: [], parsersMap: {} };
         var result = eapriv.computeRequiredIf('requiredif', {}, elementMock, paramsMock);
         assert.ok(result.valid); // ok - not required despite requirement obligation (not invoked due to non-null value)
 
@@ -818,7 +817,7 @@
     qunit.test("verify_assertthat_computed_for_non_null_value", function(assert) {
 
         var elementMock = { name: 'name' };
-        var paramsMock = { expression: 'false', fieldsMap: {}, constsMap: {}, parsersMap: {} };
+        var paramsMock = { expression: 'false', fieldsMap: {}, constsMap: {}, enumsMap: {}, methodsList: [],  parsersMap: {} };
         var result = eapriv.computeAssertThat('asserthat', {}, elementMock, paramsMock);
         assert.ok(!result.valid); // not ok - not satisfied because of false assertion
     });
@@ -826,7 +825,7 @@
     qunit.test("verify_requiredif_computed_for_null_value", function(assert) {
 
         var elementMock = { name: 'name' };
-        var paramsMock = { expression: 'true', fieldsMap: {}, constsMap: {}, parsersMap: {} };
+        var paramsMock = { expression: 'true', fieldsMap: {}, constsMap: {}, enumsMap: {}, methodsList: [], parsersMap: {} };
         var result = eapriv.computeRequiredIf('requiredif', null, elementMock, paramsMock);
         assert.ok(!result.valid); // not ok - required because of requirement obligation
 
@@ -861,6 +860,8 @@
             expression: "Whoami() == 'root' && IsEmail(Email)",
             fieldsMap: { Email: 'string' },
             constsMap: {},
+            enumsMap: {},
+            methodsList: ['Whoami', 'IsEmail'],
             parsersMap: {}
         }
         var result = eapriv.computeAssertThat('asserthat', {}, elementMock, paramsMock);
@@ -886,6 +887,8 @@
             expression: "Whoami() == 'root' && !IsEmail(Email)",
             fieldsMap: { Email: 'string' },
             constsMap: {},
+            enumsMap: {},
+            methodsList: ['Whoami', 'IsEmail'],
             parsersMap: {}
         }
         var result = eapriv.computeRequiredIf('requiredif', null, elementMock, paramsMock);

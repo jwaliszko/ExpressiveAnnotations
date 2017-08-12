@@ -101,6 +101,7 @@ var
             }
         },
         prep: function(message, date) {
+            message = typeHelper.string.tryParse(message);
             var lines = message.split('\n');
             var stamp = date !== undefined && date !== null ? '(' + typeHelper.datetime.stamp(date) + '): ' : '';
             var fline = stamp + lines.shift();
@@ -124,15 +125,12 @@ var
                 return func.apply(this, arguments); // no exact signature match, most likely variable number of arguments is accepted
             };
         },
-        registerMethods: function(model) {
-            var name, body;
+        registerMethods: function(model, essentialMethods) {
+            var i, name, body;
             this.initialize();
-            for (name in this.methods) {
-                if (this.methods.hasOwnProperty(name)) {
-                    if (model.hasOwnProperty(name)) {
-                        logger.warn(typeHelper.string.format('Skipping {0} function registration due to naming conflict (property of the same name already defined within the context).', name));
-                        continue;
-                    }
+            for (i = 0; i < essentialMethods.length; i++) {
+                name = essentialMethods[i];
+                if (this.methods.hasOwnProperty(name)) { // if not available, exception will be thrown later, during expression evaluation (not thrown here on purpose - too early, let the log to become more complete)
                     body = this.methods[name];
                     model[name] = body;
                 }
@@ -350,7 +348,10 @@ var
         string: {
             format: function(text, params) {
                 function makeParam(value) {
-                    value = typeHelper.isObject(value) ? JSON.stringify(value, null, 4): value;
+                    var replacer = function (key, value) {
+                        return typeof value === 'function' ? 'function(...) {...}' : value;
+                    }
+                    value = typeHelper.isObject(value) ? JSON.stringify(value, replacer, 4): value;
                     value = typeHelper.isString(value) ? value.replace(/\$/g, '$$$$'): value; // escape $ sign for string.replace()
                     return value;
                 }
@@ -729,8 +730,8 @@ var
                                                                       // value parser, e.g. for an array which values are distracted among multiple fields)
         if (value !== undefined && value !== null && value !== '') { // check if the field value is set (continue if so, otherwise skip condition verification)
             var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
-            toolchain.registerMethods(model);
-            var message = 'Field {0} - {1} expression:\n[{2}]\nto be executed within the following context (methods not shown):\n{3}';
+            toolchain.registerMethods(model, params.methodsList);
+            var message = 'Field {0} - {1} expression:\n[{2}]\nto be executed within the following context:\n{3}';
             logger.info(typeHelper.string.format(message, element.name, method, params.expression, model));
             var exprVal = modelHelper.ctxEval(params.expression, model); // verify assertion, if not satisfied => notify (return false)
             return {
@@ -748,10 +749,10 @@ var
         value = modelHelper.adjustGivenValue(value, element, params);
 
         var exprVal = undefined, model;
-        var message = 'Field {0} - {1} expression:\n[{2}]\nto be executed within the following context (methods not shown):\n{3}';
+        var message = 'Field {0} - {1} expression:\n[{2}]\nto be executed within the following context:\n{3}';
         if (!api.settings.optimize) { // no optimization - compute requirement condition (which now may have changed) despite the fact field value may be provided
             model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
-            toolchain.registerMethods(model);
+            toolchain.registerMethods(model, params.methodsList);
             logger.info(typeHelper.string.format(message, element.name, method, params.expression, model));
             exprVal = modelHelper.ctxEval(params.expression, model);
         }
@@ -767,7 +768,7 @@ var
             }
 
             model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
-            toolchain.registerMethods(model);
+            toolchain.registerMethods(model, params.methodsList);
             logger.info(typeHelper.string.format(message, element.name, method, params.expression, model));
             exprVal = modelHelper.ctxEval(params.expression, model); // verify requirement, if satisfied => notify (return false)
             return {
@@ -786,7 +787,7 @@ var
     // bind requirements first...
     $.each(annotations.split(''), function() { // it would be ideal to have exactly as many handlers as there are unique annotations, but the number of annotations isn't known untill DOM is ready
         var adapter = typeHelper.string.format('requiredif{0}', $.trim(this));
-        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'enumsMap', 'parsersMap', 'errFieldsMap', 'allowEmpty'], function(options) {
+        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'enumsMap', 'methodsList', 'parsersMap', 'errFieldsMap', 'allowEmpty'], function(options) {
             buildAdapter(adapter, options);
         });
     });
@@ -794,7 +795,7 @@ var
     // ...then move to asserts
     $.each(annotations.split(''), function() {
         var adapter = typeHelper.string.format('assertthat{0}', $.trim(this));
-        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'enumsMap', 'parsersMap', 'errFieldsMap'], function(options) {
+        $.validator.unobtrusive.adapters.add(adapter, ['expression', 'fieldsMap', 'constsMap', 'enumsMap', 'methodsList', 'parsersMap', 'errFieldsMap'], function(options) {
             buildAdapter(adapter, options);
         });
     });

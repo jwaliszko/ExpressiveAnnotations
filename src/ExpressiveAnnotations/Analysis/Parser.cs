@@ -65,6 +65,7 @@ namespace ExpressiveAnnotations.Analysis
             Fields = new Dictionary<string, Expression>();
             Consts = new Dictionary<string, object>();
             Enums = new Dictionary<string, object>();
+            Methods = new HashSet<string>();
         }
 
         private Stack<Token> TokensToProcess { get; set; }
@@ -77,6 +78,7 @@ namespace ExpressiveAnnotations.Analysis
         private IDictionary<string, Expression> Fields { get; set; }
         private IDictionary<string, object> Consts { get; set; }
         private IDictionary<string, object> Enums { get; set; }
+        private ISet<string> Methods { get; set; }
         private IFunctionsProvider FuncProvider { get; set; }
         private IDictionary<string, IList<LambdaExpression>> Functions
             => FuncProvider == null ? new Dictionary<string, IList<LambdaExpression>>() : FuncProvider.GetFunctions();
@@ -256,6 +258,17 @@ namespace ExpressiveAnnotations.Analysis
         }
 
         /// <summary>
+        ///     Gets names of methods extracted from specified expression within given context.
+        /// </summary>
+        /// <returns>
+        ///     Collection containing names.
+        /// </returns>
+        public IEnumerable<string> GetMethods()
+        {
+            return Methods.ToArray();
+        }
+
+        /// <summary>
         ///     Gets the abstract syntax tree built during parsing.
         /// </summary>
         /// <returns>
@@ -271,6 +284,7 @@ namespace ExpressiveAnnotations.Analysis
             Fields.Clear();
             Consts.Clear();
             Enums.Clear();
+            Methods.Clear();
             SyntaxTree = null;
         }
 
@@ -749,6 +763,7 @@ namespace ExpressiveAnnotations.Analysis
             }
             ReadToken(); // read ")"
 
+            Methods.Add(name);
             return ExtractMethodExpression(name, args, func.Location); // get method call
         }
 
