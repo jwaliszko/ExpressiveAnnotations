@@ -10,9 +10,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Web.Mvc;
-using ExpressiveAnnotations.Analysis;
 using ExpressiveAnnotations.Attributes;
-using ExpressiveAnnotations.Functions;
 using ExpressiveAnnotations.MvcUnobtrusive.Caching;
 
 namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
@@ -48,15 +46,18 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                 {                                                                           // (by design, no reason to recompile once compiled expressions)
                     Debug.WriteLine($"[cache add] process: {Process.GetCurrentProcess().Id}, thread: {Thread.CurrentThread.ManagedThreadId}");
 
-                    var parser = new Parser();
-                    parser.RegisterToolchain();
-                    parser.Parse<bool>(metadata.ContainerType, attribute.Expression);
+                    IDictionary<string, Expression> fields = null;
+                    attribute.Compile(metadata.ContainerType, parser =>
+                    {
+                        fields = parser.GetFields();
+                        FieldsMap = fields.ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value.Type));
+                        ConstsMap = parser.GetConsts();
+                        EnumsMap = parser.GetEnums();
+                        MethodsList = parser.GetMethods();
+                    }); // compile the expression associated with attribute (to be cached for subsequent invocations)
 
-                    var fields = parser.GetFields();
-                    FieldsMap = fields.ToDictionary(x => x.Key, x => Helper.GetCoarseType(x.Value.Type));
-                    ConstsMap = parser.GetConsts();
-                    EnumsMap = parser.GetEnums();
-                    MethodsList = parser.GetMethods();
+                    AssertClientSideCompatibility();
+
                     ParsersMap = fields
                         .Select(kvp => new
                         {
@@ -73,9 +74,6 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
                         if (valueParser != null)
                             ParsersMap.Add(new KeyValuePair<string, string>(metadata.PropertyName, valueParser.ParserName));
                     }
-
-                    AssertClientSideCompatibility();
-                    attribute.Compile(metadata.ContainerType); // compile expressions in attributes (to be cached for subsequent invocations)
 
                     return new CacheItem
                     {

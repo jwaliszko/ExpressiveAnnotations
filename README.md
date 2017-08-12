@@ -755,13 +755,15 @@ Alternatively, to enforce re-binding of already attached validation handlers, us
 
 ##### <a id="can-i-increase-web-console-verbosity-for-debug-purposes">Can I increase web console verbosity for debug purposes?</a>
 
-If you need more insightful overview of what client-side script is doing (including warnings if detected) enable logging:
+If you need more insightful overview of what client-side script is doing, enable verbose logging:
 
 ```JavaScript
 <script>
     ea.settings.debug = true; // output debug messages to the web console
                               // (should be disabled for release code not to introduce redundant overhead)
 ```
+
+Warnings and errors are always flushed to the console, no matter this feature is enabled or not.
 
 ##### <a id="i-prefer-enum-values-to-be-rendered-as-numbers-is-it-allowed">I prefer enum values to be rendered as numbers, is it allowed?</a>
 

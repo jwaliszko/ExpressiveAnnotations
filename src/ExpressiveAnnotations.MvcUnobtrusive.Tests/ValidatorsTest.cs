@@ -419,7 +419,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
         }
 
         [Fact]
-        public void naming_colissions_at_client_side_are_detected()
+        public void naming_collisions_at_client_side_are_detected()
         {
             var model = new Model();
             var metadata = GetModelMetadata(model, m => m.Value);

@@ -62,7 +62,7 @@ namespace ExpressiveAnnotations.Attributes
         protected Dictionary<Type, Func<object, bool>> CachedValidationFuncs { get; private set; }
 
         /// <summary>
-        ///     Gets the parser.
+        ///     Gets the parser associated with this attribute.
         /// </summary>
         protected Parser Parser { get; private set; }
 
@@ -152,17 +152,20 @@ namespace ExpressiveAnnotations.Attributes
         ///     Parses and compiles expression provided to the attribute. Compiled lambda is then cached and used for validation purposes.
         /// </summary>
         /// <param name="validationContextType">The type of the object to be validated.</param>
-        /// <param name="force">Flag indicating whether parsing should be rerun despite the fact compiled lambda already exists.</param>
+        /// <param name="action">The action to be invoked after compilation is done. <see cref="Parser" /> object, containing all of the computed data, is given as an input parameter.</param>
+        /// <param name="force">Flag indicating whether parsing should be invoked again despite the fact compiled lambda already exists.</param>
         /// <exception cref="ParseErrorException"></exception>
-        public void Compile(Type validationContextType, bool force = false)
+        public void Compile(Type validationContextType, Action<Parser> action = null, bool force = false)
         {
             if (force)
             {
                 CachedValidationFuncs[validationContextType] = Parser.Parse<bool>(validationContextType, Expression);
+                action?.Invoke(Parser);
                 return;
             }
             if (!CachedValidationFuncs.ContainsKey(validationContextType))
                 CachedValidationFuncs[validationContextType] = Parser.Parse<bool>(validationContextType, Expression);
+            action?.Invoke(Parser);
         }
 
         /// <summary>

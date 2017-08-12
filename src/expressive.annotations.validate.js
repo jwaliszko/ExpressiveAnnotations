@@ -348,7 +348,7 @@ var
         string: {
             format: function(text, params) {
                 function makeParam(value) {
-                    var replacer = function (key, value) {
+                    var replacer = function(key, value) {
                         return typeof value === 'function' ? 'function(...) {...}' : value;
                     }
                     value = typeHelper.isObject(value) ? JSON.stringify(value, replacer, 4): value;
