@@ -36,7 +36,7 @@ namespace ExpressiveAnnotations.MvcWebSample
 
             // !------------------------------------------------------------------------------------------------------
 
-            DataAnnotationsModelValidatorProvider.AddImplicitRequiredAttributeForValueTypes = false; // disables implicit data-val-required arrtibutes addition for value types in HTML
+            DataAnnotationsModelValidatorProvider.AddImplicitRequiredAttributeForValueTypes = false; // disables implicit data-val-required attributes addition for value types in HTML
 
             AreaRegistration.RegisterAllAreas();
 

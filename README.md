@@ -807,36 +807,39 @@ EA does not provide any built-in mechanisms to manipulate DOM. Nevertheless, the
     ea.settings.optimize = false; // if flag is on, requirement expression is not needlessly evaluated for non-empty fields
                                   // otherwise, it is evaluated and such an evaluation result is provided to the eavalid event
     
-    $('form').find(selector).on('eavalid', function(e, type, valid, expr, cond, idx) { // verify asterisk visibility based on computed condition
-        if (type === 'requiredif' && cond !== undefined) {
-            if (idx === 0) { // if first of its kind...
-                e.currentTarget.eacond = false; // ...reset asterisk visibility flag
-            }
-            e.currentTarget.eacond |= cond; // multiple requiredif attributes can be applied to a single field - remember if any condition is true
+    $(document).ready(function() {
+        var selector = 'input, select, textarea';
 
-            if (e.currentTarget.eacond) {
-                $(e.currentTarget).closest('li').find('.asterisk').show(); // show asterisk for required fields (no matter if valid or not)
+        $('form').find(selector).on('eavalid', function(e, type, valid, expr, cond, idx) { // verify asterisk visibility based on computed condition
+            if (type === 'requiredif' && cond !== undefined) {
+                if (idx === 0) { // if first of its kind...
+                    e.currentTarget.eacond = false; // ...reset asterisk visibility flag
+                }
+                e.currentTarget.eacond |= cond; // multiple requiredif attributes can be applied to a single field - remember if any condition is true
+
+                if (e.currentTarget.eacond) {
+                    $(e.currentTarget).closest('li').find('.asterisk').show(); // show asterisk for required fields (no matter if valid or not)
+                }
+                else {
+                    $(e.currentTarget).closest('li').find('.asterisk').hide();
+                }
             }
-            else {
-                $(e.currentTarget).closest('li').find('.asterisk').hide();
+        });
+    
+        $('form').find(selector).each(function() { // apply asterisks for required or conditionally required fields
+            if ($(this).attr('data-val-required') !== undefined // make sure implicit required attributes for value types are disabled i.e. DataAnnotationsModelValidatorProvider.AddImplicitRequiredAttributeForValueTypes = false
+                || $(this).attr('data-val-requiredif') !== undefined) {
+                $(this).parent('li').prepend('<span class="asterisk">*</span>');
             }
-        }
-    });
+        });
     
-    $('form').find(selector).each(function() { // apply asterisks for required or conditionally required fields
-        if ($(this).attr('data-val-required') !== undefined // make sure implicit required attributes for value types are disabled i.e. DataAnnotationsModelValidatorProvider.AddImplicitRequiredAttributeForValueTypes = false
-            || $(this).attr('data-val-requiredif') !== undefined) {
-            var div = $(this).parent('div');
-            div.prepend('<span class="asterisk">*</span>');
-        }
-    });
-    
-    $('form').find(selector).each(function() { // run validation for every field to verify asterisks visibility
-        if ($(this).attr('data-val-requiredif') !== undefined) {
-            $(this).valid();
-            $(this).removeClass('input-validation-error');
-            $(this).parent().find('.field-validation-error').empty();
-        }
+        $('form').find(selector).each(function() { // run validation for every field to verify asterisks visibility
+            if ($(this).attr('data-val-requiredif') !== undefined) {
+                $(this).valid();
+                $(this).removeClass('input-validation-error');
+                $(this).parent().find('.field-validation-error').empty();
+            }
+        });
     });
 ```
 
@@ -864,6 +867,14 @@ For the needs of this example, the code above makes assumptions:
         <label ...
         <input data-val=...
     </li>
+    ```
+
+* implicit data-val-required attributes addition is disabled for value types in HTML (edit `Global.asax`):
+
+    ```C#
+    protected void Application_Start()
+    {
+        DataAnnotationsModelValidatorProvider.AddImplicitRequiredAttributeForValueTypes = false;
     ```
 
 ##### <a id="how-to-handle-validation-based-on-parent-model-field">How to handle validation based on parent model field?</a>
