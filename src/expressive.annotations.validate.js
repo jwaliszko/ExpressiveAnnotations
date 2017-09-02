@@ -1,4 +1,4 @@
-/* expressive.annotations.validate.js - v2.7.2
+/* expressive.annotations.validate.js - v2.7.3
  * Client-side component of ExpressiveAnnotations - annotation-based conditional validation library.
  * https://github.com/jwaliszko/ExpressiveAnnotations
  *
@@ -137,6 +137,7 @@ var
             }
         },
         initialize: function() {
+            var that = this;
             this.addMethod('Now', function() { // return milliseconds
                 return Date.now(); // now() is faster than new Date().getTime()
             });
@@ -182,7 +183,7 @@ var
             this.addMethod('CompareOrdinalIgnoreCase', function(strA, strB) {
                 strA = (strA !== null && strA !== undefined) ? strA.toLowerCase() : null;
                 strB = (strB !== null && strB !== undefined) ? strB.toLowerCase() : null;
-                return this.CompareOrdinal(strA, strB);
+                return that.methods.CompareOrdinal(strA, strB);
             });
             this.addMethod('StartsWith', function(str, prefix) {
                 return str !== null && str !== undefined && prefix !== null && prefix !== undefined && str.slice(0, prefix.length) === prefix;
@@ -190,7 +191,7 @@ var
             this.addMethod('StartsWithIgnoreCase', function(str, prefix) {
                 str = (str !== null && str !== undefined) ? str.toLowerCase() : null;
                 prefix = (prefix !== null && prefix !== undefined) ? prefix.toLowerCase() : null;
-                return this.StartsWith(str, prefix);
+                return that.methods.StartsWith(str, prefix);
             });
             this.addMethod('EndsWith', function(str, suffix) {
                 return str !== null && str !== undefined && suffix !== null && suffix !== undefined && str.slice(-suffix.length) === suffix;
@@ -198,7 +199,7 @@ var
             this.addMethod('EndsWithIgnoreCase', function(str, suffix) {
                 str = (str !== null && str !== undefined) ? str.toLowerCase() : null;
                 suffix = (suffix !== null && suffix !== undefined) ? suffix.toLowerCase() : null;
-                return this.EndsWith(str, suffix);
+                return that.methods.EndsWith(str, suffix);
             });
             this.addMethod('Contains', function(str, substr) {
                 return str !== null && str !== undefined && substr !== null && substr !== undefined && str.indexOf(substr) > -1;
@@ -206,7 +207,7 @@ var
             this.addMethod('ContainsIgnoreCase', function(str, substr) {
                 str = (str !== null && str !== undefined) ? str.toLowerCase() : null;
                 substr = (substr !== null && substr !== undefined) ? substr.toLowerCase() : null;
-                return this.Contains(str, substr);
+                return that.methods.Contains(str, substr);
             });
             this.addMethod('IsNullOrWhiteSpace', function(str) {
                 return str === null || !/\S/.test(str);
@@ -294,14 +295,14 @@ var
                     if (typeHelper.isArray(values)) {
                         if (values.length === 0)
                             throw "empty sequence";
-                        sum = this.Sum(values);
+                        sum = that.methods.Sum(values);
                         return sum / values.length;
                     }
                 }
                 for (i = 0, l = arguments.length; i < l; i++) {
                     arr.push(arguments[i]);
                 }
-                sum = this.Sum(arr);
+                sum = that.methods.Sum(arr);
                 return sum / arguments.length;
             });
         }

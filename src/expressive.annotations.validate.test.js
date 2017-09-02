@@ -717,6 +717,30 @@
         assert.equal(m.Guid('a1111111-1111-1111-1111-111111111111'), m.Guid('A1111111-1111-1111-1111-111111111111'));
     });
 
+    qunit.test("internal_methods_are_called_as_expected", function(assert) {
+        var model = {};
+        eapriv.toolchain.registerMethods(model, ["CompareOrdinalIgnoreCase", "StartsWithIgnoreCase", "EndsWithIgnoreCase", "ContainsIgnoreCase", "Average"]);
+
+        function getMethods(obj) {
+            var res = [];
+            for (var m in obj) {
+                if (typeof obj[m] == "function") {
+                    res.push(m);
+                }
+            }
+            return res;
+        }
+
+        var registered = getMethods(model);
+        assert.equal(registered.length, 5);
+        assert.equal(model.CompareOrdinalIgnoreCase('a', 'A'), 0); // internally calls CompareOrdinal
+        assert.ok(model.StartsWithIgnoreCase(' ab c', ' A')); // internally calls StartsWith
+        assert.ok(model.EndsWithIgnoreCase(' ab c', ' C')); // internally calls EndsWith
+        assert.ok(model.ContainsIgnoreCase(' ab c', 'B ')); // internally calls Contains
+        assert.equal(model.Average([1]), 1); // internally calls Sum
+        assert.equal(model.Average(1, 2, 3), 2); // internally calls Sum
+    });
+
     qunit.module("settings");
 
     qunit.test("verify_allowed_settings_setup", function(assert) {
