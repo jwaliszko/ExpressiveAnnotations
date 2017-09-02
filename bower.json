@@ -1,6 +1,6 @@
 {
     "name": "expressive-annotations",
-    "version": "2.7.2-pre",
+    "version": "2.7.4-pre",
     "license": "MIT",
     "homepage": "https://github.com/jwaliszko/ExpressiveAnnotations",
     "description": "Client-side component of ExpressiveAnnotations - annotation-based conditional validation library.",
