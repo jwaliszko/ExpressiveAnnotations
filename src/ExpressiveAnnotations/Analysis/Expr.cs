@@ -259,7 +259,7 @@ namespace ExpressiveAnnotations.Analysis
             var type1 = arg1.Type;
             var type2 = arg2.Type;
             TypeAdapter.MakeTypesCompatible(arg1, arg2, out arg1, out arg2, oper.Type);
-            Wall.Mul(arg1, arg2, type1, type2, oper);            
+            Wall.Mul(arg1, arg2, type1, type2, oper);
 
             try
             {
@@ -364,7 +364,11 @@ namespace ExpressiveAnnotations.Analysis
         public Expression Condition(Expression arg1, Expression arg2, Expression arg3, Token start, Token oper)
         {
             Wall.OfType<bool>(arg1, start.Location);
-            Wall.TypesMatch(arg2, arg3, oper.Location);
+
+            var type2 = arg2.Type;
+            var type3 = arg3.Type;
+            TypeAdapter.MakeTypesCompatible(arg2, arg3, out arg2, out arg3, oper.Type);
+            Wall.Cond(arg2, arg3, type2, type3, oper.Location);
 
             return Expression.Condition(arg1, arg2, arg3);
         }

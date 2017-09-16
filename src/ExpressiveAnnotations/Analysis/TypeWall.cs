@@ -91,11 +91,17 @@ namespace ExpressiveAnnotations.Analysis
                     $"Operator '{oper.Value}' cannot be applied to operand of type 'null'.", ExprString, oper.Location);
         }
 
-        public void TypesMatch(Expression arg1, Expression arg2, Location pos)
+        public void Cond(Expression arg1, Expression arg2, Type type1, Type type2, Location pos)
         {
+            if (arg1.IsNullLiteral() && !arg2.IsNullLiteral())
+                throw new ParseErrorException(
+                    $"Type of conditional expression cannot be determined because there is no implicit conversion between 'null' and '{type2}'.", ExprString, pos);
+            if (!arg1.IsNullLiteral() && arg2.IsNullLiteral())
+                throw new ParseErrorException(
+                    $"Type of conditional expression cannot be determined because there is no implicit conversion between '{type1}' and 'null'.", ExprString, pos);
             if (arg1.Type != arg2.Type)
                 throw new ParseErrorException(
-                    "Argument types must match.", ExprString, pos);
+                    $"Type of conditional expression cannot be determined because there is no implicit conversion between '{type1}' and '{type2}'.", ExprString, pos);
         }
 
         public void OfType<T>(Expression arg, Location pos)

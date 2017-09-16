@@ -343,7 +343,8 @@ namespace ExpressiveAnnotations.Tests
             Assert.True(parser.Parse<bool>("false ? false : true").Invoke());
 
             Assert.True(parser.Parse<bool>("(true ? 1 : 2) == 1").Invoke());
-            Assert.True(parser.Parse<bool>("(false ? 1 : 2) == 2").Invoke());
+            Assert.True(parser.Parse<bool>("(false ? 1 : 2.2) == 2.2").Invoke());
+            Assert.True(parser.Parse<bool>("(true ? null : null) == null").Invoke());
 
             Assert.True(parser.Parse<bool>("(1 > 0 ? true : false) ? (1 > 0 ? true : false) : (false ? false : false)").Invoke());
             Assert.True(parser.Parse<bool>("(1 > 0 ? false : true) ? (false ? false : false) : (1 > 0 ? true : false)").Invoke());
@@ -579,6 +580,8 @@ namespace ExpressiveAnnotations.Tests
             var expectedMethods = new[] {"Number", "IncNumber", "DecNumber"};
             Assert.Equal(expectedMethods.Length, parsedMethods.Count);
             Assert.True(!expectedMethods.Except(parsedMethods).Any());
+
+            Assert.True(parser.Parse<Model, bool>("(true ? Number : -1.1) == 0").Invoke(model));
 
             Assert.True(parser.Parse<Model, bool>("Array[0] != null && Array[1] != null").Invoke(model));
             Assert.True(parser.Parse<Model, bool>("Array[0].Number + Array[0].Array[0].Number + Array[1].Number + Array[1].Array[0].Number == 0").Invoke(model));
@@ -1561,9 +1564,21 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("Expected subproperty identifier. Unexpected end of expression.", e.Error);
             Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
 
-            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object, bool>("[0][1 > 0 ? 0*2.0 : 0^2] == 1"));
-            Assert.Equal("Argument types must match.", e.Error);
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object, bool>("[0][1 > 0 ? 0*2.0 : ''] == 1"));
+            Assert.Equal("Type of conditional expression cannot be determined because there is no implicit conversion between 'System.Double' and 'System.String'.", e.Error);
             Assert.Equal(new Location(1, 11), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object, bool>("[0][1 > 0 ? '' : 0*2.0] == 1"));
+            Assert.Equal("Type of conditional expression cannot be determined because there is no implicit conversion between 'System.String' and 'System.Double'.", e.Error);
+            Assert.Equal(new Location(1, 11), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object, bool>("true ? null : 1"));
+            Assert.Equal("Type of conditional expression cannot be determined because there is no implicit conversion between 'null' and 'System.Int32'.", e.Error);
+            Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
+
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object, bool>("true ? 1 : null"));
+            Assert.Equal("Type of conditional expression cannot be determined because there is no implicit conversion between 'System.Int32' and 'null'.", e.Error);
+            Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
 
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<Model, bool>("Collection[true ? 0 : 1].Collection[true ? [0][0] : 1].Unknown == -2"));
             Assert.Equal("Only public properties, constants and enums are accepted. Identifier 'Unknown' not known.", e.Error);
