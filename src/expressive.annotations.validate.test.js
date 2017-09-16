@@ -49,6 +49,7 @@
             debug: false,
             optimize: true,
             enumsAsNumbers: true,
+            registerAllMethods: false,
             dependencyTriggers: 'change keyup'
         });
         eapriv.toolchain.methods = {};
@@ -717,19 +718,9 @@
         assert.equal(m.Guid('a1111111-1111-1111-1111-111111111111'), m.Guid('A1111111-1111-1111-1111-111111111111'));
     });
 
-    qunit.test("internal_methods_are_called_as_expected", function(assert) {
+    qunit.test("internal_methods_are_called_as_expected_when_registration_is_restricted_to_essential_methods_only", function(assert) {
         var model = {};
-        eapriv.toolchain.registerMethods(model, ["CompareOrdinalIgnoreCase", "StartsWithIgnoreCase", "EndsWithIgnoreCase", "ContainsIgnoreCase", "Average"]);
-
-        function getMethods(obj) {
-            var res = [];
-            for (var m in obj) {
-                if (typeof obj[m] == "function") {
-                    res.push(m);
-                }
-            }
-            return res;
-        }
+        eapriv.toolchain.registerMethods(model, ["CompareOrdinalIgnoreCase", "StartsWithIgnoreCase", "EndsWithIgnoreCase", "ContainsIgnoreCase", "Average"], "ABC");
 
         var registered = getMethods(model);
         assert.equal(registered.length, 5);
@@ -739,6 +730,35 @@
         assert.ok(model.ContainsIgnoreCase(' ab c', 'B ')); // internally calls Contains
         assert.equal(model.Average([1]), 1); // internally calls Sum
         assert.equal(model.Average(1, 2, 3), 2); // internally calls Sum
+    });
+
+    qunit.test("internal_methods_are_called_as_expected_when_registration_of_all_methods_is_enabled", function(assert) {
+        ea.settings.apply({ registerAllMethods: true });
+
+        var model = {};
+        eapriv.toolchain.registerMethods(model, [], "ABC");
+
+        var registered = getMethods(model);
+        assert.equal(registered.length, 28);
+        assert.equal(model.CompareOrdinalIgnoreCase('a', 'A'), 0); // internally calls CompareOrdinal
+        assert.ok(model.StartsWithIgnoreCase(' ab c', ' A')); // internally calls StartsWith
+        assert.ok(model.EndsWithIgnoreCase(' ab c', ' C')); // internally calls EndsWith
+        assert.ok(model.ContainsIgnoreCase(' ab c', 'B ')); // internally calls Contains
+        assert.equal(model.Average([1]), 1); // internally calls Sum
+        assert.equal(model.Average(1, 2, 3), 2); // internally calls Sum
+    });
+
+    qunit.test("even_if_registration_of_all_methods_is_enabled_methods_which_are_in_naming_conflict_with_fields_are_skipped", function(assert) {
+        ea.settings.apply({ registerAllMethods: true });
+
+        var model = { Length: 1 };
+        eapriv.toolchain.registerMethods(model, [], "ABC");
+        assert.equal(eapriv.getBuffer().read().type, "warn");
+        assert.ok(eapriv.getBuffer().read().message.indexOf("Field ABC - skipping Length(...) method registration, naming conflict with the field identifier.") !== -1);
+
+        var registered = getMethods(model);
+        assert.equal(registered.length, 27);
+        assert.ok(!eapriv.typeHelper.array.contains(registered, "Length"));
     });
 
     qunit.module("settings");
@@ -752,15 +772,21 @@
         ea.settings.apply({ debug: false });
         assert.equal(ea.settings.debug, false);
 
+        ea.settings.apply({ optimize: false });
+        assert.equal(ea.settings.optimize, false);
+
+        ea.settings.apply({ enumsAsNumbers: false });
+        assert.equal(ea.settings.enumsAsNumbers, false);
+
+        ea.settings.apply({ registerAllMethods: false });
+        assert.equal(ea.settings.registerAllMethods, false);
+
         ea.settings.apply({ dependencyTriggers: 'change paste keyup' });
         assert.equal(ea.settings.dependencyTriggers, 'change paste keyup');
-
         ea.settings.apply({ dependencyTriggers: undefined });
         assert.equal(ea.settings.dependencyTriggers, undefined);
-
         ea.settings.apply({ dependencyTriggers: null });
         assert.equal(ea.settings.dependencyTriggers, null);
-
         ea.settings.apply({ dependencyTriggers: '' });
         assert.equal(ea.settings.dependencyTriggers, '');
     });
@@ -794,6 +820,17 @@
             },
             function(ex) {
                 return ex.toString() === 'EA settings error: enumsAsNumbers value must be a boolean (true or false)';
+            }
+        );
+    });
+
+    qunit.test("detect_invalid_methods_registration_setup", function(assert) {
+        assert.throws(
+            function() {
+                ea.settings.apply({ registerAllMethods: 1 });
+            },
+            function(ex) {
+                return ex.toString() === 'EA settings error: registerAllMethods value must be a boolean (true or false)';
             }
         );
     });
@@ -918,5 +955,15 @@
         var result = eapriv.computeRequiredIf('requiredif', null, elementMock, paramsMock);
         assert.ok(!result.valid);
     });
+
+    function getMethods(obj) {
+        var res = [];
+        for (var m in obj) {
+            if (typeof obj[m] == "function") {
+                res.push(m);
+            }
+        }
+        return res;
+    }
 
 }($, QUnit, window.ea, window.ea._private));

@@ -1,4 +1,4 @@
-/* expressive.annotations.validate.js - v2.7.3
+/* expressive.annotations.validate.js - v2.7.4
  * Client-side component of ExpressiveAnnotations - annotation-based conditional validation library.
  * https://github.com/jwaliszko/ExpressiveAnnotations
  *
@@ -18,6 +18,8 @@ var
                             // and such an evaluation result is provided to the eavalid event)
             enumsAsNumbers: true, // specifies whether values of enum types are internally treated as integral numerics or string identifiers (should be consistent
                                   // with the way of how input fields values are stored in HTML)
+            registerAllMethods: false, // specifies whether all of the built-in and custom methods are to be registered within the model context (excluding these
+                                       // having naming conflicts with the field identifiers), or the essential ones only (actually used in the expression)
             dependencyTriggers: 'change keyup', // a string containing one or more space-separated DOM field event types (such as "change", "keyup" or custom event
                                                 // names) for which fields directly dependent on referenced DOM field are validated - for this feature to be off
                                                 // entirely, initialize with empty string, null or undefined (validation will be fired on form submit attempt only)
@@ -32,6 +34,9 @@ var
                     }
                     if (!typeHelper.isBool(api.settings.enumsAsNumbers)) {
                         throw 'EA settings error: enumsAsNumbers value must be a boolean (true or false)';
+                    }
+                    if (!typeHelper.isBool(api.settings.registerAllMethods)) {
+                        throw 'EA settings error: registerAllMethods value must be a boolean (true or false)';
                     }
                     if (!typeHelper.isString(api.settings.dependencyTriggers)
                         && api.settings.dependencyTriggers !== null && api.settings.dependencyTriggers !== undefined) {
@@ -125,9 +130,23 @@ var
                 return func.apply(this, arguments); // no exact signature match, most likely variable number of arguments is accepted
             };
         },
-        registerMethods: function(model, essentialMethods) {
+        registerMethods: function(model, essentialMethods, fieldName) {
             var i, name, body;
             this.initialize();
+            if (api.settings.registerAllMethods) {
+                for (name in this.methods) {
+                    if (this.methods.hasOwnProperty(name)) {
+                        if (model.hasOwnProperty(name)) {
+                            logger.warn(typeHelper.string.format('Field {0} - skipping {1}(...) method registration, naming conflict with the field identifier.', fieldName, name));
+                            continue;
+                        }
+                        body = this.methods[name];
+                        model[name] = body;
+                    }
+                }
+                return;
+            }
+
             for (i = 0; i < essentialMethods.length; i++) {
                 name = essentialMethods[i];
                 if (this.methods.hasOwnProperty(name)) { // if not available, exception will be thrown later, during expression evaluation (not thrown here on purpose - too early, let the log to become more complete)
@@ -351,6 +370,9 @@ var
                 function makeParam(value) {
                     var replacer = function(key, value) {
                         return typeof value === 'function' ? 'function(...) {...}' : value;
+                    }
+                    if (api.settings.registerAllMethods) {
+                        replacer = null; // do not print all of the methods not to disturb the console output
                     }
                     value = typeHelper.isObject(value) ? JSON.stringify(value, replacer, 4): value;
                     value = typeHelper.isString(value) ? value.replace(/\$/g, '$$$$'): value; // escape $ sign for string.replace()
@@ -731,9 +753,9 @@ var
                                                                       // value parser, e.g. for an array which values are distracted among multiple fields)
         if (value !== undefined && value !== null && value !== '') { // check if the field value is set (continue if so, otherwise skip condition verification)
             var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
-            toolchain.registerMethods(model, params.methodsList);
-            var message = 'Field {0} - {1} expression:\n[{2}]\nto be executed within the following context:\n{3}';
-            logger.info(typeHelper.string.format(message, element.name, method, params.expression, model));
+            toolchain.registerMethods(model, params.methodsList, element.name);
+            var message = 'Field {0} - {1} expression:\n[{2}]\nto be executed within the following context{3}:\n{4}';
+            logger.info(typeHelper.string.format(message, element.name, method, params.expression, api.settings.registerAllMethods ? ' (methods not shown)' : '', model));
             var exprVal = modelHelper.ctxEval(params.expression, model); // verify assertion, if not satisfied => notify (return false)
             return {
                 valid: exprVal,
@@ -750,11 +772,11 @@ var
         value = modelHelper.adjustGivenValue(value, element, params);
 
         var exprVal = undefined, model;
-        var message = 'Field {0} - {1} expression:\n[{2}]\nto be executed within the following context:\n{3}';
+        var message = 'Field {0} - {1} expression:\n[{2}]\nto be executed within the following context{3}:\n{4}';
         if (!api.settings.optimize) { // no optimization - compute requirement condition (which now may have changed) despite the fact field value may be provided
             model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
-            toolchain.registerMethods(model, params.methodsList);
-            logger.info(typeHelper.string.format(message, element.name, method, params.expression, model));
+            toolchain.registerMethods(model, params.methodsList, element.name);
+            logger.info(typeHelper.string.format(message, element.name, method, params.expression, api.settings.registerAllMethods ? ' (methods not shown)' : '', model));
             exprVal = modelHelper.ctxEval(params.expression, model);
         }
 
@@ -769,8 +791,8 @@ var
             }
 
             model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
-            toolchain.registerMethods(model, params.methodsList);
-            logger.info(typeHelper.string.format(message, element.name, method, params.expression, model));
+            toolchain.registerMethods(model, params.methodsList, element.name);
+            logger.info(typeHelper.string.format(message, element.name, method, params.expression, api.settings.registerAllMethods ? ' (methods not shown)' : '', model));
             exprVal = modelHelper.ctxEval(params.expression, model); // verify requirement, if satisfied => notify (return false)
             return {
                 valid: !exprVal,
