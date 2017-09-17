@@ -35,6 +35,7 @@ A small .NET and JavaScript library which provides annotation-based conditional 
    - [How to control frequency of dependent fields validation?](#how-to-control-frequency-of-dependent-fields-validation) <sup>(re client-side)</sup>
    - [Can I increase web console verbosity for debug purposes?](#can-i-increase-web-console-verbosity-for-debug-purposes) <sup>(re client-side)</sup>
    - [I prefer enum values to be rendered as numbers, is it allowed?](#i-prefer-enum-values-to-be-rendered-as-numbers-is-it-allowed) <sup>(re client-side)</sup>
+   - [How to access one method from another?](#how-to-access-one-method-from-another) <sup>(re client-side)</sup>
    - [How to fetch field's value or its display name in error message?](#how-to-fetch-fields-value-or-its-display-name-in-error-message) <sup>(re client and server-side)</sup>
    - [Is there any event raised when validation is done?](#is-there-any-event-raised-when-validation-is-done) <sup>(re client-side)</sup>
    - [Can I decorate conditionally required fields with asterisks?](#can-i-decorate-conditionally-required-fields-with-asterisks) <sup>(re client-side)</sup>
@@ -771,6 +772,22 @@ There is a possibility to setup of how enumeration values are internally process
 
 This setting should be consistent with the way of how input fields values are stored in HTML, e.g. `@Html.EditorFor(m => m.EnumValue)` renders to string identifier by default, in contrast to `@Html.EditorFor("EnumValue", (int)Model.EnumValue)` statement, where value is explicitly casted to `int`. The flag setup should reflect that behavior, to have the internal JS model context deserialized accordingly.
 
+##### <a id="how-to-access-one-method-from-another">How to access one method from another?</a>
+
+Through `this`. You may want to turn the `registerAllMethods` option on. When enabled, EA attempts to register all of the methods within the model context, unless naming conflict with field identifier occurs - registration of such a particular method is then skipped.
+
+```JavaScript
+<script>
+    ea.settings.registerAllMethods = true;
+
+    ea.addMethod('MethodA', function() {
+        ...
+    });
+    ea.addMethod('MethodB', function() {
+        return this.MethodA();
+    });
+```
+
 ##### <a id="how-to-fetch-fields-value-or-its-display-name-in-error-message">How to fetch field's value or its display name in error message?</a>
 
 * to get a value, wrap the field name in braces, e.g. `{field}`, or for nested fields - `{field.field}`,
@@ -869,7 +886,7 @@ For the needs of this example, the code above makes assumptions:
     </li>
     ```
 
-* implicit data-val-required attributes addition is disabled for value types in HTML (edit `Global.asax`):
+* implicit `data-val-required` attributes addition is disabled for value types in HTML (edit `Global.asax`):
 
     ```C#
     protected void Application_Start()

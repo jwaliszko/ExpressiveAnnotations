@@ -1564,6 +1564,10 @@ namespace ExpressiveAnnotations.Tests
             Assert.Equal("Expected subproperty identifier. Unexpected end of expression.", e.Error);
             Assert.Equal(new Location(1, 6), e.Location, new LocationComparer());
 
+            e = Assert.Throws<ParseErrorException>(() => parser.Parse<object, bool>("1 ? 2 : 3"));
+            Assert.Equal("Argument must be of type 'System.Boolean'.", e.Error);
+            Assert.Equal(new Location(1, 1), e.Location, new LocationComparer());
+
             e = Assert.Throws<ParseErrorException>(() => parser.Parse<object, bool>("[0][1 > 0 ? 0*2.0 : ''] == 1"));
             Assert.Equal("Type of conditional expression cannot be determined because there is no implicit conversion between 'System.Double' and 'System.String'.", e.Error);
             Assert.Equal(new Location(1, 11), e.Location, new LocationComparer());
