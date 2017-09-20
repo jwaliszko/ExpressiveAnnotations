@@ -56,31 +56,32 @@ cp expressive.annotations.validate.min.js ../src/expressive.annotations.validate
 echo -e "\n------ package building..."
 coreVersion=`strings ../src/ExpressiveAnnotations/bin/Release/ExpressiveAnnotations.dll | egrep '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | cut -f1,2,3 -d"."`
 ./nuget.exe pack ExpressiveAnnotations.nuspec -version $productVersion -symbols
-./nuget.exe pack ExpressiveAnnotations.dll.nuspec -version $coreVersion -symbols
+./nuget.exe pack ExpressiveAnnotations.dll.nuspec -version $coreVersion
 
 scriptVersion=`strings ../src/expressive.annotations.validate.js | egrep -o -m1 '[0-9]+\.[0-9]+\.[0-9]+'`
-sed -E 's/[0-9]+\.[0-9]+\.[0-9]+-pre/'$scriptVersion'/' ../bower.json > bower.json
-sed -E 's/[0-9]+\.[0-9]+\.[0-9]+-pre/'$scriptVersion'/' ../package.json > package.json
+sed -E 's/\$version\$/'$scriptVersion'/' ../package.json > package.json
 
 unobVersion=`strings ../src/ExpressiveAnnotations.MvcUnobtrusive/bin/Release/ExpressiveAnnotations.MvcUnobtrusive.dll | egrep '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | cut -f1,2,3 -d"."`
 
-echo "This product version contains following components:
-ExpressiveAnnotations.dll v"$coreVersion", ExpressiveAnnotations.MvcUnobtrusive.dll v"$unobVersion", expressive.annotations.validate.js v"$scriptVersion"" > readme.txt
-unix2dos readme.txt
+echo "EA v"$productVersion" (full-stack product version) consists of the following components:
+ExpressiveAnnotations.dll v"$coreVersion", ExpressiveAnnotations.MvcUnobtrusive.dll v"$unobVersion", expressive.annotations.validate.js v"$scriptVersion"" > NOTES
+unix2dos NOTES
 
 echo -e "\n------ archive creation..."
-mkdir -p $productVersion/dist
-mv net* $productVersion/dist
-mv expressive.annotations.validate* $productVersion/dist
-mv *.txt $productVersion/dist
-cp ../doc/api/api.chm $productVersion/dist
+mkdir -p $productVersion/ExpressiveAnnotations/dist
+mv net* $productVersion/ExpressiveAnnotations/dist
+mv expressive.annotations.validate* $productVersion/ExpressiveAnnotations/dist
+mv NOTES $productVersion/ExpressiveAnnotations
+cp ../doc/api/api.chm $productVersion/ExpressiveAnnotations
+cp ../README.md $productVersion/ExpressiveAnnotations
+cp ../LICENSE $productVersion/ExpressiveAnnotations
+cp ../logo.png $productVersion/ExpressiveAnnotations
 mv *.nupkg $productVersion
 mv *.json $productVersion
 cd $productVersion
-mv dist ExpressiveAnnotations
 zip -r ExpressiveAnnotations.zip ExpressiveAnnotations
-mv ExpressiveAnnotations dist
 cd ..
 
 # nuget setapikey ...
-# nuget push ExpressiveAnnotations.x.x.x.nupkg
+# nuget push ExpressiveAnnotations.x.x.x.nupkg -source https://www.nuget.org
+# nuget push ExpressiveAnnotations.dll.x.x.x.nupkg -source https://www.nuget.org

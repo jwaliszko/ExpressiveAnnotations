@@ -7,7 +7,7 @@
 [![Release version](https://img.shields.io/github/release/jwaliszko/ExpressiveAnnotations.svg)](https://github.com/jwaliszko/ExpressiveAnnotations/releases/latest)
 [![License](http://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 
-A small .NET and JavaScript library which provides annotation-based conditional validation mechanisms. Given attributes allow to forget about imperative way of step-by-step verification of validation conditions in many cases. Since fields validation requirements are applied as metadata, domain-related code is more condensed.
+A small .NET and JavaScript library which provides full-stack, annotation-based, conditional validation mechanisms. Given attributes, powered by expressions engine, allow to forget about imperative way of step-by-step verification of validation conditions in many cases. Since fields validation requirements are applied as metadata, domain-related code is more condensed.
 
 ### Table of contents
  - [What is the context behind this work?](#what-is-the-context-behind-this-implementation)
@@ -501,7 +501,7 @@ Because client-side handles expressions in its unchanged form (as provided to at
 
 Client-side validation is fully supported. Enable it for your web project within the next few steps:
 
-1. Reference both assemblies to your project: core [**ExpressiveAnnotations.dll**](src/ExpressiveAnnotations) and subsidiary [**ExpressiveAnnotations.MvcUnobtrusive.dll**](src/ExpressiveAnnotations.MvcUnobtrusive).
+1. Reference both assemblies to your project: core [**ExpressiveAnnotations.dll**](src/ExpressiveAnnotations) (defines validation attributes driven by expressions) and subsidiary [**ExpressiveAnnotations.MvcUnobtrusive.dll**](src/ExpressiveAnnotations.MvcUnobtrusive) (defines model validators for ASP.NET MVC).
 2. In Global.asax register required validators (`IClientValidatable` interface is not directly implemented by the attributes, to avoid coupling of ExpressionAnnotations assembly with System.Web.Mvc dependency):
 
     ```C#
@@ -531,7 +531,7 @@ Client-side validation is fully supported. Enable it for your web project within
     ```
     
     Despite the fact this provider automatically registers adapters for expressive validation attributes, it additionally respects their processing priorities when validation is performed (i.e. the [`Priority`](#signatures) property actually means something in practice).
-3. Include [**expressive.annotations.validate.js**](src/expressive.annotations.validate.js?raw=true) script in your page (it should be included in bundle below jQuery validation files):
+3. Include [**expressive.annotations.validate.js**](src/expressive.annotations.validate.js?raw=true) script (makes client-side validation to work out of the box) in your page. It should be included in bundle below jQuery validation files:
 
     ```JavaScript
     <script src="/Scripts/jquery.validate.js"></script>
