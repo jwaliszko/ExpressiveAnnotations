@@ -20,6 +20,8 @@ var
                                   // with the way of how input fields values are stored in HTML)
             registerAllMethods: false, // specifies whether all of the built-in and custom methods are to be registered within the model context (excluding these
                                        // having naming conflicts with the field identifiers), or the essential ones only (actually used in the expression)
+            lazyDependencyValidation: true, // allows to switch dependencies validation into lazy mode; prior to first form submission, the user can e.g. tab through
+                                            // fields without getting validation messages + user gets a chance to provide a correct value before seeing any errors
             dependencyTriggers: 'change keyup', // a string containing one or more space-separated DOM field event types (such as "change", "keyup" or custom event
                                                 // names) for which fields directly dependent on referenced DOM field are validated - for this feature to be off
                                                 // entirely, initialize with empty string, null or undefined (validation will be fired on form submit attempt only)
@@ -37,6 +39,9 @@ var
                     }
                     if (!typeHelper.isBool(api.settings.registerAllMethods)) {
                         throw 'EA settings error: registerAllMethods value must be a boolean (true or false)';
+                    }
+                    if (!typeHelper.isBool(api.settings.lazyDependencyValidation)) {
+                        throw 'EA settings error: lazyDependencyValidation value must be a boolean (true or false)';
                     }
                     if (!typeHelper.isString(api.settings.dependencyTriggers)
                         && api.settings.dependencyTriggers !== null && api.settings.dependencyTriggers !== undefined) {
@@ -546,32 +551,31 @@ var
         getPrefix: function(str) {
             return (str !== undefined && str !== null) ? str.substr(0, str.lastIndexOf('.') + 1) : '';
         },
-        extractValue: function(form, name, prefix, type, parser) {
-            function getValue(element) {
-                var elementType = element.attr('type');
-                switch (elementType) {
-                    case 'checkbox':
-                        if (element.length > 2) {
-                            logger.warn(typeHelper.string.format('DOM field {0} is ambiguous (unless custom value parser is provided).', element.attr('name')));
-                        }
-                        return element.is(':checked');
-                    case 'radio':
-                        return element.filter(':checked').val();
-                    default:
-                        if (element.length > 1) {
-                            logger.warn(typeHelper.string.format('DOM field {0} is ambiguous (unless custom value parser is provided).', element.attr('name')));
-                        }
-                        return element.val();
-                }
+        getFieldValue: function(field) {
+            var type = field.attr('type');
+            switch (type) {
+                case 'checkbox':
+                    if (field.length > 2) {
+                        logger.warn(typeHelper.string.format('DOM field {0} is ambiguous (unless custom value parser is provided).', field.attr('name')));
+                    }
+                    return field.is(':checked');
+                case 'radio':
+                    return field.filter(':checked').val();
+                default:
+                    if (field.length > 1) {
+                        logger.warn(typeHelper.string.format('DOM field {0} is ambiguous (unless custom value parser is provided).', field.attr('name')));
+                    }
+                    return field.val();
             }
-
+        },
+        extractFieldValue: function(form, name, prefix, type, parser) {
             var field, fieldName, rawValue, parsedValue;
             fieldName = prefix + name;
             field = $(form).find(typeHelper.string.format(':input[name="{0}"]', fieldName));
             if (field.length === 0) {
                 throw typeHelper.string.format('DOM field {0} not found.', fieldName);
             }
-            rawValue = getValue(field);
+            rawValue = this.getFieldValue(field);
             if (rawValue === null || rawValue === undefined  || rawValue === '') { // field value not set
                 return null;
             }
@@ -625,7 +629,7 @@ var
                 if (fieldsMap.hasOwnProperty(name)) {
                     type = fieldsMap[name];
                     parser = parsersMap[name];
-                    value = this.extractValue(form, name, prefix, type, parser);
+                    value = this.extractFieldValue(form, name, prefix, type, parser);
                     buildField(name, value, model);
                 }
             }
@@ -677,21 +681,50 @@ var
                 }
             }
         },
-        validateReferences: function(name, form) {
-            var i, field, referencedFields, validator;
-            validator = $(form).validate(); // get validator attached to the form
-            referencedFields = this.referencesMap[name];
+        validateReferences: function(field, form, event) {
+            var fieldName = field.name,
+                validator = $(form).validate(); // get validator attached to the form;
+
+            if (api.settings.lazyDependencyValidation) {
+                // avoid revalidate the field when pressing one of the following keys (based on jquery.validate.js)
+                // Tab         => 9
+                // Shift       => 16
+                // Ctrl        => 17
+                // Alt         => 18
+                // Caps lock   => 20
+                // End         => 35
+                // Home        => 36
+                // Left arrow  => 37
+                // Up arrow    => 38
+                // Right arrow => 39
+                // Down arrow  => 40
+                // Insert      => 45
+                // Num lock    => 144
+                // AltGr key   => 225
+                var excludedKeys = [9, 16, 17, 18, 20, 35, 36, 37, 38, 39, 40, 45, 144, 225];
+                if (event.type === 'keyup' && $.inArray(event.keyCode, excludedKeys) !== -1 && modelHelper.getFieldValue($(field)) === '') {
+                    logger.info(typeHelper.string.format('No character detected, skipping dependencies validation of {0} field.', fieldName));
+                    return;
+                }
+
+                if (!(fieldName in validator.submitted)) { // validate if field validation has been activated
+                    logger.info(typeHelper.string.format('Field not submitted by jquery.validate yet, skipping dependencies validation of {0} field.', fieldName));
+                    return;
+                }
+            }
+
+            var i, depField, referencedFields = this.referencesMap[fieldName];
             if (referencedFields !== undefined && referencedFields !== null) {
-                logger.info(typeHelper.string.format('Validation triggered for the following dependencies of {0} field:\n{1}.', name, referencedFields.join(', ')));
+                logger.info(typeHelper.string.format('Validation triggered for the following dependencies of {0} field:\n{1}.', fieldName, referencedFields.join(', ')));
                 i = referencedFields.length;
                 while (i--) {
-                    field = $(form).find(typeHelper.string.format(':input[data-val][name="{0}"]', referencedFields[i])).not(validator.settings.ignore);
-                    if (field.length !== 0) {
-                        field.valid();
+                    depField = $(form).find(typeHelper.string.format(':input[data-val][name="{0}"]', referencedFields[i])).not(validator.settings.ignore);
+                    if (depField.length !== 0) {
+                        depField.valid();
                     }
                 }
             } else {
-                logger.info(typeHelper.string.format('No fields dependent on {0} detected.', name));
+                logger.info(typeHelper.string.format('No fields dependent on {0} detected.', fieldName));
             }
         },
         bindFields: function(form, force) { // attach validation handlers to dependency triggers (events) for some form elements
@@ -708,9 +741,8 @@ var
                     $(element).addClass('ea-triggers-bound');
                     return !force && bound;
                 }).on(namespacedEvents.join(' '), function(event) {
-                    var field = $(this).attr('name');
                     logger.info(typeHelper.string.format('Dependency validation trigger - {0} event, handled.', event.type));
-                    validationHelper.validateReferences(field, form); // validate referenced fields only
+                    validationHelper.validateReferences(this, form, event); // validate referenced fields only
                 });
             }
         }
@@ -733,7 +765,7 @@ var
                 for (field in params.errFieldsMap) {
                     if (params.errFieldsMap.hasOwnProperty(field)) {
                         guid = params.errFieldsMap[field];
-                        value = modelHelper.extractValue(params.form, field, params.prefix, 'string', null);
+                        value = modelHelper.extractFieldValue(params.form, field, params.prefix, 'string', null);
 
                         var re = new RegExp(guid, 'g'); // with this regex...
                         message = message.replace(re, value); // ...occurrences are replaced globally
@@ -880,8 +912,8 @@ var
         typeHelper: typeHelper,
         modelHelper: modelHelper,
         validationHelper: validationHelper,
-        computeRequiredIf: computeRequiredIf,
         computeAssertThat: computeAssertThat,
+        computeRequiredIf: computeRequiredIf,
         getBuffer: function() { return buffer; },
         setBuffer: function(buff) { buffer = buff; }
     };

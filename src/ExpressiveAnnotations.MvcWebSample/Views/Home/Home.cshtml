@@ -60,6 +60,7 @@
                 debug: '@verbose' === 'True',
                 optimize: '@indication' === 'no-annotating',
                 enumsAsNumbers: true,
+                lazyDependencyValidation: false,
                 dependencyTriggers: '@triggers' // if not explicitly provided, default setup is: 'change keyup'
             });
 
@@ -132,10 +133,10 @@
             }
 
             $(document).ready(function() {
-                var validator = $('form').data('validator'); // get validator associated with the form (association established by jquery.validate.unobtrusive.js)
-                validator.settings.onkeyup = function(element) { // execute validation of current field on keyup event
-                    $(element).valid();
-                }
+                //var validator = $('form').data('validator'); // get validator associated with the form (association established by jquery.validate.unobtrusive.js)
+                //validator.settings.onkeyup = function(element) { // execute validation of current field on keyup event
+                //    //$(element).valid();
+                //}
 
                 $('#triggers input[type="checkbox"]').on('click', function() {
                     // disable some excessive activity if you wish, and e.g. trigger dependent fields validation only when field 'change' event is fired -

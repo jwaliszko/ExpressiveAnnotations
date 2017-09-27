@@ -106,6 +106,8 @@
 
     qunit.test("dependency_trigger_initiates_dependent_field_validation_when_not_ignored", function(assert) {
 
+        ea.settings.lazyDependencyValidation = false;
+
         var validator = $('#basic_test_form').validate();
         var element = $('#basic_test_form').find('[name="ContactDetails.Letters"]');
 
