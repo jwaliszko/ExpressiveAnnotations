@@ -10,10 +10,15 @@
 
     qunit.begin(function() {
         ea.addMethod('Whoami', function() {
+            qunit.assert.equal(this.__meta__.element.name, 'ContactDetails.Email');
+            qunit.assert.equal(this.__meta__.form.id, 'basic_test_form');
+
             return 'root';
         });
         ea.addMethod('ArrayContains', function(value, array) {
             qunit.assert.equal(Object.prototype.toString.call(array), '[object Array]');
+            qunit.assert.equal(this.__meta__.element.name, 'ContactDetails.Email');
+            qunit.assert.equal(this.__meta__.form.id, 'basic_test_form');
 
             return $.inArray(value, array) >= 0;
         });

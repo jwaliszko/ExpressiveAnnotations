@@ -10,7 +10,9 @@
         <licenseUrl>https://github.com/jwaliszko/ExpressiveAnnotations/blob/master/LICENSE</licenseUrl>
         <projectUrl>https://github.com/jwaliszko/ExpressiveAnnotations</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>ExpressiveAnnotations is a small .NET and JavaScript library which provides full-stack annotation-based conditional validation mechanisms. Given attributes, powered by expressions engine, allow to forget about imperative way of step-by-step verification of validation conditions in many cases. Since fields validation requirements are applied as metadata, domain-related code is more condensed.
+        <description>ExpressiveAnnotations is a small .NET and JavaScript library which provides full-stack annotation-based conditional validation mechanisms.
+
+Given attributes, powered by expressions engine, allow to forget about imperative way of step-by-step implementation of validation conditions in many cases. Since fields validation requirements are applied as metadata, domain-related code is more condensed.
 
 This package contains single component, i.e. ExpressiveAnnotations.dll - assembly with validation attributes powered by expressions engine.</description>
         <summary>Server-side component of ExpressiveAnnotations - annotation-based conditional validation library.</summary>
