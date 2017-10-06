@@ -59,7 +59,7 @@ _ReSharper*
 *.ncrunch*
 .*crunch*.local.xml
 
-# Installshield output folder 
+# Installshield output folder
 [Ee]xpress
 
 # DocProject is a documentation generator add-in
@@ -109,7 +109,6 @@ UpgradeLog*.XML
 
 # Linked content script files (copied automatically before each build)
 /src/ExpressiveAnnotations.MvcWebSample/Scripts/expressive.annotations.validate*.js
-/src/.vs/config/applicationhost.config
 /bower_components
 /node_modules
 /build/[0-9]*
@@ -121,3 +120,4 @@ UpgradeLog*.XML
 /src/_Chutzpah.*
 /.vs
 /src/ExpressiveAnnotations.MvcWebSample/Properties/PublishProfiles/FolderProfile.pubxml
+/src/.vs

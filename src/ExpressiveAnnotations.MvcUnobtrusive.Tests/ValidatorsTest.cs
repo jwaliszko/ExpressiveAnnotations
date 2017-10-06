@@ -510,6 +510,23 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
         }
 
         [Fact]
+        public void meta_identifier_is_restricted_for_internal_client_side_purposes()
+        {
+            var model = new Model();
+            var metadata = GetModelMetadata(model, m => m.Value);
+            var controllerContext = GetControllerContext();
+
+            var e = Assert.Throws<ValidationException>(() => new AssertThatValidator(metadata, controllerContext, new AssertThatAttribute("Value == __meta__")));
+            Assert.Equal(
+                "AssertThatValidator: validation applied to Value field failed.",
+                e.Message);
+            Assert.IsType<InvalidOperationException>(e.InnerException);
+            Assert.Equal(
+                "__meta__ identifier is restricted for internal client-side purposes, please use different name.",
+                e.InnerException.Message);
+        }
+
+        [Fact]
         public void verify_validators_caching()
         {
             const int testLoops = 10;
@@ -568,6 +585,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
             [ValueParser("stringparser")]
             public StringInsens InsensString { get; set; }
             public StringInsens? NInsensString { get; set; }
+            public int? __meta__ { get; set; }
 
             public class MathModel
             {

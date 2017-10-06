@@ -1,4 +1,4 @@
-/* expressive.annotations.validate.js - v2.7.4
+/* expressive.annotations.validate.js - v2.8.0
  * Client-side component of ExpressiveAnnotations - annotation-based conditional validation library.
  * https://github.com/jwaliszko/ExpressiveAnnotations
  *
@@ -373,13 +373,24 @@ var
         string: {
             format: function(text, params) {
                 function makeParam(value) {
+                    var omitKeys = function(obj, keys) {
+                        var key, dup = {};
+                        for (key in obj) {
+                            if (obj.hasOwnProperty(key)) { // avoid enumeration of prototype properties
+                                if (keys.indexOf(key) === -1) {
+                                    dup[key] = obj[key];
+                                }
+                            }
+                        }
+                        return dup;
+                    }
                     var replacer = function(key, value) {
                         return typeof value === 'function' ? 'function(...) {...}' : value;
                     }
                     if (api.settings.registerAllMethods) {
                         replacer = null; // do not print all of the methods not to disturb the console output
                     }
-                    value = typeHelper.isObject(value) ? JSON.stringify(value, replacer, 4): value;
+                    value = typeHelper.isObject(value) ? JSON.stringify(omitKeys(value, ['__meta__']), replacer, 4): value;
                     value = typeHelper.isString(value) ? value.replace(/\$/g, '$$$$'): value; // escape $ sign for string.replace()
                     return value;
                 }
@@ -585,7 +596,7 @@ var
             }
             return parsedValue;
         },
-        deserializeObject: function(form, fieldsMap, constsMap, enumsMap, parsersMap, prefix) {
+        deserializeObject: function(element, form, fieldsMap, constsMap, enumsMap, parsersMap, prefix) {
             function buildField(fieldName, fieldValue, object) {
                 var props, parent, i, match, arrayIndex, arrayName, arrayPat;
                 arrayPat = /^([a-z_0-9]+)\[([0-9]+)\]$/i;
@@ -645,6 +656,10 @@ var
                     buildField(name, value, model);
                 }
             }
+            model.__meta__ = { // associate additional data with the context (to be accessed from the custom method body through this.__meta__)
+                element: element,
+                form: form
+            };
             return model;
         },
         adjustGivenValue: function(value, element, params) {
@@ -784,7 +799,7 @@ var
                                                                       // logic should be invoked or not - full type-detection parsing is not required at this stage, but we may have to extract such a value using
                                                                       // value parser, e.g. for an array which values are distracted among multiple fields)
         if (value !== undefined && value !== null && value !== '') { // check if the field value is set (continue if so, otherwise skip condition verification)
-            var model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
+            var model = modelHelper.deserializeObject(element, params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model, params.methodsList, element.name);
             var message = 'Field {0} - {1} expression:\n[{2}]\nto be executed within the following context{3}:\n{4}';
             logger.info(typeHelper.string.format(message, element.name, method, params.expression, api.settings.registerAllMethods ? ' (methods not shown)' : '', model));
@@ -806,7 +821,7 @@ var
         var exprVal = undefined, model;
         var message = 'Field {0} - {1} expression:\n[{2}]\nto be executed within the following context{3}:\n{4}';
         if (!api.settings.optimize) { // no optimization - compute requirement condition (which now may have changed) despite the fact field value may be provided
-            model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
+            model = modelHelper.deserializeObject(element, params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model, params.methodsList, element.name);
             logger.info(typeHelper.string.format(message, element.name, method, params.expression, api.settings.registerAllMethods ? ' (methods not shown)' : '', model));
             exprVal = modelHelper.ctxEval(params.expression, model);
@@ -822,7 +837,7 @@ var
                 }
             }
 
-            model = modelHelper.deserializeObject(params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
+            model = modelHelper.deserializeObject(element, params.form, params.fieldsMap, params.constsMap, params.enumsMap, params.parsersMap, params.prefix);
             toolchain.registerMethods(model, params.methodsList, element.name);
             logger.info(typeHelper.string.format(message, element.name, method, params.expression, api.settings.registerAllMethods ? ' (methods not shown)' : '', model));
             exprVal = modelHelper.ctxEval(params.expression, model); // verify requirement, if satisfied => notify (return false)

@@ -7,7 +7,9 @@
 [![Release version](https://img.shields.io/github/release/jwaliszko/ExpressiveAnnotations.svg)](https://github.com/jwaliszko/ExpressiveAnnotations/releases/latest)
 [![License](http://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 
-A small .NET and JavaScript library which provides full-stack, annotation-based, conditional validation mechanisms. Given attributes, powered by expressions engine, allow to forget about imperative way of step-by-step verification of validation conditions in many cases. Since fields validation requirements are applied as metadata, domain-related code is more condensed.
+A small .NET and JavaScript library which provides full-stack, annotation-based, conditional validation mechanisms.
+
+Given attributes, powered by expressions engine, allow to forget about imperative way of step-by-step implementation of validation conditions in many cases. Since fields validation requirements are applied as metadata, domain-related code is more condensed.
 
 ### Table of contents
  - [What is the context behind this work?](#what-is-the-context-behind-this-implementation)
@@ -36,6 +38,7 @@ A small .NET and JavaScript library which provides full-stack, annotation-based,
    - [Can I increase web console verbosity for debug purposes?](#can-i-increase-web-console-verbosity-for-debug-purposes) <sup>(re client-side)</sup>
    - [I prefer enum values to be rendered as numbers, is it allowed?](#i-prefer-enum-values-to-be-rendered-as-numbers-is-it-allowed) <sup>(re client-side)</sup>
    - [How to access one method from another?](#how-to-access-one-method-from-another) <sup>(re client-side)</sup>
+   - [How to access current control from inside a method?](#how-to-access-current-control-from-inside-a-method) <sup>(re client-side)</sup>
    - [How to fetch field's value or its display name in error message?](#how-to-fetch-fields-value-or-its-display-name-in-error-message) <sup>(re client and server-side)</sup>
    - [Is there any event raised when validation is done?](#is-there-any-event-raised-when-validation-is-done) <sup>(re client-side)</sup>
    - [Can I decorate conditionally required fields with asterisks?](#can-i-decorate-conditionally-required-fields-with-asterisks) <sup>(re client-side)</sup>
@@ -140,7 +143,7 @@ In our case, this concept is materialized by attributes, e.g.
 public string ReasonForTravel { get; set; }
 ```
 
-Here, we're saying "Ensure the field is required according to given condition."
+Here, we're saying "ensure the field is required according to given condition".
 
 With **imperative** programming you define the control flow of the computation which needs to be done. You tell the compiler what you want, exactly step by step.
 
@@ -160,7 +163,7 @@ If we choose this way instead of model fields decoration, it has negative impact
 }
 ```
 
-Here instead, we're saying "If condition is met, return some view. Otherwise, add error message to state container. Return other view."
+Here instead, we're saying "if condition is met, return some view; otherwise, add error message to state container, return other view".
 
 ### <a id="expressions-specification">EA expressions specification</a>
 
@@ -785,6 +788,33 @@ Through `this`. You may want to turn the `registerAllMethods` option on. When en
     });
     ea.addMethod('MethodB', function() {
         return this.MethodA();
+    });
+```
+
+##### <a id="how-to-access-current-control-from-inside-a-method">How to access current control from inside a method?</a>
+
+Simply access it through the `__meta__` property of `this` scope, e.g.
+
+```JavaScript
+<script>
+    ea.addMethod('Method', function() {
+        var elem = this.__meta__.element;
+        ...
+    });
+```
+
+Alternatively, you can pass the field name to the method and then look for it, e.g.
+
+```C#
+[AssertThat("Method('SomeField')")]
+public string SomeField { get; set; }
+```
+
+```JavaScript
+<script>
+    ea.addMethod('Method', function(name) {
+        var field = $(':input[name="' + name + '"]')
+        ...
     });
 ```
 

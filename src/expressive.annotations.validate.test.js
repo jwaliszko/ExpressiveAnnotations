@@ -90,7 +90,8 @@
         assert.equal(eapriv.typeHelper.string.format("{1}{0}", "a", "b"), "ba", "string.format({1}{0}, 'a', 'b') succeed");
         assert.equal(eapriv.typeHelper.string.format("{0}{0}", "a", "b"), "aa", "string.format({0}{0}, 'a', 'b') succeed");
         assert.equal(eapriv.typeHelper.string.format("{0}{0}", "a"), "aa", "string.format({0}{0}, 'a') succeed");
-        assert.equal(eapriv.typeHelper.string.format("{0}", { a: true }), "{\n    \"a\": true\n}", "string.format({0}, object) succeed");
+        assert.equal(eapriv.typeHelper.string.format("{0}", { a: true }), "{\n    \"a\": true\n}", "string.format({0}, simple object) succeed");
+        assert.equal(eapriv.typeHelper.string.format("{0}", { a: true, b: false }), "{\n    \"a\": true,\n    \"b\": false\n}", "string.format({0}, complex object) succeed");
         assert.equal(eapriv.typeHelper.string.format("a{0}b", "$'"), "a$'b", "string.format(a{0}b, '$\'') succeed");
 
         assert.equal(eapriv.typeHelper.string.format("{0}", ["a"]), "a", "string.format({0}, ['a']) succeed");
@@ -100,8 +101,20 @@
         assert.equal(eapriv.typeHelper.string.format("{1}{0}", ["a", "b"]), "ba", "string.format({1}{0}, ['a', 'b']) succeed");
         assert.equal(eapriv.typeHelper.string.format("{0}{0}", ["a", "b"]), "aa", "string.format({0}{0}, ['a', 'b']) succeed");
         assert.equal(eapriv.typeHelper.string.format("{0}{0}", ["a"]), "aa", "string.format({0}{0}, ['a']) succeed");
-        assert.equal(eapriv.typeHelper.string.format("{0}", [{ a: true }]), "{\n    \"a\": true\n}", "string.format({0}, [object]) succeed");
+        assert.equal(eapriv.typeHelper.string.format("{0}", [{ a: true }]), "{\n    \"a\": true\n}", "string.format({0}, [simple object]) succeed");
+        assert.equal(eapriv.typeHelper.string.format("{0}", [{ a: true, b: false }]), "{\n    \"a\": true,\n    \"b\": false\n}", "string.format({0}, [complex object]) succeed");
         assert.equal(eapriv.typeHelper.string.format("a{0}b", ["$'"]), "a$'b", "string.format(a{0}b, ['$\'']) succeed");
+    });
+
+    qunit.test("special_cases_of_objects_are_serialized_to_json_as_expected", function (assert) {
+        // no meta info
+        assert.equal(eapriv.typeHelper.string.format("{0}", { a: true, __meta__: null }), "{\n    \"a\": true\n}", "no meta information should be serialized");
+        // no function info
+        ea.settings.registerAllMethods = true; // no method info serialized when all methods are registered, not to disturb the console output
+        assert.equal(eapriv.typeHelper.string.format("{0}", { a: true, foo: function(a, b) { return -1; } }), "{\n    \"a\": true\n}", "no function info");
+        // brief function info
+        ea.settings.registerAllMethods = false;
+        assert.equal(eapriv.typeHelper.string.format("{0}", { a: true, foo: function(a, b) { return -1; } }), "{\n    \"a\": true,\n    \"foo\": \"function(...) {...}\"\n}", "brief function info");
     });
 
     qunit.test("verify_string_indentation", function(assert) {
@@ -392,10 +405,16 @@
                     }
                 }
             },
-            Days: [true, false]
+            Days: [true, false],
+
+            __meta__: {
+                element: "e",
+                form: "f"
+            }
         }
         var deserializedModel = eapriv.modelHelper.deserializeObject(
-            null,  // form
+            "e",   // element
+            "f",   // form
             null,  // fieldsMap
             {      // constsMap
                 "Number": 123,

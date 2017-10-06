@@ -236,6 +236,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
         private void AssertClientSideCompatibility() // verify client-side compatibility of current expression
         {
             AssertNoNamingCollisionsAtCorrespondingSegments();
+            AssertNoRestrictedMetaIdentifierUsed();
         }
 
         private void AssertNoNamingCollisionsAtCorrespondingSegments()
@@ -269,6 +270,17 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
             if (name != null)
                 throw new InvalidOperationException(
                     $"{prefix} - method {name}(...) is colliding with {EnumsMap.Keys.First(x => x.StartsWith(name))} enum identifier.");
+        }
+
+        private void AssertNoRestrictedMetaIdentifierUsed()
+        {
+            const string meta = "__meta__";
+            if (FieldsMap.Keys.Select(x => x.Split('.').First()).Contains(meta)
+                || EnumsMap.Keys.Select(x => x.Split('.').First()).Contains(meta)
+                || ConstsMap.Keys.Select(x => x.Split('.').First()).Contains(meta)
+                || MethodsList.Contains(meta))
+                throw new InvalidOperationException(
+                    $"{meta} identifier is restricted for internal client-side purposes, please use different name.");
         }
 
         private void AssertAttribsQuantityAllowed(int count)
