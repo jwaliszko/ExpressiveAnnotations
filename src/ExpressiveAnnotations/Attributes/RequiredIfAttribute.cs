@@ -61,17 +61,37 @@ namespace ExpressiveAnnotations.Attributes
         {
             AssertNonValueType(value);
 
-            var isEmpty = value is string && string.IsNullOrWhiteSpace((string) value);
+            var isEmpty = value is string && string.IsNullOrWhiteSpace((string)value);
             if (value == null || (isEmpty && !AllowEmptyStrings))
             {
                 Compile(validationContext.ObjectType);
                 if (CachedValidationFuncs[validationContext.ObjectType](validationContext.ObjectInstance)) // check if the requirement condition is satisfied
                     return new ValidationResult( // requirement confirmed => notify
                         FormatErrorMessage(validationContext.DisplayName, Expression, validationContext.ObjectInstance),
-                        new[] {validationContext.MemberName});
+                        new[] { validationContext.MemberName });
             }
 
             return ValidationResult.Success;
+        }
+
+        /// <summary>
+        ///     Indicates if the property is required with respect to the attribute and model value
+        /// </summary>
+        /// <param name="value">Model value to test</param>
+        /// <returns>
+        ///     True if the property is required, false otherwise
+        /// </returns>
+        public bool IsRequired(object value)
+        {
+            if (value == null)
+                return false;
+
+            Type type = value.GetType();
+            if (!CachedValidationFuncs.ContainsKey(type))
+            {
+                CachedValidationFuncs[type] = Parser.Parse<bool>(type, Expression);
+            }
+            return CachedValidationFuncs[type](value);
         }
 
         private void AssertNonValueType(object value)
