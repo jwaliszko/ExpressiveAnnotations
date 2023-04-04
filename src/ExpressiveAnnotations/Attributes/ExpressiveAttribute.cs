@@ -287,7 +287,8 @@ namespace ExpressiveAnnotations.Attributes
 
         private void AdjustMemberName(ValidationContext validationContext) // fixes for: MVC <= 4 (MemberName is not provided), WebAPI 2 (MemberName states for display name)
         {
-            PropertyType = null; // reset value
+            if (PropertyType != null) return;
+
             if (validationContext.MemberName == null && validationContext.DisplayName == null)
                 return;
 
