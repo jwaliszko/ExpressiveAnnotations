@@ -225,7 +225,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
             count++;
             AssertAttribsQuantityAllowed(count);
             RequestStorage.Set(AttributeWeakId, count);
-            return count == 1 ? string.Empty : char.ConvertFromUtf32(95 + count); // single lowercase letter from latin alphabet or an empty string
+            return count == 1 ? string.Empty : (count-1).ToString("X2").ToLowerInvariant(); // 2 digit lowercase hex value of count or an empty string
         }
 
         private void ResetSuffixAllocation()
@@ -285,7 +285,7 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Validators
 
         private void AssertAttribsQuantityAllowed(int count)
         {
-            const int max = 27;
+            const int max = 64;
             if (count > max)
                 throw new InvalidOperationException(
                     $"No more than {max} unique attributes of the same type can be applied for a single field or property.");

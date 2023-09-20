@@ -19,8 +19,8 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
         public void verify_client_validation_rules_collecting_for_single_model_with_multiple_annotations()
         {
             var model = new Model();
-            var assertAttributes = Enumerable.Range(0, 28).Select(x => new AssertThatAttribute($"Value > {x}")).ToArray();
-            var requirAttributes = Enumerable.Range(0, 28).Select(x => new RequiredIfAttribute($"Value > {x}")).ToArray();
+            var assertAttributes = Enumerable.Range(0, 65).Select(x => new AssertThatAttribute($"Value > {x}")).ToArray();
+            var requirAttributes = Enumerable.Range(0, 65).Select(x => new RequiredIfAttribute($"Value > {x}")).ToArray();
 
             var metadata = GetModelMetadata(model, m => m.Value);
             var controllerContext = GetControllerContext();
@@ -35,18 +35,18 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
                 {
                     var validator = assertValidators[i];
                     var rule = validator.GetClientValidationRules().Single();
-                    var suffix = i == 0 ? string.Empty : char.ConvertFromUtf32(96 + i);
+                    var suffix = i == 0 ? string.Empty : i.ToString("X2").ToLowerInvariant();
                     Assert.Equal($"assertthat{suffix}", rule.ValidationType);
                     i++;
                 }
             });
-            Assert.Equal(27, i); // 27 attributes passed
+            Assert.Equal(64, i); // 64 attributes passed
             Assert.Equal(
                 "AssertThatValidator: collecting of client validation rules for Value field failed.",
                 e.Message);
             Assert.IsType<InvalidOperationException>(e.InnerException);
             Assert.Equal(
-                "No more than 27 unique attributes of the same type can be applied for a single field or property.",
+                "No more than 64 unique attributes of the same type can be applied for a single field or property.",
                 e.InnerException.Message);
 
             var j = 0;
@@ -56,18 +56,18 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
                 {
                     var validator = requirValidators[j];
                     var rule = validator.GetClientValidationRules().Single();
-                    var suffix = j == 0 ? string.Empty : char.ConvertFromUtf32(96 + j);
+                    var suffix = j == 0 ? string.Empty : j.ToString("X2").ToLowerInvariant();
                     Assert.Equal($"requiredif{suffix}", rule.ValidationType);
                     j++;
                 }
             });
-            Assert.Equal(27, j); // 27 attributes passed
+            Assert.Equal(64, j); // 64 attributes passed
             Assert.Equal(
                 "RequiredIfValidator: collecting of client validation rules for Value field failed.",
                 e.Message);
             Assert.IsType<InvalidOperationException>(e.InnerException);
             Assert.Equal(
-                "No more than 27 unique attributes of the same type can be applied for a single field or property.",
+                "No more than 64 unique attributes of the same type can be applied for a single field or property.",
                 e.InnerException.Message);
         }
 
@@ -97,10 +97,10 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
         [Fact]
         public void verify_client_validation_rules_collecting_for_multiple_models_with_multiple_annotations()
         {
-            var models = Enumerable.Range(0, 28).Select(x => new Model()).ToList();
+            var models = Enumerable.Range(0, 65).Select(x => new Model()).ToList();
 
-            var assertAttributes = Enumerable.Range(0, 28).Select(x => new AssertThatAttribute($"Value > {x}")).ToArray();
-            var requirAttributes = Enumerable.Range(0, 28).Select(x => new RequiredIfAttribute($"Value > {x}")).ToArray();
+            var assertAttributes = Enumerable.Range(0, 65).Select(x => new AssertThatAttribute($"Value > {x}")).ToArray();
+            var requirAttributes = Enumerable.Range(0, 65).Select(x => new RequiredIfAttribute($"Value > {x}")).ToArray();
 
             models.ForEach(model =>
             {
@@ -115,18 +115,18 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
                     {
                         var validator = assertValidators[i];
                         var rule = validator.GetClientValidationRules().Single();
-                        var suffix = i == 0 ? string.Empty : char.ConvertFromUtf32(96 + i);
+                        var suffix = i == 0 ? string.Empty : i.ToString("X2").ToLowerInvariant();
                         Assert.Equal($"assertthat{suffix}", rule.ValidationType);
                         i++;
                     }
                 });
-                Assert.Equal(27, i); // 27 attributes passed
+                Assert.Equal(64, i); // 64 attributes passed
                 Assert.Equal(
                     "AssertThatValidator: collecting of client validation rules for Value field failed.",
                     e.Message);
                 Assert.IsType<InvalidOperationException>(e.InnerException);
                 Assert.Equal(
-                    "No more than 27 unique attributes of the same type can be applied for a single field or property.",
+                    "No more than 64 unique attributes of the same type can be applied for a single field or property.",
                     e.InnerException.Message);
             });
 
@@ -143,18 +143,18 @@ namespace ExpressiveAnnotations.MvcUnobtrusive.Tests
                     {
                         var validator = requirValidators[j];
                         var rule = validator.GetClientValidationRules().Single();
-                        var suffix = j == 0 ? string.Empty : char.ConvertFromUtf32(96 + j);
+                        var suffix = j == 0 ? string.Empty : j.ToString("X2").ToLowerInvariant();
                         Assert.Equal($"requiredif{suffix}", rule.ValidationType);
                         j++;
                     }
                 });
-                Assert.Equal(27, j); // 27 attributes passed
+                Assert.Equal(64, j); // 64 attributes passed
                 Assert.Equal(
                     "RequiredIfValidator: collecting of client validation rules for Value field failed.",
                     e.Message);
                 Assert.IsType<InvalidOperationException>(e.InnerException);
                 Assert.Equal(
-                    "No more than 27 unique attributes of the same type can be applied for a single field or property.",
+                    "No more than 64 unique attributes of the same type can be applied for a single field or property.",
                     e.InnerException.Message);
             });
         }
